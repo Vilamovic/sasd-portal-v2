@@ -43,13 +43,13 @@ export default function Home() {
 
       {/* TODO: Dodać komponenty dla innych sekcji */}
       {activeSection === 'materials' && (
-        <div className="min-h-screen bg-gray-100 p-8">
-          <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-8">
-            <h1 className="text-3xl font-bold mb-4">Materiały Szkoleniowe</h1>
-            <p className="text-gray-600">Sekcja w budowie - FAZA 5</p>
+        <div className="min-h-screen bg-gradient-to-br from-[#1a2332] via-[#1e2836] to-[#151c28] p-8">
+          <div className="max-w-6xl mx-auto bg-white/10 backdrop-blur-sm rounded-xl shadow-lg p-8 border border-white/20">
+            <h1 className="text-3xl font-bold mb-4 text-white">Materiały Szkoleniowe</h1>
+            <p className="text-gray-300">Sekcja w budowie - FAZA 5</p>
             <button
               onClick={() => setActiveSection('dashboard')}
-              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              className="mt-4 px-4 py-2 bg-yellow-500 text-gray-900 font-semibold rounded-lg hover:bg-yellow-400 transition-colors"
             >
               ← Powrót do Dashboard
             </button>
@@ -77,13 +77,13 @@ export default function Home() {
       )}
 
       {activeSection === 'admin' && (
-        <div className="min-h-screen bg-gray-100 p-8">
-          <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-8">
-            <h1 className="text-3xl font-bold mb-4">Panel Administratora</h1>
-            <p className="text-gray-600">Sekcja w budowie - FAZA 5</p>
+        <div className="min-h-screen bg-gradient-to-br from-[#1a2332] via-[#1e2836] to-[#151c28] p-8">
+          <div className="max-w-6xl mx-auto bg-white/10 backdrop-blur-sm rounded-xl shadow-lg p-8 border border-white/20">
+            <h1 className="text-3xl font-bold mb-4 text-white">Panel Administratora</h1>
+            <p className="text-gray-300">Sekcja w budowie - FAZA 5</p>
             <button
               onClick={() => setActiveSection('dashboard')}
-              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              className="mt-4 px-4 py-2 bg-yellow-500 text-gray-900 font-semibold rounded-lg hover:bg-yellow-400 transition-colors"
             >
               ← Powrót do Dashboard
             </button>

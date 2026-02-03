@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useTranslation } from '@/src/contexts/TranslationContext';
-import { BookOpen, FileText, Users } from 'lucide-react';
+import { BookOpen, FileText, Users, ArrowRight } from 'lucide-react';
 import Navbar from './Navbar';
 
 /**
@@ -48,18 +48,19 @@ export default function Dashboard({ onNavigate }) {
   const visibleTiles = tiles.filter((tile) => tile.roles.includes(role));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-[#1a2332] via-[#1e2836] to-[#151c28]">
       {/* Navbar */}
       <Navbar />
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Welcome Message */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-            Witaj w systemie szkoleniowym
+        <div className="mb-12">
+          <h2 className="text-4xl font-bold text-white mb-2">
+            BAZA WIEDZY
           </h2>
-          <p className="text-gray-600">
+          <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full"></div>
+          <p className="text-gray-400 mt-4">
             Wybierz sekcję, aby rozpocząć pracę
           </p>
         </div>
@@ -72,45 +73,33 @@ export default function Dashboard({ onNavigate }) {
               <button
                 key={tile.id}
                 onClick={() => onNavigate && onNavigate(tile.id)}
-                className={`group relative overflow-hidden rounded-2xl shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl`}
+                className="group relative overflow-hidden rounded-xl shadow-xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl"
               >
                 {/* Gradient Background */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${tile.color} ${tile.hoverColor} transition-all duration-300`} />
 
                 {/* Content */}
-                <div className="relative p-8 text-left">
+                <div className="relative p-6 text-left flex items-center">
                   {/* Icon */}
-                  <div className="mb-4">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl group-hover:bg-white/30 transition-all duration-300">
-                      <Icon className="w-8 h-8 text-white" />
+                  <div className="flex-shrink-0 mr-4">
+                    <div className="flex items-center justify-center w-14 h-14 bg-white/30 backdrop-blur-sm rounded-lg group-hover:bg-white/40 transition-all duration-300">
+                      <Icon className="w-7 h-7 text-white" />
                     </div>
                   </div>
 
-                  {/* Title */}
-                  <h3 className="text-2xl font-bold text-white mb-2">
-                    {tile.title}
-                  </h3>
+                  {/* Text Content */}
+                  <div className="flex-grow">
+                    <h3 className="text-xl font-bold text-white mb-1">
+                      {tile.title}
+                    </h3>
+                    <p className="text-white/80 text-sm leading-relaxed">
+                      {tile.description}
+                    </p>
+                  </div>
 
-                  {/* Description */}
-                  <p className="text-white/90 text-sm leading-relaxed">
-                    {tile.description}
-                  </p>
-
-                  {/* Hover Arrow */}
-                  <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <svg
-                      className="w-6 h-6 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 7l5 5m0 0l-5 5m5-5H6"
-                      />
-                    </svg>
+                  {/* Arrow Icon */}
+                  <div className="flex-shrink-0 ml-2">
+                    <ArrowRight className="w-5 h-5 text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all duration-300" />
                   </div>
                 </div>
               </button>
