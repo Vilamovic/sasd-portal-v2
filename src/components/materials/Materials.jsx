@@ -3,12 +3,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import dynamic from 'next/dynamic';
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 import { getAllMaterials, upsertMaterial, deleteMaterialFromDb } from '@/src/utils/supabaseHelpers';
 import { BookOpen, Edit3, Trash2, Plus, Save, X, Maximize2, Minimize2, ChevronDown } from 'lucide-react';
 
 // Dynamic import React-Quill (client-side only)
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
+const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 
 /**
  * Materials - WYSIWYG editor dla materiałów szkoleniowych
