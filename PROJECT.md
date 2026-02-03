@@ -875,6 +875,67 @@ if (event === 'SIGNED_IN') {
 
 ---
 
+### Problem: Tailwind v4 @apply Build Failure
+
+**Symptomy**:
+- `npm run build` fails with webpack errors
+- Error: "Cannot apply unknown utility class `border-border`" (lub `bg-police-dark-900`, `bg-white/10`)
+- PostCSS syntax errors in globals.css
+- Build worked locally in dev mode, but fails in production build
+- Vercel deployment fails with same errors
+
+**Przyczyna**:
+Projekt używa **Tailwind CSS v4** (`tailwindcss": "^4.0.0"`), ale `globals.css` był napisany z Tailwind v3 syntaxem. W Tailwind v4:
+- `@apply` z custom theme colors (np. `bg-police-dark-900`) nie działa w `@layer base` i `@layer components`
+- Tailwind v4 ma zmieniony sposób przetwarzania @apply directives
+- Custom colors muszą być używane jako plain CSS values, nie przez @apply
+
+**Rozwiązanie**:
+Zamień wszystkie `@apply` statements z custom colors na plain CSS:
+
+```css
+// ❌ ZŁE (Tailwind v4 nie zadziała w build)
+@layer base {
+  body {
+    @apply bg-police-dark-900 text-white font-sans;
+  }
+  ::selection {
+    @apply bg-badge-gold-600 text-police-dark-900;
+  }
+}
+
+// ✅ DOBRE (Plain CSS values)
+@layer base {
+  body {
+    background: linear-gradient(135deg, #0a0f1a 0%, #151c28 50%, #1a2332 100%);
+    color: white;
+    font-family: Inter, Roboto, system-ui, sans-serif;
+  }
+  ::selection {
+    background-color: #d4af37;
+    color: #0a0f1a;
+  }
+}
+```
+
+**Kroki fix'u**:
+1. Znajdź wszystkie `@apply` statements w `globals.css`: `grep "@apply" app/globals.css`
+2. Zamień każdy @apply na odpowiedni CSS:
+   - `bg-police-dark-900` → `background-color: #0a0f1a;`
+   - `text-white` → `color: white;`
+   - `bg-white/10` → `background-color: rgba(255, 255, 255, 0.1);`
+   - `rounded-xl` → `border-radius: 0.75rem;`
+3. Usuń nieużywane `@layer components` i `@layer utilities` jeśli zawierają @apply (wszystkie komponenty używają inline Tailwind classes)
+4. Test local build: `npm run build`
+5. Commit i push do Vercel
+
+**Alternatywa (nie polecana)**:
+Downgrade do Tailwind v3, ale wymaga reinstall dependencies i może zepsuć inne rzeczy.
+
+**Historia**: Problem wystąpił 2026-02-03 po redesign'ie komponentów. Visual redesign działał lokalnie (`npm run dev`), ale Vercel build failował. Root cause: `@apply` z custom colors niekompatybilny z Tailwind v4 build process. Fix w commit e4d0ed8.
+
+---
+
 ## 📁 File Locations
 
 ### Core Configuration
