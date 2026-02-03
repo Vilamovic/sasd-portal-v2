@@ -1,10 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import Login from '@/src/components/auth/Login';
+import Dashboard from '@/src/components/dashboard/Dashboard';
 
 export default function Home() {
   const { user, loading } = useAuth();
+  const [activeSection, setActiveSection] = useState('dashboard');
 
   // Loading state
   if (loading) {
@@ -23,46 +26,65 @@ export default function Home() {
     return <Login />;
   }
 
-  // Logged in - show temporary dashboard
+  // Handler nawigacji między sekcjami
+  const handleNavigate = (section) => {
+    setActiveSection(section);
+    // TODO: Implementacja renderowania różnych sekcji
+    console.log('Navigating to:', section);
+  };
+
+  // Logged in - show Dashboard
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Witaj w SASD Portal v2! 🎉
-          </h1>
-          <p className="text-lg text-gray-600 mb-6">
-            Jesteś zalogowany jako: <strong>{user.email}</strong>
-          </p>
+    <div>
+      {activeSection === 'dashboard' && (
+        <Dashboard onNavigate={handleNavigate} />
+      )}
 
-          <div className="bg-green-50 border-l-4 border-green-500 p-6 mb-6">
-            <h2 className="text-xl font-semibold text-green-900 mb-2">
-              ✅ FAZA 2 UKOŃCZONA: CORE & AUTH
-            </h2>
-            <ul className="space-y-2 text-green-800">
-              <li>✓ TranslationContext (wielojęzyczność)</li>
-              <li>✓ AuthContext (Supabase Auth + Discord OAuth)</li>
-              <li>✓ Providers (wrapper contextów)</li>
-              <li>✓ Login Screen (Discord integration)</li>
-              <li>✓ Role system (dev/admin/user)</li>
-              <li>✓ Force logout mechanism</li>
-              <li>✓ MTA nick modal (TODO: implementacja UI)</li>
-            </ul>
-          </div>
-
-          <div className="bg-blue-50 border-l-4 border-blue-500 p-6">
-            <h2 className="text-xl font-semibold text-blue-900 mb-2">
-              🚧 NASTĘPNY KROK: FAZA 3 - DASHBOARD & NAWIGACJA
-            </h2>
-            <ul className="space-y-2 text-blue-800">
-              <li>• Dashboard z kafelkami (Materiały, Egzaminy, Admin)</li>
-              <li>• Sidebar/Navbar nawigacja</li>
-              <li>• Routing między sekcjami</li>
-              <li>• User profile dropdown</li>
-            </ul>
+      {/* TODO: Dodać komponenty dla innych sekcji */}
+      {activeSection === 'materials' && (
+        <div className="min-h-screen bg-gray-100 p-8">
+          <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-8">
+            <h1 className="text-3xl font-bold mb-4">Materiały Szkoleniowe</h1>
+            <p className="text-gray-600">Sekcja w budowie - FAZA 5</p>
+            <button
+              onClick={() => setActiveSection('dashboard')}
+              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            >
+              ← Powrót do Dashboard
+            </button>
           </div>
         </div>
-      </div>
+      )}
+
+      {activeSection === 'exams' && (
+        <div className="min-h-screen bg-gray-100 p-8">
+          <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-8">
+            <h1 className="text-3xl font-bold mb-4">System Egzaminacyjny</h1>
+            <p className="text-gray-600">Sekcja w budowie - FAZA 4</p>
+            <button
+              onClick={() => setActiveSection('dashboard')}
+              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            >
+              ← Powrót do Dashboard
+            </button>
+          </div>
+        </div>
+      )}
+
+      {activeSection === 'admin' && (
+        <div className="min-h-screen bg-gray-100 p-8">
+          <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-8">
+            <h1 className="text-3xl font-bold mb-4">Panel Administratora</h1>
+            <p className="text-gray-600">Sekcja w budowie - FAZA 5</p>
+            <button
+              onClick={() => setActiveSection('dashboard')}
+              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            >
+              ← Powrót do Dashboard
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
