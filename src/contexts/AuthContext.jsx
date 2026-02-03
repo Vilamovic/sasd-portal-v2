@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/src/supabaseClient';
+import { getUserById, upsertUser } from '@/src/utils/supabaseHelpers';
 
 const AuthContext = createContext();
 
@@ -27,57 +28,13 @@ export function AuthProvider({ children }) {
   const hasNotifiedLogin = useRef(false);
   const roleCheckIntervalRef = useRef(null);
 
-  /**
-   * Pomocnicza funkcja - pobiera dane użytkownika z bazy
-   */
-  const getUserFromDatabase = useCallback(async (userId) => {
-    try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error fetching user from database:', error);
-      return null;
-    }
-  }, []);
-
-  /**
-   * Pomocnicza funkcja - upsert użytkownika do bazy
-   */
-  const upsertUserToDatabase = useCallback(async (userId, userMetadata) => {
-    try {
-      const userData = {
-        id: userId,
-        username: userMetadata.full_name || userMetadata.name || 'Unknown',
-        email: userMetadata.email || null,
-        avatar_url: userMetadata.avatar_url || null,
-        last_seen: new Date().toISOString(),
-      };
-
-      const { data, error } = await supabase
-        .from('users')
-        .upsert(userData, { onConflict: 'id' })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error upserting user:', error);
-      return null;
-    }
-  }, []);
+  // getUserById i upsertUser są teraz importowane z supabaseHelpers.js
 
   /**
    * Sprawdza czy użytkownik ma ustawiony MTA nick
    */
   const checkMtaNick = useCallback(async (userId) => {
-    const userData = await getUserFromDatabase(userId);
+    const { data: userData } = await getUserById(userId);
     if (userData && !userData.mta_nick) {
       setShowMtaNickModal(true);
       return false;
@@ -86,7 +43,7 @@ export function AuthProvider({ children }) {
       setMtaNick(userData.mta_nick);
     }
     return true;
-  }, [getUserFromDatabase]);
+  }, []);
 
   /**
    * Zamknięcie modala MTA nick po zapisaniu
@@ -119,7 +76,7 @@ export function AuthProvider({ children }) {
 
     roleCheckIntervalRef.current = setInterval(async () => {
       try {
-        const userData = await getUserFromDatabase(userId);
+        const { data: userData } = await getUserById(userId);
 
         if (userData) {
           const newRole = determineRole(userId, userData);
@@ -212,7 +169,12 @@ export function AuthProvider({ children }) {
           : Date.now();
 
         try {
-          const dbUser = await getUserFromDatabase(userId);
+          const { data: dbUser, error: fetchError } = await getUserById(userId);
+
+          if (fetchError) {
+            console.error('Error fetching user:', fetchError);
+          }
+
           if (dbUser) {
             const userRole = determineRole(userId, dbUser);
             setRole(userRole);
@@ -223,12 +185,30 @@ export function AuthProvider({ children }) {
             startRolePolling(userId);
           } else {
             // User nie istnieje w bazie - utwórz rekord
-            const newUser = await upsertUserToDatabase(userId, session.user.user_metadata);
+            const userData = {
+              id: userId,
+              username: session.user.user_metadata?.full_name || session.user.user_metadata?.name || 'Unknown',
+              email: session.user.email || session.user.user_metadata?.email || null,
+              avatar_url: session.user.user_metadata?.avatar_url || null,
+              last_seen: new Date().toISOString(),
+            };
+
+            const { data: newUser, error: upsertError } = await upsertUser(userData);
+
+            if (upsertError) {
+              console.error('Error creating user:', upsertError);
+            }
+
             if (newUser) {
               const userRole = determineRole(userId, newUser);
               setRole(userRole);
               roleRef.current = userRole;
               startRolePolling(userId);
+            } else {
+              // Fallback: ustaw rolę 'user' jeśli nie udało się utworzyć
+              console.warn('Failed to create user, using default role');
+              setRole('user');
+              roleRef.current = 'user';
             }
           }
         } catch (error) {
@@ -261,8 +241,21 @@ export function AuthProvider({ children }) {
         }
 
         // Upsert user do bazy (non-blocking)
-        upsertUserToDatabase(userId, session.user.user_metadata)
-          .then((dbUser) => {
+        const userData = {
+          id: userId,
+          username: session.user.user_metadata?.full_name || session.user.user_metadata?.name || 'Unknown',
+          email: session.user.email || session.user.user_metadata?.email || null,
+          avatar_url: session.user.user_metadata?.avatar_url || null,
+          last_seen: new Date().toISOString(),
+        };
+
+        upsertUser(userData)
+          .then(({ data: dbUser, error: upsertError }) => {
+            if (upsertError) {
+              console.error('Error upserting user:', upsertError);
+              return;
+            }
+
             if (dbUser) {
               // Określ rolę
               const userRole = determineRole(userId, dbUser);
