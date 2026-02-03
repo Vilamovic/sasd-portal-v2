@@ -59,7 +59,7 @@ export default function Home() {
 
       {activeSection === 'exams' && (
         <div>
-          <ExamDashboard onNavigate={(section) => {
+          <ExamDashboard onNavigate={(section: string) => {
             console.log('Exam section:', section);
             // TODO: Handle exam subsections (take-exam, statistics, questions, archive)
             setActiveSection('exams-' + section);
