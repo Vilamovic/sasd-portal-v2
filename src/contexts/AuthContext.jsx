@@ -309,7 +309,7 @@ export function AuthProvider({ children }) {
         clearInterval(roleCheckIntervalRef.current);
       }
     };
-  }, [upsertUserToDatabase, determineRole, checkMtaNick, startRolePolling]);
+  }, [determineRole, checkMtaNick, startRolePolling]);
 
   /**
    * Logowanie przez Discord OAuth
@@ -328,6 +328,36 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  /**
+   * Force re-login (używane po zmianie schematu DB)
+   */
+  const forceRelogin = useCallback(async () => {
+    try {
+      console.log('🔄 Forcing re-login...');
+
+      // Wyloguj i wyczyść wszystko
+      await signOut();
+
+      // Wyczyść sessionStorage
+      if (typeof window !== 'undefined') {
+        sessionStorage.clear();
+
+        // Przeładuj stronę
+        window.location.href = '/';
+      }
+
+      console.log('✅ Re-login forced successfully');
+    } catch (error) {
+      console.error('❌ Force re-login error:', error);
+      // Nawet jeśli wystąpił błąd, wyczyść i przeładuj
+      if (typeof window !== 'undefined') {
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = '/';
+      }
+    }
+  }, [signOut]);
+
   const value = {
     user,
     session,
@@ -338,6 +368,7 @@ export function AuthProvider({ children }) {
     handleMtaNickComplete,
     signInWithDiscord,
     signOut,
+    forceRelogin,
     // Dodatkowo dla kompatybilności
     isAuthenticated: !!user,
     isDev: role === 'dev',
