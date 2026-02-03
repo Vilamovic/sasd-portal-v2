@@ -107,7 +107,7 @@ export function AuthProvider({ children }) {
         console.error('Role polling error:', error);
       }
     }, 5000); // Co 5 sekund
-  }, [getUserFromDatabase, determineRole]);
+  }, [determineRole]);
 
   /**
    * Wylogowanie
