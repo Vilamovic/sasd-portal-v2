@@ -1,10 +1,14 @@
-# 🛡️ SASD Portal | AI Guidelines
+# 🛡️ SASD Portal | Quick Start for AI
+
+> **NOTE**: This file serves as a **quick reference/index**. All detailed documentation is in PROJECT.md.
 
 ## 📌 IMPORTANT: Read Main Documentation First
 
 **All project documentation has been consolidated into a single file:**
 
 👉 **[PROJECT.md](./PROJECT.md)** 👈
+
+**Why this file exists**: CLAUDE.md is kept as a lightweight "entry point" that AI reads first. It provides critical rules and points to the main documentation.
 
 This file contains:
 - ✅ AI Operational Rules

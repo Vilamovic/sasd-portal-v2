@@ -39,9 +39,14 @@
    - **NIE GENERUJ** kodu dopóki nie otrzymasz konkretnego zadania
 
 2. **PLANNING FIRST (To-Do List)**
-   - Gdy otrzymasz zadanie, wypisz listę kroków w formacie: `[ ] krok 1, [ ] krok 2`
-   - W każdej kolejnej odpowiedzi odhaczaj ukończone zadania `[X]` i pokazuj postęp
-   - Używaj TodoWrite tool do trackowania
+   - Gdy otrzymasz zadanie **ZAWSZE** użyj TodoWrite tool do utworzenia checklisty
+   - Format: `{"content": "Task", "status": "pending/in_progress/completed", "activeForm": "Doing task..."}`
+   - W trakcie pracy:
+     - Mark `in_progress` gdy zaczynasz task
+     - **VERIFY** że task działa poprawnie
+     - Mark `completed` **NATYCHMIAST** po zakończeniu i weryfikacji
+     - **NIE BATCHUJ** completions - odhaczaj każdy task zaraz po skończeniu
+   - Tylko **JEDEN** task powinien być `in_progress` jednocześnie
 
 3. **AUTONOMOUS DETECTIVE**
    - Samodzielnie analizuj strukturę plików
@@ -761,6 +766,29 @@ useEffect(() => {
 
 ## 🚀 Deployment & Troubleshooting
 
+### Known Issues Log
+
+**Purpose**: This section tracks **CRITICAL issues** that took significant time to debug and their solutions. Add new issues here when encountered.
+
+**Format for new issues**:
+```
+### Problem: [Brief Title]
+
+**Symptomy**:
+- Symptom 1
+- Symptom 2
+
+**Przyczyna**:
+[Root cause explanation]
+
+**Rozwiązanie**:
+[Step-by-step solution]
+
+**Historia**: [When it occurred, who fixed it]
+```
+
+---
+
 ### GitHub → Vercel Auto-Deploy
 1. Push zmian na `master` branch:
    ```bash
@@ -922,14 +950,20 @@ c:\Users\user\sasd-portal-v2\src\supabaseClient.js
 - [ ] Read this PROJECT.md file completely
 - [ ] Confirm: "Co dzisiaj robimy?"
 - [ ] Wait for user to provide task
-- [ ] Create TodoWrite checklist if task is non-trivial
+- [ ] **IMPORTANT**: Create TodoWrite checklist if task is non-trivial (3+ steps)
 
-### During Development
-- [ ] Use TodoWrite to track progress
-- [ ] Mark tasks as completed immediately after finishing
+### During Development (CRITICAL: Use TodoWrite)
+- [ ] **Create todo list** using TodoWrite tool at start of task
+  - Format: `{"content": "Task description", "status": "pending", "activeForm": "Doing task..."}`
+  - Example: `[{"content": "Fix bug in login", "status": "in_progress", "activeForm": "Fixing login bug"}]`
+- [ ] **Update todo list** as you work:
+  - Mark `in_progress` when starting a task
+  - Mark `completed` **IMMEDIATELY** after finishing (don't batch!)
+  - Only ONE task should be `in_progress` at a time
 - [ ] PRESERVE all business logic (only change UI)
 - [ ] Use existing utilities (examUtils.js, supabaseHelpers.js)
 - [ ] Follow police theme design patterns
+- [ ] **Verify task works** before marking as completed
 - [ ] Test locally before committing
 
 ### Before Committing
@@ -963,6 +997,46 @@ git push origin master
 
 ---
 
+## 📌 Template: Adding New Known Issue
+
+**When you encounter a CRITICAL bug that takes significant time to debug, add it to the "Known Issues Log" section using this template:**
+
+```markdown
+### Problem: [Brief Descriptive Title]
+
+**Symptomy**:
+- Symptom 1 (what the user sees)
+- Symptom 2 (error messages, console logs)
+- Symptom 3 (when it occurs)
+
+**Przyczyna**:
+[Detailed explanation of root cause - why it happened]
+
+**Rozwiązanie**:
+```bash
+# Step-by-step commands or code changes
+step 1
+step 2
+step 3
+```
+
+**Weryfikacja po fix**:
+1. How to verify the fix worked
+2. What to test
+3. What to check
+
+**Historia**: [Date] - [Brief description of circumstances when it occurred]
+```
+
+**Criteria for adding to Known Issues Log**:
+- ✅ Bug took >30 minutes to debug
+- ✅ Non-obvious root cause
+- ✅ High impact (broke critical functionality)
+- ✅ Could happen again
+- ❌ Simple typos, obvious bugs (don't add these)
+
+---
+
 **Last Updated**: 2026-02-03
-**Version**: 1.0.0
+**Version**: 1.0.1
 **Status**: ✅ All components redesigned with Police Dark Theme
