@@ -284,9 +284,7 @@ export function AuthProvider({ children }) {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'discord',
-        options: {
-          redirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
-        },
+        // Supabase automatycznie użyje prawidłowego redirect URL
       });
 
       if (error) throw error;

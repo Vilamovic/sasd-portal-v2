@@ -13,7 +13,10 @@
       "Bash(gh repo create:*)",
       "Bash(git push:*)",
       "Bash(timeout 10 npm run dev:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run dev:*)"
     ]
   }
 }
