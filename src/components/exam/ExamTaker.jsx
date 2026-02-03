@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
-import { generateExam, checkAnswer, calculateExamResult } from '@/src/utils/examUtils';
+import { generateExam, calculateExamResult } from '@/src/utils/examUtils';
 import { getAllExamTypes, getQuestionsByExamType, saveExamResult } from '@/src/utils/supabaseHelpers';
 import { notifyExamSubmission } from '@/src/utils/discord';
 import { FileText, Clock, CheckCircle, XCircle, ArrowRight } from 'lucide-react';
@@ -60,7 +60,7 @@ export default function ExamTaker({ onBack }) {
       }
 
       // Wygeneruj egzamin (losowanie i shuffle)
-      const generatedExam = generateExam(questions, examTypeId);
+      const generatedExam = generateExam(questions, 10);
 
       setSelectedType(examTypes.find(t => t.id === examTypeId));
       setExam(generatedExam);
@@ -95,7 +95,7 @@ export default function ExamTaker({ onBack }) {
         clearInterval(timerRef.current);
       }
     };
-  }, [currentQuestionIndex, exam, showResults]);
+  }, [currentQuestionIndex, exam, showResults, handleNextQuestion]);
 
   // Handle answer selection
   const handleAnswerSelect = (optionIndex) => {
@@ -122,13 +122,17 @@ export default function ExamTaker({ onBack }) {
   };
 
   // Następne pytanie lub zakończ egzamin
-  const handleNextQuestion = async (isTimeout = false) => {
+  const handleNextQuestion = useCallback(async (isTimeout = false) => {
     if (submittingRef.current) return;
 
     const currentQuestion = exam.questions[currentQuestionIndex];
 
     // Jeśli timeout i brak odpowiedzi, zapisz -1
-    if (isTimeout && !answers[currentQuestion.id]) {
+    const currentAnswer = answers[currentQuestion.id];
+    const noAnswer = currentAnswer === undefined ||
+      (Array.isArray(currentAnswer) && currentAnswer.length === 0);
+
+    if (isTimeout && noAnswer) {
       setAnswers(prev => ({
         ...prev,
         [currentQuestion.id]: -1,
@@ -145,7 +149,7 @@ export default function ExamTaker({ onBack }) {
     const nextIndex = currentQuestionIndex + 1;
     setCurrentQuestionIndex(nextIndex);
     setTimeLeft(exam.questions[nextIndex]?.time_limit || 30);
-  };
+  }, [exam, currentQuestionIndex, answers, submittingRef]);
 
   // Zakończ egzamin i zapisz wyniki
   const finishExam = async (finalAnswers) => {
@@ -153,8 +157,8 @@ export default function ExamTaker({ onBack }) {
     submittingRef.current = true;
 
     try {
-      // Oblicz wyniki
-      const result = calculateExamResult(exam.questions, finalAnswers);
+      // Oblicz wyniki (parametry: answers, questions)
+      const result = calculateExamResult(finalAnswers, exam.questions);
 
       // Określ próg zdawalności (50% dla trainee/pościgowy/swat, 75% dla reszty)
       const examTypeName = selectedType.name.toLowerCase();
@@ -194,6 +198,7 @@ export default function ExamTaker({ onBack }) {
         percentage: result.percentage,
         passed,
         passingThreshold,
+        examId: savedExam.exam_id,
       });
 
       // Pokaż wyniki
@@ -426,7 +431,13 @@ export default function ExamTaker({ onBack }) {
         {/* Next Button */}
         <button
           onClick={() => handleNextQuestion(false)}
-          disabled={!currentAnswer && currentAnswer !== 0}
+          disabled={(() => {
+            if (currentQuestion.is_multiple_choice) {
+              return !currentAnswer || currentAnswer.length === 0;
+            } else {
+              return currentAnswer === undefined && currentAnswer !== 0;
+            }
+          })()}
           className="w-full px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-lg hover:from-green-600 hover:to-green-700 transition-all disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {currentQuestionIndex === exam.questions.length - 1 ? 'Zakończ Egzamin' : 'Następne Pytanie'}

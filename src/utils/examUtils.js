@@ -61,7 +61,7 @@ export function generateExam(questionPool, questionCount = 10) {
       id: question.id,
       exam_type_id: question.exam_type_id,
       question: question.question,
-      options: shuffledOptions.map(opt => opt.text), // Tylko tekst opcji
+      shuffledOptions: shuffledOptions.map(opt => opt.text), // Zmieniono nazwę na shuffledOptions
       correct_answers: correctAnswers,
       is_multiple_choice: question.is_multiple_choice,
       time_limit: question.time_limit || 30, // Default 30s

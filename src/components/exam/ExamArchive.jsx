@@ -62,8 +62,8 @@ export default function ExamArchive({ onBack }) {
         details: `Nick: ${userNick}`,
       });
 
-      // Remove from list
-      setArchivedResults(archivedResults.filter(r => r.id !== examId));
+      // Remove from list (używamy exam_id bo to jest klucz w bazie)
+      setArchivedResults(archivedResults.filter(r => r.exam_id !== examId));
       alert('Egzamin usunięty trwale.');
     } catch (error) {
       console.error('Error deleting exam:', error);

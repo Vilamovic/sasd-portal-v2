@@ -310,7 +310,9 @@ export default function ExamQuestions({ onBack }) {
                   setFormData({
                     ...formData,
                     isMultipleChoice: e.target.checked,
-                    correctAnswers: e.target.checked ? formData.correctAnswers : formData.correctAnswers.slice(0, 1),
+                    correctAnswers: e.target.checked
+                      ? formData.correctAnswers
+                      : (formData.correctAnswers.length > 0 ? formData.correctAnswers.slice(0, 1) : []),
                   });
                 }}
                 className="w-4 h-4"

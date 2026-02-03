@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/src/supabaseClient';
 import { getUserById, upsertUser } from '@/src/utils/supabaseHelpers';
+import { notifyUserAuth } from '@/src/utils/discord';
 
 const AuthContext = createContext();
 
@@ -274,9 +275,9 @@ export function AuthProvider({ children }) {
               const timeDiff = (now - createdAt) / 1000; // sekundy
 
               if (timeDiff < 60 && !hasNotifiedLogin.current) {
-                // Nowa rejestracja - wyślij webhook (TODO: implementacja discord.js)
+                // Nowa rejestracja - wyślij webhook do Discord
                 hasNotifiedLogin.current = true;
-                console.log('New user registration detected:', dbUser);
+                notifyUserAuth(dbUser, timeDiff).catch(console.error);
               }
             }
           })

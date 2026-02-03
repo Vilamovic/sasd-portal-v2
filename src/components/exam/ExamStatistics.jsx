@@ -58,8 +58,8 @@ export default function ExamStatistics({ onBack }) {
       const { error } = await archiveExamResult(examId);
       if (error) throw error;
 
-      // Usuń z listy
-      setExamResults(examResults.filter(r => r.id !== examId));
+      // Usuń z listy (używamy exam_id bo to jest klucz w bazie)
+      setExamResults(examResults.filter(r => r.exam_id !== examId));
       alert('Egzamin zarchiwizowany.');
     } catch (error) {
       console.error('Error archiving exam:', error);

@@ -83,7 +83,7 @@ export async function notifyUserAuth(user, timeDiff) {
  */
 export async function notifyExamSubmission(examData) {
   const {
-    user,
+    username,
     examType,
     score,
     total,
@@ -107,7 +107,7 @@ export async function notifyExamSubmission(examData) {
         fields: [
           {
             name: 'Zdający',
-            value: user.mta_nick || user.username || user.email,
+            value: username,
             inline: true,
           },
           {

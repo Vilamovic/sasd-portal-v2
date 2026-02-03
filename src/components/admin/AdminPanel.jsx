@@ -70,6 +70,13 @@ export default function AdminPanel({ onBack }) {
   const handleUpdateRole = async (userId, newRole, userNick) => {
     if (submittingRef.current) return;
 
+    // Check if trying to change dev role
+    const targetUser = users.find(u => u.id === userId);
+    if (targetUser?.role === 'dev') {
+      alert('Nie możesz zmienić roli użytkownika dev.');
+      return;
+    }
+
     if (!confirm(`Czy na pewno chcesz zmienić rolę użytkownika ${userNick} na ${newRole}?`)) {
       return;
     }
