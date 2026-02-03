@@ -194,10 +194,51 @@ export function AuthProvider({ children }) {
    */
   useEffect(() => {
     // Pobierz aktualną sesję
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user || null);
       userRef.current = session?.user || null;
+
+      // Jeśli user jest zalogowany, ustaw jego rolę
+      if (session?.user) {
+        const userId = session.user.id;
+
+        // Zapisz login timestamp z localStorage lub utwórz nowy
+        const storedTimestamp = typeof window !== 'undefined'
+          ? localStorage.getItem(`login_timestamp_${userId}`)
+          : null;
+        loginTimestampRef.current = storedTimestamp
+          ? parseInt(storedTimestamp, 10)
+          : Date.now();
+
+        try {
+          const dbUser = await getUserFromDatabase(userId);
+          if (dbUser) {
+            const userRole = determineRole(userId, dbUser);
+            setRole(userRole);
+            roleRef.current = userRole;
+            setMtaNick(dbUser.mta_nick);
+
+            // Rozpocznij polling roli
+            startRolePolling(userId);
+          } else {
+            // User nie istnieje w bazie - utwórz rekord
+            const newUser = await upsertUserToDatabase(userId, session.user.user_metadata);
+            if (newUser) {
+              const userRole = determineRole(userId, newUser);
+              setRole(userRole);
+              roleRef.current = userRole;
+              startRolePolling(userId);
+            }
+          }
+        } catch (error) {
+          console.error('Error loading user role:', error);
+          // Fallback: ustaw rolę 'user'
+          setRole('user');
+          roleRef.current = 'user';
+        }
+      }
+
       setLoading(false);
     });
 
