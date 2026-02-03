@@ -28,7 +28,7 @@ export default function Home() {
   }
 
   // Handler nawigacji między sekcjami
-  const handleNavigate = (section) => {
+  const handleNavigate = (section: string) => {
     setActiveSection(section);
     // TODO: Implementacja renderowania różnych sekcji
     console.log('Navigating to:', section);
