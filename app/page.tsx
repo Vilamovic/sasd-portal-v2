@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import Login from '@/src/components/auth/Login';
 import Dashboard from '@/src/components/dashboard/Dashboard';
-import ExamDashboard from '@/src/components/exam/ExamDashboard';
+import Exam from '@/src/components/exam/Exam';
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -58,22 +58,7 @@ export default function Home() {
       )}
 
       {activeSection === 'exams' && (
-        <div>
-          <ExamDashboard onNavigate={(section: string) => {
-            console.log('Exam section:', section);
-            // TODO: Handle exam subsections (take-exam, statistics, questions, archive)
-            setActiveSection('exams-' + section);
-          }} />
-          {/* Placeholder: Back button (temporary) */}
-          <div className="fixed bottom-8 left-8">
-            <button
-              onClick={() => setActiveSection('dashboard')}
-              className="px-6 py-3 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 transition-colors"
-            >
-              ← Dashboard
-            </button>
-          </div>
-        </div>
+        <Exam onBack={() => setActiveSection('dashboard')} />
       )}
 
       {activeSection === 'admin' && (

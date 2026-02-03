@@ -8,7 +8,7 @@ import { FileText, BarChart3, Settings, Archive } from 'lucide-react';
  * ExamDashboard - Główny ekran wyboru sekcji egzaminacyjnych
  * 4 kafelki: Zacznij Egzamin, Moje Statystyki, Zarządzanie Pytaniami, Archiwum
  */
-export default function ExamDashboard({ onNavigate }) {
+export default function ExamDashboard({ onNavigate, onBack }) {
   const { role, isAdmin } = useAuth();
   const { t } = useTranslation();
 
@@ -98,6 +98,16 @@ export default function ExamDashboard({ onNavigate }) {
             </div>
           </div>
         </button>
+
+        {/* Back Button */}
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="mt-8 px-6 py-3 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
+          >
+            ← Powrót do Dashboard
+          </button>
+        )}
       </div>
     );
   }
@@ -147,6 +157,16 @@ export default function ExamDashboard({ onNavigate }) {
             );
           })}
         </div>
+
+        {/* Back Button */}
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="mt-8 px-6 py-3 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
+          >
+            ← Powrót do Dashboard
+          </button>
+        )}
       </div>
     </div>
   );
