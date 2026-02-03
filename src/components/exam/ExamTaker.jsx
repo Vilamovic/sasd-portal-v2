@@ -5,7 +5,7 @@ import { useAuth } from '@/src/contexts/AuthContext';
 import { generateExam, calculateExamResult } from '@/src/utils/examUtils';
 import { getAllExamTypes, getQuestionsByExamType, saveExamResult } from '@/src/utils/supabaseHelpers';
 import { notifyExamSubmission } from '@/src/utils/discord';
-import { FileText, Clock, CheckCircle, XCircle, ArrowRight } from 'lucide-react';
+import { Target, Clock, CheckCircle, XCircle, ArrowRight, ChevronLeft, Trophy, AlertCircle } from 'lucide-react';
 
 /**
  * ExamTaker - Interface do zdawania egzaminów
@@ -219,15 +219,26 @@ export default function ExamTaker({ onBack }) {
   // Ekran wyboru typu egzaminu
   if (!exam && !loading) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-[#1a2332] via-[#1e2836] to-[#151c28] p-8">
+      <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-police-dark-900 via-police-dark-800 to-police-dark-700 p-8">
         <div className="max-w-4xl mx-auto">
+          {/* Back Button */}
+          <div className="mb-6">
+            <button
+              onClick={onBack}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-gray-400 hover:text-white transition-all duration-200"
+            >
+              <ChevronLeft className="w-5 h-5" />
+              <span className="text-sm font-medium">Powrót</span>
+            </button>
+          </div>
+
           {/* Header */}
-          <div className="mb-8">
-            <h2 className="text-4xl font-bold text-white mb-2">
+          <div className="mb-12">
+            <h1 className="text-4xl font-bold text-white mb-2">
               WYBIERZ TYP EGZAMINU
-            </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full"></div>
-            <p className="text-gray-400 mt-4">
+            </h1>
+            <div className="w-24 h-1 bg-gradient-to-r from-badge-gold-600 to-badge-gold-400 rounded-full mb-3"></div>
+            <p className="text-gray-400 text-sm">
               Rozpocznij egzamin z wybranego zakresu
             </p>
           </div>
@@ -240,48 +251,35 @@ export default function ExamTaker({ onBack }) {
                 <button
                   key={type.id}
                   onClick={() => startExam(type.id)}
-                  className="group relative overflow-hidden rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 p-6 text-left hover:bg-white/10 transition-all duration-300"
+                  className="group relative bg-police-dark-700 rounded-xl border border-white/10 hover:border-badge-gold-600/50 p-6 text-left hover:scale-[1.01] transition-all duration-300 shadow-xl"
                 >
-                  {/* Icon */}
                   <div className="flex items-center gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                      <FileText className="w-6 h-6 text-white" />
+                    <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-badge-gold-600 to-badge-gold-400 rounded-xl flex items-center justify-center shadow-lg">
+                      <Target className="w-6 h-6 text-police-dark-900" strokeWidth={2.5} />
                     </div>
 
-                    {/* Content */}
                     <div className="flex-grow">
-                      <h3 className="text-lg font-bold text-white mb-1">
+                      <h3 className="text-lg font-bold text-white mb-2">
                         {type.name}
                       </h3>
                       <div className="flex items-center gap-2">
-                        <span className={`text-xs font-semibold px-2 py-1 rounded ${
+                        <Trophy className={`w-4 h-4 ${isEasy ? 'text-green-400' : 'text-amber-400'}`} />
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                           isEasy
-                            ? 'bg-green-500/20 text-green-400'
-                            : 'bg-yellow-500/20 text-yellow-400'
+                            ? 'bg-green-500/20 text-green-300 border border-green-400/30'
+                            : 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
                         }`}>
-                          {type.passing_threshold}%
-                        </span>
-                        <span className="text-xs text-gray-400">
-                          próg zdawalności
+                          Próg: {type.passing_threshold}%
                         </span>
                       </div>
                     </div>
 
-                    {/* Arrow */}
-                    <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-white group-hover:translate-x-1 transition-all duration-300" />
+                    <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-badge-gold-400 group-hover:translate-x-1 transition-all duration-300" />
                   </div>
                 </button>
               );
             })}
           </div>
-
-          {/* Back Button */}
-          <button
-            onClick={onBack}
-            className="mt-8 px-6 py-3 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
-          >
-            ← Powrót
-          </button>
         </div>
       </div>
     );
@@ -290,9 +288,9 @@ export default function ExamTaker({ onBack }) {
   // Ekran ładowania
   if (loading) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-[#1a2332] via-[#1e2836] to-[#151c28] flex items-center justify-center">
+      <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-police-dark-900 via-police-dark-800 to-police-dark-700 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-yellow-400 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-badge-gold-600/30 border-t-badge-gold-600 mx-auto mb-4"></div>
           <p className="text-gray-400">Ładowanie egzaminu...</p>
         </div>
       </div>
@@ -302,52 +300,80 @@ export default function ExamTaker({ onBack }) {
   // Ekran wyników
   if (showResults && results) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-[#1a2332] via-[#1e2836] to-[#151c28] flex items-center justify-center p-8">
-        <div className="max-w-md w-full bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-8 text-center">
-          {/* Icon */}
-          <div className="mb-6">
-            {results.passed ? (
-              <CheckCircle className="w-20 h-20 text-green-400 mx-auto" />
-            ) : (
-              <XCircle className="w-20 h-20 text-red-400 mx-auto" />
-            )}
-          </div>
+      <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-police-dark-900 via-police-dark-800 to-police-dark-700 flex items-center justify-center p-8">
+        <div className="max-w-lg w-full">
+          {/* Glow effect */}
+          <div className={`absolute inset-0 bg-gradient-to-br ${results.passed ? 'from-green-500 to-green-600' : 'from-red-500 to-red-600'} rounded-3xl opacity-20 blur-2xl`}></div>
 
-          {/* Title */}
-          <h2 className="text-3xl font-bold text-white mb-2">
-            {results.passed ? 'Gratulacje!' : 'Niestety...'}
-          </h2>
-          <p className="text-gray-400 mb-8">
-            {results.passed
-              ? 'Zdałeś egzamin!'
-              : `Nie udało się. Wymagane ${results.passingThreshold}%.`}
-          </p>
-
-          {/* Results */}
-          <div className="space-y-4 mb-8">
-            <div className="flex justify-between text-lg">
-              <span className="text-gray-400">Wynik:</span>
-              <span className="text-white font-bold">
-                {results.score} / {results.totalQuestions}
-              </span>
+          <div className="relative bg-police-dark-700 rounded-3xl border border-white/10 shadow-2xl overflow-hidden">
+            {/* Header */}
+            <div className={`bg-gradient-to-r ${results.passed ? 'from-green-500/20 to-emerald-500/20' : 'from-red-500/20 to-red-600/20'} p-8 border-b border-white/10`}>
+              <div className="flex items-center justify-center mb-4">
+                {results.passed ? (
+                  <div className="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center">
+                    <CheckCircle className="w-16 h-16 text-green-400" strokeWidth={2} />
+                  </div>
+                ) : (
+                  <div className="w-24 h-24 bg-red-500/20 rounded-full flex items-center justify-center">
+                    <XCircle className="w-16 h-16 text-red-400" strokeWidth={2} />
+                  </div>
+                )}
+              </div>
+              <h2 className="text-3xl font-bold text-white text-center mb-2">
+                {results.passed ? 'Gratulacje!' : 'Niestety...'}
+              </h2>
+              <p className="text-gray-300 text-center">
+                {results.passed
+                  ? 'Pomyślnie zdałeś egzamin!'
+                  : `Nie udało się. Wymagane ${results.passingThreshold}%.`}
+              </p>
             </div>
-            <div className="flex justify-between text-lg">
-              <span className="text-gray-400">Procent:</span>
-              <span className={`font-bold ${
-                results.passed ? 'text-green-400' : 'text-red-400'
-              }`}>
-                {results.percentage.toFixed(1)}%
-              </span>
+
+            {/* Results */}
+            <div className="p-8">
+              <div className="grid grid-cols-2 gap-4 mb-8">
+                {/* Score */}
+                <div className="bg-white/5 rounded-2xl p-5 border border-white/10 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <CheckCircle className="w-5 h-5 text-badge-gold-600" />
+                    <span className="text-sm text-gray-400">Wynik</span>
+                  </div>
+                  <p className="text-3xl font-bold text-white">
+                    {results.score}<span className="text-gray-400">/{results.totalQuestions}</span>
+                  </p>
+                </div>
+
+                {/* Percentage */}
+                <div className="bg-white/5 rounded-2xl p-5 border border-white/10 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Trophy className={`w-5 h-5 ${results.passed ? 'text-green-400' : 'text-red-400'}`} />
+                    <span className="text-sm text-gray-400">Procent</span>
+                  </div>
+                  <p className={`text-3xl font-bold ${results.passed ? 'text-green-400' : 'text-red-400'}`}>
+                    {results.percentage.toFixed(1)}%
+                  </p>
+                </div>
+              </div>
+
+              {/* Status Badge */}
+              <div className={`mb-6 p-4 rounded-xl border ${results.passed ? 'bg-green-500/10 border-green-400/30' : 'bg-red-500/10 border-red-400/30'}`}>
+                <div className="flex items-center gap-3">
+                  <AlertCircle className={`w-5 h-5 ${results.passed ? 'text-green-400' : 'text-red-400'}`} />
+                  <span className={`text-sm font-medium ${results.passed ? 'text-green-300' : 'text-red-300'}`}>
+                    {results.passed ? 'Egzamin zaliczony' : `Wymagane minimum: ${results.passingThreshold}%`}
+                  </span>
+                </div>
+              </div>
+
+              {/* Button */}
+              <button
+                onClick={onBack}
+                className="w-full px-6 py-4 bg-gradient-to-r from-badge-gold-600 to-badge-gold-400 hover:from-badge-gold-400 hover:to-badge-gold-600 text-police-dark-900 font-bold rounded-xl transition-all duration-300 hover:scale-[1.02] shadow-badge-gold"
+              >
+                Zakończ
+              </button>
             </div>
           </div>
-
-          {/* Button */}
-          <button
-            onClick={onBack}
-            className="w-full px-6 py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 font-semibold rounded-lg hover:from-yellow-500 hover:to-yellow-600 transition-all"
-          >
-            Zakończ
-          </button>
         </div>
       </div>
     );
@@ -358,38 +384,62 @@ export default function ExamTaker({ onBack }) {
   const currentAnswer = answers[currentQuestion.id];
   const progress = ((currentQuestionIndex + 1) / exam.questions.length) * 100;
 
+  // Timer color based on time left
+  const timerColor = timeLeft > 10 ? 'text-green-400' : timeLeft > 5 ? 'text-amber-400' : 'text-red-400';
+  const timerBgColor = timeLeft > 10 ? 'bg-green-500/20 border-green-400/30' : timeLeft > 5 ? 'bg-amber-500/20 border-amber-400/30' : 'bg-red-500/20 border-red-400/30';
+
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-[#1a2332] via-[#1e2836] to-[#151c28] p-8">
+    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-police-dark-900 via-police-dark-800 to-police-dark-700 p-8">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-white">
-              {selectedType.name}
-            </h2>
-            <div className="flex items-center gap-2 text-yellow-400">
-              <Clock className="w-5 h-5" />
-              <span className="text-xl font-bold">{timeLeft}s</span>
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-1">
+                {selectedType.name}
+              </h2>
+              <span className="text-sm text-gray-400">
+                Pytanie {currentQuestionIndex + 1} z {exam.questions.length}
+              </span>
+            </div>
+
+            {/* Timer */}
+            <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border ${timerBgColor}`}>
+              <Clock className={`w-6 h-6 ${timerColor}`} />
+              <div className="text-right">
+                <div className="text-xs text-gray-400 uppercase tracking-wide">Czas</div>
+                <div className={`text-2xl font-bold ${timerColor}`}>{timeLeft}s</div>
+              </div>
             </div>
           </div>
 
-          {/* Progress */}
-          <div className="relative w-full h-2 bg-white/10 rounded-full overflow-hidden">
+          {/* Progress Bar */}
+          <div className="relative w-full h-3 bg-white/10 rounded-full overflow-hidden">
             <div
-              className="absolute top-0 left-0 h-full bg-gradient-to-r from-yellow-400 to-yellow-500 transition-all duration-300"
+              className="absolute top-0 left-0 h-full bg-gradient-to-r from-badge-gold-600 to-badge-gold-400 transition-all duration-300"
               style={{ width: `${progress}%` }}
             />
           </div>
-          <p className="text-gray-400 text-sm mt-2">
-            Pytanie {currentQuestionIndex + 1} z {exam.questions.length}
-          </p>
         </div>
 
-        {/* Question */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 p-8 mb-6">
-          <h3 className="text-xl font-semibold text-white mb-6">
-            {currentQuestion.question}
-          </h3>
+        {/* Question Card */}
+        <div className="bg-police-dark-700 rounded-2xl border border-white/10 p-8 mb-6 shadow-xl">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="flex-shrink-0 w-10 h-10 bg-badge-gold-600/20 rounded-xl flex items-center justify-center border border-badge-gold-600/30">
+              <span className="text-badge-gold-600 font-bold text-lg">{currentQuestionIndex + 1}</span>
+            </div>
+            <h3 className="text-xl font-semibold text-white leading-relaxed flex-grow">
+              {currentQuestion.question}
+            </h3>
+          </div>
+
+          {/* Multiple choice indicator */}
+          {currentQuestion.is_multiple_choice && (
+            <div className="mb-6 px-4 py-2 bg-blue-500/10 border border-blue-400/30 rounded-lg inline-flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-blue-400" />
+              <span className="text-sm text-blue-300 font-medium">Możesz wybrać wiele odpowiedzi</span>
+            </div>
+          )}
 
           {/* Answers */}
           <div className="space-y-3">
@@ -402,25 +452,25 @@ export default function ExamTaker({ onBack }) {
                 <button
                   key={index}
                   onClick={() => handleAnswerSelect(index)}
-                  className={`w-full text-left p-4 rounded-lg border-2 transition-all duration-200 ${
+                  className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${
                     isSelected
-                      ? 'bg-yellow-500/20 border-yellow-400 text-white'
+                      ? 'bg-badge-gold-600/20 border-badge-gold-600 text-white shadow-lg'
                       : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:border-white/20'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`flex-shrink-0 w-6 h-6 rounded ${
+                    <div className={`flex-shrink-0 w-6 h-6 ${
                       currentQuestion.is_multiple_choice ? 'rounded-md' : 'rounded-full'
-                    } border-2 ${
+                    } border-2 transition-all ${
                       isSelected
-                        ? 'bg-yellow-400 border-yellow-400'
+                        ? 'bg-badge-gold-600 border-badge-gold-600'
                         : 'bg-transparent border-gray-500'
                     } flex items-center justify-center`}>
                       {isSelected && (
-                        <CheckCircle className="w-4 h-4 text-gray-900" />
+                        <CheckCircle className="w-4 h-4 text-police-dark-900" strokeWidth={3} />
                       )}
                     </div>
-                    <span className="flex-grow">{option}</span>
+                    <span className="flex-grow font-medium">{option}</span>
                   </div>
                 </button>
               );
@@ -438,7 +488,7 @@ export default function ExamTaker({ onBack }) {
               return currentAnswer === undefined && currentAnswer !== 0;
             }
           })()}
-          className="w-full px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-lg hover:from-green-600 hover:to-green-700 transition-all disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold rounded-xl transition-all disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-2 shadow-xl hover:scale-[1.01]"
         >
           {currentQuestionIndex === exam.questions.length - 1 ? 'Zakończ Egzamin' : 'Następne Pytanie'}
           <ArrowRight className="w-5 h-5" />

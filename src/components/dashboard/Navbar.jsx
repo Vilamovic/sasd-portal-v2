@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useTranslation } from '@/src/contexts/TranslationContext';
-import { LogOut, User, ChevronDown, Badge } from 'lucide-react';
+import { LogOut, User, ChevronDown, Shield, Mail, Gamepad2 } from 'lucide-react';
 
 /**
  * Navbar - Górna belka nawigacyjna z user profile i logout
@@ -35,110 +35,136 @@ export default function Navbar() {
   const displayName = mtaNick || user?.email?.split('@')[0] || 'Użytkownik';
 
   return (
-    <nav className="bg-gradient-to-r from-[#1a2332] to-[#1e2836] shadow-lg border-b border-white/10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo / Tytuł */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-lg flex items-center justify-center shadow-lg">
-              <Badge className="w-6 h-6 text-gray-900" />
+    <nav className="h-16 bg-gradient-to-r from-[#0a0f1a] via-[#151c28] to-[#1a2332] border-b border-white/10 shadow-2xl">
+      <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
+        {/* Logo Section - Złota Odznaka SASD */}
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            {/* Złoty pierścień pulsujący */}
+            <div className="absolute inset-0 bg-gradient-to-br from-badge-gold-600 to-badge-gold-400 rounded-full animate-pulse opacity-20 blur-md"></div>
+
+            {/* Główna ikona odznaki */}
+            <div className="relative w-10 h-10 bg-gradient-to-br from-badge-gold-600 to-badge-gold-400 rounded-full flex items-center justify-center shadow-lg">
+              <Shield className="w-6 h-6 text-police-dark-900" strokeWidth={2.5} />
             </div>
-            <span className="text-lg font-bold text-white tracking-wide">
-              SAN ANDREAS SHERIFF'S DEPARTMENT
-            </span>
           </div>
 
-          {/* User Menu */}
-          <div className="relative" ref={dropdownRef}>
-            <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
-            >
-              {/* Avatar placeholder */}
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center text-gray-900 font-semibold text-sm shadow-md">
-                {displayName.charAt(0).toUpperCase()}
+          {/* Tytuł - Inter Bold */}
+          <div className="flex flex-col">
+            <span className="text-white font-bold text-lg tracking-wide">
+              SAN ANDREAS SHERIFF'S DEPARTMENT
+            </span>
+            <span className="text-badge-gold-600 text-xs font-medium tracking-wider">
+              TRAINING PORTAL
+            </span>
+          </div>
+        </div>
+
+        {/* User Menu Section */}
+        <div className="relative" ref={dropdownRef}>
+          {/* User Button */}
+          <button
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            className="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-badge-gold-600/50 transition-all duration-300"
+          >
+            {/* Avatar z złotym borderkiem */}
+            <div className="relative">
+              <div className="w-9 h-9 bg-gradient-to-br from-badge-gold-600 to-badge-gold-400 rounded-full flex items-center justify-center shadow-lg">
+                <User className="w-5 h-5 text-police-dark-900" strokeWidth={2.5} />
+              </div>
+              {/* Online indicator */}
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-[#151c28]"></div>
+            </div>
+
+            {/* User Info - Hidden on mobile */}
+            <div className="hidden md:flex flex-col items-start">
+              <span className="text-white font-semibold text-sm">{displayName}</span>
+              <span className="text-badge-gold-600 text-xs font-medium">{t(`admin.roles.${role}`)}</span>
+            </div>
+
+            {/* Chevron */}
+            <ChevronDown
+              className={`w-4 h-4 text-gray-400 hover:text-white transition-all duration-200 ${
+                dropdownOpen ? 'rotate-180' : ''
+              }`}
+            />
+          </button>
+
+          {/* Dropdown Menu - POPRAWIONY */}
+          {dropdownOpen && (
+            <div className="absolute right-0 top-full mt-2 w-80 bg-police-dark-600 rounded-2xl shadow-2xl border border-white/10 opacity-100 visible transition-all duration-300 transform origin-top-right z-50 animate-slideDown">
+              {/* Header z Avatar i Nickiem */}
+              <div className="p-4 border-b border-white/10">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-badge-gold-600 to-badge-gold-400 rounded-full flex items-center justify-center shadow-lg">
+                    <User className="w-7 h-7 text-police-dark-900" strokeWidth={2.5} />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-white font-bold text-base">{displayName}</span>
+                    <span className="text-gray-400 text-sm">{user?.user_metadata?.badge || 'Officer'}</span>
+                  </div>
+                </div>
               </div>
 
-              {/* User Info */}
-              <div className="text-left hidden sm:block">
-                <div className="text-sm font-semibold text-white">
-                  {displayName}
-                </div>
-                <div className="text-xs text-gray-400">
-                  {t(`admin.roles.${role}`)}
-                </div>
-              </div>
-
-              {/* Dropdown Icon */}
-              <ChevronDown
-                className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
-                  dropdownOpen ? 'rotate-180' : ''
-                }`}
-              />
-            </button>
-
-            {/* Dropdown Menu */}
-            {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-[#1e2836] rounded-xl shadow-2xl border border-white/10 py-2 z-50 animate-fadeIn">
-                {/* User Info (mobile) */}
-                <div className="px-4 py-3 border-b border-white/10 sm:hidden">
-                  <div className="text-sm font-semibold text-white">
-                    {displayName}
-                  </div>
-                  <div className="text-xs text-gray-400 mt-0.5">
-                    {user?.email}
-                  </div>
-                </div>
-
-                {/* Profile Info */}
-                <div className="px-4 py-3 border-b border-white/10">
-                  <div className="flex items-center gap-2 text-sm text-gray-300 mb-2">
-                    <User className="w-4 h-4" />
-                    <span className="font-medium">Profil</span>
-                  </div>
-                  <div className="space-y-1 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Email:</span>
-                      <span className="text-white font-medium truncate ml-2 max-w-[150px]">
-                        {user?.email}
-                      </span>
-                    </div>
-                    {mtaNick && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">MTA Nick:</span>
-                        <span className="text-white font-medium">
-                          {mtaNick}
-                        </span>
-                      </div>
-                    )}
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Rola:</span>
+              {/* Menu Items */}
+              <div className="p-3 space-y-1">
+                {/* Role Badge */}
+                <div className="px-3 py-2 flex items-center gap-3">
+                  <Shield className={`w-5 h-5 ${isDev ? 'text-red-400' : isAdmin ? 'text-purple-400' : 'text-blue-400'}`} />
+                  <div className="flex flex-col">
+                    <span className="text-xs text-gray-400 uppercase tracking-wide">Rola</span>
+                    <div className="mt-1">
                       <span
-                        className={`font-semibold ${
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold shadow-lg ${
                           isDev
-                            ? 'text-red-400'
+                            ? 'bg-gradient-to-r from-red-500 to-red-600 text-white'
                             : isAdmin
-                            ? 'text-purple-400'
-                            : 'text-blue-400'
+                            ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white'
+                            : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
                         }`}
                       >
-                        {t(`admin.roles.${role}`)}
+                        {t(`admin.roles.${role}`).toUpperCase()}
                       </span>
                     </div>
                   </div>
                 </div>
+
+                {/* MTA Nick */}
+                {mtaNick && (
+                  <div className="px-3 py-2 flex items-center gap-3 rounded-lg hover:bg-white/5 transition-colors">
+                    <Gamepad2 className="w-5 h-5 text-badge-gold-600" />
+                    <div className="flex flex-col">
+                      <span className="text-xs text-gray-400 uppercase tracking-wide">MTA Nick</span>
+                      <span className="text-white font-medium text-sm">{mtaNick}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Email */}
+                <div className="px-3 py-2 flex items-center gap-3 rounded-lg hover:bg-white/5 transition-colors">
+                  <Mail className="w-5 h-5 text-blue-400" />
+                  <div className="flex flex-col">
+                    <span className="text-xs text-gray-400 uppercase tracking-wide">Email</span>
+                    <span className="text-white font-medium text-sm truncate max-w-[200px]">{user?.email}</span>
+                  </div>
+                </div>
+
+                {/* Separator */}
+                <div className="h-px bg-white/10 my-2"></div>
 
                 {/* Logout Button */}
                 <button
                   onClick={handleLogout}
-                  className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-red-500/20 transition-colors duration-200 text-red-400"
+                  className="w-full px-3 py-2.5 flex items-center gap-3 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 transition-all duration-200 group"
                 >
-                  <LogOut className="w-4 h-4" />
-                  <span className="text-sm font-medium">{t('nav.logout')}</span>
+                  <LogOut className="w-5 h-5 text-red-400 group-hover:text-red-300" />
+                  <span className="text-red-400 group-hover:text-red-300 font-semibold text-sm">
+                    {t('nav.logout')}
+                  </span>
                 </button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 

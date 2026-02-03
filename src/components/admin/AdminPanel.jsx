@@ -5,7 +5,7 @@ import { useAuth } from '@/src/contexts/AuthContext';
 import { supabase } from '@/src/supabaseClient';
 import { setForceLogoutForUser, deleteUser } from '@/src/utils/supabaseHelpers';
 import { notifyAdminAction } from '@/src/utils/discord';
-import { Users, Search, UserMinus, Shield, ChevronDown, ArrowUpDown } from 'lucide-react';
+import { Users, Search, UserMinus, Shield, ChevronDown, ArrowUpDown, ChevronLeft } from 'lucide-react';
 
 /**
  * AdminPanel - Zarządzanie użytkownikami
@@ -187,7 +187,7 @@ export default function AdminPanel({ onBack }) {
   // Access control
   if (!isAdmin) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-[#1a2332] via-[#1e2836] to-[#151c28] flex items-center justify-center p-8">
+      <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-police-dark-900 via-police-dark-800 to-police-dark-700 flex items-center justify-center p-8">
         <div className="text-center">
           <Shield className="w-16 h-16 text-red-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-2">Brak dostępu</h2>
@@ -196,7 +196,7 @@ export default function AdminPanel({ onBack }) {
           </p>
           <button
             onClick={onBack}
-            className="px-6 py-3 bg-yellow-500 text-gray-900 font-semibold rounded-lg hover:bg-yellow-400 transition-colors"
+            className="px-6 py-3 bg-gradient-to-r from-badge-gold-600 to-badge-gold-400 text-police-dark-900 font-bold rounded-xl hover:from-badge-gold-400 hover:to-badge-gold-600 transition-all duration-300 hover:scale-[1.02] shadow-lg"
           >
             Powrót
           </button>
@@ -207,9 +207,9 @@ export default function AdminPanel({ onBack }) {
 
   if (loading) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-[#1a2332] via-[#1e2836] to-[#151c28] flex items-center justify-center">
+      <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-police-dark-900 via-police-dark-800 to-police-dark-700 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-yellow-400 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-badge-gold-400 mx-auto mb-4"></div>
           <p className="text-gray-400">Ładowanie użytkowników...</p>
         </div>
       </div>
@@ -217,14 +217,14 @@ export default function AdminPanel({ onBack }) {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-[#1a2332] via-[#1e2836] to-[#151c28] p-8">
+    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-police-dark-900 via-police-dark-800 to-police-dark-700 p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <h2 className="text-4xl font-bold text-white mb-2">
             PANEL ADMINISTRATORA
           </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full"></div>
+          <div className="w-24 h-1 bg-gradient-to-r from-badge-gold-600 to-badge-gold-400 rounded-full"></div>
           <p className="text-gray-400 mt-4">
             Zarządzanie użytkownikami ({filteredUsers.length})
           </p>
@@ -239,13 +239,13 @@ export default function AdminPanel({ onBack }) {
               placeholder={isDev ? "Szukaj po nicku, username, badge lub email..." : "Szukaj po nicku, username lub badge..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400 transition-colors"
+              className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-badge-gold-400 transition-colors"
             />
           </div>
         </div>
 
         {/* Users Table */}
-        <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/20 overflow-hidden">
+        <div className="bg-police-dark-700 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-white/5 border-b border-white/10">
@@ -371,7 +371,7 @@ export default function AdminPanel({ onBack }) {
                             </button>
 
                             {showActionDropdown === u.id && !isCurrentUser && !isDevUser && (
-                              <div className="absolute right-0 mt-2 w-48 bg-[#1e2836] rounded-xl shadow-2xl border border-white/10 py-2 z-50">
+                              <div className="absolute right-0 mt-2 w-48 bg-police-dark-600 rounded-xl shadow-2xl border border-white/10 py-2 z-50">
                                 {/* Dev can give/remove admin */}
                                 {isDev && (
                                   <>
@@ -417,9 +417,10 @@ export default function AdminPanel({ onBack }) {
         {/* Back Button */}
         <button
           onClick={onBack}
-          className="mt-8 px-6 py-3 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
+          className="mt-8 flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-gray-400 hover:text-white transition-all duration-200"
         >
-          ← Powrót do Dashboard
+          <ChevronLeft className="w-5 h-5" />
+          <span className="text-sm font-medium">Powrót do Dashboard</span>
         </button>
       </div>
     </div>

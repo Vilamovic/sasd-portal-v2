@@ -5,7 +5,7 @@ import { useAuth } from '@/src/contexts/AuthContext';
 import dynamic from 'next/dynamic';
 import 'react-quill-new/dist/quill.snow.css';
 import { getAllMaterials, upsertMaterial, deleteMaterialFromDb } from '@/src/utils/supabaseHelpers';
-import { BookOpen, Edit3, Trash2, Plus, Save, X, Maximize2, Minimize2, ChevronDown } from 'lucide-react';
+import { BookOpen, Edit3, Trash2, Plus, Save, X, Maximize2, Minimize2, ChevronDown, ChevronLeft } from 'lucide-react';
 
 // Dynamic import React-Quill (client-side only)
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
@@ -203,9 +203,9 @@ export default function Materials({ onBack }) {
 
   if (loading) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-[#1a2332] via-[#1e2836] to-[#151c28] flex items-center justify-center">
+      <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-police-dark-900 via-police-dark-800 to-police-dark-700 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-yellow-400 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-badge-gold-400 mx-auto mb-4"></div>
           <p className="text-gray-400">Ładowanie materiałów...</p>
         </div>
       </div>
@@ -215,9 +215,9 @@ export default function Materials({ onBack }) {
   // Fullscreen mode
   if (fullscreen && editing) {
     return (
-      <div className="fixed inset-0 bg-[#1a2332] z-50 overflow-hidden flex flex-col">
+      <div className="fixed inset-0 bg-police-dark-900 z-50 overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 bg-[#1e2836] border-b border-white/10">
+        <div className="flex items-center justify-between px-6 py-4 bg-police-dark-700 border-b border-white/10">
           <input
             type="text"
             value={editTitle}
@@ -228,21 +228,21 @@ export default function Materials({ onBack }) {
           <div className="flex items-center gap-2 ml-4">
             <button
               onClick={() => setFullscreen(false)}
-              className="p-2 bg-white/10 text-white rounded hover:bg-white/20 transition-colors"
+              className="p-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
               title="Wyjdź z pełnego ekranu"
             >
               <Minimize2 className="w-5 h-5" />
             </button>
             <button
               onClick={handleSave}
-              className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white font-semibold rounded hover:bg-green-600 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors"
             >
               <Save className="w-4 h-4" />
               Zapisz
             </button>
             <button
               onClick={cancelEdit}
-              className="p-2 bg-white/10 text-white rounded hover:bg-white/20 transition-colors"
+              className="p-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -264,7 +264,7 @@ export default function Materials({ onBack }) {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-[#1a2332] via-[#1e2836] to-[#151c28] p-8">
+    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-police-dark-900 via-police-dark-800 to-police-dark-700 p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8 flex items-start justify-between">
@@ -272,7 +272,7 @@ export default function Materials({ onBack }) {
             <h2 className="text-4xl font-bold text-white mb-2">
               MATERIAŁY SZKOLENIOWE
             </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full"></div>
+            <div className="w-24 h-1 bg-gradient-to-r from-badge-gold-600 to-badge-gold-400 rounded-full"></div>
             <p className="text-gray-400 mt-4">
               Przeglądaj i edytuj materiały szkoleniowe
             </p>
@@ -283,14 +283,14 @@ export default function Materials({ onBack }) {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setShowManageDropdown(!showManageDropdown)}
-                className="flex items-center gap-2 px-6 py-3 bg-yellow-500 text-gray-900 font-semibold rounded-lg hover:bg-yellow-400 transition-colors"
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-badge-gold-600 to-badge-gold-400 text-police-dark-900 font-bold rounded-xl hover:from-badge-gold-400 hover:to-badge-gold-600 transition-all duration-300 hover:scale-[1.02] shadow-lg"
               >
                 Zarządzaj
                 <ChevronDown className={`w-4 h-4 transition-transform ${showManageDropdown ? 'rotate-180' : ''}`} />
               </button>
 
               {showManageDropdown && (
-                <div className="absolute right-0 mt-2 w-64 bg-[#1e2836] rounded-xl shadow-2xl border border-white/10 py-2 z-50">
+                <div className="absolute right-0 mt-2 w-64 bg-police-dark-700 rounded-xl shadow-2xl border border-white/10 py-2 z-50">
                   <button
                     onClick={() => {
                       setShowAddForm(!showAddForm);
@@ -322,14 +322,14 @@ export default function Materials({ onBack }) {
 
         {/* Add Form */}
         {showAddForm && isAdmin && (
-          <div className="mb-6 bg-white/10 backdrop-blur-sm rounded-xl border border-yellow-400 p-6">
+          <div className="mb-6 bg-police-dark-700 backdrop-blur-sm rounded-xl border border-badge-gold-400 p-6 shadow-xl">
             <h3 className="text-xl font-bold text-white mb-4">Dodaj Nowy Materiał</h3>
             <input
               type="text"
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               placeholder="Tytuł materiału..."
-              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400 transition-colors mb-4"
+              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-badge-gold-400 transition-colors mb-4"
             />
             <div className="flex items-center gap-3">
               <button
@@ -355,9 +355,9 @@ export default function Materials({ onBack }) {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Sidebar - Material List */}
           <div className="lg:col-span-1">
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/20 p-4">
+            <div className="bg-police-dark-700 backdrop-blur-sm rounded-xl border border-white/10 p-4 shadow-xl">
               <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
-                <BookOpen className="w-5 h-5" />
+                <BookOpen className="w-5 h-5 text-badge-gold-600" />
                 Lista Materiałów
               </h3>
               <div className="space-y-2">
@@ -371,10 +371,10 @@ export default function Materials({ onBack }) {
                         setSelectedMaterial(material);
                         setEditing(false);
                       }}
-                      className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
+                      className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 ${
                         selectedMaterial?.id === material.id
-                          ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-400'
-                          : 'bg-white/5 text-gray-300 hover:bg-white/10'
+                          ? 'bg-badge-gold-600/20 text-badge-gold-400 border border-badge-gold-400 shadow-lg'
+                          : 'bg-white/5 text-gray-300 hover:bg-white/10 border border-transparent'
                       }`}
                     >
                       <span className="text-sm font-medium">{material.title}</span>
@@ -388,39 +388,39 @@ export default function Materials({ onBack }) {
           {/* Content Area */}
           <div className="lg:col-span-3">
             {!selectedMaterial ? (
-              <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/20 p-12 text-center">
+              <div className="bg-police-dark-700 backdrop-blur-sm rounded-xl border border-white/10 p-12 text-center shadow-xl">
                 <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-400">Wybierz materiał z listy</p>
               </div>
             ) : editing ? (
-              <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/20 p-6">
+              <div className="bg-police-dark-700 backdrop-blur-sm rounded-xl border border-white/10 p-6 shadow-xl">
                 {/* Edit Header */}
                 <div className="flex items-center justify-between mb-4">
                   <input
                     type="text"
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    className="text-2xl font-bold bg-white/10 text-white border border-white/20 rounded-lg px-4 py-2 flex-grow mr-4 focus:outline-none focus:border-yellow-400"
+                    className="text-2xl font-bold bg-white/10 text-white border border-white/20 rounded-lg px-4 py-2 flex-grow mr-4 focus:outline-none focus:border-badge-gold-400 transition-colors"
                     placeholder="Tytuł materiału..."
                   />
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setFullscreen(true)}
-                      className="p-2 bg-white/10 text-white rounded hover:bg-white/20 transition-colors"
+                      className="p-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
                       title="Pełny ekran"
                     >
                       <Maximize2 className="w-5 h-5" />
                     </button>
                     <button
                       onClick={handleSave}
-                      className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white font-semibold rounded hover:bg-green-600 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors"
                     >
                       <Save className="w-4 h-4" />
                       Zapisz
                     </button>
                     <button
                       onClick={cancelEdit}
-                      className="p-2 bg-white/10 text-white rounded hover:bg-white/20 transition-colors"
+                      className="p-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
                     >
                       <X className="w-5 h-5" />
                     </button>
@@ -439,14 +439,14 @@ export default function Materials({ onBack }) {
                 </div>
               </div>
             ) : (
-              <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/20 p-6">
+              <div className="bg-police-dark-700 backdrop-blur-sm rounded-xl border border-white/10 p-6 shadow-xl">
                 {/* View Header */}
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-2xl font-bold text-white">{selectedMaterial.title}</h3>
                   {isAdmin && (
                     <button
                       onClick={startEdit}
-                      className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg hover:opacity-90 transition-all duration-300 shadow-lg"
                     >
                       <Edit3 className="w-4 h-4" />
                       Edytuj
@@ -467,9 +467,10 @@ export default function Materials({ onBack }) {
         {/* Back Button */}
         <button
           onClick={onBack}
-          className="mt-8 px-6 py-3 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
+          className="mt-8 flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-gray-400 hover:text-white transition-all duration-200"
         >
-          ← Powrót do Dashboard
+          <ChevronLeft className="w-5 h-5" />
+          <span className="text-sm font-medium">Powrót do Dashboard</span>
         </button>
       </div>
 

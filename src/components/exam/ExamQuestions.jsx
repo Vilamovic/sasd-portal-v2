@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { getAllExamTypes, getQuestionsByExamType, addExamQuestion, updateExamQuestion, deleteExamQuestion } from '@/src/utils/supabaseHelpers';
 import { notifyExamQuestionAction } from '@/src/utils/discord';
-import { Plus, Edit2, Trash2, Save, X, CheckSquare, Square } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, CheckSquare, Square, ChevronLeft } from 'lucide-react';
 
 /**
  * ExamQuestions - Zarządzanie pytaniami egzaminacyjnymi
@@ -241,7 +241,7 @@ export default function ExamQuestions({ onBack }) {
     return (
       <div
         ref={formRef}
-        className="bg-white/10 backdrop-blur-sm rounded-xl border border-yellow-400 p-6 mb-4"
+        className="bg-police-dark-700 backdrop-blur-sm rounded-xl border border-badge-gold-400 p-6 mb-4 shadow-xl"
       >
         <h3 className="text-xl font-bold text-white mb-4">
           {editingQuestionId ? 'Edytuj Pytanie' : 'Dodaj Nowe Pytanie'}
@@ -256,7 +256,7 @@ export default function ExamQuestions({ onBack }) {
             value={formData.question}
             onChange={(e) => setFormData({ ...formData, question: e.target.value })}
             rows={3}
-            className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400 transition-colors"
+            className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-badge-gold-400 transition-colors"
             placeholder="Wpisz pytanie..."
           />
         </div>
@@ -291,7 +291,7 @@ export default function ExamQuestions({ onBack }) {
                   type="text"
                   value={formData[optKey]}
                   onChange={(e) => setFormData({ ...formData, [optKey]: e.target.value })}
-                  className="flex-grow px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400 transition-colors"
+                  className="flex-grow px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-badge-gold-400 transition-colors"
                   placeholder={`Odpowiedź ${num}...`}
                 />
               </div>
@@ -330,7 +330,7 @@ export default function ExamQuestions({ onBack }) {
               onChange={(e) => setFormData({ ...formData, timeLimit: parseInt(e.target.value) || 30 })}
               min={10}
               max={300}
-              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-yellow-400 transition-colors"
+              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-badge-gold-400 transition-colors"
             />
           </div>
         </div>
@@ -359,7 +359,7 @@ export default function ExamQuestions({ onBack }) {
   // Access control
   if (!isAdmin) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-[#1a2332] via-[#1e2836] to-[#151c28] flex items-center justify-center p-8">
+      <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-police-dark-900 via-police-dark-800 to-police-dark-700 flex items-center justify-center p-8">
         <div className="text-center">
           <X className="w-16 h-16 text-red-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-2">Brak dostępu</h2>
@@ -368,7 +368,7 @@ export default function ExamQuestions({ onBack }) {
           </p>
           <button
             onClick={onBack}
-            className="px-6 py-3 bg-yellow-500 text-gray-900 font-semibold rounded-lg hover:bg-yellow-400 transition-colors"
+            className="px-6 py-3 bg-gradient-to-r from-badge-gold-600 to-badge-gold-400 text-police-dark-900 font-bold rounded-xl hover:from-badge-gold-400 hover:to-badge-gold-600 transition-all duration-300 hover:scale-[1.02] shadow-lg"
           >
             Powrót
           </button>
@@ -380,13 +380,13 @@ export default function ExamQuestions({ onBack }) {
   // Type selection screen
   if (!selectedType) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-[#1a2332] via-[#1e2836] to-[#151c28] p-8">
+      <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-police-dark-900 via-police-dark-800 to-police-dark-700 p-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
             <h2 className="text-4xl font-bold text-white mb-2">
               ZARZĄDZANIE PYTANIAMI
             </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full"></div>
+            <div className="w-24 h-1 bg-gradient-to-r from-badge-gold-600 to-badge-gold-400 rounded-full"></div>
             <p className="text-gray-400 mt-4">
               Wybierz typ egzaminu aby zarządzać pytaniami
             </p>
@@ -397,7 +397,7 @@ export default function ExamQuestions({ onBack }) {
               <button
                 key={type.id}
                 onClick={() => setSelectedType(type)}
-                className="p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl text-left hover:bg-white/10 transition-all"
+                className="p-6 bg-police-dark-700 backdrop-blur-sm border border-white/10 rounded-xl text-left hover:bg-white/10 hover:border-badge-gold-600/50 transition-all duration-300 shadow-xl"
               >
                 <h3 className="text-lg font-bold text-white">{type.name}</h3>
               </button>
@@ -406,9 +406,10 @@ export default function ExamQuestions({ onBack }) {
 
           <button
             onClick={onBack}
-            className="mt-8 px-6 py-3 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
+            className="mt-8 flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-gray-400 hover:text-white transition-all duration-200"
           >
-            ← Powrót
+            <ChevronLeft className="w-5 h-5" />
+            <span className="text-sm font-medium">Powrót</span>
           </button>
         </div>
       </div>
@@ -417,7 +418,7 @@ export default function ExamQuestions({ onBack }) {
 
   // Questions list
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-[#1a2332] via-[#1e2836] to-[#151c28] p-8">
+    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-police-dark-900 via-police-dark-800 to-police-dark-700 p-8">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -426,7 +427,7 @@ export default function ExamQuestions({ onBack }) {
               <h2 className="text-4xl font-bold text-white mb-2">
                 {selectedType.name}
               </h2>
-              <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full"></div>
+              <div className="w-24 h-1 bg-gradient-to-r from-badge-gold-600 to-badge-gold-400 rounded-full"></div>
               <p className="text-gray-400 mt-4">
                 {questions.length} pytań
               </p>
@@ -436,7 +437,7 @@ export default function ExamQuestions({ onBack }) {
                 resetForm();
                 setShowAddForm(true);
               }}
-              className="flex items-center gap-2 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors"
+              className="flex items-center gap-2 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors shadow-lg"
             >
               <Plus className="w-5 h-5" />
               Dodaj Pytanie
@@ -451,11 +452,11 @@ export default function ExamQuestions({ onBack }) {
         <div className="space-y-4">
           {loading ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-yellow-400 mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-badge-gold-400 mx-auto mb-4"></div>
               <p className="text-gray-400">Ładowanie pytań...</p>
             </div>
           ) : questions.length === 0 ? (
-            <div className="text-center py-12 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10">
+            <div className="text-center py-12 bg-police-dark-700 backdrop-blur-sm rounded-xl border border-white/10 shadow-xl">
               <p className="text-gray-400">Brak pytań dla tego typu egzaminu.</p>
             </div>
           ) : (
@@ -464,7 +465,7 @@ export default function ExamQuestions({ onBack }) {
                 {editingQuestionId === question.id && renderForm()}
 
                 {editingQuestionId !== question.id && (
-                  <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-6 hover:bg-white/10 transition-colors">
+                  <div className="bg-police-dark-700 backdrop-blur-sm rounded-xl border border-white/10 p-6 hover:bg-white/10 transition-colors shadow-xl">
                     <div className="flex items-start justify-between">
                       <div className="flex-grow">
                         <h3 className="text-white font-semibold mb-2">
@@ -522,9 +523,10 @@ export default function ExamQuestions({ onBack }) {
         {/* Back Button */}
         <button
           onClick={() => setSelectedType(null)}
-          className="mt-8 px-6 py-3 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
+          className="mt-8 flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-gray-400 hover:text-white transition-all duration-200"
         >
-          ← Powrót do wyboru typu
+          <ChevronLeft className="w-5 h-5" />
+          <span className="text-sm font-medium">Powrót do wyboru typu</span>
         </button>
       </div>
     </div>

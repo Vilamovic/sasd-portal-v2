@@ -16,7 +16,10 @@
       "Bash(git reset:*)",
       "Bash(npm run build:*)",
       "Bash(npm install:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(dir:*)",
+      "Bash(curl:*)",
+      "Bash(ls:*)"
     ]
   }
 }
