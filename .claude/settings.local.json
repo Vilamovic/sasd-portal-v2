@@ -19,7 +19,13 @@
       "Bash(npm run dev:*)",
       "Bash(dir:*)",
       "Bash(curl:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(timeout:*)",
+      "Bash(for f in \"c:\\\\Users\\\\user\\\\sasd-portal-v2\\\\src\\\\components\\\\exam\\\\Exam.jsx\" \"c:\\\\Users\\\\user\\\\sasd-portal-v2\\\\src\\\\components\\\\exam\\\\ExamDashboard.jsx\" \"c:\\\\Users\\\\user\\\\sasd-portal-v2\\\\src\\\\components\\\\exam\\\\ExamTaker.jsx\" \"c:\\\\Users\\\\user\\\\sasd-portal-v2\\\\src\\\\components\\\\exam\\\\ExamQuestions.jsx\" \"c:\\\\Users\\\\user\\\\sasd-portal-v2\\\\src\\\\components\\\\exam\\\\ExamStatistics.jsx\" \"c:\\\\Users\\\\user\\\\sasd-portal-v2\\\\src\\\\components\\\\exam\\\\ExamArchive.jsx\" \"c:\\\\Users\\\\user\\\\sasd-portal-v2\\\\src\\\\components\\\\admin\\\\AdminPanel.jsx\")",
+      "Bash(done)",
+      "Bash(git rm:*)",
+      "Bash(git checkout:*)",
+      "Bash(git stash:*)"
     ]
   }
 }
