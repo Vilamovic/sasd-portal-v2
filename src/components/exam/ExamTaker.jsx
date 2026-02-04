@@ -56,7 +56,7 @@ export default function ExamTaker({ onBack }) {
 
   // Zapisz stan egzaminu do localStorage
   const saveExamState = useCallback(() => {
-    if (!exam || showResults) return;
+    if (!exam || showResults || !user?.id) return;
 
     const examState = {
       exam,
@@ -76,6 +76,8 @@ export default function ExamTaker({ onBack }) {
 
   // Odzyskaj stan egzaminu z localStorage
   const recoverExamState = useCallback(() => {
+    if (!user?.id) return;
+
     try {
       const savedState = localStorage.getItem(`exam_state_${user.id}`);
       if (!savedState) return;
@@ -99,12 +101,16 @@ export default function ExamTaker({ onBack }) {
       console.log('✅ Exam state recovered from localStorage');
     } catch (error) {
       console.error('Error recovering exam state:', error);
-      localStorage.removeItem(`exam_state_${user.id}`);
+      if (user?.id) {
+        localStorage.removeItem(`exam_state_${user.id}`);
+      }
     }
   }, [user]);
 
   // Wyczyść stan egzaminu z localStorage
   const clearExamState = useCallback(() => {
+    if (!user?.id) return;
+
     try {
       localStorage.removeItem(`exam_state_${user.id}`);
     } catch (error) {
