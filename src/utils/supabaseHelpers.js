@@ -447,12 +447,17 @@ export async function createExamAccessToken(userId, examTypeId, createdBy, expir
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + expiresInDays);
 
+    // Generate unique token (UUID v4)
+    const token = crypto.randomUUID();
+
     const { data, error } = await supabase
       .from('exam_access_tokens')
       .insert({
+        token: token,
         user_id: userId,
         exam_type_id: examTypeId,
         created_by: createdBy,
+        used: false,
         expires_at: expiresAt.toISOString(),
       })
       .select()
