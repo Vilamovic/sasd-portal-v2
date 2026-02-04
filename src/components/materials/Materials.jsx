@@ -49,23 +49,7 @@ export default function Materials({ onBack }) {
     ],
   };
 
-  // Load materials
-  useEffect(() => {
-    loadMaterials();
-  }, []);
-
-  // Close dropdown on click outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowManageDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
+  // Define loadMaterials BEFORE useEffect to avoid initialization order issues
   const loadMaterials = async () => {
     try {
       setLoading(true);
@@ -100,6 +84,24 @@ export default function Materials({ onBack }) {
       setLoading(false);
     }
   };
+
+  // Load materials
+  useEffect(() => {
+    loadMaterials();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowManageDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Start editing
   const startEdit = () => {
