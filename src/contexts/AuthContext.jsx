@@ -28,6 +28,7 @@ export function AuthProvider({ children }) {
   const loginTimestampRef = useRef(null);
   const hasNotifiedLogin = useRef(false);
   const roleCheckIntervalRef = useRef(null);
+  const realtimeCleanupRef = useRef(null);
 
   // getUserById i upsertUser są teraz importowane z supabaseHelpers.js
 
@@ -67,7 +68,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   /**
-   * Polling roli z bazy (co 5s) + sprawdzanie force logout
+   * Realtime subscription + fallback polling (co 30s) dla roli i force logout
+   * OPTYMALIZACJA: 720 zapytań/h → 120 zapytań/h (83% redukcja)
    */
   const startRolePolling = useCallback((userId) => {
     // Wyczyść poprzedni interval
@@ -75,7 +77,8 @@ export function AuthProvider({ children }) {
       clearInterval(roleCheckIntervalRef.current);
     }
 
-    roleCheckIntervalRef.current = setInterval(async () => {
+    // Funkcja sprawdzająca user data
+    const checkUserData = async () => {
       try {
         const { data: userData } = await getUserById(userId);
 
@@ -105,10 +108,36 @@ export function AuthProvider({ children }) {
           }
         }
       } catch (error) {
-        console.error('Role polling error:', error);
+        console.error('Role check error:', error);
       }
-    }, 5000); // Co 5 sekund
-  }, [determineRole]);
+    };
+
+    // Supabase Realtime subscription (instant updates)
+    const realtimeChannel = supabase
+      .channel(`user-${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'users',
+          filter: `id=eq.${userId}`,
+        },
+        (payload) => {
+          console.log('🔔 Realtime update detected:', payload);
+          checkUserData();
+        }
+      )
+      .subscribe();
+
+    // Zapisz cleanup function do ref
+    realtimeCleanupRef.current = () => {
+      supabase.removeChannel(realtimeChannel);
+    };
+
+    // Fallback polling co 30s (zamiast 5s)
+    roleCheckIntervalRef.current = setInterval(checkUserData, 30000);
+  }, [determineRole, signOut]);
 
   /**
    * Wylogowanie
@@ -118,6 +147,11 @@ export function AuthProvider({ children }) {
       // Wyczyść interval pollingu
       if (roleCheckIntervalRef.current) {
         clearInterval(roleCheckIntervalRef.current);
+      }
+
+      // Wyczyść realtime subscription
+      if (realtimeCleanupRef.current) {
+        realtimeCleanupRef.current();
       }
 
       // Wyczyść localStorage
@@ -308,6 +342,9 @@ export function AuthProvider({ children }) {
       subscription.unsubscribe();
       if (roleCheckIntervalRef.current) {
         clearInterval(roleCheckIntervalRef.current);
+      }
+      if (realtimeCleanupRef.current) {
+        realtimeCleanupRef.current();
       }
     };
   }, [determineRole, checkMtaNick, startRolePolling]);

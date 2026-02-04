@@ -3,9 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { generateExam, calculateExamResult } from '@/src/utils/examUtils';
-import { getAllExamTypes, getQuestionsByExamType, saveExamResult } from '@/src/utils/supabaseHelpers';
-import { notifyExamSubmission } from '@/src/utils/discord';
-import { Target, Clock, CheckCircle, XCircle, ArrowRight, ChevronLeft, Trophy, AlertCircle, Sparkles } from 'lucide-react';
+import { getAllExamTypes, getQuestionsByExamType, saveExamResult, verifyAndConsumeExamToken } from '@/src/utils/supabaseHelpers';
+import { notifyExamSubmission, notifyCheat } from '@/src/utils/discord';
+import { Target, Clock, CheckCircle, XCircle, ArrowRight, ChevronLeft, Trophy, AlertCircle, Sparkles, Key } from 'lucide-react';
 
 /**
  * ExamTaker - Premium Sheriff-themed exam interface
@@ -29,9 +29,17 @@ export default function ExamTaker({ onBack }) {
   const timerRef = useRef(null);
   const submittingRef = useRef(false);
 
-  // Załaduj typy egzaminów
+  // One-Time Access Token state
+  const [showTokenModal, setShowTokenModal] = useState(false);
+  const [tokenInput, setTokenInput] = useState('');
+  const [tokenError, setTokenError] = useState('');
+  const [verifyingToken, setVerifyingToken] = useState(false);
+  const [pendingExamTypeId, setPendingExamTypeId] = useState(null);
+
+  // Załaduj typy egzaminów i odzyskaj stan egzaminu z localStorage
   useEffect(() => {
     loadExamTypes();
+    recoverExamState();
   }, []);
 
   const loadExamTypes = async () => {
@@ -46,13 +54,103 @@ export default function ExamTaker({ onBack }) {
     }
   };
 
-  // Rozpocznij egzamin
-  const startExam = async (examTypeId) => {
-    try {
-      setLoading(true);
-      const { data: questions, error } = await getQuestionsByExamType(examTypeId);
+  // Zapisz stan egzaminu do localStorage
+  const saveExamState = useCallback(() => {
+    if (!exam || showResults) return;
 
-      if (error) throw error;
+    const examState = {
+      exam,
+      selectedType,
+      currentQuestionIndex,
+      answers,
+      timeLeft,
+      timestamp: Date.now(),
+    };
+
+    try {
+      localStorage.setItem(`exam_state_${user.id}`, JSON.stringify(examState));
+    } catch (error) {
+      console.error('Error saving exam state:', error);
+    }
+  }, [exam, selectedType, currentQuestionIndex, answers, timeLeft, showResults, user]);
+
+  // Odzyskaj stan egzaminu z localStorage
+  const recoverExamState = useCallback(() => {
+    try {
+      const savedState = localStorage.getItem(`exam_state_${user.id}`);
+      if (!savedState) return;
+
+      const examState = JSON.parse(savedState);
+      const timeSinceLastSave = Date.now() - examState.timestamp;
+
+      // Jeśli minęło więcej niż 1 godzina, usuń stan (wygasł)
+      if (timeSinceLastSave > 3600000) {
+        localStorage.removeItem(`exam_state_${user.id}`);
+        return;
+      }
+
+      // Przywróć stan egzaminu
+      setExam(examState.exam);
+      setSelectedType(examState.selectedType);
+      setCurrentQuestionIndex(examState.currentQuestionIndex);
+      setAnswers(examState.answers);
+      setTimeLeft(examState.timeLeft);
+
+      console.log('✅ Exam state recovered from localStorage');
+    } catch (error) {
+      console.error('Error recovering exam state:', error);
+      localStorage.removeItem(`exam_state_${user.id}`);
+    }
+  }, [user]);
+
+  // Wyczyść stan egzaminu z localStorage
+  const clearExamState = useCallback(() => {
+    try {
+      localStorage.removeItem(`exam_state_${user.id}`);
+    } catch (error) {
+      console.error('Error clearing exam state:', error);
+    }
+  }, [user]);
+
+  // Rozpocznij egzamin - najpierw pokaż modal z tokenem
+  const startExam = (examTypeId) => {
+    setPendingExamTypeId(examTypeId);
+    setTokenInput('');
+    setTokenError('');
+    setShowTokenModal(true);
+  };
+
+  // Weryfikuj token i rozpocznij egzamin
+  const verifyTokenAndStart = async () => {
+    if (!tokenInput.trim()) {
+      setTokenError('Proszę wprowadzić token dostępu.');
+      return;
+    }
+
+    setVerifyingToken(true);
+    setTokenError('');
+
+    try {
+      // Weryfikuj i konsumuj token przez RPC
+      const { data, error } = await verifyAndConsumeExamToken(
+        tokenInput.trim(),
+        user.id,
+        pendingExamTypeId
+      );
+
+      if (error || !data?.success) {
+        setTokenError(data?.error || 'Nieprawidłowy token. Sprawdź i spróbuj ponownie.');
+        setVerifyingToken(false);
+        return;
+      }
+
+      // Token zweryfikowany - rozpocznij egzamin
+      setShowTokenModal(false);
+      setLoading(true);
+
+      const { data: questions, error: questionsError } = await getQuestionsByExamType(pendingExamTypeId);
+
+      if (questionsError) throw questionsError;
       if (!questions || questions.length === 0) {
         alert('Brak pytań dla tego typu egzaminu.');
         setLoading(false);
@@ -62,16 +160,16 @@ export default function ExamTaker({ onBack }) {
       // Wygeneruj egzamin (losowanie i shuffle)
       const generatedExam = generateExam(questions, 10);
 
-      setSelectedType(examTypes.find(t => t.id === examTypeId));
+      setSelectedType(examTypes.find(t => t.id === pendingExamTypeId));
       setExam(generatedExam);
       setCurrentQuestionIndex(0);
       setAnswers({});
       setTimeLeft(generatedExam.questions[0]?.time_limit || 30);
       setLoading(false);
     } catch (error) {
-      console.error('Error starting exam:', error);
-      alert('Błąd podczas rozpoczynania egzaminu.');
-      setLoading(false);
+      console.error('Error verifying token or starting exam:', error);
+      setTokenError('Błąd podczas weryfikacji tokenu. Spróbuj ponownie.');
+      setVerifyingToken(false);
     }
   };
 
@@ -126,6 +224,78 @@ export default function ExamTaker({ onBack }) {
       }
     };
   }, [currentQuestionIndex, exam, showResults, handleNextQuestion]);
+
+  // Auto-save exam state do localStorage
+  useEffect(() => {
+    saveExamState();
+  }, [saveExamState]);
+
+  // 🚨 CHEATING ALERTS: Monitoring visibilitychange & window.blur
+  useEffect(() => {
+    if (!exam || showResults) return;
+
+    const handleVisibilityChange = async () => {
+      if (document.hidden) {
+        console.warn('⚠️ CHEATING DETECTED: User switched tabs');
+
+        // Zakończ egzamin ze skutkiem negatywnym (0 punktów)
+        const failedAnswers = {};
+        exam.questions.forEach(q => {
+          failedAnswers[q.id] = -1; // -1 = brak odpowiedzi/timeout
+        });
+
+        // Wyślij alert do Admina przez Discord
+        await notifyCheat({
+          username: user?.user_metadata?.username || 'Unknown',
+          mtaNick: mtaNick || 'Brak',
+          email: user?.email || 'N/A',
+          examType: selectedType?.name || 'Unknown',
+          cheatType: 'tab_switch',
+          timestamp: new Date().toISOString(),
+        });
+
+        alert('🚨 UWAGA: Wykryto przełączenie karty. Egzamin zostaje zakończony ze skutkiem negatywnym.');
+
+        // Zakończ egzamin
+        await finishExam(failedAnswers);
+      }
+    };
+
+    const handleWindowBlur = async () => {
+      console.warn('⚠️ CHEATING DETECTED: Window lost focus');
+
+      // Zakończ egzamin ze skutkiem negatywnym
+      const failedAnswers = {};
+      exam.questions.forEach(q => {
+        failedAnswers[q.id] = -1;
+      });
+
+      // Wyślij alert do Admina przez Discord
+      await notifyCheat({
+        username: user?.user_metadata?.username || 'Unknown',
+        mtaNick: mtaNick || 'Brak',
+        email: user?.email || 'N/A',
+        examType: selectedType?.name || 'Unknown',
+        cheatType: 'window_blur',
+        timestamp: new Date().toISOString(),
+      });
+
+      alert('🚨 UWAGA: Wykryto wyjście z okna egzaminu. Egzamin zostaje zakończony ze skutkiem negatywnym.');
+
+      // Zakończ egzamin
+      await finishExam(failedAnswers);
+    };
+
+    // Dodaj event listenery
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('blur', handleWindowBlur);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('blur', handleWindowBlur);
+    };
+  }, [exam, showResults, selectedType, mtaNick, user]);
 
   // Handle answer selection
   const handleAnswerSelect = (optionIndex) => {
@@ -201,6 +371,9 @@ export default function ExamTaker({ onBack }) {
         examId: savedExam.exam_id,
       });
 
+      // Wyczyść zapisany stan egzaminu
+      clearExamState();
+
       // Pokaż wyniki
       setResults({
         ...result,
@@ -219,11 +392,13 @@ export default function ExamTaker({ onBack }) {
   // Ekran wyboru typu egzaminu
   if (!exam && !loading) {
     return (
-      <div className="min-h-screen bg-[#020a06] relative overflow-hidden">
-        <div className="fixed inset-0 pointer-events-none">
-          <div className="absolute top-1/4 -left-32 w-96 h-96 bg-[#c9a227]/10 rounded-full blur-[120px] animate-pulse-glow" />
-          <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-[#22693f]/20 rounded-full blur-[120px] animate-pulse-glow" style={{ animationDelay: '1.5s' }} />
-        </div>
+      <>
+        {renderTokenModal()}
+        <div className="min-h-screen bg-[#020a06] relative overflow-hidden">
+          <div className="fixed inset-0 pointer-events-none">
+            <div className="absolute top-1/4 -left-32 w-96 h-96 bg-[#c9a227]/10 rounded-full blur-[120px] animate-pulse-glow" />
+            <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-[#22693f]/20 rounded-full blur-[120px] animate-pulse-glow" style={{ animationDelay: '1.5s' }} />
+          </div>
 
         <div className="relative z-10 max-w-4xl mx-auto px-6 py-12">
           {onBack && (
@@ -286,28 +461,34 @@ export default function ExamTaker({ onBack }) {
           </div>
         </div>
       </div>
+      </>
     );
   }
 
   // Ekran ładowania
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#020a06] flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#c9a227]/30 border-t-[#c9a227] mx-auto mb-4" />
-          <p className="text-[#8fb5a0]">Ładowanie egzaminu...</p>
+      <>
+        {renderTokenModal()}
+        <div className="min-h-screen bg-[#020a06] flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#c9a227]/30 border-t-[#c9a227] mx-auto mb-4" />
+            <p className="text-[#8fb5a0]">Ładowanie egzaminu...</p>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   // Ekran wyników
   if (showResults && results) {
     return (
-      <div className="min-h-screen bg-[#020a06] flex items-center justify-center p-8 relative overflow-hidden">
-        <div className="fixed inset-0 pointer-events-none">
-          <div className={`absolute top-1/4 -left-32 w-96 h-96 ${results.passed ? 'bg-[#22c55e]/10' : 'bg-red-500/10'} rounded-full blur-[120px] animate-pulse-glow`} />
-        </div>
+      <>
+        {renderTokenModal()}
+        <div className="min-h-screen bg-[#020a06] flex items-center justify-center p-8 relative overflow-hidden">
+          <div className="fixed inset-0 pointer-events-none">
+            <div className={`absolute top-1/4 -left-32 w-96 h-96 ${results.passed ? 'bg-[#22c55e]/10' : 'bg-red-500/10'} rounded-full blur-[120px] animate-pulse-glow`} />
+          </div>
 
         <div className="relative z-10 max-w-lg w-full">
           <div
@@ -385,11 +566,105 @@ export default function ExamTaker({ onBack }) {
           </div>
         </div>
       </div>
+      </>
     );
   }
 
+  // Modal wprowadzania tokenu
+  const renderTokenModal = () => {
+    if (!showTokenModal) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="glass-strong rounded-2xl border border-[#c9a227] max-w-md w-full shadow-2xl">
+          {/* Header */}
+          <div className="p-6 border-b border-[#1a4d32]">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 bg-gradient-to-br from-[#c9a227] to-[#e6b830] rounded-xl flex items-center justify-center shadow-lg">
+                <Key className="w-6 h-6 text-[#020a06]" strokeWidth={2.5} />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-white">Jednorazowy Token Dostępu</h3>
+                <p className="text-sm text-[#8fb5a0]">Wymagany do rozpoczęcia egzaminu</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Body */}
+          <div className="p-6">
+            <p className="text-[#8fb5a0] text-sm mb-4">
+              Wprowadź token dostępu otrzymany od administratora. Token można użyć tylko raz.
+            </p>
+
+            <input
+              type="text"
+              value={tokenInput}
+              onChange={(e) => {
+                setTokenInput(e.target.value);
+                setTokenError('');
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !verifyingToken) {
+                  verifyTokenAndStart();
+                }
+              }}
+              placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+              className="w-full px-4 py-3 bg-[#051a0f]/80 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0]/50 focus:outline-none focus:border-[#c9a227] transition-colors mb-4 font-mono text-sm"
+              disabled={verifyingToken}
+              autoFocus
+            />
+
+            {tokenError && (
+              <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                <span className="text-sm text-red-400">{tokenError}</span>
+              </div>
+            )}
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={verifyTokenAndStart}
+                disabled={verifyingToken || !tokenInput.trim()}
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-[#22c55e] to-[#16a34a] hover:opacity-90 text-white font-semibold rounded-xl transition-all disabled:from-[#133524] disabled:to-[#0a2818] disabled:cursor-not-allowed disabled:opacity-50 shadow-lg flex items-center justify-center gap-2"
+              >
+                {verifyingToken ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Weryfikacja...
+                  </>
+                ) : (
+                  <>
+                    <Key className="w-4 h-4" />
+                    Weryfikuj i Rozpocznij
+                  </>
+                )}
+              </button>
+              <button
+                onClick={() => {
+                  setShowTokenModal(false);
+                  setTokenInput('');
+                  setTokenError('');
+                  setPendingExamTypeId(null);
+                }}
+                disabled={verifyingToken}
+                className="px-6 py-3 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Anuluj
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Ekran egzaminu
-  if (!exam) return null;
+  if (!exam) return (
+    <>
+      {renderTokenModal()}
+      {null}
+    </>
+  );
 
   const currentQuestion = exam.questions[currentQuestionIndex];
   const currentAnswer = answers[currentQuestion.id];
@@ -398,6 +673,9 @@ export default function ExamTaker({ onBack }) {
   const timerBgColor = timeLeft > 10 ? 'bg-[#22c55e]/10 border-[#22c55e]/30' : timeLeft > 5 ? 'bg-[#c9a227]/10 border-[#c9a227]/30' : 'bg-red-500/10 border-red-400/30';
 
   return (
+    <>
+      {renderTokenModal()}
+
     <div className="min-h-screen bg-[#020a06] relative overflow-hidden">
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-1/4 -left-32 w-96 h-96 bg-[#c9a227]/10 rounded-full blur-[120px] animate-pulse-glow" />
@@ -500,5 +778,6 @@ export default function ExamTaker({ onBack }) {
         </button>
       </div>
     </div>
+    </>
   );
 }

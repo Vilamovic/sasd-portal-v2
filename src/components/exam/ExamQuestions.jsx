@@ -49,9 +49,12 @@ export default function ExamQuestions({ onBack }) {
   // Scroll to form when editing
   useEffect(() => {
     if ((editingQuestionId || showAddForm) && formRef.current) {
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 100);
+
+      // Cleanup: wyczyść timeout jeśli komponent zostanie unmountowany
+      return () => clearTimeout(timeoutId);
     }
   }, [editingQuestionId, showAddForm]);
 

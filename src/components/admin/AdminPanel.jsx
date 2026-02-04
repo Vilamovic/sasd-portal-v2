@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { supabase } from '@/src/supabaseClient';
 import { setForceLogoutForUser, deleteUser } from '@/src/utils/supabaseHelpers';
 import { notifyAdminAction } from '@/src/utils/discord';
-import { Users, Search, UserMinus, Shield, ShieldCheck, ShieldOff, ChevronDown, ArrowUpDown, ChevronLeft, Sparkles, MoreVertical } from 'lucide-react';
+import { Users, Search, UserMinus, Shield, ShieldCheck, ShieldOff, ChevronDown, ArrowUpDown, ChevronLeft, Sparkles, MoreVertical, Key } from 'lucide-react';
+import Link from 'next/link';
 
 /**
  * AdminPanel - Premium Sheriff-themed user management
@@ -16,8 +17,9 @@ import { Users, Search, UserMinus, Shield, ShieldCheck, ShieldOff, ChevronDown, 
  * - Sortowanie (username, nick, badge, role, created_at, last_seen)
  * - Przycisk "Wyrzuć": force logout → wait 2s → delete user
  * - Discord webhook przy usunięciu
+ * OPTIMIZED: React.memo to prevent unnecessary re-renders
  */
-export default function AdminPanel({ onBack }) {
+const AdminPanel = memo(function AdminPanel({ onBack }) {
   const { user, role, isDev, isAdmin } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -442,15 +444,27 @@ export default function AdminPanel({ onBack }) {
           </div>
         </div>
 
-        {/* Back Button */}
-        <button
-          onClick={onBack}
-          className="mt-8 flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200"
-        >
-          <ChevronLeft className="w-5 h-5" />
-          <span className="text-sm font-medium">Powrót do Dashboard</span>
-        </button>
+        {/* Action Buttons */}
+        <div className="mt-8 flex flex-wrap items-center gap-4">
+          <Link
+            href="/admin/tokens"
+            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[#c9a227] to-[#e6b830] hover:opacity-90 text-[#020a06] font-bold transition-all duration-300 hover:scale-[1.02] shadow-lg"
+          >
+            <Key className="w-5 h-5" />
+            <span className="text-sm font-medium">Tokeny Egzaminacyjne</span>
+          </Link>
+
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200"
+          >
+            <ChevronLeft className="w-5 h-5" />
+            <span className="text-sm font-medium">Powrót do Dashboard</span>
+          </button>
+        </div>
       </div>
     </div>
   );
-}
+});
+
+export default AdminPanel;

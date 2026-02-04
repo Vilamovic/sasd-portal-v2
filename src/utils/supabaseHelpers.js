@@ -434,3 +434,141 @@ export async function deleteMaterialFromDb(materialId) {
     return { error };
   }
 }
+
+// ============================================
+// EXAM ACCESS TOKENS (One-Time Access)
+// ============================================
+
+/**
+ * Tworzy nowy token dostępu do egzaminu (Admin/Dev only)
+ */
+export async function createExamAccessToken(userId, examTypeId, createdBy, expiresInDays = 7) {
+  try {
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + expiresInDays);
+
+    const { data, error } = await supabase
+      .from('exam_access_tokens')
+      .insert({
+        user_id: userId,
+        exam_type_id: examTypeId,
+        created_by: createdBy,
+        expires_at: expiresAt.toISOString(),
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('createExamAccessToken error:', error);
+    return { data: null, error };
+  }
+}
+
+/**
+ * Pobiera wszystkie tokeny dla użytkownika
+ */
+export async function getUserExamTokens(userId) {
+  try {
+    const { data, error } = await supabase
+      .from('exam_access_tokens')
+      .select(`
+        *,
+        exam_types(name),
+        created_by_user:users!exam_access_tokens_created_by_fkey(username, mta_nick)
+      `)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('getUserExamTokens error:', error);
+    return { data: null, error };
+  }
+}
+
+/**
+ * Pobiera wszystkie tokeny (Admin/Dev only)
+ */
+export async function getAllExamTokens() {
+  try {
+    const { data, error } = await supabase
+      .from('exam_access_tokens')
+      .select(`
+        *,
+        users(username, mta_nick, email),
+        exam_types(name),
+        created_by_user:users!exam_access_tokens_created_by_fkey(username, mta_nick)
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('getAllExamTokens error:', error);
+    return { data: null, error };
+  }
+}
+
+/**
+ * Weryfikuje i konsumuje token (RPC)
+ */
+export async function verifyAndConsumeExamToken(token, userId, examTypeId) {
+  try {
+    const { data, error } = await supabase.rpc('verify_and_consume_exam_token', {
+      p_token: token,
+      p_user_id: userId,
+      p_exam_type_id: examTypeId,
+    });
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('verifyAndConsumeExamToken error:', error);
+    return { data: null, error };
+  }
+}
+
+/**
+ * Usuwa token (Admin/Dev only)
+ */
+export async function deleteExamAccessToken(tokenId) {
+  try {
+    const { error } = await supabase
+      .from('exam_access_tokens')
+      .delete()
+      .eq('id', tokenId);
+
+    if (error) throw error;
+    return { error: null };
+  } catch (error) {
+    console.error('deleteExamAccessToken error:', error);
+    return { error };
+  }
+}
+
+/**
+ * Sprawdza czy użytkownik ma aktywny (nieużyty) token dla danego typu egzaminu
+ */
+export async function hasActiveTokenForExam(userId, examTypeId) {
+  try {
+    const { data, error } = await supabase
+      .from('exam_access_tokens')
+      .select('id, token, expires_at')
+      .eq('user_id', userId)
+      .eq('exam_type_id', examTypeId)
+      .eq('used', false)
+      .gt('expires_at', new Date().toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) throw error;
+    return { data, error: null, hasToken: !!data };
+  } catch (error) {
+    console.error('hasActiveTokenForExam error:', error);
+    return { data: null, error, hasToken: false };
+  }
+}
