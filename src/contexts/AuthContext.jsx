@@ -8,7 +8,7 @@ import { notifyUserAuth } from '@/src/utils/discord';
 const AuthContext = createContext();
 
 // UUID developera (hardcoded - nietykalne)
-const DEV_UUID = 'c254fb57-72d4-450c-87b7-cd7ffad5b715';
+const DEV_UUID = '2ab9b7ad-a32f-4219-b1fd-3c0e79628d75';
 
 /**
  * AuthProvider - Provider dla systemu autentykacji
