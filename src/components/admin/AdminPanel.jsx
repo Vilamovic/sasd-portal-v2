@@ -269,8 +269,8 @@ export default function AdminPanel({ onBack }) {
         </div>
 
         {/* Users Table */}
-        <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 overflow-hidden shadow-xl">
-          <div className="overflow-x-auto">
+        <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 shadow-xl">
+          <div className="overflow-x-auto overflow-y-visible">
             <table className="w-full">
               <thead className="bg-[#051a0f]/50 border-b border-[#1a4d32]/50">
                 <tr>
