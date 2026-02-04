@@ -28,6 +28,7 @@ export default function ExamTaker({ onBack }) {
   const [results, setResults] = useState(null);
   const timerRef = useRef(null);
   const submittingRef = useRef(false);
+  const cheatingDetectedRef = useRef(false);
 
   // One-Time Access Token state
   const [showTokenModal, setShowTokenModal] = useState(false);
@@ -227,7 +228,7 @@ export default function ExamTaker({ onBack }) {
         user_id: user.id,
         exam_type_id: selectedType.id,
         score: result.score,
-        total_questions: result.totalQuestions,
+        total_questions: result.total,
         percentage: result.percentage,
         passed,
         answers: finalAnswers,
@@ -245,7 +246,7 @@ export default function ExamTaker({ onBack }) {
         username: mtaNick || user.email,
         examType: selectedType.name,
         score: result.score,
-        total: result.totalQuestions,
+        total: result.total,
         percentage: result.percentage,
         passed,
         passingThreshold,
@@ -332,8 +333,17 @@ export default function ExamTaker({ onBack }) {
     if (!exam || showResults) return;
 
     const handleVisibilityChange = async () => {
+      // Jeśli już wykryto cheating, nie rób nic (zapobiega loopowi)
+      if (cheatingDetectedRef.current) return;
+
       if (document.hidden) {
+        // Ustaw flagę natychmiast
+        cheatingDetectedRef.current = true;
+
         console.warn('⚠️ CHEATING DETECTED: User switched tabs');
+
+        // Wyczyść localStorage (blokuje powrót do egzaminu)
+        clearExamState();
 
         // Zakończ egzamin ze skutkiem negatywnym (0 punktów)
         const failedAnswers = {};
@@ -359,7 +369,16 @@ export default function ExamTaker({ onBack }) {
     };
 
     const handleWindowBlur = async () => {
+      // Jeśli już wykryto cheating, nie rób nic (zapobiega loopowi)
+      if (cheatingDetectedRef.current) return;
+
+      // Ustaw flagę natychmiast
+      cheatingDetectedRef.current = true;
+
       console.warn('⚠️ CHEATING DETECTED: Window lost focus');
+
+      // Wyczyść localStorage (blokuje powrót do egzaminu)
+      clearExamState();
 
       // Zakończ egzamin ze skutkiem negatywnym
       const failedAnswers = {};
@@ -392,7 +411,7 @@ export default function ExamTaker({ onBack }) {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('blur', handleWindowBlur);
     };
-  }, [exam, showResults, selectedType, mtaNick, user, finishExam]);
+  }, [exam, showResults, selectedType, mtaNick, user, finishExam, clearExamState]);
 
   // Handle answer selection
   const handleAnswerSelect = (optionIndex) => {
