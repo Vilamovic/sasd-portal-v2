@@ -201,7 +201,7 @@ export default function ExamTaker({ onBack }) {
     const nextIndex = currentQuestionIndex + 1;
     setCurrentQuestionIndex(nextIndex);
     setTimeLeft(exam.questions[nextIndex]?.time_limit || 30);
-  }, [exam, currentQuestionIndex, answers, submittingRef]);
+  }, [exam, currentQuestionIndex, answers, submittingRef, finishExam]);
 
   // Timer countdown
   useEffect(() => {
@@ -295,7 +295,7 @@ export default function ExamTaker({ onBack }) {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('blur', handleWindowBlur);
     };
-  }, [exam, showResults, selectedType, mtaNick, user]);
+  }, [exam, showResults, selectedType, mtaNick, user, finishExam]);
 
   // Handle answer selection
   const handleAnswerSelect = (optionIndex) => {
@@ -322,7 +322,7 @@ export default function ExamTaker({ onBack }) {
   };
 
   // Zakończ egzamin i zapisz wyniki
-  const finishExam = async (finalAnswers) => {
+  const finishExam = useCallback(async (finalAnswers) => {
     if (submittingRef.current) return;
     submittingRef.current = true;
 
@@ -387,7 +387,7 @@ export default function ExamTaker({ onBack }) {
     } finally {
       submittingRef.current = false;
     }
-  };
+  }, [exam, selectedType, user, mtaNick, clearExamState]);
 
   // Ekran wyboru typu egzaminu
   if (!exam && !loading) {
