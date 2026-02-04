@@ -1,9 +1,17 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
-import { useTranslation } from '@/src/contexts/TranslationContext';
 import { Shield, BookOpen, GraduationCap, Users, Bell, Lock, Sparkles, ChevronRight } from 'lucide-react';
+
+// Generate particles ONCE outside component to prevent re-render crashes
+const particles = Array.from({ length: 20 }, (_, i) => ({
+  id: i,
+  left: Math.random() * 100,
+  top: Math.random() * 100,
+  duration: 15 + Math.random() * 20,
+  delay: Math.random() * 10,
+}));
 
 /**
  * Login - Premium Police Portal Landing Page
@@ -11,48 +19,25 @@ import { Shield, BookOpen, GraduationCap, Users, Bell, Lock, Sparkles, ChevronRi
  */
 export default function Login() {
   const { signInWithDiscord } = useAuth();
-  const { t } = useTranslation();
   const [isLogging, setIsLogging] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
-  const targetRef = useRef({ x: 50, y: 50 });
 
-  // Smooth mouse tracking with lerp (linear interpolation)
+  // Throttled mouse tracking (~30fps) - no requestAnimationFrame to prevent lag
   useEffect(() => {
-    let animationId;
-    const smoothFactor = 0.02;
-
     const handleMouseMove = (e) => {
-      targetRef.current = {
+      const now = Date.now();
+      if (now - (handleMouseMove.lastCall || 0) < 33) return; // ~30fps throttle
+      handleMouseMove.lastCall = now;
+
+      setMousePosition({
         x: (e.clientX / window.innerWidth) * 100,
         y: (e.clientY / window.innerHeight) * 100,
-      };
-    };
-
-    const animate = () => {
-      setMousePosition(prev => {
-        const dx = targetRef.current.x - prev.x;
-        const dy = targetRef.current.y - prev.y;
-
-        if (Math.abs(dx) < 0.01 && Math.abs(dy) < 0.01) {
-          animationId = requestAnimationFrame(animate);
-          return prev;
-        }
-
-        return {
-          x: prev.x + dx * smoothFactor,
-          y: prev.y + dy * smoothFactor,
-        };
       });
-      animationId = requestAnimationFrame(animate);
     };
+    handleMouseMove.lastCall = 0;
 
-    window.addEventListener('mousemove', handleMouseMove);
-    animationId = requestAnimationFrame(animate);
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      cancelAnimationFrame(animationId);
-    };
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
   const handleLogin = async () => {
@@ -100,9 +85,10 @@ export default function Login() {
     <div className="min-h-screen bg-[#020a06] text-white overflow-hidden relative">
       {/* Animated gradient background */}
       <div
-        className="absolute inset-0 opacity-30 transition-all duration-1000 ease-out pointer-events-none"
+        className="absolute inset-0 opacity-30 pointer-events-none"
         style={{
           background: `radial-gradient(circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(201, 162, 39, 0.15) 0%, rgba(34, 105, 63, 0.1) 30%, transparent 60%)`,
+          transition: 'background 0.5s ease-out',
         }}
       />
 
@@ -117,15 +103,15 @@ export default function Login() {
 
       {/* Floating particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
+        {particles.map((particle) => (
           <div
-            key={i}
+            key={particle.id}
             className="absolute w-1 h-1 bg-[#c9a227] rounded-full opacity-20"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animation: `particle-float ${15 + Math.random() * 20}s linear infinite`,
-              animationDelay: `${Math.random() * 10}s`,
+              left: `${particle.left}%`,
+              top: `${particle.top}%`,
+              animation: `particle-float ${particle.duration}s linear infinite`,
+              animationDelay: `${particle.delay}s`,
             }}
           />
         ))}
