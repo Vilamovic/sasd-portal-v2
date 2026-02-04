@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, memo } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { supabase } from '@/src/supabaseClient';
 import { createExamAccessToken, getAllExamTokens, deleteExamAccessToken, getAllExamTypes } from '@/src/utils/supabaseHelpers';
@@ -14,7 +14,7 @@ import Link from 'next/link';
  * - Delete tokens
  * STYLE: Skopiowany 1:1 z AdminPanel.jsx (Sheriff Dark Green theme)
  */
-const TokenManagement = memo(function TokenManagement({ onBack }) {
+export default function TokenManagement({ onBack }) {
   const { user, isAdmin } = useAuth();
   const [tokens, setTokens] = useState([]);
   const [examTypes, setExamTypes] = useState([]);
@@ -414,6 +414,5 @@ const TokenManagement = memo(function TokenManagement({ onBack }) {
       </div>
     </div>
   );
-});
+}
 
-export default TokenManagement;

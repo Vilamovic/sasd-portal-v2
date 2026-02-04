@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, memo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { supabase } from '@/src/supabaseClient';
 import { setForceLogoutForUser, deleteUser } from '@/src/utils/supabaseHelpers';
@@ -17,9 +17,8 @@ import Link from 'next/link';
  * - Sortowanie (username, nick, badge, role, created_at, last_seen)
  * - Przycisk "Wyrzuć": force logout → wait 2s → delete user
  * - Discord webhook przy usunięciu
- * OPTIMIZED: React.memo to prevent unnecessary re-renders
  */
-const AdminPanel = memo(function AdminPanel({ onBack }) {
+export default function AdminPanel({ onBack }) {
   const { user, role, isDev, isAdmin } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -465,6 +464,4 @@ const AdminPanel = memo(function AdminPanel({ onBack }) {
       </div>
     </div>
   );
-});
-
-export default AdminPanel;
+}

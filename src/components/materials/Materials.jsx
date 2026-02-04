@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, memo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import dynamic from 'next/dynamic';
 import 'react-quill-new/dist/quill.snow.css';
@@ -21,7 +21,7 @@ const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
  * - Auto-render images
  * OPTIMIZED: React.memo to prevent unnecessary re-renders
  */
-const Materials = memo(function Materials({ onBack }) {
+export default function Materials({ onBack }) {
   const { user, role, isAdmin } = useAuth();
   const [materials, setMaterials] = useState([]);
   const [selectedMaterial, setSelectedMaterial] = useState(null);
@@ -530,6 +530,5 @@ const Materials = memo(function Materials({ onBack }) {
       `}</style>
     </div>
   );
-});
+}
 
-export default Materials;

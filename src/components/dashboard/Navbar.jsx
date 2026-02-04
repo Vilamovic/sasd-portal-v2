@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, memo } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useTranslation } from '@/src/contexts/TranslationContext';
 import { LogOut, User, ChevronDown, Shield, Mail, Gamepad2 } from 'lucide-react';
@@ -10,7 +10,7 @@ import { LogOut, User, ChevronDown, Shield, Mail, Gamepad2 } from 'lucide-react'
  * With user profile dropdown and logout functionality
  * OPTIMIZED: React.memo to prevent unnecessary re-renders
  */
-const Navbar = memo(function Navbar() {
+export default function Navbar() {
   const { user, role, isDev, isAdmin, signOut, mtaNick } = useAuth();
   const { t } = useTranslation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -177,6 +177,5 @@ const Navbar = memo(function Navbar() {
       </div>
     </nav>
   );
-});
+}
 
-export default Navbar;
