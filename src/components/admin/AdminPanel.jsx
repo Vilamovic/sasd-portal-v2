@@ -18,6 +18,7 @@ import Link from 'next/link';
  * - Przycisk "Wyrzuć": force logout → wait 2s → delete user
  * - Discord webhook przy usunięciu
  * OPTIMIZED: React.memo to prevent unnecessary re-renders
+ * @param {{ onBack: () => void }} props
  */
 const AdminPanel = memo(function AdminPanel({ onBack }) {
   const { user, role, isDev, isAdmin } = useAuth();

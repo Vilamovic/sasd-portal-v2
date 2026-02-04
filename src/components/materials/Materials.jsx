@@ -20,6 +20,7 @@ const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
  * - Fullscreen edit mode
  * - Auto-render images
  * OPTIMIZED: React.memo to prevent unnecessary re-renders
+ * @param {{ onBack: () => void }} props
  */
 const Materials = memo(function Materials({ onBack }) {
   const { user, role, isAdmin } = useAuth();

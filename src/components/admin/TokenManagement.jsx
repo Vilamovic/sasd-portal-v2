@@ -13,6 +13,7 @@ import Link from 'next/link';
  * - View all tokens with status
  * - Delete tokens
  * STYLE: Skopiowany 1:1 z AdminPanel.jsx (Sheriff Dark Green theme)
+ * @param {{ onBack: () => void }} props
  */
 const TokenManagement = memo(function TokenManagement({ onBack }) {
   const { user, isAdmin } = useAuth();
