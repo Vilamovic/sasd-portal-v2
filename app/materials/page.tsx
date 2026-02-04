@@ -37,6 +37,7 @@ export default function MaterialsPage() {
   return (
     <>
       <Navbar />
+      {/* @ts-expect-error - Materials is JSX with memo, TypeScript can't infer props */}
       <Materials onBack={() => router.push('/dashboard')} />
     </>
   );

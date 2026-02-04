@@ -9,6 +9,11 @@ import { Users, Search, UserMinus, Shield, ShieldCheck, ShieldOff, ChevronDown, 
 import Link from 'next/link';
 
 /**
+ * @typedef {Object} AdminPanelProps
+ * @property {() => void} onBack
+ */
+
+/**
  * AdminPanel - Premium Sheriff-themed user management
  * - RPC update_user_role
  * - Force Logout + Delete User
@@ -18,7 +23,10 @@ import Link from 'next/link';
  * - Przycisk "Wyrzuć": force logout → wait 2s → delete user
  * - Discord webhook przy usunięciu
  * OPTIMIZED: React.memo to prevent unnecessary re-renders
- * @param {{ onBack: () => void }} props
+ */
+
+/**
+ * @type {React.NamedExoticComponent<AdminPanelProps>}
  */
 const AdminPanel = memo(function AdminPanel({ onBack }) {
   const { user, role, isDev, isAdmin } = useAuth();

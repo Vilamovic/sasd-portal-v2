@@ -37,6 +37,7 @@ export default function TokensPage() {
   return (
     <>
       <Navbar />
+      {/* @ts-expect-error - TokenManagement is JSX with memo, TypeScript can't infer props */}
       <TokenManagement onBack={() => router.push('/dashboard')} />
     </>
   );
