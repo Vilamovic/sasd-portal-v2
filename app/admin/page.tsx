@@ -37,7 +37,6 @@ export default function AdminPage() {
   return (
     <>
       <Navbar />
-      {/* @ts-expect-error - AdminPanel is JSX with memo, TypeScript can't infer props */}
       <AdminPanel onBack={() => router.push('/dashboard')} />
     </>
   );

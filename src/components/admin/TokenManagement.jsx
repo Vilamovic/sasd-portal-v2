@@ -8,12 +8,20 @@ import { Key, Search, Trash2, Shield, ChevronLeft, Sparkles, Copy, CheckCircle, 
 import Link from 'next/link';
 
 /**
+ * @typedef {Object} TokenManagementProps
+ * @property {() => void} onBack
+ */
+
+/**
  * TokenManagement - Premium Sheriff-themed token management
  * - Generate one-time access tokens for exams
  * - View all tokens with status
  * - Delete tokens
  * STYLE: Skopiowany 1:1 z AdminPanel.jsx (Sheriff Dark Green theme)
- * @param {{ onBack: () => void }} props
+ */
+
+/**
+ * @type {React.NamedExoticComponent<TokenManagementProps>}
  */
 const TokenManagement = memo(function TokenManagement({ onBack }) {
   const { user, isAdmin } = useAuth();

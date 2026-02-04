@@ -11,6 +11,11 @@ import { BookOpen, Edit3, Trash2, Plus, Save, X, Maximize2, Minimize2, ChevronDo
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 
 /**
+ * @typedef {Object} MaterialsProps
+ * @property {() => void} onBack
+ */
+
+/**
  * Materials - Premium Sheriff-themed WYSIWYG editor
  * For training materials with glassmorphism design
  * - React-Quill editor for admins
@@ -20,7 +25,10 @@ const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
  * - Fullscreen edit mode
  * - Auto-render images
  * OPTIMIZED: React.memo to prevent unnecessary re-renders
- * @param {{ onBack: () => void }} props
+ */
+
+/**
+ * @type {React.NamedExoticComponent<MaterialsProps>}
  */
 const Materials = memo(function Materials({ onBack }) {
   const { user, role, isAdmin } = useAuth();
