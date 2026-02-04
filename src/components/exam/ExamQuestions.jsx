@@ -4,10 +4,10 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { getAllExamTypes, getQuestionsByExamType, addExamQuestion, updateExamQuestion, deleteExamQuestion } from '@/src/utils/supabaseHelpers';
 import { notifyExamQuestionAction } from '@/src/utils/discord';
-import { Plus, Edit2, Trash2, Save, X, CheckSquare, Square, ChevronLeft } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, CheckSquare, Square, ChevronLeft, Sparkles, Settings, Clock } from 'lucide-react';
 
 /**
- * ExamQuestions - Zarządzanie pytaniami egzaminacyjnymi
+ * ExamQuestions - Premium Sheriff-themed question management
  * - Wybór typu → lista pytań → formularz add/edit/delete
  * - Pytanie, 4 odpowiedzi, multiple choice checkbox
  * - In-place editing (formularz pojawia się na miejscu klikniętego pytania)
@@ -241,7 +241,7 @@ export default function ExamQuestions({ onBack }) {
     return (
       <div
         ref={formRef}
-        className="bg-police-dark-700 backdrop-blur-sm rounded-xl border border-badge-gold-400 p-6 mb-4 shadow-xl"
+        className="glass-strong rounded-xl border border-[#c9a227] p-6 mb-4 shadow-xl"
       >
         <h3 className="text-xl font-bold text-white mb-4">
           {editingQuestionId ? 'Edytuj Pytanie' : 'Dodaj Nowe Pytanie'}
@@ -249,14 +249,14 @@ export default function ExamQuestions({ onBack }) {
 
         {/* Question */}
         <div className="mb-4">
-          <label className="block text-gray-300 text-sm font-semibold mb-2">
+          <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">
             Pytanie:
           </label>
           <textarea
             value={formData.question}
             onChange={(e) => setFormData({ ...formData, question: e.target.value })}
             rows={3}
-            className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-badge-gold-400 transition-colors"
+            className="w-full px-4 py-3 bg-[#051a0f]/80 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-[#c9a227] transition-colors"
             placeholder="Wpisz pytanie..."
           />
         </div>
@@ -275,8 +275,8 @@ export default function ExamQuestions({ onBack }) {
                   onClick={() => toggleCorrectAnswer(index)}
                   className={`flex-shrink-0 w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${
                     isCorrect
-                      ? 'bg-green-500 border-green-500'
-                      : 'bg-transparent border-gray-500'
+                      ? 'bg-[#22c55e] border-[#22c55e]'
+                      : 'bg-transparent border-[#8fb5a0]'
                   }`}
                 >
                   {isCorrect && (
@@ -291,7 +291,7 @@ export default function ExamQuestions({ onBack }) {
                   type="text"
                   value={formData[optKey]}
                   onChange={(e) => setFormData({ ...formData, [optKey]: e.target.value })}
-                  className="flex-grow px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-badge-gold-400 transition-colors"
+                  className="flex-grow px-4 py-3 bg-[#051a0f]/80 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-[#c9a227] transition-colors"
                   placeholder={`Odpowiedź ${num}...`}
                 />
               </div>
@@ -302,7 +302,7 @@ export default function ExamQuestions({ onBack }) {
         {/* Multiple Choice & Time Limit */}
         <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="flex items-center gap-2 text-gray-300 text-sm font-semibold cursor-pointer">
+            <label className="flex items-center gap-2 text-[#8fb5a0] text-sm font-semibold cursor-pointer">
               <input
                 type="checkbox"
                 checked={formData.isMultipleChoice}
@@ -321,7 +321,7 @@ export default function ExamQuestions({ onBack }) {
             </label>
           </div>
           <div>
-            <label className="block text-gray-300 text-sm font-semibold mb-2">
+            <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">
               Czas (sekundy):
             </label>
             <input
@@ -330,7 +330,7 @@ export default function ExamQuestions({ onBack }) {
               onChange={(e) => setFormData({ ...formData, timeLimit: parseInt(e.target.value) || 30 })}
               min={10}
               max={300}
-              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-badge-gold-400 transition-colors"
+              className="w-full px-4 py-3 bg-[#051a0f]/80 border border-[#1a4d32] rounded-xl text-white focus:outline-none focus:border-[#c9a227] transition-colors"
             />
           </div>
         </div>
@@ -339,14 +339,14 @@ export default function ExamQuestions({ onBack }) {
         <div className="flex items-center gap-3">
           <button
             onClick={handleSave}
-            className="flex items-center gap-2 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors"
+            className="flex items-center gap-2 px-6 py-3 bg-[#22c55e] text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg"
           >
             <Save className="w-4 h-4" />
             Zapisz
           </button>
           <button
             onClick={resetForm}
-            className="flex items-center gap-2 px-6 py-3 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
+            className="flex items-center gap-2 px-6 py-3 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
           >
             <X className="w-4 h-4" />
             Anuluj
@@ -359,16 +359,16 @@ export default function ExamQuestions({ onBack }) {
   // Access control
   if (!isAdmin) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-police-dark-900 via-police-dark-800 to-police-dark-700 flex items-center justify-center p-8">
+      <div className="min-h-screen bg-[#020a06] flex items-center justify-center p-8">
         <div className="text-center">
           <X className="w-16 h-16 text-red-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-2">Brak dostępu</h2>
-          <p className="text-gray-400 mb-6">
+          <p className="text-[#8fb5a0] mb-6">
             Tylko administratorzy mogą zarządzać pytaniami.
           </p>
           <button
             onClick={onBack}
-            className="px-6 py-3 bg-gradient-to-r from-badge-gold-600 to-badge-gold-400 text-police-dark-900 font-bold rounded-xl hover:from-badge-gold-400 hover:to-badge-gold-600 transition-all duration-300 hover:scale-[1.02] shadow-lg"
+            className="px-6 py-3 bg-gradient-to-r from-[#c9a227] to-[#e6b830] text-[#020a06] font-bold rounded-xl hover:opacity-90 transition-all duration-300 hover:scale-[1.02] shadow-lg"
           >
             Powrót
           </button>
@@ -380,14 +380,23 @@ export default function ExamQuestions({ onBack }) {
   // Type selection screen
   if (!selectedType) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-police-dark-900 via-police-dark-800 to-police-dark-700 p-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-8">
-            <h2 className="text-4xl font-bold text-white mb-2">
-              ZARZĄDZANIE PYTANIAMI
+      <div className="min-h-screen bg-[#020a06] relative overflow-hidden">
+        <div className="fixed inset-0 pointer-events-none">
+          <div className="absolute top-1/4 -left-32 w-96 h-96 bg-[#c9a227]/10 rounded-full blur-[120px] animate-pulse-glow" />
+          <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-[#22693f]/20 rounded-full blur-[120px] animate-pulse-glow" style={{ animationDelay: '1.5s' }} />
+        </div>
+
+        <div className="relative z-10 max-w-4xl mx-auto px-6 py-12">
+          <div className="mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#c9a227]/10 border border-[#c9a227]/20 text-[#c9a227] text-sm font-medium mb-6">
+              <Settings className="w-4 h-4" />
+              <span>Zarządzanie pytaniami</span>
+            </div>
+            <h2 className="text-4xl font-bold text-white mb-4">
+              Zarządzanie <span className="text-gold-gradient">Pytaniami</span>
             </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-badge-gold-600 to-badge-gold-400 rounded-full"></div>
-            <p className="text-gray-400 mt-4">
+            <div className="w-24 h-1 bg-gradient-to-r from-[#c9a227] to-[#e6b830] rounded-full mb-4" />
+            <p className="text-[#8fb5a0]">
               Wybierz typ egzaminu aby zarządzać pytaniami
             </p>
           </div>
@@ -397,16 +406,21 @@ export default function ExamQuestions({ onBack }) {
               <button
                 key={type.id}
                 onClick={() => setSelectedType(type)}
-                className="p-6 bg-police-dark-700 backdrop-blur-sm border border-white/10 rounded-xl text-left hover:bg-white/10 hover:border-badge-gold-600/50 transition-all duration-300 shadow-xl"
+                className="group p-6 glass-strong border border-[#1a4d32]/50 rounded-xl text-left hover:border-[#c9a227]/50 transition-all duration-300 shadow-xl hover:scale-[1.01]"
               >
-                <h3 className="text-lg font-bold text-white">{type.name}</h3>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#c9a227] to-[#e6b830] rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <Settings className="w-6 h-6 text-[#020a06]" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white group-hover:text-[#c9a227] transition-colors">{type.name}</h3>
+                </div>
               </button>
             ))}
           </div>
 
           <button
             onClick={onBack}
-            className="mt-8 flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-gray-400 hover:text-white transition-all duration-200"
+            className="mt-8 flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200"
           >
             <ChevronLeft className="w-5 h-5" />
             <span className="text-sm font-medium">Powrót</span>
@@ -418,17 +432,26 @@ export default function ExamQuestions({ onBack }) {
 
   // Questions list
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-police-dark-900 via-police-dark-800 to-police-dark-700 p-8">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen bg-[#020a06] relative overflow-hidden">
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-[#c9a227]/10 rounded-full blur-[120px] animate-pulse-glow" />
+        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-[#22693f]/20 rounded-full blur-[120px] animate-pulse-glow" style={{ animationDelay: '1.5s' }} />
+      </div>
+
+      <div className="relative z-10 max-w-5xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#c9a227]/10 border border-[#c9a227]/20 text-[#c9a227] text-sm font-medium mb-4">
+                <Sparkles className="w-4 h-4" />
+                <span>{selectedType.name}</span>
+              </div>
               <h2 className="text-4xl font-bold text-white mb-2">
-                {selectedType.name}
+                Pytania <span className="text-gold-gradient">Egzaminacyjne</span>
               </h2>
-              <div className="w-24 h-1 bg-gradient-to-r from-badge-gold-600 to-badge-gold-400 rounded-full"></div>
-              <p className="text-gray-400 mt-4">
+              <div className="w-24 h-1 bg-gradient-to-r from-[#c9a227] to-[#e6b830] rounded-full mb-2" />
+              <p className="text-[#8fb5a0]">
                 {questions.length} pytań
               </p>
             </div>
@@ -437,7 +460,7 @@ export default function ExamQuestions({ onBack }) {
                 resetForm();
                 setShowAddForm(true);
               }}
-              className="flex items-center gap-2 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors shadow-lg"
+              className="flex items-center gap-2 px-6 py-3 bg-[#22c55e] text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg"
             >
               <Plus className="w-5 h-5" />
               Dodaj Pytanie
@@ -452,12 +475,12 @@ export default function ExamQuestions({ onBack }) {
         <div className="space-y-4">
           {loading ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-badge-gold-400 mx-auto mb-4"></div>
-              <p className="text-gray-400">Ładowanie pytań...</p>
+              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#c9a227] mx-auto mb-4" />
+              <p className="text-[#8fb5a0]">Ładowanie pytań...</p>
             </div>
           ) : questions.length === 0 ? (
-            <div className="text-center py-12 bg-police-dark-700 backdrop-blur-sm rounded-xl border border-white/10 shadow-xl">
-              <p className="text-gray-400">Brak pytań dla tego typu egzaminu.</p>
+            <div className="text-center py-12 glass-strong rounded-xl border border-[#1a4d32] shadow-xl">
+              <p className="text-[#8fb5a0]">Brak pytań dla tego typu egzaminu.</p>
             </div>
           ) : (
             questions.map((question, index) => (
@@ -465,48 +488,57 @@ export default function ExamQuestions({ onBack }) {
                 {editingQuestionId === question.id && renderForm()}
 
                 {editingQuestionId !== question.id && (
-                  <div className="bg-police-dark-700 backdrop-blur-sm rounded-xl border border-white/10 p-6 hover:bg-white/10 transition-colors shadow-xl">
-                    <div className="flex items-start justify-between">
+                  <div className="glass-strong rounded-xl border border-[#1a4d32]/50 p-6 hover:border-[#c9a227]/30 transition-colors shadow-xl">
+                    <div className="flex items-start justify-between gap-4">
                       <div className="flex-grow">
-                        <h3 className="text-white font-semibold mb-2">
-                          {index + 1}. {question.question}
-                        </h3>
-                        <div className="space-y-1">
+                        <div className="flex items-start gap-3 mb-3">
+                          <div className="flex-shrink-0 w-8 h-8 bg-[#c9a227]/20 rounded-lg flex items-center justify-center border border-[#c9a227]/30">
+                            <span className="text-[#c9a227] font-bold text-sm">{index + 1}</span>
+                          </div>
+                          <h3 className="text-white font-semibold leading-relaxed">{question.question}</h3>
+                        </div>
+
+                        <div className="ml-11 space-y-1 mb-3">
                           {question.options.map((option, oIndex) => {
                             const isCorrect = question.correct_answers.includes(oIndex);
                             return (
                               <div
                                 key={oIndex}
-                                className={`text-sm ${isCorrect ? 'text-green-400' : 'text-gray-400'}`}
+                                className={`text-sm flex items-center gap-2 ${isCorrect ? 'text-[#22c55e]' : 'text-[#8fb5a0]'}`}
                               >
-                                {isCorrect ? '✓' : '•'} {option}
+                                <span className={`w-5 h-5 rounded flex items-center justify-center text-xs ${isCorrect ? 'bg-[#22c55e]/20' : 'bg-[#0a2818]'}`}>
+                                  {isCorrect ? '✓' : '•'}
+                                </span>
+                                {option}
                               </div>
                             );
                           })}
                         </div>
-                        <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
+
+                        <div className="ml-11 flex items-center gap-2">
                           {question.is_multiple_choice && (
-                            <span className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded">
+                            <span className="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded-lg border border-purple-500/30">
                               Wielokrotny wybór
                             </span>
                           )}
-                          <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded">
+                          <span className="px-2 py-1 bg-[#14b8a6]/20 text-[#14b8a6] text-xs rounded-lg border border-[#14b8a6]/30 flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
                             {question.time_limit}s
                           </span>
                         </div>
                       </div>
 
-                      <div className="flex-shrink-0 ml-4 flex items-center gap-2">
+                      <div className="flex-shrink-0 flex items-center gap-2">
                         <button
                           onClick={() => startEdit(question)}
-                          className="p-2 bg-blue-500/20 text-blue-400 rounded hover:bg-blue-500/30 transition-colors"
+                          className="p-2.5 bg-[#14b8a6]/20 text-[#14b8a6] rounded-lg hover:bg-[#14b8a6]/30 transition-colors border border-[#14b8a6]/30"
                           title="Edytuj"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(question.id, question.question)}
-                          className="p-2 bg-red-500/20 text-red-400 rounded hover:bg-red-500/30 transition-colors"
+                          className="p-2.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors border border-red-500/30"
                           title="Usuń"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -523,7 +555,7 @@ export default function ExamQuestions({ onBack }) {
         {/* Back Button */}
         <button
           onClick={() => setSelectedType(null)}
-          className="mt-8 flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-gray-400 hover:text-white transition-all duration-200"
+          className="mt-8 flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200"
         >
           <ChevronLeft className="w-5 h-5" />
           <span className="text-sm font-medium">Powrót do wyboru typu</span>

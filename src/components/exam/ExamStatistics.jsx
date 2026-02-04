@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { getAllExamResultsNonArchived, archiveExamResult, getAllExamTypes } from '@/src/utils/supabaseHelpers';
-import { Search, Archive, Eye, X, CheckCircle, XCircle, ChevronLeft } from 'lucide-react';
+import { Search, Archive, Eye, X, CheckCircle, XCircle, ChevronLeft, Sparkles, BarChart3, Filter } from 'lucide-react';
 
 /**
- * ExamStatistics - Wyświetlanie wyników egzaminów
+ * ExamStatistics - Premium Sheriff-themed exam results viewer
  * - Wyszukiwanie po nicku/ID
  * - Filtrowanie po typie egzaminu
  * - Archiwizacja
@@ -91,21 +91,21 @@ export default function ExamStatistics({ onBack }) {
 
     return (
       <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div className="bg-police-dark-700 rounded-xl border border-white/10 max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+        <div className="glass-strong rounded-2xl border border-[#1a4d32] max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
           {/* Header */}
-          <div className="p-6 border-b border-white/10">
+          <div className="p-6 border-b border-[#1a4d32] bg-gradient-to-r from-[#0a2818]/50 to-transparent">
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="text-2xl font-bold text-white mb-1">
                   {users?.mta_nick || users?.email || 'Brak nicku'}
                 </h3>
-                <p className="text-gray-400 text-sm">
+                <p className="text-[#8fb5a0] text-sm">
                   {users?.badge || 'Brak badge'}
                 </p>
               </div>
               <button
                 onClick={() => setShowDetails(false)}
-                className="text-gray-400 hover:text-white transition-colors"
+                className="text-[#8fb5a0] hover:text-white transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -139,7 +139,7 @@ export default function ExamStatistics({ onBack }) {
                 return (
                   <div
                     key={qIndex}
-                    className="bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 p-4"
+                    className="glass rounded-xl border border-[#1a4d32]/50 p-5"
                   >
                     {/* Question Header */}
                     <div className="flex items-start justify-between mb-4">
@@ -148,11 +148,11 @@ export default function ExamStatistics({ onBack }) {
                       </h4>
                       <div className="flex-shrink-0 ml-4">
                         {isTimeout ? (
-                          <span className="text-gray-400 text-sm">
+                          <span className="text-[#8fb5a0] text-sm">
                             Nie wybrano odpowiedzi (czas minął)
                           </span>
                         ) : isCorrect ? (
-                          <CheckCircle className="w-6 h-6 text-green-400" />
+                          <CheckCircle className="w-6 h-6 text-[#22c55e]" />
                         ) : (
                           <XCircle className="w-6 h-6 text-red-400" />
                         )}
@@ -167,28 +167,28 @@ export default function ExamStatistics({ onBack }) {
                           : userAnswer === oIndex;
                         const isCorrectOption = correctAnswers.includes(oIndex);
 
-                        let bgColor = 'bg-white/5';
-                        let textColor = 'text-gray-400';
+                        let bgColor = 'bg-[#051a0f]/50';
+                        let textColor = 'text-[#8fb5a0]';
                         let label = '';
 
                         if (isTimeout) {
                           // Timeout - pokaż tylko poprawne
                           if (isCorrectOption) {
-                            bgColor = 'bg-blue-500/20';
-                            textColor = 'text-blue-400';
+                            bgColor = 'bg-[#14b8a6]/20';
+                            textColor = 'text-[#14b8a6]';
                             label = '(Poprawna)';
                           }
                         } else {
                           // Zielone: wybrano poprawnie
                           if (isUserAnswer && isCorrectOption) {
-                            bgColor = 'bg-green-500/20';
-                            textColor = 'text-green-400';
+                            bgColor = 'bg-[#22c55e]/20';
+                            textColor = 'text-[#22c55e]';
                             label = '(Poprawnie wybrano)';
                           }
                           // Niebieskie: poprawna nie wybrana
                           else if (!isUserAnswer && isCorrectOption) {
-                            bgColor = 'bg-blue-500/20';
-                            textColor = 'text-blue-400';
+                            bgColor = 'bg-[#14b8a6]/20';
+                            textColor = 'text-[#14b8a6]';
                             label = '(Poprawna - nie wybrano)';
                           }
                           // Czerwone: wybrano błędnie
@@ -202,7 +202,7 @@ export default function ExamStatistics({ onBack }) {
                         return (
                           <div
                             key={oIndex}
-                            className={`p-3 rounded ${bgColor} ${textColor} text-sm`}
+                            className={`p-3 rounded-lg border border-[#1a4d32]/30 ${bgColor} ${textColor} text-sm`}
                           >
                             {option} {label && <span className="font-semibold">{label}</span>}
                           </div>
@@ -216,10 +216,10 @@ export default function ExamStatistics({ onBack }) {
           </div>
 
           {/* Footer */}
-          <div className="p-6 border-t border-white/10">
+          <div className="p-6 border-t border-[#1a4d32]">
             <button
               onClick={() => setShowDetails(false)}
-              className="w-full px-6 py-3 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
+              className="w-full px-6 py-3 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
             >
               Zamknij
             </button>
@@ -232,16 +232,16 @@ export default function ExamStatistics({ onBack }) {
   // Access control - user nie ma dostępu
   if (role === 'user') {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-police-dark-900 via-police-dark-800 to-police-dark-700 flex items-center justify-center p-8">
+      <div className="min-h-screen bg-[#020a06] flex items-center justify-center p-8">
         <div className="text-center">
           <XCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-2">Brak dostępu</h2>
-          <p className="text-gray-400 mb-6">
+          <p className="text-[#8fb5a0] mb-6">
             Tylko administratorzy mogą przeglądać statystyki egzaminów.
           </p>
           <button
             onClick={onBack}
-            className="px-6 py-3 bg-gradient-to-r from-badge-gold-600 to-badge-gold-400 text-police-dark-900 font-bold rounded-xl hover:from-badge-gold-400 hover:to-badge-gold-600 transition-all duration-300 hover:scale-[1.02] shadow-lg"
+            className="px-6 py-3 bg-gradient-to-r from-[#c9a227] to-[#e6b830] text-[#020a06] font-bold rounded-xl hover:opacity-90 transition-all duration-300 hover:scale-[1.02] shadow-lg"
           >
             Powrót
           </button>
@@ -252,77 +252,92 @@ export default function ExamStatistics({ onBack }) {
 
   if (loading) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-police-dark-900 via-police-dark-800 to-police-dark-700 flex items-center justify-center">
+      <div className="min-h-screen bg-[#020a06] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-badge-gold-400 mx-auto mb-4"></div>
-          <p className="text-gray-400">Ładowanie statystyk...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#c9a227] mx-auto mb-4"></div>
+          <p className="text-[#8fb5a0]">Ładowanie statystyk...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-police-dark-900 via-police-dark-800 to-police-dark-700 p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[#020a06] relative overflow-hidden">
+      {/* Background effects */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-[#c9a227]/10 rounded-full blur-[120px] animate-pulse-glow" />
+        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-[#22693f]/20 rounded-full blur-[120px] animate-pulse-glow" style={{ animationDelay: '1.5s' }} />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h2 className="text-4xl font-bold text-white mb-2">
-            STATYSTYKI EGZAMINÓW
-          </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-badge-gold-600 to-badge-gold-400 rounded-full"></div>
-          <p className="text-gray-400 mt-4">
-            Przeglądaj wyniki egzaminów i statystyki
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#c9a227]/10 border border-[#c9a227]/20 text-[#c9a227] text-sm font-medium mb-6">
+            <BarChart3 className="w-4 h-4" />
+            <span>Statystyki</span>
+          </div>
+
+          <div className="flex items-center gap-3 mb-4">
+            <BarChart3 className="w-8 h-8 text-[#c9a227]" />
+            <h2 className="text-4xl font-bold text-white">
+              Statystyki <span className="text-gold-gradient">Egzaminów</span>
+            </h2>
+          </div>
+          <div className="w-24 h-1 bg-gradient-to-r from-[#c9a227] to-[#e6b830] rounded-full mb-4" />
+          <p className="text-[#8fb5a0]">
+            Przeglądaj wyniki egzaminów ({examResults.length})
           </p>
         </div>
 
         {/* Filters */}
         <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8fb5a0]" />
             <input
               type="text"
               placeholder="Szukaj po nicku lub ID..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-badge-gold-400 transition-colors"
+              className="w-full pl-12 pr-4 py-3 bg-[#051a0f]/80 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-[#c9a227] transition-colors"
             />
           </div>
 
-          {/* Type Filter */}
-          <select
-            value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value)}
-            className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-white focus:outline-none focus:border-badge-gold-400 transition-colors"
-          >
-            <option value="all" className="bg-police-dark-700">Wszystkie typy</option>
-            {examTypes.map((type) => (
-              <option key={type.id} value={type.id} className="bg-police-dark-700">
-                {type.name}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8fb5a0]" />
+            <select
+              value={selectedType}
+              onChange={(e) => setSelectedType(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 bg-[#051a0f]/80 border border-[#1a4d32] rounded-xl text-white focus:outline-none focus:border-[#c9a227] transition-colors appearance-none cursor-pointer"
+            >
+              <option value="all">Wszystkie typy</option>
+              {examTypes.map((type) => (
+                <option key={type.id} value={type.id}>
+                  {type.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Results Table */}
-        <div className="bg-police-dark-700 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden shadow-xl">
+        <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-white/5 border-b border-white/10">
+              <thead className="bg-[#051a0f]/50 border-b border-[#1a4d32]/50">
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Nick</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Typ Egzaminu</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Wynik</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Procent</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Status</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Data</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Akcje</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227]">Nick</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227]">Typ Egzaminu</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227]">Wynik</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227]">Procent</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227]">Status</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227]">Data</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227]">Akcje</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredResults.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-8 text-center text-gray-400">
+                    <td colSpan={7} className="px-6 py-8 text-center text-[#8fb5a0]">
                       Brak wyników do wyświetlenia
                     </td>
                   </tr>
@@ -330,11 +345,11 @@ export default function ExamStatistics({ onBack }) {
                   filteredResults.map((result) => {
                     const examType = examTypes.find(t => t.id === result.exam_type_id);
                     return (
-                      <tr key={result.id} className="border-b border-white/10 hover:bg-white/5 transition-colors">
+                      <tr key={result.id} className="border-b border-[#1a4d32]/50 hover:bg-[#051a0f]/30 transition-colors">
                         <td className="px-6 py-4 text-white">
                           {result.users?.mta_nick || result.users?.email || 'Brak nicku'}
                         </td>
-                        <td className="px-6 py-4 text-gray-300">
+                        <td className="px-6 py-4 text-[#8fb5a0]">
                           {examType?.name || 'N/A'}
                         </td>
                         <td className="px-6 py-4 text-white">
@@ -342,23 +357,23 @@ export default function ExamStatistics({ onBack }) {
                         </td>
                         <td className="px-6 py-4">
                           <span className={`font-semibold ${
-                            result.passed ? 'text-green-400' : 'text-red-400'
+                            result.passed ? 'text-[#22c55e]' : 'text-red-400'
                           }`}>
                             {result.percentage.toFixed(1)}%
                           </span>
                         </td>
                         <td className="px-6 py-4">
                           {result.passed ? (
-                            <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-semibold rounded">
+                            <span className="px-2 py-1 bg-[#22c55e]/20 text-[#22c55e] text-xs font-semibold rounded-full border border-[#22c55e]/30">
                               Zdany
                             </span>
                           ) : (
-                            <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs font-semibold rounded">
+                            <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs font-semibold rounded-full border border-red-500/30">
                               Niezdany
                             </span>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-gray-400 text-sm">
+                        <td className="px-6 py-4 text-[#8fb5a0] text-sm">
                           {new Date(result.created_at).toLocaleString('pl-PL')}
                         </td>
                         <td className="px-6 py-4">
@@ -368,14 +383,14 @@ export default function ExamStatistics({ onBack }) {
                                 setSelectedResult(result);
                                 setShowDetails(true);
                               }}
-                              className="p-2 bg-blue-500/20 text-blue-400 rounded hover:bg-blue-500/30 transition-colors"
+                              className="p-2.5 bg-[#14b8a6]/20 text-[#14b8a6] rounded-lg hover:bg-[#14b8a6]/30 transition-colors border border-[#14b8a6]/30"
                               title="Szczegóły"
                             >
                               <Eye className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => handleArchive(result.id)}
-                              className="p-2 bg-yellow-500/20 text-yellow-400 rounded hover:bg-yellow-500/30 transition-colors"
+                              onClick={() => handleArchive(result.exam_id)}
+                              className="p-2.5 bg-[#c9a227]/20 text-[#c9a227] rounded-lg hover:bg-[#c9a227]/30 transition-colors border border-[#c9a227]/30"
                               title="Archiwizuj"
                             >
                               <Archive className="w-4 h-4" />
@@ -394,7 +409,7 @@ export default function ExamStatistics({ onBack }) {
         {/* Back Button */}
         <button
           onClick={onBack}
-          className="mt-8 flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-gray-400 hover:text-white transition-all duration-200"
+          className="mt-8 flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200"
         >
           <ChevronLeft className="w-5 h-5" />
           <span className="text-sm font-medium">Powrót</span>
