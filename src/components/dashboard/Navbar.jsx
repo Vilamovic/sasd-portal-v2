@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useTranslation } from '@/src/contexts/TranslationContext';
 import { LogOut, User, ChevronDown, Shield, Mail, Gamepad2 } from 'lucide-react';
@@ -13,6 +14,7 @@ import { LogOut, User, ChevronDown, Shield, Mail, Gamepad2 } from 'lucide-react'
 export default function Navbar() {
   const { user, role, isDev, isAdmin, signOut, mtaNick } = useAuth();
   const { t } = useTranslation();
+  const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -28,14 +30,21 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = async () => {
-    await signOut();
-    window.location.reload();
+    try {
+      await signOut();
+      router.push('/');
+      router.refresh();
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Fallback to reload if router fails
+      window.location.href = '/';
+    }
   };
 
   const displayName = mtaNick || user?.email?.split('@')[0] || 'Użytkownik';
 
   return (
-    <nav className="h-16 bg-gradient-to-r from-[#020a06] via-[#051a0f] to-[#0a2818] border-b border-[#1a4d32]/50 shadow-2xl relative">
+    <nav className="h-16 bg-gradient-to-r from-[#020a06] via-[#051a0f] to-[#0a2818] border-b border-[#1a4d32]/50 shadow-2xl relative z-50">
       {/* Subtle animated gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-[#c9a227]/5 via-transparent to-[#c9a227]/5 opacity-50" />
 
@@ -67,7 +76,7 @@ export default function Navbar() {
         </div>
 
         {/* User Menu Section */}
-        <div className="relative" ref={dropdownRef}>
+        <div className="relative z-[60]" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
             className="flex items-center gap-3 px-4 py-2 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/50 transition-all duration-300 group"
@@ -97,7 +106,7 @@ export default function Navbar() {
 
           {/* Dropdown Menu */}
           {dropdownOpen && (
-            <div className="absolute right-0 top-full mt-2 w-80 bg-[#051a0f] rounded-2xl shadow-2xl border border-[#1a4d32] z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="absolute right-0 top-full mt-2 w-80 bg-[#051a0f] rounded-2xl shadow-2xl border border-[#1a4d32] z-[9999] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
               {/* Decorative top border */}
               <div className="h-1 bg-gradient-to-r from-transparent via-[#c9a227] to-transparent" />
 
