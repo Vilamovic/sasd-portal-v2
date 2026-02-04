@@ -501,28 +501,48 @@ export async function getAllExamTokens() {
   try {
     const { data, error } = await supabase
       .from('exam_access_tokens')
-      .select(`
-        *,
-        users(username, mta_nick, email),
-        exam_types(name),
-        created_by_user:users!exam_access_tokens_created_by_fkey(username, mta_nick)
-      `)
+      .select('*')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
 
-    // Flatten nested objects for easier access in UI
-    const flattenedData = data?.map(token => ({
-      ...token,
-      user_username: token.users?.username || null,
-      user_mta_nick: token.users?.mta_nick || null,
-      user_email: token.users?.email || null,
-      exam_type_name: token.exam_types?.name || null,
-      created_by_username: token.created_by_user?.username || null,
-      created_by_mta_nick: token.created_by_user?.mta_nick || null,
-    }));
+    // Load related data separately to avoid JOIN failures
+    const enrichedData = await Promise.all(
+      (data || []).map(async (token) => {
+        // Get user data
+        const { data: userData } = await supabase
+          .from('users')
+          .select('username, mta_nick, email')
+          .eq('id', token.user_id)
+          .single();
 
-    return { data: flattenedData, error: null };
+        // Get exam type
+        const { data: examType } = await supabase
+          .from('exam_types')
+          .select('name')
+          .eq('id', token.exam_type_id)
+          .single();
+
+        // Get created by user
+        const { data: createdByUser } = await supabase
+          .from('users')
+          .select('username, mta_nick')
+          .eq('id', token.created_by)
+          .single();
+
+        return {
+          ...token,
+          user_username: userData?.username || null,
+          user_mta_nick: userData?.mta_nick || null,
+          user_email: userData?.email || null,
+          exam_type_name: examType?.name || 'Unknown',
+          created_by_username: createdByUser?.username || null,
+          created_by_mta_nick: createdByUser?.mta_nick || null,
+        };
+      })
+    );
+
+    return { data: enrichedData, error: null };
   } catch (error) {
     console.error('getAllExamTokens error:', error);
     return { data: null, error };
