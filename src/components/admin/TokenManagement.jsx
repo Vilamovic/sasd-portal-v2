@@ -28,9 +28,16 @@ export default function TokenManagement({ onBack }) {
   const [selectedExamTypeId, setSelectedExamTypeId] = useState('');
   const [copiedToken, setCopiedToken] = useState(null);
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  // Define functions BEFORE useEffect to avoid initialization order issues
+  const loadTokens = async () => {
+    try {
+      const { data, error } = await getAllExamTokens();
+      if (error) throw error;
+      setTokens(data || []);
+    } catch (error) {
+      console.error('Error loading tokens:', error);
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -58,15 +65,10 @@ export default function TokenManagement({ onBack }) {
     }
   };
 
-  const loadTokens = async () => {
-    try {
-      const { data, error } = await getAllExamTokens();
-      if (error) throw error;
-      setTokens(data || []);
-    } catch (error) {
-      console.error('Error loading tokens:', error);
-    }
-  };
+  useEffect(() => {
+    loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleGenerateToken = async () => {
     if (!selectedUserId || !selectedExamTypeId) {
