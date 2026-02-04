@@ -32,6 +32,17 @@ export function generateExam(questionPool, questionCount = 10) {
 
   // Dla każdego pytania: przemieszaj odpowiedzi
   const examQuestions = selectedQuestions.map((question) => {
+    // Walidacja struktury pytania
+    if (!question.options || !Array.isArray(question.options)) {
+      console.error('❌ Invalid question structure:', question);
+      throw new Error(`Question ${question.id} has invalid or missing options array`);
+    }
+
+    if (!question.correct_answers || !Array.isArray(question.correct_answers)) {
+      console.error('❌ Invalid question structure:', question);
+      throw new Error(`Question ${question.id} has invalid or missing correct_answers array`);
+    }
+
     // Stwórz tablicę opcji z indeksami (żeby zachować śledzenie poprawnych odpowiedzi)
     const optionsWithIndices = question.options.map((option, index) => ({
       text: option,
@@ -68,7 +79,7 @@ export function generateExam(questionPool, questionCount = 10) {
     };
   });
 
-  return examQuestions;
+  return { questions: examQuestions };
 }
 
 /**

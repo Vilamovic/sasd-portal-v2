@@ -132,6 +132,10 @@ export default function ExamTaker({ onBack }) {
         return;
       }
 
+      // Debug: sprawdź strukturę pytań
+      console.log('📝 Questions from database:', questions);
+      console.log('📝 First question structure:', questions[0]);
+
       // Wygeneruj egzamin (losowanie i shuffle)
       const generatedExam = generateExam(questions, 10);
 
