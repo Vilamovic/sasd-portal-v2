@@ -16,7 +16,7 @@ import { Target, Clock, CheckCircle, XCircle, ArrowRight, ChevronLeft, Trophy, A
  * - Brak przycisku "Poprzednie"
  */
 export default function ExamTaker({ onBack }) {
-  const { user, mtaNick } = useAuth();
+  const { user, mtaNick, isAdmin } = useAuth();
   const [examTypes, setExamTypes] = useState([]);
   const [selectedType, setSelectedType] = useState(null);
   const [exam, setExam] = useState(null);
@@ -112,15 +112,52 @@ export default function ExamTaker({ onBack }) {
     }
   }, [user]);
 
-  // Rozpocznij egzamin - najpierw pokaż modal z tokenem
-  const startExam = (examTypeId) => {
+  // Helper: Załaduj pytania i rozpocznij egzamin
+  const loadAndStartExam = async (examTypeId) => {
+    try {
+      setLoading(true);
+
+      const { data: questions, error: questionsError } = await getQuestionsByExamType(examTypeId);
+
+      if (questionsError) throw questionsError;
+      if (!questions || questions.length === 0) {
+        alert('Brak pytań dla tego typu egzaminu.');
+        setLoading(false);
+        return;
+      }
+
+      // Wygeneruj egzamin (losowanie i shuffle)
+      const generatedExam = generateExam(questions, 10);
+
+      setSelectedType(examTypes.find(t => t.id === examTypeId));
+      setExam(generatedExam);
+      setCurrentQuestionIndex(0);
+      setAnswers({});
+      setTimeLeft(generatedExam.questions[0]?.time_limit || 30);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error loading exam:', error);
+      alert('Błąd podczas ładowania egzaminu.');
+      setLoading(false);
+    }
+  };
+
+  // Rozpocznij egzamin - Admin bypass, User wymaga tokenu
+  const startExam = async (examTypeId) => {
+    // Admin/Dev bypass - bezpośredni start bez tokenu
+    if (isAdmin) {
+      await loadAndStartExam(examTypeId);
+      return;
+    }
+
+    // User - wymaga tokenu
     setPendingExamTypeId(examTypeId);
     setTokenInput('');
     setTokenError('');
     setShowTokenModal(true);
   };
 
-  // Weryfikuj token i rozpocznij egzamin
+  // Weryfikuj token i rozpocznij egzamin (tylko dla users)
   const verifyTokenAndStart = async () => {
     if (!tokenInput.trim()) {
       setTokenError('Proszę wprowadzić token dostępu.');
@@ -144,34 +181,84 @@ export default function ExamTaker({ onBack }) {
         return;
       }
 
-      // Token zweryfikowany - rozpocznij egzamin
+      // Token zweryfikowany - zamknij modal i rozpocznij egzamin
       setShowTokenModal(false);
-      setLoading(true);
-
-      const { data: questions, error: questionsError } = await getQuestionsByExamType(pendingExamTypeId);
-
-      if (questionsError) throw questionsError;
-      if (!questions || questions.length === 0) {
-        alert('Brak pytań dla tego typu egzaminu.');
-        setLoading(false);
-        return;
-      }
-
-      // Wygeneruj egzamin (losowanie i shuffle)
-      const generatedExam = generateExam(questions, 10);
-
-      setSelectedType(examTypes.find(t => t.id === pendingExamTypeId));
-      setExam(generatedExam);
-      setCurrentQuestionIndex(0);
-      setAnswers({});
-      setTimeLeft(generatedExam.questions[0]?.time_limit || 30);
-      setLoading(false);
+      await loadAndStartExam(pendingExamTypeId);
+      setVerifyingToken(false);
     } catch (error) {
       console.error('Error verifying token or starting exam:', error);
       setTokenError('Błąd podczas weryfikacji tokenu. Spróbuj ponownie.');
       setVerifyingToken(false);
     }
   };
+
+  // Zakończ egzamin i zapisz wyniki
+  const finishExam = useCallback(async (finalAnswers) => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+
+    try {
+      // Oblicz wyniki (parametry: answers, questions)
+      const result = calculateExamResult(finalAnswers, exam.questions);
+
+      // Określ próg zdawalności (50% dla trainee/pościgowy/swat, 75% dla reszty)
+      const examTypeName = selectedType.name.toLowerCase();
+      const passingThreshold =
+        examTypeName.includes('trainee') ||
+        examTypeName.includes('pościgowy') ||
+        examTypeName.includes('swat')
+          ? 50
+          : 75;
+
+      const passed = result.percentage >= passingThreshold;
+
+      // Przygotuj dane do zapisu
+      const examData = {
+        user_id: user.id,
+        exam_type_id: selectedType.id,
+        score: result.score,
+        total_questions: result.totalQuestions,
+        percentage: result.percentage,
+        passed,
+        answers: finalAnswers,
+        questions: exam.questions,
+        is_archived: false,
+      };
+
+      // Zapisz do bazy
+      const { data: savedExam, error } = await saveExamResult(examData);
+
+      if (error) throw error;
+
+      // Discord notification
+      notifyExamSubmission({
+        username: mtaNick || user.email,
+        examType: selectedType.name,
+        score: result.score,
+        total: result.totalQuestions,
+        percentage: result.percentage,
+        passed,
+        passingThreshold,
+        examId: savedExam.exam_id,
+      });
+
+      // Wyczyść zapisany stan egzaminu
+      clearExamState();
+
+      // Pokaż wyniki
+      setResults({
+        ...result,
+        passed,
+        passingThreshold,
+      });
+      setShowResults(true);
+    } catch (error) {
+      console.error('Error saving exam:', error);
+      alert('Błąd podczas zapisywania wyników egzaminu.');
+    } finally {
+      submittingRef.current = false;
+    }
+  }, [exam, selectedType, user, mtaNick, clearExamState]);
 
   // Następne pytanie lub zakończ egzamin
   const handleNextQuestion = useCallback(async (isTimeout = false) => {
@@ -320,74 +407,6 @@ export default function ExamTaker({ onBack }) {
       });
     }
   };
-
-  // Zakończ egzamin i zapisz wyniki
-  const finishExam = useCallback(async (finalAnswers) => {
-    if (submittingRef.current) return;
-    submittingRef.current = true;
-
-    try {
-      // Oblicz wyniki (parametry: answers, questions)
-      const result = calculateExamResult(finalAnswers, exam.questions);
-
-      // Określ próg zdawalności (50% dla trainee/pościgowy/swat, 75% dla reszty)
-      const examTypeName = selectedType.name.toLowerCase();
-      const passingThreshold =
-        examTypeName.includes('trainee') ||
-        examTypeName.includes('pościgowy') ||
-        examTypeName.includes('swat')
-          ? 50
-          : 75;
-
-      const passed = result.percentage >= passingThreshold;
-
-      // Przygotuj dane do zapisu
-      const examData = {
-        user_id: user.id,
-        exam_type_id: selectedType.id,
-        score: result.score,
-        total_questions: result.totalQuestions,
-        percentage: result.percentage,
-        passed,
-        answers: finalAnswers,
-        questions: exam.questions,
-        is_archived: false,
-      };
-
-      // Zapisz do bazy
-      const { data: savedExam, error } = await saveExamResult(examData);
-
-      if (error) throw error;
-
-      // Discord notification
-      notifyExamSubmission({
-        username: mtaNick || user.email,
-        examType: selectedType.name,
-        score: result.score,
-        total: result.totalQuestions,
-        percentage: result.percentage,
-        passed,
-        passingThreshold,
-        examId: savedExam.exam_id,
-      });
-
-      // Wyczyść zapisany stan egzaminu
-      clearExamState();
-
-      // Pokaż wyniki
-      setResults({
-        ...result,
-        passed,
-        passingThreshold,
-      });
-      setShowResults(true);
-    } catch (error) {
-      console.error('Error saving exam:', error);
-      alert('Błąd podczas zapisywania wyników egzaminu.');
-    } finally {
-      submittingRef.current = false;
-    }
-  }, [exam, selectedType, user, mtaNick, clearExamState]);
 
   // Ekran wyboru typu egzaminu
   if (!exam && !loading) {

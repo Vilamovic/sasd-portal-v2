@@ -505,7 +505,19 @@ export async function getAllExamTokens() {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return { data, error: null };
+
+    // Flatten nested objects for easier access in UI
+    const flattenedData = data?.map(token => ({
+      ...token,
+      user_username: token.users?.username || null,
+      user_mta_nick: token.users?.mta_nick || null,
+      user_email: token.users?.email || null,
+      exam_type_name: token.exam_types?.name || null,
+      created_by_username: token.created_by_user?.username || null,
+      created_by_mta_nick: token.created_by_user?.mta_nick || null,
+    }));
+
+    return { data: flattenedData, error: null };
   } catch (error) {
     console.error('getAllExamTokens error:', error);
     return { data: null, error };
