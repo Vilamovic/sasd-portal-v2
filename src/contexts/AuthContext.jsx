@@ -68,6 +68,48 @@ export function AuthProvider({ children }) {
   }, []);
 
   /**
+   * Wylogowanie - MOVED BEFORE startRolePolling to fix initialization order
+   */
+  const signOut = useCallback(async () => {
+    try {
+      // Wyczyść interval pollingu
+      if (roleCheckIntervalRef.current) {
+        clearInterval(roleCheckIntervalRef.current);
+      }
+
+      // Wyczyść realtime subscription
+      if (realtimeCleanupRef.current) {
+        realtimeCleanupRef.current();
+      }
+
+      // Wyczyść localStorage
+      if (typeof window !== 'undefined') {
+        const userId = userRef.current?.id;
+        if (userId) {
+          localStorage.removeItem(`login_timestamp_${userId}`);
+        }
+        localStorage.clear();
+      }
+
+      // Wyloguj z Supabase
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
+      // Wyczyść state
+      setUser(null);
+      setSession(null);
+      setRole(null);
+      setMtaNick(null);
+      userRef.current = null;
+      roleRef.current = null;
+      loginTimestampRef.current = null;
+      hasNotifiedLogin.current = false;
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  }, []);
+
+  /**
    * Realtime subscription + fallback polling (co 30s) dla roli i force logout
    * OPTYMALIZACJA: 720 zapytań/h → 120 zapytań/h (83% redukcja)
    */
@@ -138,48 +180,6 @@ export function AuthProvider({ children }) {
     // Fallback polling co 30s (zamiast 5s)
     roleCheckIntervalRef.current = setInterval(checkUserData, 30000);
   }, [determineRole, signOut]);
-
-  /**
-   * Wylogowanie
-   */
-  const signOut = useCallback(async () => {
-    try {
-      // Wyczyść interval pollingu
-      if (roleCheckIntervalRef.current) {
-        clearInterval(roleCheckIntervalRef.current);
-      }
-
-      // Wyczyść realtime subscription
-      if (realtimeCleanupRef.current) {
-        realtimeCleanupRef.current();
-      }
-
-      // Wyczyść localStorage
-      if (typeof window !== 'undefined') {
-        const userId = userRef.current?.id;
-        if (userId) {
-          localStorage.removeItem(`login_timestamp_${userId}`);
-        }
-        localStorage.clear();
-      }
-
-      // Wyloguj z Supabase
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-
-      // Wyczyść state
-      setUser(null);
-      setSession(null);
-      setRole(null);
-      setMtaNick(null);
-      userRef.current = null;
-      roleRef.current = null;
-      loginTimestampRef.current = null;
-      hasNotifiedLogin.current = false;
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  }, []);
 
   /**
    * Inicjalizacja sesji i listenera auth state
