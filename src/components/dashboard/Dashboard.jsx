@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useTranslation } from '@/src/contexts/TranslationContext';
 import { BookOpen, FileText, Users, ArrowRight, Clock, CheckCircle, Shield, Sparkles } from 'lucide-react';
@@ -7,9 +8,9 @@ import Navbar from './Navbar';
 
 /**
  * Dashboard - Premium Sheriff-themed main dashboard
- * Role-based navigation tiles with glassmorphism design
+ * Role-based navigation tiles with glassmorphism design (Next.js routing)
  */
-export default function Dashboard({ onNavigate }) {
+export default function Dashboard() {
   const { user, role, isDev, isAdmin } = useAuth();
   const { t } = useTranslation();
 
@@ -116,9 +117,9 @@ export default function Dashboard({ onNavigate }) {
                 />
 
                 {/* Main Card */}
-                <button
-                  onClick={() => onNavigate && onNavigate(tile.id)}
-                  className={`relative w-full glass-strong rounded-2xl p-6 border border-[#1a4d32]/50 ${tile.borderHover} transition-all duration-300 hover:scale-[1.02] shadow-xl hover:shadow-2xl text-left overflow-hidden`}
+                <Link
+                  href={`/${tile.id}`}
+                  className={`block relative w-full glass-strong rounded-2xl p-6 border border-[#1a4d32]/50 ${tile.borderHover} transition-all duration-300 hover:scale-[1.02] shadow-xl hover:shadow-2xl text-left overflow-hidden`}
                 >
                   {/* Corner accents */}
                   <div className="absolute top-0 left-6 w-16 h-[2px] bg-gradient-to-r from-[#c9a227]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -157,7 +158,7 @@ export default function Dashboard({ onNavigate }) {
                     <span>Przejdź</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
-                </button>
+                </Link>
               </div>
             );
           })}

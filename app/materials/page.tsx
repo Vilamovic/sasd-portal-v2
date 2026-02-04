@@ -3,16 +3,17 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
-import Login from '@/src/components/auth/Login';
+import Navbar from '@/src/components/dashboard/Navbar';
+import Materials from '@/src/components/materials/Materials';
 
-export default function Home() {
+export default function MaterialsPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  // Redirect to dashboard if logged in
+  // Redirect to login if not authenticated
   useEffect(() => {
-    if (user && !loading) {
-      router.push('/dashboard');
+    if (!user && !loading) {
+      router.push('/');
     }
   }, [user, loading, router]);
 
@@ -28,18 +29,15 @@ export default function Home() {
     );
   }
 
-  // Not logged in - show Login screen
+  // Not authenticated
   if (!user) {
-    return <Login />;
+    return null;
   }
 
-  // Redirecting to dashboard
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#020a06]">
-      <div className="text-center">
-        <div className="w-16 h-16 border-4 border-[#c9a227]/30 border-t-[#c9a227] rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-[#8fb5a0] text-lg">Przekierowywanie...</p>
-      </div>
-    </div>
+    <>
+      <Navbar />
+      <Materials onBack={() => router.push('/dashboard')} />
+    </>
   );
 }
