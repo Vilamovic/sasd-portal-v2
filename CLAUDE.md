@@ -13,7 +13,7 @@
 This file contains:
 - ✅ AI Operational Rules
 - ✅ Project Architecture
-- ✅ UI Design System (Police Dark Theme)
+- ✅ UI Design System (Sheriff Dark Green Theme - NIETYKALNY)
 - ✅ Completed Features & Tasks
 - ✅ Technical Patterns
 - ✅ Deployment & Troubleshooting
@@ -51,6 +51,29 @@ This file contains:
 ✅ Use Glob, Grep, Read to explore codebase.
 ❌ **DO NOT ask** for locations of existing logic.
 
+### ⚠️ 6. **SHERIFF THEME - ABSOLUTNIE NIETYKALNY** ⚠️
+🚨 **KATEGORYCZNY ZAKAZ ZMIANY UI BEZ WYRAŹNEJ ZGODY** 🚨
+
+**ZABRANIA SIĘ:**
+- ❌ Zmiany kolorów Sheriff Dark Green theme (#020a06, #c9a227, #051a0f, #1a4d32, #22693f, #e6b830)
+- ❌ Modyfikacji glassmorphism (.glass, .glass-strong)
+- ❌ Usuwania background effects (gradient orbs, animations)
+- ❌ Zmiany stylów komponentów bez WYRAŹNEJ zgody użytkownika
+- ❌ "Ulepszania" UI na własną rękę
+- ❌ Zmiany animacji (pulse-glow, gradient-shift, particle-float)
+
+**NOWE KOMPONENTY:**
+✅ Gdy tworzysz NOWE podstrony/komponenty:
+- **MUSISZ** użyć TEGO SAMEGO Sheriff theme co istniejące komponenty
+- **SKOPIUJ** style z [ExamDashboard.jsx](src/components/exam/ExamDashboard.jsx) lub [Dashboard.jsx](src/components/dashboard/Dashboard.jsx)
+- **ZACHOWAJ** glassmorphism, gradient orbs, Sheriff colors, animations
+- **PYTAJ** jeśli nie jesteś pewien jak stylować nowy komponent
+
+**Migration History (Feb 2026):**
+- Kompletna migracja z Police Blue → Sheriff Dark Green z Tailwind v4
+- 100% logiki biznesowej zachowane
+- Commit: `fd618b3` - feat: Migrate entire UI to Sheriff Dark Green theme
+
 ---
 
 ## 📚 Full Documentation
@@ -61,4 +84,4 @@ For complete information, always refer to:
 
 ---
 
-**Last Updated**: 2026-02-03
+**Last Updated**: 2026-02-04 (Sheriff Theme Migration Complete)

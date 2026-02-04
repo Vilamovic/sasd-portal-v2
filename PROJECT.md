@@ -4,7 +4,7 @@
 1. [Project Overview](#project-overview)
 2. [AI Operational Rules](#ai-operational-rules)
 3. [Project Architecture](#project-architecture)
-4. [UI Design System (Police Dark Theme)](#ui-design-system-police-dark-theme)
+4. [UI Design System (Sheriff Dark Green Theme) 🚨 NIETYKALNY](#ui-design-system-sheriff-dark-green-theme--nietykalny-)
 5. [Completed Features & Tasks](#completed-features--tasks)
 6. [Technical Patterns](#technical-patterns)
 7. [Deployment & Troubleshooting](#deployment--troubleshooting)
@@ -62,13 +62,23 @@
    - **TYLKO UI**: kolory, layout, classes, ikony
    - Przykład: W ExamTaker zachowaj `generateExam()`, `calculateExamResult()`, `saveExamResult()`
 
-6. **DRY & UTILS**
+6. **🚨 SHERIFF THEME - ABSOLUTNIE NIETYKALNY 🚨**
+   - **KATEGORYCZNY ZAKAZ ZMIANY UI BEZ WYRAŹNEJ ZGODY**
+   - ❌ NIE ZMIENIAJ kolorów Sheriff (#020a06, #c9a227, #051a0f, #1a4d32, #22693f, #e6b830)
+   - ❌ NIE MODYFIKUJ glassmorphism (.glass, .glass-strong)
+   - ❌ NIE USUWAJ background effects (gradient orbs, animations)
+   - ❌ NIE "ULEPSZAJ" UI na własną rękę
+   - ✅ DLA NOWYCH KOMPONENTÓW: Kopiuj style z ExamDashboard.jsx lub Dashboard.jsx
+   - ✅ ZACHOWAJ wszystkie elementy Sheriff theme
+   - Migration: Commit `fd618b3` (Feb 2026) - Police Blue → Sheriff Dark Green z Tailwind v4
+
+7. **DRY & UTILS**
    - Używaj istniejących narzędzi (np. `generateExam` z examUtils.js, supabaseHelpers.js)
 
-7. **STALE CLOSURES**
+8. **STALE CLOSURES**
    - W AuthContext i listenerach używaj `useRef` (np. `userRef`, `hasNotifiedLogin`)
 
-8. **DEPLOYMENT AWARENESS**
+9. **DEPLOYMENT AWARENESS**
    - Po zakończeniu prac przypomnij o `git commit` i `push` na GitHub
    - Vercel automatycznie deployuje po pushu
 
@@ -272,144 +282,208 @@
 
 ---
 
-## 🎨 UI Design System (Police Dark Theme)
+## 🎨 UI Design System (Sheriff Dark Green Theme) 🚨 NIETYKALNY 🚨
 
-### Color Palette
+### ⚠️ KATEGORYCZNY ZAKAZ ZMIAN BEZ ZGODY ⚠️
 
-#### Główne Kolory
+**ZABRANIA SIĘ ABSOLUTNIE:**
+- ❌ Zmiana kolorów Sheriff Dark Green theme
+- ❌ Modyfikacja glassmorphism effects
+- ❌ Usuwanie background effects (gradient orbs)
+- ❌ Zmiana animacji (pulse-glow, gradient-shift, particle-float)
+- ❌ "Ulepszanie" UI na własną rękę
+- ❌ Modyfikacja stylów bez WYRAŹNEJ zgody użytkownika
+
+**DLA NOWYCH KOMPONENTÓW:**
+✅ **MUSISZ** użyć TEGO SAMEGO Sheriff theme
+✅ **SKOPIUJ** style z [ExamDashboard.jsx](src/components/exam/ExamDashboard.jsx) lub [Dashboard.jsx](src/components/dashboard/Dashboard.jsx)
+✅ **ZACHOWAJ** wszystkie elementy: glassmorphism, gradient orbs, Sheriff colors, animations
+✅ **PYTAJ** użytkownika jeśli nie jesteś pewien
+
+**Migration History (Feb 2026):**
+- Commit `fd618b3` - Kompletna migracja Police Blue → Sheriff Dark Green z Tailwind v4
+- 100% business logic preserved
+- 13 komponentów zmigrowanych + globals.css + Tailwind v4 setup
+
+### Color Palette (Sheriff Dark Green)
+
+#### Główne Kolory Sheriff
 ```css
-/* Tła */
-police-dark-900: #0a0f1a  /* Najciemniejsze */
-police-dark-800: #151c28
-police-dark-700: #1a2332  /* Karty */
-police-dark-600: #1e2836  /* Dropdown */
+/* Tła (Dark Green Sheriff Theme) */
+#020a06  /* Najciemniejsze - main background */
+#051a0f  /* Ciemne - cards/inputs opacity 80% */
+#0a2818  /* Średnie - hover states */
+#1a4d32  /* Borders - border colors */
+#22693f  /* Lighter green - accents */
 
-/* Złote Akcenty (Odznaka Sherifa) */
-badge-gold-600: #d4af37
-badge-gold-500: #e5c158
-badge-gold-400: #fbbf24
+/* Złote Akcenty Sheriff (Primary Gold) */
+#c9a227  /* Gold primary - main accent */
+#e6b830  /* Gold light - gradients to */
 
-/* Niebieski Policyjny */
-police-blue-700: #1e40af
-police-blue-600: #2563eb
-police-blue-500: #3b82f6
-police-blue-400: #60a5fa
+/* Teksty */
+#8fb5a0  /* Sage green - secondary text */
+white    /* Primary text */
 
 /* Statusy */
-Success: #10b981 (zielony)
-Warning: #f59e0b (amber)
-Danger: #ef4444 (czerwony)
-Info: #3b82f6 (niebieski)
+#22c55e  /* Success - emerald green (passed exams, correct) */
+#14b8a6  /* Info - teal (details, view buttons) */
+#ef4444  /* Danger - red (failed, delete) */
+purple-500  /* Admin role badge */
+red-500     /* Dev role badge */
+
+/* Glassmorphism */
+.glass        /* backdrop-blur-sm bg-[#051a0f]/30 */
+.glass-strong /* backdrop-blur-md bg-[#051a0f]/60 border border-[#1a4d32]/50 */
+
+/* Custom Gradients */
+.text-gold-gradient /* bg-gradient-to-r from-[#c9a227] via-[#e6b830] to-[#c9a227] bg-clip-text */
 ```
 
-### Standard Component Patterns
+### Standard Component Patterns (Sheriff Theme)
 
-#### 1. Page Background
+#### 1. Page Background with Gradient Orbs
 ```jsx
-<div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-police-dark-900 via-police-dark-800 to-police-dark-700 p-8">
-```
+<div className="min-h-screen bg-[#020a06] relative overflow-hidden">
+  {/* Background effects - WYMAGANE dla Sheriff theme */}
+  <div className="fixed inset-0 pointer-events-none">
+    <div className="absolute top-1/4 -left-32 w-96 h-96 bg-[#c9a227]/10 rounded-full blur-[120px] animate-pulse-glow" />
+    <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-[#22693f]/20 rounded-full blur-[120px] animate-pulse-glow" style={{ animationDelay: '1.5s' }} />
+  </div>
 
-#### 2. Page Header
-```jsx
-<div className="mb-8">
-  <h2 className="text-4xl font-bold text-white mb-2">
-    TYTUŁ SEKCJI
-  </h2>
-  <div className="w-24 h-1 bg-gradient-to-r from-badge-gold-600 to-badge-gold-400 rounded-full"></div>
-  <p className="text-gray-400 mt-4">
-    Opis sekcji
-  </p>
-</div>
-```
-
-#### 3. Card with Glow Effect
-```jsx
-<div className="group relative">
-  {/* Glow effect */}
-  <div className="absolute inset-0 bg-gradient-to-br from-badge-gold-600 to-badge-gold-400 rounded-2xl opacity-0 group-hover:opacity-20 blur-xl transition-all duration-500"></div>
-
-  {/* Main card */}
-  <div className="relative bg-police-dark-700 rounded-2xl p-6 border border-white/10 hover:border-badge-gold-600/50 transition-all duration-300 hover:scale-[1.02] shadow-xl hover:shadow-2xl">
-    {/* Icon */}
-    <div className="w-14 h-14 bg-gradient-to-br from-badge-gold-600 to-badge-gold-400 rounded-2xl flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300">
-      <Icon className="w-7 h-7 text-white" strokeWidth={2.5} />
-    </div>
-
-    {/* Content + Stats + Button */}
+  <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
+    {/* Content */}
   </div>
 </div>
 ```
 
-#### 4. Buttons
+#### 2. Page Header (Sheriff Style)
+```jsx
+<div className="mb-8">
+  {/* Badge */}
+  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#c9a227]/10 border border-[#c9a227]/20 text-[#c9a227] text-sm font-medium mb-6">
+    <Sparkles className="w-4 h-4" />
+    <span>Kategoria</span>
+  </div>
+
+  {/* Title */}
+  <div className="flex items-center gap-3 mb-4">
+    <Icon className="w-8 h-8 text-[#c9a227]" />
+    <h2 className="text-4xl font-bold text-white">
+      Tytuł <span className="text-gold-gradient">Sekcji</span>
+    </h2>
+  </div>
+
+  {/* Underline */}
+  <div className="w-24 h-1 bg-gradient-to-r from-[#c9a227] to-[#e6b830] rounded-full mb-4" />
+
+  {/* Description */}
+  <p className="text-[#8fb5a0]">Opis sekcji</p>
+</div>
+```
+
+#### 3. Card with Glassmorphism (Sheriff Style)
+```jsx
+<div className="group relative">
+  {/* Glow effect */}
+  <div className="absolute -inset-2 rounded-3xl opacity-0 group-hover:opacity-100 blur-xl transition-all duration-500" style={{ background: 'rgba(201, 162, 39, 0.3)' }} />
+
+  {/* Main card - GLASSMORPHISM */}
+  <button className="relative w-full glass-strong rounded-2xl p-6 border border-[#1a4d32]/50 hover:border-[#c9a227]/50 transition-all duration-300 hover:scale-[1.02] shadow-xl">
+    {/* Corner accents */}
+    <div className="absolute top-0 left-6 w-16 h-[2px] bg-gradient-to-r from-[#c9a227]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+    {/* Icon */}
+    <div className="w-14 h-14 bg-gradient-to-br from-[#c9a227] to-[#e6b830] rounded-2xl flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-all duration-300">
+      <Icon className="w-7 h-7 text-[#020a06]" strokeWidth={2} />
+    </div>
+
+    {/* Content + Stats + Button */}
+  </button>
+</div>
+```
+
+#### 4. Buttons (Sheriff Style)
 
 **Gold Primary Button** (CTA, główne akcje):
 ```jsx
-<button className="px-6 py-3 bg-gradient-to-r from-badge-gold-600 to-badge-gold-400 hover:from-badge-gold-400 hover:to-badge-gold-600 text-police-dark-900 font-bold rounded-xl transition-all duration-300 hover:scale-[1.02] shadow-lg">
+<button className="px-6 py-3 bg-gradient-to-r from-[#c9a227] to-[#e6b830] hover:opacity-90 text-[#020a06] font-bold rounded-xl transition-all duration-300 hover:scale-[1.02] shadow-lg">
   Tekst Przycisku
 </button>
 ```
 
-**Blue Secondary Button** (edycja, akcje secondary):
+**Green Success Button** (zapisz, dodaj, next):
 ```jsx
-<button className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg hover:opacity-90 transition-all duration-300 shadow-lg">
-  Edytuj
+<button className="px-6 py-3 bg-[#22c55e] text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg">
+  Zapisz
 </button>
 ```
 
-**Green Success Button** (zapisz, dodaj):
+**Teal Info Button** (szczegóły, view):
 ```jsx
-<button className="px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors">
-  Zapisz
+<button className="p-2.5 bg-[#14b8a6]/20 text-[#14b8a6] rounded-lg hover:bg-[#14b8a6]/30 transition-colors border border-[#14b8a6]/30">
+  <Eye className="w-4 h-4" />
 </button>
 ```
 
 **Red Danger Button** (usuń):
 ```jsx
-<button className="px-6 py-3 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 rounded-lg transition-colors">
-  Usuń
+<button className="p-2.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors border border-red-500/30">
+  <Trash2 className="w-4 h-4" />
 </button>
 ```
 
-**Back Button Pattern**:
+**Back Button Pattern** (Sheriff style):
 ```jsx
-<button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-gray-400 hover:text-white transition-all duration-200">
+<button className="flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200">
   <ChevronLeft className="w-5 h-5" />
   <span className="text-sm font-medium">Powrót</span>
 </button>
 ```
 
-#### 5. Inputs
+#### 5. Inputs (Sheriff Style)
 
 **Text Input / Search**:
 ```jsx
 <input
   type="text"
-  className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-badge-gold-400 transition-colors"
+  className="w-full px-4 py-3 bg-[#051a0f]/80 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-[#c9a227] transition-colors"
   placeholder="Placeholder..."
 />
 ```
 
+**Search with Icon**:
+```jsx
+<div className="relative">
+  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8fb5a0]" />
+  <input
+    type="text"
+    className="w-full pl-12 pr-4 py-3 bg-[#051a0f]/80 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-[#c9a227] transition-colors"
+    placeholder="Szukaj..."
+  />
+</div>
+```
+
 **Select Dropdown**:
 ```jsx
-<select className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-white focus:outline-none focus:border-badge-gold-400 transition-colors">
-  <option value="all" className="bg-police-dark-700">Wszystkie typy</option>
+<select className="w-full px-4 py-3 bg-[#051a0f]/80 border border-[#1a4d32] rounded-xl text-white focus:outline-none focus:border-[#c9a227] transition-colors">
+  <option value="all">Wszystkie typy</option>
 </select>
 ```
 
-#### 6. Tables
+#### 6. Tables (Sheriff Style)
 
-**Table Container**:
+**Table Container with Glassmorphism**:
 ```jsx
-<div className="bg-police-dark-700 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden shadow-xl">
+<div className="glass-strong rounded-2xl border border-[#1a4d32]/50 overflow-hidden shadow-xl">
   <div className="overflow-x-auto">
     <table className="w-full">
-      <thead className="bg-white/5 border-b border-white/10">
+      <thead className="bg-[#051a0f]/50 border-b border-[#1a4d32]/50">
         <tr>
-          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Header</th>
+          <th className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227]">Header</th>
         </tr>
       </thead>
       <tbody>
-        <tr className="border-b border-white/10 hover:bg-white/5 transition-colors">
+        <tr className="border-b border-[#1a4d32]/50 hover:bg-[#051a0f]/30 transition-colors">
           <td className="px-6 py-4 text-white">Data</td>
         </tr>
       </tbody>
@@ -418,19 +492,24 @@ Info: #3b82f6 (niebieski)
 </div>
 ```
 
-#### 7. Loading Spinner
+#### 7. Loading Spinner (Sheriff Style)
 ```jsx
-<div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-badge-gold-400 mx-auto mb-4"></div>
-<p className="text-gray-400">Ładowanie...</p>
+<div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#c9a227] mx-auto mb-4" />
+<p className="text-[#8fb5a0]">Ładowanie...</p>
 ```
 
-#### 8. Modal
+#### 8. Modal (Sheriff Style with Glassmorphism)
 ```jsx
 <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-  <div className="bg-police-dark-700 rounded-xl border border-white/10 max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+  <div className="glass-strong rounded-2xl border border-[#1a4d32] max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
     {/* Header */}
-    <div className="p-6 border-b border-white/10">
-      {/* Content */}
+    <div className="p-6 border-b border-[#1a4d32] bg-gradient-to-r from-[#0a2818]/50 to-transparent">
+      <div className="flex items-start justify-between">
+        <h3 className="text-2xl font-bold text-white">Tytuł</h3>
+        <button onClick={onClose} className="text-[#8fb5a0] hover:text-white transition-colors">
+          <X className="w-6 h-6" />
+        </button>
+      </div>
     </div>
 
     {/* Body */}
@@ -439,8 +518,10 @@ Info: #3b82f6 (niebieski)
     </div>
 
     {/* Footer */}
-    <div className="p-6 border-t border-white/10">
-      {/* Buttons */}
+    <div className="p-6 border-t border-[#1a4d32]">
+      <button className="w-full px-6 py-3 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]">
+        Zamknij
+      </button>
     </div>
   </div>
 </div>
