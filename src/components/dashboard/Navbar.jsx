@@ -34,7 +34,7 @@ export default function Navbar() {
   const displayName = mtaNick || user?.email?.split('@')[0] || 'Użytkownik';
 
   return (
-    <nav className="h-16 bg-gradient-to-r from-[#020a06] via-[#051a0f] to-[#0a2818] border-b border-[#1a4d32]/50 shadow-2xl relative overflow-hidden">
+    <nav className="h-16 bg-gradient-to-r from-[#020a06] via-[#051a0f] to-[#0a2818] border-b border-[#1a4d32]/50 shadow-2xl relative">
       {/* Subtle animated gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-[#c9a227]/5 via-transparent to-[#c9a227]/5 opacity-50" />
 

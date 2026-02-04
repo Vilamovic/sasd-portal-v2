@@ -227,7 +227,7 @@ export default function AdminPanel({ onBack }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#020a06] relative overflow-hidden">
+    <div className="min-h-screen bg-[#020a06] relative">
       {/* Background effects */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-1/4 -left-32 w-96 h-96 bg-[#c9a227]/10 rounded-full blur-[120px] animate-pulse-glow" />
