@@ -64,7 +64,9 @@ export default function Materials({ onBack }) {
       const { data, error } = await getAllMaterials();
       if (error) throw error;
 
-      const materialsData = data || [];
+      const materialsData = (data || []).sort((a, b) =>
+        a.title.localeCompare(b.title, 'pl', { sensitivity: 'base' })
+      );
       setMaterials(materialsData);
 
       // Cache in localStorage
@@ -289,9 +291,16 @@ export default function Materials({ onBack }) {
               Materiały <span className="text-gold-gradient">Szkoleniowe</span>
             </h2>
             <div className="w-24 h-1 bg-gradient-to-r from-[#c9a227] to-[#e6b830] rounded-full mb-3" />
-            <p className="text-[#8fb5a0]">
-              Przeglądaj i edytuj materiały szkoleniowe
-            </p>
+            <div className="flex items-center gap-3">
+              <p className="text-[#8fb5a0]">
+                Przeglądaj i edytuj materiały szkoleniowe
+              </p>
+              {materials.length > 0 && (
+                <span className="px-3 py-1 bg-[#c9a227]/10 border border-[#c9a227]/30 rounded-full text-[#c9a227] text-xs font-bold">
+                  {materials.length} {materials.length === 1 ? 'materiał' : materials.length < 5 ? 'materiały' : 'materiałów'}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Admin Controls */}
@@ -357,6 +366,21 @@ export default function Materials({ onBack }) {
           </div>
         )}
 
+        {/* Edit Mode Info */}
+        {isAdmin && editMode && (
+          <div className="mb-6 glass-strong rounded-xl border border-red-500/30 p-4 shadow-lg bg-red-500/5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center flex-shrink-0">
+                <Trash2 className="w-5 h-5 text-red-400" />
+              </div>
+              <div>
+                <p className="text-white font-semibold text-sm">Tryb usuwania aktywny</p>
+                <p className="text-[#8fb5a0] text-xs">Kliknij ikonę kosza na kafelku aby usunąć materiał</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Materials Grid */}
         {materials.length === 0 ? (
           <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 p-12 text-center shadow-xl">
@@ -393,10 +417,10 @@ export default function Materials({ onBack }) {
                         e.stopPropagation();
                         handleDelete(material.id, material.title);
                       }}
-                      className="absolute top-4 right-4 z-10 p-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 rounded-xl transition-all duration-200 group/delete"
+                      className="absolute top-4 right-4 z-10 p-2.5 bg-red-500/20 hover:bg-red-500 border border-red-500/50 hover:border-red-500 rounded-xl transition-all duration-200 group/delete animate-fadeIn shadow-lg shadow-red-500/20"
                       title="Usuń materiał"
                     >
-                      <Trash2 className="w-4 h-4 text-red-400 group-hover/delete:scale-110 transition-transform" />
+                      <Trash2 className="w-4 h-4 text-red-400 group-hover/delete:text-white group-hover/delete:scale-110 transition-all" />
                     </button>
                   )}
 
@@ -513,7 +537,8 @@ export default function Materials({ onBack }) {
                   {/* Content */}
                   <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
                     <div
-                      className="prose prose-invert max-w-none prose-headings:text-white prose-p:text-[#8fb5a0] prose-a:text-[#c9a227] prose-strong:text-white prose-li:text-[#8fb5a0]"
+                      className="prose prose-invert max-w-none prose-headings:text-white prose-p:text-[#8fb5a0] prose-a:text-[#c9a227] prose-strong:text-white prose-li:text-[#8fb5a0] break-words"
+                      style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}
                       dangerouslySetInnerHTML={{ __html: selectedMaterial.content }}
                     />
                   </div>
