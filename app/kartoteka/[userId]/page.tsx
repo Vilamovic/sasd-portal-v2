@@ -12,7 +12,10 @@ import {
   updateUserDivision,
   updateUserPermissions,
   updateIsCommander,
+  addPenalty,
+  addUserNote,
 } from '@/src/utils/supabaseHelpers';
+import { notifyPenalty } from '@/src/utils/discord';
 import {
   ChevronLeft,
   User,
@@ -59,10 +62,17 @@ export default function UserProfilePage() {
   const [tempPermissions, setTempPermissions] = useState<string[]>([]);
   const [tempIsCommander, setTempIsCommander] = useState(false);
 
-  // Modal states (będą użyte w następnym kroku)
+  // Modal states
   const [showAddPlusMinusModal, setShowAddPlusMinusModal] = useState(false);
   const [showAddPenaltyModal, setShowAddPenaltyModal] = useState(false);
   const [showAddNoteModal, setShowAddNoteModal] = useState(false);
+
+  // Modal form states
+  const [plusMinusType, setPlusMinusType] = useState<'plus' | 'minus'>('plus');
+  const [plusMinusReason, setPlusMinusReason] = useState('');
+  const [penaltyReason, setPenaltyReason] = useState('');
+  const [penaltyDuration, setPenaltyDuration] = useState('24');
+  const [noteText, setNoteText] = useState('');
 
   const submittingRef = useRef(false);
 
@@ -302,6 +312,122 @@ export default function UserProfilePage() {
         return 'bg-[#10b981] text-white';
       default:
         return 'bg-gray-600 text-white';
+    }
+  };
+
+  // Modal handlers
+  const handleAddPlusMinus = async () => {
+    if (submittingRef.current || !currentUser) return;
+    if (!plusMinusReason.trim()) {
+      alert('Powód jest wymagany.');
+      return;
+    }
+
+    submittingRef.current = true;
+    try {
+      const { error } = await addPenalty({
+        user_id: userId,
+        admin_id: currentUser.id,
+        penalty_type: plusMinusType,
+        reason: plusMinusReason.trim(),
+        duration_hours: null,
+      });
+      if (error) throw error;
+
+      // Send Discord notification
+      await notifyPenalty({
+        type: plusMinusType,
+        user: { username: user.username, mta_nick: user.mta_nick },
+        description: plusMinusReason.trim(),
+        admin: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin',
+      });
+
+      // Reload data
+      await loadUserData();
+      setPlusMinusReason('');
+      setShowAddPlusMinusModal(false);
+      alert(`${plusMinusType === 'plus' ? 'PLUS' : 'MINUS'} dodany.`);
+    } catch (error) {
+      console.error('Error adding PLUS/MINUS:', error);
+      alert('Błąd podczas dodawania.');
+    } finally {
+      submittingRef.current = false;
+    }
+  };
+
+  const handleAddPenalty = async () => {
+    if (submittingRef.current || !currentUser) return;
+    if (!penaltyReason.trim()) {
+      alert('Powód jest wymagany.');
+      return;
+    }
+
+    const duration = parseInt(penaltyDuration);
+    if (isNaN(duration) || duration <= 0) {
+      alert('Czas trwania musi być liczbą większą od 0.');
+      return;
+    }
+
+    submittingRef.current = true;
+    try {
+      const { error } = await addPenalty({
+        user_id: userId,
+        admin_id: currentUser.id,
+        penalty_type: 'suspension',
+        reason: penaltyReason.trim(),
+        duration_hours: duration,
+      });
+      if (error) throw error;
+
+      // Send Discord notification
+      await notifyPenalty({
+        type: 'zawieszenie_sluzba',
+        user: { username: user.username, mta_nick: user.mta_nick },
+        description: penaltyReason.trim(),
+        duration: `${duration}h`,
+        admin: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin',
+      });
+
+      // Reload data
+      await loadUserData();
+      setPenaltyReason('');
+      setPenaltyDuration('24');
+      setShowAddPenaltyModal(false);
+      alert('Kara (zawieszenie) nadana.');
+    } catch (error) {
+      console.error('Error adding penalty:', error);
+      alert('Błąd podczas nadawania kary.');
+    } finally {
+      submittingRef.current = false;
+    }
+  };
+
+  const handleAddNote = async () => {
+    if (submittingRef.current || !currentUser) return;
+    if (!noteText.trim()) {
+      alert('Treść notatki jest wymagana.');
+      return;
+    }
+
+    submittingRef.current = true;
+    try {
+      const { error } = await addUserNote({
+        user_id: userId,
+        admin_id: currentUser.id,
+        note_text: noteText.trim(),
+      });
+      if (error) throw error;
+
+      // Reload data
+      await loadUserData();
+      setNoteText('');
+      setShowAddNoteModal(false);
+      alert('Notatka dodana.');
+    } catch (error) {
+      console.error('Error adding note:', error);
+      alert('Błąd podczas dodawania notatki.');
+    } finally {
+      submittingRef.current = false;
     }
   };
 
@@ -807,48 +933,247 @@ export default function UserProfilePage() {
         </div>
       </div>
 
-      {/* TODO: Modals będą dodane w następnym kroku */}
+      {/* PLUS/MINUS Modal */}
       {showAddPlusMinusModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-          <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 p-8 max-w-lg w-full">
-            <h3 className="text-2xl font-bold text-white mb-4">Dodaj PLUS/MINUS</h3>
-            <p className="text-[#8fb5a0] mb-4">Funkcja w przygotowaniu...</p>
-            <button
-              onClick={() => setShowAddPlusMinusModal(false)}
-              className="w-full px-6 py-3 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
-            >
-              Zamknij
-            </button>
+          <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 p-8 max-w-lg w-full shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-white flex items-center gap-2">
+                <Award className="w-6 h-6 text-[#c9a227]" />
+                Dodaj PLUS/MINUS
+              </h3>
+              <button
+                onClick={() => {
+                  setShowAddPlusMinusModal(false);
+                  setPlusMinusReason('');
+                  setPlusMinusType('plus');
+                }}
+                className="text-[#8fb5a0] hover:text-white transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Type Selection */}
+              <div>
+                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Typ</label>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setPlusMinusType('plus')}
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all ${
+                      plusMinusType === 'plus'
+                        ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg'
+                        : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32]'
+                    }`}
+                  >
+                    <Plus className="w-5 h-5" />
+                    PLUS
+                  </button>
+                  <button
+                    onClick={() => setPlusMinusType('minus')}
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all ${
+                      plusMinusType === 'minus'
+                        ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg'
+                        : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32]'
+                    }`}
+                  >
+                    <Minus className="w-5 h-5" />
+                    MINUS
+                  </button>
+                </div>
+              </div>
+
+              {/* Reason */}
+              <div>
+                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Powód</label>
+                <textarea
+                  value={plusMinusReason}
+                  onChange={(e) => setPlusMinusReason(e.target.value)}
+                  placeholder="Opisz powód nadania PLUS/MINUS..."
+                  rows={4}
+                  className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-[#c9a227] transition-colors resize-none"
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={handleAddPlusMinus}
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#c9a227] to-[#e6b830] text-[#020a06] font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
+                >
+                  <Save className="w-4 h-4" />
+                  Dodaj
+                </button>
+                <button
+                  onClick={() => {
+                    setShowAddPlusMinusModal(false);
+                    setPlusMinusReason('');
+                    setPlusMinusType('plus');
+                  }}
+                  className="px-6 py-3 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
+                >
+                  Anuluj
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
+      {/* Penalty Modal */}
       {showAddPenaltyModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-          <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 p-8 max-w-lg w-full">
-            <h3 className="text-2xl font-bold text-white mb-4">Nadaj Karę</h3>
-            <p className="text-[#8fb5a0] mb-4">Funkcja w przygotowaniu...</p>
-            <button
-              onClick={() => setShowAddPenaltyModal(false)}
-              className="w-full px-6 py-3 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
-            >
-              Zamknij
-            </button>
+          <div className="glass-strong rounded-2xl border border-red-500/30 p-8 max-w-lg w-full shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-white flex items-center gap-2">
+                <AlertTriangle className="w-6 h-6 text-red-400" />
+                Nadaj Karę (Zawieszenie)
+              </h3>
+              <button
+                onClick={() => {
+                  setShowAddPenaltyModal(false);
+                  setPenaltyReason('');
+                  setPenaltyDuration('24');
+                }}
+                className="text-[#8fb5a0] hover:text-white transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Reason */}
+              <div>
+                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Powód zawieszenia</label>
+                <textarea
+                  value={penaltyReason}
+                  onChange={(e) => setPenaltyReason(e.target.value)}
+                  placeholder="Opisz powód nadania kary..."
+                  rows={4}
+                  className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-red-500 transition-colors resize-none"
+                />
+              </div>
+
+              {/* Duration */}
+              <div>
+                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Czas trwania (godziny)</label>
+                <div className="grid grid-cols-4 gap-2 mb-3">
+                  {['1', '6', '12', '24', '48', '72', '168', '720'].map((hours) => (
+                    <button
+                      key={hours}
+                      onClick={() => setPenaltyDuration(hours)}
+                      className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
+                        penaltyDuration === hours
+                          ? 'bg-red-500 text-white'
+                          : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32] hover:bg-[#133524]'
+                      }`}
+                    >
+                      {parseInt(hours) >= 24 ? `${parseInt(hours) / 24}d` : `${hours}h`}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="number"
+                  value={penaltyDuration}
+                  onChange={(e) => setPenaltyDuration(e.target.value)}
+                  placeholder="Lub wpisz własną liczbę godzin..."
+                  className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-red-500 transition-colors"
+                />
+              </div>
+
+              {/* Warning */}
+              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl">
+                <p className="text-red-400 text-xs">
+                  <strong>Uwaga:</strong> Zawieszenie uniemożliwi użytkownikowi dostęp do egzaminów i innych funkcji przez podany czas.
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={handleAddPenalty}
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
+                >
+                  <AlertTriangle className="w-4 h-4" />
+                  Nadaj Karę
+                </button>
+                <button
+                  onClick={() => {
+                    setShowAddPenaltyModal(false);
+                    setPenaltyReason('');
+                    setPenaltyDuration('24');
+                  }}
+                  className="px-6 py-3 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
+                >
+                  Anuluj
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
+      {/* Note Modal */}
       {showAddNoteModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-          <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 p-8 max-w-lg w-full">
-            <h3 className="text-2xl font-bold text-white mb-4">Dodaj Notatkę</h3>
-            <p className="text-[#8fb5a0] mb-4">Funkcja w przygotowaniu...</p>
-            <button
-              onClick={() => setShowAddNoteModal(false)}
-              className="w-full px-6 py-3 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
-            >
-              Zamknij
-            </button>
+          <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 p-8 max-w-lg w-full shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-white flex items-center gap-2">
+                <FileText className="w-6 h-6 text-[#c9a227]" />
+                Dodaj Notatkę Prywatną
+              </h3>
+              <button
+                onClick={() => {
+                  setShowAddNoteModal(false);
+                  setNoteText('');
+                }}
+                className="text-[#8fb5a0] hover:text-white transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Note Text */}
+              <div>
+                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Treść notatki</label>
+                <textarea
+                  value={noteText}
+                  onChange={(e) => setNoteText(e.target.value)}
+                  placeholder="Wpisz notatkę widoczną tylko dla administratorów..."
+                  rows={6}
+                  className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-[#c9a227] transition-colors resize-none"
+                />
+              </div>
+
+              {/* Info */}
+              <div className="p-3 bg-[#c9a227]/10 border border-[#c9a227]/30 rounded-xl">
+                <p className="text-[#c9a227] text-xs">
+                  <strong>Informacja:</strong> Notatki prywatne są widoczne tylko dla administratorów i służą do wewnętrznych uwag.
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={handleAddNote}
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#14b8a6] to-[#0d9488] text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
+                >
+                  <Save className="w-4 h-4" />
+                  Dodaj Notatkę
+                </button>
+                <button
+                  onClick={() => {
+                    setShowAddNoteModal(false);
+                    setNoteText('');
+                  }}
+                  className="px-6 py-3 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
+                >
+                  Anuluj
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
