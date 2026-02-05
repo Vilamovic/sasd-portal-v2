@@ -25,7 +25,15 @@
       "Bash(done)",
       "Bash(git rm:*)",
       "Bash(git checkout:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(grep:*)",
+      "Bash(npx -y @modelcontextprotocol/inspector npx supabase-mcp)",
+      "Bash(mcp list-tools:*)",
+      "Bash(npx @modelcontextprotocol/cli list-tools:*)",
+      "Bash(findstr:*)",
+      "Bash(npx supabase:*)",
+      "Bash(npx:*)",
+      "Bash(node check_db_structure.js:*)"
     ]
   }
 }

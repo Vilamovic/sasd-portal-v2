@@ -22,6 +22,14 @@ export function AuthProvider({ children }) {
   const [mtaNick, setMtaNick] = useState(null);
   const [showMtaNickModal, setShowMtaNickModal] = useState(false);
 
+  // Kartoteka & Dywizje
+  const [division, setDivision] = useState(null);
+  const [permissions, setPermissions] = useState([]);
+  const [plusCount, setPlusCount] = useState(0);
+  const [minusCount, setMinusCount] = useState(0);
+  const [activePenalties, setActivePenalties] = useState([]);
+  const [isCommander, setIsCommander] = useState(false);
+
   // Refs dla uniknięcia stale closures
   const userRef = useRef(null);
   const roleRef = useRef(null);
@@ -29,8 +37,31 @@ export function AuthProvider({ children }) {
   const hasNotifiedLogin = useRef(false);
   const roleCheckIntervalRef = useRef(null);
   const realtimeCleanupRef = useRef(null);
+  const penaltiesIntervalRef = useRef(null);
 
   // getUserById i upsertUser są teraz importowane z supabaseHelpers.js
+
+  /**
+   * Pobiera aktywne kary użytkownika
+   */
+  const fetchActivePenalties = useCallback(async (userId) => {
+    try {
+      const { data, error } = await supabase.rpc('get_active_penalties', {
+        p_user_id: userId,
+      });
+
+      if (error) {
+        console.error('fetchActivePenalties error:', error);
+        return;
+      }
+
+      if (data) {
+        setActivePenalties(data);
+      }
+    } catch (error) {
+      console.error('fetchActivePenalties error:', error);
+    }
+  }, []);
 
   /**
    * Sprawdza czy użytkownik ma ustawiony MTA nick
@@ -43,6 +74,12 @@ export function AuthProvider({ children }) {
     }
     if (userData && userData.mta_nick) {
       setMtaNick(userData.mta_nick);
+      // Aktualizuj nowe pola
+      setDivision(userData.division || null);
+      setPermissions(userData.permissions || []);
+      setPlusCount(userData.plus_count || 0);
+      setMinusCount(userData.minus_count || 0);
+      setIsCommander(userData.is_commander || false);
     }
     return true;
   }, []);
@@ -77,6 +114,11 @@ export function AuthProvider({ children }) {
         clearInterval(roleCheckIntervalRef.current);
       }
 
+      // Wyczyść interval kar
+      if (penaltiesIntervalRef.current) {
+        clearInterval(penaltiesIntervalRef.current);
+      }
+
       // Wyczyść realtime subscription
       if (realtimeCleanupRef.current) {
         realtimeCleanupRef.current();
@@ -100,6 +142,12 @@ export function AuthProvider({ children }) {
       setSession(null);
       setRole(null);
       setMtaNick(null);
+      setDivision(null);
+      setPermissions([]);
+      setPlusCount(0);
+      setMinusCount(0);
+      setActivePenalties([]);
+      setIsCommander(false);
       userRef.current = null;
       roleRef.current = null;
       loginTimestampRef.current = null;
@@ -148,6 +196,13 @@ export function AuthProvider({ children }) {
             // Opcjonalnie: reload przy zmianie roli
             // window.location.reload();
           }
+
+          // Aktualizuj pola Kartoteki
+          setDivision(userData.division || null);
+          setPermissions(userData.permissions || []);
+          setPlusCount(userData.plus_count || 0);
+          setMinusCount(userData.minus_count || 0);
+          setIsCommander(userData.is_commander || false);
         }
       } catch (error) {
         console.error('Role check error:', error);
@@ -216,8 +271,18 @@ export function AuthProvider({ children }) {
             roleRef.current = userRole;
             setMtaNick(dbUser.mta_nick);
 
+            // Ustaw pola Kartoteki
+            setDivision(dbUser.division || null);
+            setPermissions(dbUser.permissions || []);
+            setPlusCount(dbUser.plus_count || 0);
+            setMinusCount(dbUser.minus_count || 0);
+            setIsCommander(dbUser.is_commander || false);
+
             // Rozpocznij polling roli
             startRolePolling(userId);
+
+            // Pobierz aktywne kary
+            fetchActivePenalties(userId);
           } else {
             // User nie istnieje w bazie - utwórz rekord
             const userData = {
@@ -303,6 +368,9 @@ export function AuthProvider({ children }) {
               // Rozpocznij polling roli
               startRolePolling(userId);
 
+              // Pobierz aktywne kary
+              fetchActivePenalties(userId);
+
               // Discord notification tylko dla rejestracji (timeDiff < 60s)
               const createdAt = new Date(dbUser.created_at).getTime();
               const now = Date.now();
@@ -323,6 +391,12 @@ export function AuthProvider({ children }) {
       if (event === 'SIGNED_OUT') {
         setRole(null);
         setMtaNick(null);
+        setDivision(null);
+        setPermissions([]);
+        setPlusCount(0);
+        setMinusCount(0);
+        setActivePenalties([]);
+        setIsCommander(false);
         roleRef.current = null;
         loginTimestampRef.current = null;
         hasNotifiedLogin.current = false;
@@ -330,6 +404,9 @@ export function AuthProvider({ children }) {
         // Wyczyść interval
         if (roleCheckIntervalRef.current) {
           clearInterval(roleCheckIntervalRef.current);
+        }
+        if (penaltiesIntervalRef.current) {
+          clearInterval(penaltiesIntervalRef.current);
         }
       }
 
@@ -343,11 +420,38 @@ export function AuthProvider({ children }) {
       if (roleCheckIntervalRef.current) {
         clearInterval(roleCheckIntervalRef.current);
       }
+      if (penaltiesIntervalRef.current) {
+        clearInterval(penaltiesIntervalRef.current);
+      }
       if (realtimeCleanupRef.current) {
         realtimeCleanupRef.current();
       }
     };
-  }, [determineRole, checkMtaNick, startRolePolling]);
+  }, [determineRole, checkMtaNick, startRolePolling, fetchActivePenalties]);
+
+  /**
+   * Polling aktywnych kar (co 30s)
+   */
+  useEffect(() => {
+    if (!user?.id) return;
+
+    // Wyczyść poprzedni interval
+    if (penaltiesIntervalRef.current) {
+      clearInterval(penaltiesIntervalRef.current);
+    }
+
+    // Startuj polling
+    penaltiesIntervalRef.current = setInterval(() => {
+      fetchActivePenalties(user.id);
+    }, 30000); // 30 sekund
+
+    // Cleanup
+    return () => {
+      if (penaltiesIntervalRef.current) {
+        clearInterval(penaltiesIntervalRef.current);
+      }
+    };
+  }, [user?.id, fetchActivePenalties]);
 
   /**
    * Logowanie przez Discord OAuth
@@ -407,6 +511,13 @@ export function AuthProvider({ children }) {
     signInWithDiscord,
     signOut,
     forceRelogin,
+    // Kartoteka & Dywizje
+    division,
+    permissions,
+    plusCount,
+    minusCount,
+    activePenalties,
+    isCommander,
     // Dodatkowo dla kompatybilności
     isAuthenticated: !!user,
     isDev: role === 'dev',

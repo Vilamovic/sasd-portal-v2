@@ -1,87 +1,84 @@
-# 🛡️ SASD Portal | Quick Start for AI
+# 🛡️ SASD Portal | VS Code AI Guide
 
-> **NOTE**: This file serves as a **quick reference/index**. All detailed documentation is in PROJECT.md.
+> **AUTHORITATIVE SOURCE**: To jedyne źródło prawdy dla AI. Łączy zasady operacyjne z dokumentacją techniczną.
 
-## 📌 IMPORTANT: Read Main Documentation First
+## ⚙️ AI Operational Rules (VS Code Edition)
 
-**All project documentation has been consolidated into a single file:**
+### 1. Workflow & Verification
+* **WAIT FOR TASK**: Nigdy nie generuj kodu bez zadania. Zacznij od: "Co dzisiaj robimy?".
+* **PLANNING**: Każde zadanie zacznij od `TodoWrite`.
+* **LOCAL BUILD**: Po zmianach Claude **musi** odpalić `npm run build` w terminalu, aby wyłapać błędy.
+* **VISUAL CHECK**: Po pomyślnym buildzie zapytaj: *"Kod sprawdzony. Czy na localhost wszystko wygląda poprawnie? Czy mogę przygotować commit?"*.
+* **GIT**: Commity zgodnie z szablonem na końcu pliku. Zakaz auto-push bez zgody.
 
-👉 **[PROJECT.md](./PROJECT.md)** 👈
+### 2. Database Awareness (Supabase MCP)
+* **MCP ACCESS**: Twoim głównym źródłem wiedzy o bazie jest serwer MCP Supabase.
+* **VERIFY BEFORE CODE**: Zamiast zgadywać, użyj narzędzi MCP, aby sprawdzić strukturę tabel lub obecność danych testowych przed implementacją logiki.
+* **NO DB CHANGES**: Nie zmieniaj struktury bazy (SQL) bez wyraźnego polecenia użytkownika.
 
-**Why this file exists**: CLAUDE.md is kept as a lightweight "entry point" that AI reads first. It provides critical rules and points to the main documentation.
+### 3. Session Hygiene & Updates
+* **CLAUDE.MD UPDATE**: Po zakończeniu dużego etapu (np. nowej podstrony) lub fixie błędu, zaktualizuj sekcję Status/Troubleshooting w tym pliku.
+* **NEW CHAT TRIGGER**: Zasugeruj nowy czat, gdy:
+    1. Lista w `TodoWrite` przekracza 10 pozycji.
+    2. Zaczynasz "zapominać" o zasadach Sheriff Theme.
+    3. Zakończono Milestone i zaktualizowano dokumentację.
 
-This file contains:
-- ✅ AI Operational Rules
-- ✅ Project Architecture
-- ✅ UI Design System (Sheriff Dark Green Theme - NIETYKALNY)
-- ✅ Completed Features & Tasks
-- ✅ Technical Patterns
-- ✅ Deployment & Troubleshooting
-- ✅ File Locations
-- ✅ Quick Reference Checklist
-
----
-
-## ⚠️ Quick Start for AI
-
-1. **Read [PROJECT.md](./PROJECT.md) completely**
-2. **Confirm ready**: "Co dzisiaj robimy?"
-3. **Wait for task** from user
-4. **Create TodoWrite checklist** if task is non-trivial
-5. **Follow patterns** from PROJECT.md
+### 4. Logic & Sheriff Theme (🚨 NIETYKALNY 🚨)
+* **PRESERVE LOGIC**: Nigdy nie zmieniaj logiki biznesowej (`useEffect`, handlery, async). Zmieniaj tylko UI.
+* **SHERIFF THEME**: Absolutny zakaz zmian kolorów: `#020a06` (BG), `#c9a227` (Gold), `#051a0f` (Card), `#1a4d32` (Border).
+* **PATTERNS**: Kopiuj style z `ExamDashboard.jsx` dla nowych komponentów.
 
 ---
 
-## 🔑 Critical Rules (MUST FOLLOW)
-
-### 1. WAIT FOR TASK
-❌ **DO NOT generate code** until you receive a specific task from the user.
-
-### 2. PLANNING FIRST
-✅ Use **TodoWrite** tool to create and track task checklist.
-
-### 3. PRESERVE BUSINESS LOGIC
-❌ **NEVER change** business logic (useEffect, handlers, async operations).
-✅ **ONLY change** UI (colors, layout, classes, icons).
-
-### 4. NO NEW FILES
-❌ **DO NOT create** new files without explicit permission.
-
-### 5. AUTONOMOUS DETECTIVE
-✅ Use Glob, Grep, Read to explore codebase.
-❌ **DO NOT ask** for locations of existing logic.
-
-### ⚠️ 6. **SHERIFF THEME - ABSOLUTNIE NIETYKALNY** ⚠️
-🚨 **KATEGORYCZNY ZAKAZ ZMIANY UI BEZ WYRAŹNEJ ZGODY** 🚨
-
-**ZABRANIA SIĘ:**
-- ❌ Zmiany kolorów Sheriff Dark Green theme (#020a06, #c9a227, #051a0f, #1a4d32, #22693f, #e6b830)
-- ❌ Modyfikacji glassmorphism (.glass, .glass-strong)
-- ❌ Usuwania background effects (gradient orbs, animations)
-- ❌ Zmiany stylów komponentów bez WYRAŹNEJ zgody użytkownika
-- ❌ "Ulepszania" UI na własną rękę
-- ❌ Zmiany animacji (pulse-glow, gradient-shift, particle-float)
-
-**NOWE KOMPONENTY:**
-✅ Gdy tworzysz NOWE podstrony/komponenty:
-- **MUSISZ** użyć TEGO SAMEGO Sheriff theme co istniejące komponenty
-- **SKOPIUJ** style z [ExamDashboard.jsx](src/components/exam/ExamDashboard.jsx) lub [Dashboard.jsx](src/components/dashboard/Dashboard.jsx)
-- **ZACHOWAJ** glassmorphism, gradient orbs, Sheriff colors, animations
-- **PYTAJ** jeśli nie jesteś pewien jak stylować nowy komponent
-
-**Migration History (Feb 2026):**
-- Kompletna migracja z Police Blue → Sheriff Dark Green z Tailwind v4
-- 100% logiki biznesowej zachowane
-- Commit: `fd618b3` - feat: Migrate entire UI to Sheriff Dark Green theme
+## 🏗️ Project Architecture & Identity
+* **Identity**: `dev` (UUID: `c254fb57-72d4-450c-87b7-cd7ffad5b715`) > `admin` > `user`.
+* **Core Systems**: Auth (Discord), Force Logout (polling 5s), Exams (JSONB), Discord Webhooks.
 
 ---
 
-## 📚 Full Documentation
-
-For complete information, always refer to:
-
-**[PROJECT.md](./PROJECT.md)**
+## 🚀 Troubleshooting History
+* **Z-Index**: Navbar `z-[60]`, Dropdown `z-[9999]`.
+* **Tailwind v4**: Zakaz `@apply` dla custom hexów w CSS.
+* **Vercel**: Dummy commit triggeruje deploy (`git commit --allow-empty`).
 
 ---
 
-**Last Updated**: 2026-02-04 (Sheriff Theme Migration Complete)
+## 📝 Git Commit Pattern
+```text
+feat: [Krótki opis]
+- [Zmiana 1]
+- [Zmiana 2]
+Zmienione pliki: [ścieżki]
+
+---
+
+## 📋 Current Task Status
+
+### 🎯 ACTIVE: System Kartoteki (Zarządzanie Personelem)
+**Start Date:** 2026-02-05
+**Detailed Instructions:** See `/task/INSTRUCTIONS.md` for complete requirements
+
+**Key Features:**
+- Dywizje (FTO, SS, DTU, GU) - wyświetlane w Navbar
+- Uprawnienia (SWAT, SEU, AIR, Press Desk, Dispatch)
+- System stopni (17 rang hierarchii)
+- System kar i nagród (PLUS/MINUS) z timerami
+- Kartoteka użytkowników (tylko admin/dev)
+
+**Database:**
+- Migration: `migrations/003_kartoteka_system.sql` (NOT executed yet)
+- Project ref: `jecootmlzlwxubvumxrk`
+- New tables: `user_penalties`, `user_notes`
+- New columns in `users`: `division`, `permissions`, `plus_count`, `minus_count`
+
+**Status:**
+- ✅ Migration SQL file created
+- ✅ MCP config updated to correct database
+- ✅ Complete instructions documented in `/task/INSTRUCTIONS.md`
+- ⏳ Awaiting migration execution
+- ⏳ Navbar modifications pending
+- ⏳ Kartoteka pages pending
+
+---
+
+Last Updated: 2026-02-05 23:30 - System Kartoteki planning phase completed

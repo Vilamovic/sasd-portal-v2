@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useTranslation } from '@/src/contexts/TranslationContext';
-import { BookOpen, FileText, Users, ArrowRight, Clock, CheckCircle, Shield, Sparkles } from 'lucide-react';
+import { BookOpen, FileText, Users, ArrowRight, Clock, CheckCircle, Shield, Sparkles, Briefcase, UserCog } from 'lucide-react';
 import Navbar from './Navbar';
 import MtaNickModal from './MtaNickModal';
 
@@ -43,6 +43,34 @@ export default function Dashboard() {
         { icon: CheckCircle, label: 'Auto-ocena' }
       ],
       roles: ['user', 'admin', 'dev'],
+    },
+    {
+      id: 'divisions',
+      title: 'Dywizje',
+      description: 'Przeglądaj materiały specjalistyczne dla swojej dywizji. SWAT, SS, DTU, GU, FTO.',
+      icon: Briefcase,
+      iconColor: 'from-[#1e3a8a] to-[#1e40af]',
+      glowColor: 'rgba(30, 58, 138, 0.3)',
+      borderHover: 'hover:border-[#1e3a8a]/50',
+      stats: [
+        { icon: Shield, label: '5 dywizji' },
+        { icon: FileText, label: 'Materiały specjalistyczne' }
+      ],
+      roles: ['user', 'admin', 'dev'],
+    },
+    {
+      id: 'kartoteka',
+      title: 'Kartoteka',
+      description: 'Zarządzaj personelem, nadawaj kary i uprawnienia. Pełny dostęp do danych wszystkich użytkowników.',
+      icon: UserCog,
+      iconColor: 'from-[#c9a227] to-[#e6b830]',
+      glowColor: 'rgba(201, 162, 39, 0.3)',
+      borderHover: 'hover:border-[#c9a227]/50',
+      stats: [
+        { icon: Users, label: 'Zarządzanie użytkownikami' },
+        { icon: Shield, label: 'Kary i uprawnienia' }
+      ],
+      roles: ['admin', 'dev'],
     },
     {
       id: 'admin',

@@ -609,3 +609,334 @@ export async function hasActiveTokenForExam(userId, examTypeId) {
     return { data: null, error, hasToken: false };
   }
 }
+
+// ============================================
+// KARTOTEKA - USER MANAGEMENT
+// ============================================
+
+/**
+ * Pobiera wszystkich użytkowników z pełnymi danymi (Kartoteka)
+ */
+export async function getAllUsersWithDetails() {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('getAllUsersWithDetails error:', error);
+    return { data: null, error };
+  }
+}
+
+/**
+ * Pobiera użytkownika z pełnymi danymi (Kartoteka)
+ * Alias dla getUserById (dla spójności nazewnictwa)
+ */
+export async function getUserWithDetails(userId) {
+  return getUserById(userId);
+}
+
+/**
+ * Aktualizuje badge (stopień) użytkownika
+ */
+export async function updateUserBadge(userId, badge) {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .update({ badge })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('updateUserBadge error:', error);
+    return { data: null, error };
+  }
+}
+
+/**
+ * Aktualizuje dywizję użytkownika
+ */
+export async function updateUserDivision(userId, division) {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .update({ division })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('updateUserDivision error:', error);
+    return { data: null, error };
+  }
+}
+
+/**
+ * Aktualizuje uprawnienia użytkownika
+ */
+export async function updateUserPermissions(userId, permissions) {
+  try {
+    const { data, error} = await supabase
+      .from('users')
+      .update({ permissions })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('updateUserPermissions error:', error);
+    return { data: null, error };
+  }
+}
+
+/**
+ * Aktualizuje status Commander użytkownika
+ */
+export async function updateIsCommander(userId, isCommander) {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .update({ is_commander: isCommander })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('updateIsCommander error:', error);
+    return { data: null, error };
+  }
+}
+
+// ============================================
+// KARTOTEKA - PENALTIES & REWARDS
+// ============================================
+
+/**
+ * Dodaje karę/nagrodę/zawieszenie dla użytkownika
+ */
+export async function addPenalty(penaltyData) {
+  try {
+    const { data, error } = await supabase
+      .from('user_penalties')
+      .insert(penaltyData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('addPenalty error:', error);
+    return { data: null, error };
+  }
+}
+
+/**
+ * Pobiera wszystkie kary użytkownika (historia)
+ */
+export async function getUserPenalties(userId) {
+  try {
+    const { data, error } = await supabase
+      .from('user_penalties')
+      .select(`
+        *,
+        created_by_user:users!user_penalties_created_by_fkey(username, mta_nick)
+      `)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('getUserPenalties error:', error);
+    return { data: null, error };
+  }
+}
+
+/**
+ * Pobiera aktywne kary użytkownika (RPC function)
+ */
+export async function getActivePenalties(userId) {
+  try {
+    const { data, error } = await supabase.rpc('get_active_penalties', {
+      p_user_id: userId,
+    });
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('getActivePenalties error:', error);
+    return { data: null, error };
+  }
+}
+
+/**
+ * Usuwa karę (Admin/Dev only)
+ */
+export async function deletePenalty(penaltyId) {
+  try {
+    const { error } = await supabase
+      .from('user_penalties')
+      .delete()
+      .eq('id', penaltyId);
+
+    if (error) throw error;
+    return { error: null };
+  } catch (error) {
+    console.error('deletePenalty error:', error);
+    return { error };
+  }
+}
+
+// ============================================
+// KARTOTEKA - PRIVATE NOTES
+// ============================================
+
+/**
+ * Dodaje prywatną notatkę o użytkowniku (Admin/Dev only)
+ */
+export async function addUserNote(noteData) {
+  try {
+    const { data, error } = await supabase
+      .from('user_notes')
+      .insert(noteData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('addUserNote error:', error);
+    return { data: null, error };
+  }
+}
+
+/**
+ * Pobiera wszystkie notatki o użytkowniku (Admin/Dev only)
+ */
+export async function getUserNotes(userId) {
+  try {
+    const { data, error } = await supabase
+      .from('user_notes')
+      .select(`
+        *,
+        created_by_user:users!user_notes_created_by_fkey(username, mta_nick)
+      `)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false});
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('getUserNotes error:', error);
+    return { data: null, error };
+  }
+}
+
+/**
+ * Usuwa notatkę (Admin/Dev only)
+ */
+export async function deleteUserNote(noteId) {
+  try {
+    const { error } = await supabase
+      .from('user_notes')
+      .delete()
+      .eq('id', noteId);
+
+    if (error) throw error;
+    return { error: null };
+  } catch (error) {
+    console.error('deleteUserNote error:', error);
+    return { error };
+  }
+}
+
+// ============================================
+// DIVISIONS - MATERIALS MANAGEMENT
+// ============================================
+
+/**
+ * Pobiera materiały dla dywizji (używa RPC z kontrolą dostępu)
+ */
+export async function getDivisionMaterials(division) {
+  try {
+    const { data, error } = await supabase.rpc('get_division_materials', {
+      p_division: division,
+    });
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('getDivisionMaterials error:', error);
+    return { data: null, error };
+  }
+}
+
+/**
+ * Dodaje materiał do dywizji (Admin/Dev/Commander only)
+ */
+export async function addDivisionMaterial(materialData) {
+  try {
+    const { data, error } = await supabase
+      .from('division_materials')
+      .insert(materialData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('addDivisionMaterial error:', error);
+    return { data: null, error };
+  }
+}
+
+/**
+ * Aktualizuje materiał dywizji
+ */
+export async function updateDivisionMaterial(materialId, materialData) {
+  try {
+    const { data, error } = await supabase
+      .from('division_materials')
+      .update(materialData)
+      .eq('id', materialId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('updateDivisionMaterial error:', error);
+    return { data: null, error };
+  }
+}
+
+/**
+ * Usuwa materiał dywizji
+ */
+export async function deleteDivisionMaterial(materialId) {
+  try {
+    const { error } = await supabase
+      .from('division_materials')
+      .delete()
+      .eq('id', materialId);
+
+    if (error) throw error;
+    return { error: null };
+  } catch (error) {
+    console.error('deleteDivisionMaterial error:', error);
+    return { error };
+  }
+}

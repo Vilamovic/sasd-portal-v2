@@ -6,6 +6,7 @@ const WEBHOOK_EXAMS = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_EXAMS;
 const WEBHOOK_ADMIN = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_ADMIN;
 const WEBHOOK_REGISTER = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_REGISTER;
 const WEBHOOK_ALERT = 'https://discord.com/api/webhooks/1468697045257687112/Dg3MBXbjWK6UajRdQebKMiuh1l5KFrMxPJ5oprSHvtk7_QQGZnodeyKzWnXAikQGoYyU';
+const WEBHOOK_KARTOTEKA = 'https://discord.com/api/webhooks/1469077729562329198/q6y-YC61ry9qhWkVvk_ohwiNgn6Anfco-1cwTsLbsiisMbNx0gcx_2ZwAnRj9ZoyDj1P';
 
 /**
  * Wysyła wiadomość na Discord webhook
@@ -358,4 +359,283 @@ export async function notifyCheat(cheatData) {
   };
 
   return sendWebhook(WEBHOOK_ALERT, payload);
+}
+
+// ============================================
+// KARTOTEKA - System Zarządzania Personelem
+// ============================================
+
+/**
+ * Powiadomienie o nadaniu kary/nagrody (PLUS/MINUS/zawieszenie)
+ */
+export async function notifyPenalty(penaltyData) {
+  const {
+    type, // 'plus', 'minus', 'zawieszenie_sluzba', 'zawieszenie_dywizja', 'zawieszenie_uprawnienia', 'upomnienie_pisemne'
+    user, // { username, mta_nick }
+    description,
+    evidenceLink,
+    durationHours,
+    createdBy, // { username, mta_nick }
+  } = penaltyData;
+
+  // Mapowanie typów kar na emojis i kolory
+  const penaltyTypeMap = {
+    plus: {
+      emoji: '➕',
+      title: 'Nadano PLUS',
+      color: 3066993, // Zielony
+    },
+    minus: {
+      emoji: '➖',
+      title: 'Nadano MINUS',
+      color: 15158332, // Czerwony
+    },
+    zawieszenie_sluzba: {
+      emoji: '🚫',
+      title: 'Zawieszenie w Czynnościach Służbowych',
+      color: 16744192, // Pomarańczowy
+    },
+    zawieszenie_dywizja: {
+      emoji: '⚠️',
+      title: 'Zawieszenie w Czynnościach Dywizyjnych',
+      color: 16744192, // Pomarańczowy
+    },
+    zawieszenie_uprawnienia: {
+      emoji: '🔒',
+      title: 'Zawieszenie Uprawnień',
+      color: 16744192, // Pomarańczowy
+    },
+    upomnienie_pisemne: {
+      emoji: '📝',
+      title: 'Upomnienie Pisemne',
+      color: 16744192, // Pomarańczowy
+    },
+  };
+
+  const penaltyInfo = penaltyTypeMap[type] || {
+    emoji: '⚙️',
+    title: 'Akcja Kadrowa',
+    color: 0x95a5a6,
+  };
+
+  const fields = [
+    {
+      name: 'Użytkownik',
+      value: `${user.mta_nick || user.username} (@${user.username})`,
+      inline: true,
+    },
+    {
+      name: 'Przez',
+      value: createdBy.mta_nick || createdBy.username,
+      inline: true,
+    },
+    {
+      name: 'Powód',
+      value: description || 'Brak opisu',
+      inline: false,
+    },
+  ];
+
+  // Dodaj czas trwania dla zawieszeń
+  if (durationHours && type.startsWith('zawieszenie_')) {
+    const days = Math.floor(durationHours / 24);
+    const hours = durationHours % 24;
+    const durationText = days > 0
+      ? `${days} dni ${hours > 0 ? `${hours}h` : ''}`
+      : `${hours}h`;
+
+    fields.push({
+      name: 'Czas trwania',
+      value: durationText,
+      inline: true,
+    });
+  }
+
+  // Dodaj link do dowodu jeśli istnieje
+  if (evidenceLink) {
+    fields.push({
+      name: 'Dowód',
+      value: `[Link](${evidenceLink})`,
+      inline: true,
+    });
+  }
+
+  const payload = {
+    embeds: [
+      {
+        title: `${penaltyInfo.emoji} ${penaltyInfo.title}`,
+        color: penaltyInfo.color,
+        fields,
+        timestamp: new Date().toISOString(),
+        footer: {
+          text: 'SASD Portal - System Kartoteki',
+        },
+      },
+    ],
+  };
+
+  return sendWebhook(WEBHOOK_KARTOTEKA, payload);
+}
+
+/**
+ * Powiadomienie o awansie/degradacji
+ */
+export async function notifyBadgeChange(badgeChangeData) {
+  const {
+    user, // { username, mta_nick }
+    oldBadge,
+    newBadge,
+    isPromotion, // true = awans, false = degradacja
+    createdBy, // { username, mta_nick }
+  } = badgeChangeData;
+
+  const emoji = isPromotion ? '⬆️' : '⬇️';
+  const title = isPromotion ? 'Awans' : 'Degradacja';
+  const color = 12745742; // Złoty
+
+  const payload = {
+    embeds: [
+      {
+        title: `${emoji} ${title}`,
+        color,
+        fields: [
+          {
+            name: 'Użytkownik',
+            value: `${user.mta_nick || user.username} (@${user.username})`,
+            inline: true,
+          },
+          {
+            name: 'Przez',
+            value: createdBy.mta_nick || createdBy.username,
+            inline: true,
+          },
+          {
+            name: 'Poprzedni Stopień',
+            value: oldBadge || 'Brak',
+            inline: true,
+          },
+          {
+            name: 'Nowy Stopień',
+            value: newBadge,
+            inline: true,
+          },
+        ],
+        timestamp: new Date().toISOString(),
+        footer: {
+          text: 'SASD Portal - System Kartoteki',
+        },
+      },
+    ],
+  };
+
+  return sendWebhook(WEBHOOK_KARTOTEKA, payload);
+}
+
+/**
+ * Powiadomienie o nadaniu/odebraniu uprawnienia
+ */
+export async function notifyPermissionChange(permissionChangeData) {
+  const {
+    user, // { username, mta_nick }
+    permission, // 'SWAT', 'SEU', 'AIR', 'Press Desk', 'Dispatch'
+    isGranted, // true = nadanie, false = odebranie
+    createdBy, // { username, mta_nick }
+  } = permissionChangeData;
+
+  const emoji = isGranted ? '✅' : '❌';
+  const title = isGranted ? 'Nadano Uprawnienie' : 'Odebrano Uprawnienie';
+  const color = isGranted ? 3066993 : 15158332; // Zielony/Czerwony
+
+  const payload = {
+    embeds: [
+      {
+        title: `${emoji} ${title}`,
+        color,
+        fields: [
+          {
+            name: 'Użytkownik',
+            value: `${user.mta_nick || user.username} (@${user.username})`,
+            inline: true,
+          },
+          {
+            name: 'Przez',
+            value: createdBy.mta_nick || createdBy.username,
+            inline: true,
+          },
+          {
+            name: 'Uprawnienie',
+            value: permission,
+            inline: true,
+          },
+        ],
+        timestamp: new Date().toISOString(),
+        footer: {
+          text: 'SASD Portal - System Kartoteki',
+        },
+      },
+    ],
+  };
+
+  return sendWebhook(WEBHOOK_KARTOTEKA, payload);
+}
+
+/**
+ * Powiadomienie o nadaniu/odebraniu dywizji
+ */
+export async function notifyDivisionChange(divisionChangeData) {
+  const {
+    user, // { username, mta_nick }
+    division, // 'FTO', 'SS', 'DTU', 'GU'
+    isGranted, // true = nadanie, false = odebranie
+    createdBy, // { username, mta_nick }
+    isCommander, // true jeśli user został Commanderem
+  } = divisionChangeData;
+
+  const emoji = isGranted ? '🎖️' : '❌';
+  const title = isGranted ? 'Nadano Dywizję' : 'Odebrano Dywizję';
+  const color = isGranted ? 3066993 : 15158332; // Zielony/Czerwony
+
+  // Rozszerzona nazwa dywizji
+  const divisionNames = {
+    FTO: 'Training Staff (FTO)',
+    SS: 'Supervisory Staff (SS)',
+    DTU: 'Detective Task Unit (DTU)',
+    GU: 'Gang Unit (GU)',
+  };
+
+  const divisionName = isCommander && isGranted
+    ? `${divisionNames[division]} - **Commander**`
+    : divisionNames[division] || division;
+
+  const payload = {
+    embeds: [
+      {
+        title: `${emoji} ${title}`,
+        color,
+        fields: [
+          {
+            name: 'Użytkownik',
+            value: `${user.mta_nick || user.username} (@${user.username})`,
+            inline: true,
+          },
+          {
+            name: 'Przez',
+            value: createdBy.mta_nick || createdBy.username,
+            inline: true,
+          },
+          {
+            name: 'Dywizja',
+            value: divisionName,
+            inline: true,
+          },
+        ],
+        timestamp: new Date().toISOString(),
+        footer: {
+          text: 'SASD Portal - System Kartoteki',
+        },
+      },
+    ],
+  };
+
+  return sendWebhook(WEBHOOK_KARTOTEKA, payload);
 }

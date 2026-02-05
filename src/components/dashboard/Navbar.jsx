@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useTranslation } from '@/src/contexts/TranslationContext';
-import { LogOut, User, ChevronDown, Shield, Mail, Gamepad2 } from 'lucide-react';
+import { LogOut, User, ChevronDown, Shield, Gamepad2, Award, Clock } from 'lucide-react';
 
 /**
  * Navbar - Premium Sheriff-themed navigation bar
@@ -12,11 +12,27 @@ import { LogOut, User, ChevronDown, Shield, Mail, Gamepad2 } from 'lucide-react'
  * OPTIMIZED: React.memo to prevent unnecessary re-renders
  */
 export default function Navbar() {
-  const { user, role, isDev, isAdmin, signOut, mtaNick } = useAuth();
+  const {
+    user,
+    role,
+    isDev,
+    isAdmin,
+    signOut,
+    mtaNick,
+    division,
+    permissions,
+    plusCount,
+    minusCount,
+    activePenalties,
+    isCommander,
+  } = useAuth();
   const { t } = useTranslation();
   const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+
+  // Countdown timer state for penalties
+  const [penaltyTimers, setPenaltyTimers] = useState({});
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -28,6 +44,79 @@ export default function Navbar() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Update penalty timers every second
+  useEffect(() => {
+    if (!activePenalties || activePenalties.length === 0) {
+      setPenaltyTimers({});
+      return;
+    }
+
+    const updateTimers = () => {
+      const newTimers = {};
+      activePenalties.forEach((penalty) => {
+        if (penalty.remaining_seconds && penalty.remaining_seconds > 0) {
+          newTimers[penalty.id] = penalty.remaining_seconds;
+        }
+      });
+      setPenaltyTimers(newTimers);
+    };
+
+    // Initial update
+    updateTimers();
+
+    // Update every second
+    const interval = setInterval(() => {
+      setPenaltyTimers((prev) => {
+        const updated = {};
+        Object.keys(prev).forEach((id) => {
+          const remaining = prev[id] - 1;
+          if (remaining > 0) {
+            updated[id] = remaining;
+          }
+        });
+        return updated;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [activePenalties]);
+
+  // Format seconds to HH:MM:SS
+  const formatTime = (seconds) => {
+    if (!seconds || seconds <= 0) return '00:00:00';
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Get division display name with Commander suffix
+  const getDivisionDisplay = () => {
+    if (!division) return null;
+    return isCommander ? `${division} Commander` : division;
+  };
+
+  // Get division color
+  const getDivisionColor = () => {
+    const colors = {
+      FTO: 'text-[#c9a227]', // Yellow (gold theme)
+      SS: 'text-[#ff8c00]', // Orange
+      DTU: 'text-[#1e3a8a]', // Navy blue
+      GU: 'text-[#10b981]', // Green
+    };
+    return colors[division] || 'text-white';
+  };
+
+  // Get penalty type display name
+  const getPenaltyDisplayName = (type) => {
+    const names = {
+      zawieszenie_sluzba: 'Zawieszenie: Służba',
+      zawieszenie_dywizja: 'Zawieszenie: Dywizja',
+      zawieszenie_uprawnienie: 'Zawieszenie: Uprawnienia',
+    };
+    return names[type] || type;
+  };
 
   const handleLogout = async () => {
     try {
@@ -105,10 +194,9 @@ export default function Navbar() {
 
             {/* User Info - Hidden on mobile */}
             <div className="hidden md:flex flex-col items-start">
-              <span className="text-white font-semibold text-sm">{discordUsername}</span>
-              <span className="text-[#c9a227] text-xs font-medium">{mtaNick ? `@${mtaNick}` : t(`admin.roles.${role}`)}</span>
+              <span className="text-white font-semibold text-sm">{mtaNick || discordUsername}</span>
+              <span className="text-[#c9a227] text-xs font-medium">@{discordUsername}</span>
             </div>
-
             {/* Chevron */}
             <ChevronDown
               className={`w-4 h-4 text-[#8fb5a0] group-hover:text-white transition-all duration-200 ${
@@ -148,46 +236,74 @@ export default function Navbar() {
 
               {/* Menu Items */}
               <div className="p-3 space-y-1">
-                {/* Role Badge */}
-                <div className="px-3 py-3 flex items-center gap-3 rounded-xl bg-[#0a2818]/30">
-                  <Shield className={`w-5 h-5 ${isDev ? 'text-red-400' : isAdmin ? 'text-purple-400' : 'text-[#22693f]'}`} />
-                  <div className="flex flex-col flex-1">
-                    <span className="text-xs text-[#8fb5a0] uppercase tracking-wide">Rola</span>
-                    <div className="mt-1">
-                      <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold shadow-lg ${
-                          isDev
-                            ? 'bg-gradient-to-r from-red-500 to-red-600 text-white'
-                            : isAdmin
-                            ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white'
-                            : 'bg-gradient-to-r from-[#22693f] to-[#1a4d32] text-white'
-                        }`}
-                      >
-                        {t(`admin.roles.${role}`).toUpperCase()}
+                {/* Division & Permissions */}
+                {(division || (permissions && permissions.length > 0)) && (
+                  <div className="px-3 py-3 flex items-center gap-3 rounded-xl bg-[#0a2818]/30">
+                    <Shield className={getDivisionColor()} />
+                    <div className="flex flex-col flex-1">
+                      <span className="text-xs text-[#8fb5a0] uppercase tracking-wide">
+                        {division ? 'Dywizja' : 'Uprawnienia'}
                       </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* MTA Nick */}
-                {mtaNick && (
-                  <div className="px-3 py-3 flex items-center gap-3 rounded-xl hover:bg-[#0a2818]/50 transition-colors cursor-default">
-                    <Gamepad2 className="w-5 h-5 text-[#c9a227]" />
-                    <div className="flex flex-col">
-                      <span className="text-xs text-[#8fb5a0] uppercase tracking-wide">MTA Nick</span>
-                      <span className="text-white font-medium text-sm">{mtaNick}</span>
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {division && (
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-bold ${getDivisionColor()} bg-white/10`}>
+                            {getDivisionDisplay()}
+                          </span>
+                        )}
+                        {permissions && permissions.length > 0 && (
+                          <>
+                            {division && <span className="text-white/50 text-xs">|</span>}
+                            {permissions.map((perm, idx) => (
+                              <span
+                                key={idx}
+                                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white bg-white/10"
+                              >
+                                {perm}
+                              </span>
+                            ))}
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
 
-                {/* Email */}
-                <div className="px-3 py-3 flex items-center gap-3 rounded-xl hover:bg-[#0a2818]/50 transition-colors cursor-default">
-                  <Mail className="w-5 h-5 text-[#14b8a6]" />
-                  <div className="flex flex-col">
-                    <span className="text-xs text-[#8fb5a0] uppercase tracking-wide">Email</span>
-                    <span className="text-white font-medium text-sm truncate max-w-[200px]">{user?.email}</span>
+                {/* Plus/Minus Counter */}
+                {(plusCount > 0 || minusCount > 0) && (
+                  <div className="px-3 py-3 flex items-center gap-3 rounded-xl bg-[#0a2818]/30">
+                    <Award className="w-5 h-5 text-[#c9a227]" />
+                    <div className="flex flex-col flex-1">
+                      <span className="text-xs text-[#8fb5a0] uppercase tracking-wide">Bilans</span>
+                      <div className="mt-1 flex gap-3">
+                        <span className="text-[#22c55e] font-bold text-sm">+{plusCount}</span>
+                        <span className="text-white/50">|</span>
+                        <span className="text-[#ef4444] font-bold text-sm">-{minusCount}</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* Active Penalties (Suspensions) */}
+                {activePenalties && activePenalties.length > 0 && (
+                  <div className="px-3 py-3 flex flex-col gap-2 rounded-xl bg-red-500/10 border border-red-500/20">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-red-400" />
+                      <span className="text-xs text-red-400 uppercase tracking-wide font-semibold">
+                        Aktywne Zawieszenia
+                      </span>
+                    </div>
+                    {activePenalties.map((penalty) => (
+                      <div key={penalty.id} className="flex flex-col gap-1 pl-6">
+                        <span className="text-white text-xs font-medium">
+                          {getPenaltyDisplayName(penalty.type)}
+                        </span>
+                        <span className="text-red-400 text-xs font-mono">
+                          {formatTime(penaltyTimers[penalty.id] || penalty.remaining_seconds)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 {/* Separator */}
                 <div className="h-px bg-gradient-to-r from-transparent via-[#1a4d32] to-transparent my-2" />
