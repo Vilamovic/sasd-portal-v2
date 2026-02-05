@@ -41,7 +41,7 @@ import {
  * Tylko dla admin/dev
  */
 export default function UserProfilePage() {
-  const { user: currentUser, loading, isAdmin } = useAuth();
+  const { user: currentUser, loading, isAdmin, role } = useAuth();
   const router = useRouter();
   const params = useParams();
   const userId = params.userId as string;
@@ -70,18 +70,34 @@ export default function UserProfilePage() {
   // Modal form states
   const [plusMinusType, setPlusMinusType] = useState<'plus' | 'minus'>('plus');
   const [plusMinusReason, setPlusMinusReason] = useState('');
+  const [penaltyType, setPenaltyType] = useState<'zawieszenie_sluzba' | 'upomnienie_pisemne'>('zawieszenie_sluzba');
   const [penaltyReason, setPenaltyReason] = useState('');
   const [penaltyDuration, setPenaltyDuration] = useState('24');
+  const [penaltyEvidenceLink, setPenaltyEvidenceLink] = useState('');
   const [noteText, setNoteText] = useState('');
 
   const submittingRef = useRef(false);
 
   const badges = [
-    'Rekrut', 'Oficer I', 'Oficer II', 'Oficer III', 'Oficer III+I',
-    'Detektyw I', 'Detektyw II', 'Detektyw III',
-    'Sierżant I', 'Sierżant II', 'Sierżant III',
-    'Porucznik I', 'Porucznik II', 'Porucznik III',
-    'Kapitan I', 'Kapitan II', 'Szef'
+    'Trainee',
+    'Deputy Sheriff I',
+    'Deputy Sheriff II',
+    'Deputy Sheriff III',
+    'Senior Deputy Sheriff',
+    'Sergeant I',
+    'Sergeant II',
+    'Detective I',
+    'Detective II',
+    'Detective III',
+    'Lieutenant',
+    'Captain I',
+    'Captain II',
+    'Captain III',
+    'Area Commander',
+    'Division Chief',
+    'Assistant Sheriff',
+    'Undersheriff',
+    'Sheriff'
   ];
 
   const divisions = ['FTO', 'SS', 'DTU', 'GU'];
@@ -94,10 +110,12 @@ export default function UserProfilePage() {
   }, [currentUser, loading, router]);
 
   useEffect(() => {
-    if (!loading && currentUser && !isAdmin) {
+    // Only redirect if role is loaded and user is not admin
+    // This prevents redirect during initial load when role might be null
+    if (!loading && currentUser && role && !isAdmin) {
       router.push('/dashboard');
     }
-  }, [isAdmin, loading, currentUser, router]);
+  }, [isAdmin, loading, currentUser, role, router]);
 
   useEffect(() => {
     if (currentUser && isAdmin) {
@@ -209,15 +227,15 @@ export default function UserProfilePage() {
 
       // Discord webhook
       if (oldBadge !== tempBadge) {
-        const badges = [
-          'Rekrut', 'Oficer I', 'Oficer II', 'Oficer III', 'Oficer III+I',
-          'Detektyw I', 'Detektyw II', 'Detektyw III',
-          'Sierżant I', 'Sierżant II', 'Sierżant III',
-          'Porucznik I', 'Porucznik II', 'Porucznik III',
-          'Kapitan I', 'Kapitan II', 'Szef'
+        const badgesList = [
+          'Trainee', 'Deputy Sheriff I', 'Deputy Sheriff II', 'Deputy Sheriff III',
+          'Senior Deputy Sheriff', 'Sergeant I', 'Sergeant II',
+          'Detective I', 'Detective II', 'Detective III',
+          'Lieutenant', 'Captain I', 'Captain II', 'Captain III',
+          'Area Commander', 'Division Chief', 'Assistant Sheriff', 'Undersheriff', 'Sheriff'
         ];
-        const oldIndex = badges.indexOf(oldBadge || '');
-        const newIndex = badges.indexOf(tempBadge || '');
+        const oldIndex = badgesList.indexOf(oldBadge || '');
+        const newIndex = badgesList.indexOf(tempBadge || '');
         const isPromotion = newIndex > oldIndex;
 
         await notifyBadgeChange({
@@ -422,7 +440,7 @@ export default function UserProfilePage() {
         type: plusMinusType,
         user: { username: user.username, mta_nick: user.mta_nick },
         description: plusMinusReason.trim(),
-        admin: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin',
+        createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
       });
 
       // Reload data
@@ -445,10 +463,14 @@ export default function UserProfilePage() {
       return;
     }
 
-    const duration = parseInt(penaltyDuration);
-    if (isNaN(duration) || duration <= 0) {
-      alert('Czas trwania musi być liczbą większą od 0.');
-      return;
+    // Duration validation only for suspension types
+    let duration = null;
+    if (penaltyType === 'zawieszenie_sluzba') {
+      duration = parseInt(penaltyDuration);
+      if (isNaN(duration) || duration <= 0) {
+        alert('Czas trwania musi być liczbą większą od 0.');
+        return;
+      }
     }
 
     submittingRef.current = true;
@@ -456,7 +478,7 @@ export default function UserProfilePage() {
       const { error } = await addPenalty({
         user_id: userId,
         admin_id: currentUser.id,
-        penalty_type: 'suspension',
+        penalty_type: penaltyType === 'zawieszenie_sluzba' ? 'suspension' : 'written_warning',
         reason: penaltyReason.trim(),
         duration_hours: duration,
       });
@@ -464,19 +486,22 @@ export default function UserProfilePage() {
 
       // Send Discord notification
       await notifyPenalty({
-        type: 'zawieszenie_sluzba',
+        type: penaltyType,
         user: { username: user.username, mta_nick: user.mta_nick },
         description: penaltyReason.trim(),
-        duration: `${duration}h`,
-        admin: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin',
+        evidenceLink: penaltyEvidenceLink.trim() || null,
+        durationHours: duration,
+        createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
       });
 
       // Reload data
       await loadUserData();
       setPenaltyReason('');
       setPenaltyDuration('24');
+      setPenaltyEvidenceLink('');
+      setPenaltyType('zawieszenie_sluzba');
       setShowAddPenaltyModal(false);
-      alert('Kara (zawieszenie) nadana.');
+      alert(`Kara (${penaltyType === 'zawieszenie_sluzba' ? 'zawieszenie' : 'upomnienie pisemne'}) nadana.`);
     } catch (error) {
       console.error('Error adding penalty:', error);
       alert('Błąd podczas nadawania kary.');
@@ -1111,13 +1136,15 @@ export default function UserProfilePage() {
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-2xl font-bold text-white flex items-center gap-2">
                 <AlertTriangle className="w-6 h-6 text-red-400" />
-                Nadaj Karę (Zawieszenie)
+                Nadaj Karę
               </h3>
               <button
                 onClick={() => {
                   setShowAddPenaltyModal(false);
                   setPenaltyReason('');
                   setPenaltyDuration('24');
+                  setPenaltyEvidenceLink('');
+                  setPenaltyType('zawieszenie_sluzba');
                 }}
                 className="text-[#8fb5a0] hover:text-white transition-colors"
               >
@@ -1126,9 +1153,40 @@ export default function UserProfilePage() {
             </div>
 
             <div className="space-y-4">
+              {/* Type Selection */}
+              <div>
+                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Typ kary</label>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setPenaltyType('zawieszenie_sluzba')}
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all ${
+                      penaltyType === 'zawieszenie_sluzba'
+                        ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg'
+                        : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32]'
+                    }`}
+                  >
+                    <AlertTriangle className="w-5 h-5" />
+                    Zawieszenie
+                  </button>
+                  <button
+                    onClick={() => setPenaltyType('upomnienie_pisemne')}
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all ${
+                      penaltyType === 'upomnienie_pisemne'
+                        ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg'
+                        : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32]'
+                    }`}
+                  >
+                    <FileText className="w-5 h-5" />
+                    Upomnienie Pisemne
+                  </button>
+                </div>
+              </div>
+
               {/* Reason */}
               <div>
-                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Powód zawieszenia</label>
+                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">
+                  Powód {penaltyType === 'zawieszenie_sluzba' ? 'zawieszenia' : 'upomnienia'}
+                </label>
                 <textarea
                   value={penaltyReason}
                   onChange={(e) => setPenaltyReason(e.target.value)}
@@ -1138,37 +1196,55 @@ export default function UserProfilePage() {
                 />
               </div>
 
-              {/* Duration */}
+              {/* Evidence Link (Optional) */}
               <div>
-                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Czas trwania (godziny)</label>
-                <div className="grid grid-cols-4 gap-2 mb-3">
-                  {['1', '6', '12', '24', '48', '72', '168', '720'].map((hours) => (
-                    <button
-                      key={hours}
-                      onClick={() => setPenaltyDuration(hours)}
-                      className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
-                        penaltyDuration === hours
-                          ? 'bg-red-500 text-white'
-                          : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32] hover:bg-[#133524]'
-                      }`}
-                    >
-                      {parseInt(hours) >= 24 ? `${parseInt(hours) / 24}d` : `${hours}h`}
-                    </button>
-                  ))}
-                </div>
+                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">
+                  Link do dowodów <span className="text-xs text-[#8fb5a0]/70">(opcjonalny)</span>
+                </label>
                 <input
-                  type="number"
-                  value={penaltyDuration}
-                  onChange={(e) => setPenaltyDuration(e.target.value)}
-                  placeholder="Lub wpisz własną liczbę godzin..."
+                  type="url"
+                  value={penaltyEvidenceLink}
+                  onChange={(e) => setPenaltyEvidenceLink(e.target.value)}
+                  placeholder="https://..."
                   className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-red-500 transition-colors"
                 />
               </div>
 
+              {/* Duration - Only for suspension */}
+              {penaltyType === 'zawieszenie_sluzba' && (
+                <div>
+                  <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Czas trwania (godziny)</label>
+                  <div className="grid grid-cols-4 gap-2 mb-3">
+                    {['1', '6', '12', '24', '48', '72', '168', '720'].map((hours) => (
+                      <button
+                        key={hours}
+                        onClick={() => setPenaltyDuration(hours)}
+                        className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
+                          penaltyDuration === hours
+                            ? 'bg-red-500 text-white'
+                            : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32] hover:bg-[#133524]'
+                        }`}
+                      >
+                        {parseInt(hours) >= 24 ? `${parseInt(hours) / 24}d` : `${hours}h`}
+                      </button>
+                    ))}
+                  </div>
+                  <input
+                    type="number"
+                    value={penaltyDuration}
+                    onChange={(e) => setPenaltyDuration(e.target.value)}
+                    placeholder="Lub wpisz własną liczbę godzin..."
+                    className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-red-500 transition-colors"
+                  />
+                </div>
+              )}
+
               {/* Warning */}
               <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl">
                 <p className="text-red-400 text-xs">
-                  <strong>Uwaga:</strong> Zawieszenie uniemożliwi użytkownikowi dostęp do egzaminów i innych funkcji przez podany czas.
+                  <strong>Uwaga:</strong> {penaltyType === 'zawieszenie_sluzba'
+                    ? 'Zawieszenie uniemożliwi użytkownikowi dostęp do egzaminów i innych funkcji przez podany czas.'
+                    : 'Upomnienie pisemne zostanie zapisane w kartotece użytkownika.'}
                 </p>
               </div>
 
@@ -1186,6 +1262,8 @@ export default function UserProfilePage() {
                     setShowAddPenaltyModal(false);
                     setPenaltyReason('');
                     setPenaltyDuration('24');
+                    setPenaltyEvidenceLink('');
+                    setPenaltyType('zawieszenie_sluzba');
                   }}
                   className="px-6 py-3 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
                 >

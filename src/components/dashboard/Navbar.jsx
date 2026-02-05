@@ -226,10 +226,8 @@ export default function Navbar() {
                     </div>
                   )}
                   <div className="flex flex-col">
-                    <span className="text-white font-bold text-base">{discordUsername}</span>
-                    {mtaNick && (
-                      <span className="text-[#c9a227] text-sm font-medium">@{mtaNick}</span>
-                    )}
+                    <span className="text-white font-bold text-base">{mtaNick || discordUsername}</span>
+                    <span className="text-[#c9a227] text-sm font-medium">@{discordUsername}</span>
                   </div>
                 </div>
               </div>

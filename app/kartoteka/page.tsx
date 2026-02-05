@@ -366,16 +366,6 @@ export default function KartotekaPage() {
               </div>
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => {
-                    // TODO: Implement batch actions modal
-                    alert('Funkcja w przygotowaniu');
-                  }}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#c9a227] to-[#e6b830] text-[#020a06] font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
-                >
-                  <UserCog className="w-4 h-4" />
-                  Zarządzaj zaznaczonymi
-                </button>
-                <button
                   onClick={() => setSelectedUsers(new Set())}
                   className="px-4 py-2.5 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
                 >
