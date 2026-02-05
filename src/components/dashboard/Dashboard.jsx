@@ -5,13 +5,14 @@ import { useAuth } from '@/src/contexts/AuthContext';
 import { useTranslation } from '@/src/contexts/TranslationContext';
 import { BookOpen, FileText, Users, ArrowRight, Clock, CheckCircle, Shield, Sparkles } from 'lucide-react';
 import Navbar from './Navbar';
+import MtaNickModal from './MtaNickModal';
 
 /**
  * Dashboard - Premium Sheriff-themed main dashboard
  * Role-based navigation tiles with glassmorphism design (Next.js routing)
  */
 export default function Dashboard() {
-  const { user, role, isDev, isAdmin } = useAuth();
+  const { user, role, isDev, isAdmin, showMtaNickModal, handleMtaNickComplete } = useAuth();
   const { t } = useTranslation();
 
   const tiles = [
@@ -62,7 +63,16 @@ export default function Dashboard() {
   const visibleTiles = tiles.filter((tile) => tile.roles.includes(role));
 
   return (
-    <div className="min-h-screen bg-[#020a06] relative overflow-hidden">
+    <>
+      {/* MTA Nick Modal - shown on first login */}
+      {showMtaNickModal && (
+        <MtaNickModal
+          user={user}
+          onComplete={handleMtaNickComplete}
+        />
+      )}
+
+      <div className="min-h-screen bg-[#020a06] relative overflow-hidden">
       {/* Background effects */}
       <div className="fixed inset-0 pointer-events-none">
         {/* Gradient orbs */}
@@ -187,5 +197,6 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
+    </>
   );
 }

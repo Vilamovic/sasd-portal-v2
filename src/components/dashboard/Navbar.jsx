@@ -41,7 +41,12 @@ export default function Navbar() {
     }
   };
 
-  const displayName = mtaNick || user?.email?.split('@')[0] || 'Użytkownik';
+  // Discord username
+  const discordUsername = user?.user_metadata?.global_name || user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'Użytkownik';
+  // Avatar URL z Discorda
+  const avatarUrl = user?.user_metadata?.avatar_url;
+  // Główna nazwa do wyświetlenia
+  const displayName = mtaNick || discordUsername;
 
   return (
     <nav className="h-16 bg-gradient-to-r from-[#020a06] via-[#051a0f] to-[#0a2818] border-b border-[#1a4d32]/50 shadow-2xl relative z-50">
@@ -83,17 +88,25 @@ export default function Navbar() {
           >
             {/* Avatar */}
             <div className="relative">
-              <div className="w-9 h-9 bg-gradient-to-br from-[#c9a227] to-[#e6b830] rounded-full flex items-center justify-center shadow-lg group-hover:shadow-[#c9a227]/30 transition-shadow">
-                <User className="w-5 h-5 text-[#020a06]" strokeWidth={2.5} />
-              </div>
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt={displayName}
+                  className="w-9 h-9 rounded-full shadow-lg group-hover:shadow-[#c9a227]/30 transition-shadow object-cover border-2 border-[#c9a227]/30"
+                />
+              ) : (
+                <div className="w-9 h-9 bg-gradient-to-br from-[#c9a227] to-[#e6b830] rounded-full flex items-center justify-center shadow-lg group-hover:shadow-[#c9a227]/30 transition-shadow">
+                  <User className="w-5 h-5 text-[#020a06]" strokeWidth={2.5} />
+                </div>
+              )}
               {/* Online indicator */}
               <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#22c55e] rounded-full border-2 border-[#051a0f]" />
             </div>
 
             {/* User Info - Hidden on mobile */}
             <div className="hidden md:flex flex-col items-start">
-              <span className="text-white font-semibold text-sm">{displayName}</span>
-              <span className="text-[#c9a227] text-xs font-medium">{t(`admin.roles.${role}`)}</span>
+              <span className="text-white font-semibold text-sm">{discordUsername}</span>
+              <span className="text-[#c9a227] text-xs font-medium">{mtaNick ? `@${mtaNick}` : t(`admin.roles.${role}`)}</span>
             </div>
 
             {/* Chevron */}
@@ -113,12 +126,22 @@ export default function Navbar() {
               {/* Header */}
               <div className="p-4 border-b border-[#1a4d32]/50 bg-gradient-to-br from-[#0a2818]/50 to-transparent">
                 <div className="flex items-center gap-3">
-                  <div className="w-14 h-14 bg-gradient-to-br from-[#c9a227] to-[#e6b830] rounded-full flex items-center justify-center shadow-lg">
-                    <User className="w-8 h-8 text-[#020a06]" strokeWidth={2.5} />
-                  </div>
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={displayName}
+                      className="w-14 h-14 rounded-full shadow-lg object-cover border-2 border-[#c9a227]/30"
+                    />
+                  ) : (
+                    <div className="w-14 h-14 bg-gradient-to-br from-[#c9a227] to-[#e6b830] rounded-full flex items-center justify-center shadow-lg">
+                      <User className="w-8 h-8 text-[#020a06]" strokeWidth={2.5} />
+                    </div>
+                  )}
                   <div className="flex flex-col">
-                    <span className="text-white font-bold text-base">{displayName}</span>
-                    <span className="text-[#8fb5a0] text-sm">{user?.user_metadata?.badge || 'Deputy'}</span>
+                    <span className="text-white font-bold text-base">{discordUsername}</span>
+                    {mtaNick && (
+                      <span className="text-[#c9a227] text-sm font-medium">@{mtaNick}</span>
+                    )}
                   </div>
                 </div>
               </div>
