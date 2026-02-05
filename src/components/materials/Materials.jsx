@@ -58,9 +58,6 @@ export default function Materials({ onBack }) {
       if (cached) {
         const parsed = JSON.parse(cached);
         setMaterials(parsed);
-        if (parsed.length > 0) {
-          setSelectedMaterial(parsed[0]);
-        }
       }
 
       // Fetch from Supabase
@@ -72,11 +69,6 @@ export default function Materials({ onBack }) {
 
       // Cache in localStorage
       localStorage.setItem('materials_cache', JSON.stringify(materialsData));
-
-      // Select first material if none selected
-      if (!selectedMaterial && materialsData.length > 0) {
-        setSelectedMaterial(materialsData[0]);
-      }
     } catch (error) {
       console.error('Error loading materials:', error);
     } finally {
@@ -277,6 +269,15 @@ export default function Materials({ onBack }) {
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
+        {/* Back Button */}
+        <button
+          onClick={onBack}
+          className="mb-6 flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200"
+        >
+          <ChevronLeft className="w-5 h-5" />
+          <span className="text-sm font-medium">Powrót do Dashboard</span>
+        </button>
+
         {/* Header */}
         <div className="mb-8 flex flex-col md:flex-row md:items-start justify-between gap-4">
           <div>
@@ -521,15 +522,6 @@ export default function Materials({ onBack }) {
             </div>
           </div>
         )}
-
-        {/* Back Button */}
-        <button
-          onClick={onBack}
-          className="mt-8 flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200"
-        >
-          <ChevronLeft className="w-5 h-5" />
-          <span className="text-sm font-medium">Powrót do Dashboard</span>
-        </button>
       </div>
 
       {/* Quill Styles */}
