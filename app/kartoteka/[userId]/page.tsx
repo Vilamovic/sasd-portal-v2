@@ -15,7 +15,7 @@ import {
   addPenalty,
   addUserNote,
 } from '@/src/utils/supabaseHelpers';
-import { notifyPenalty } from '@/src/utils/discord';
+import { notifyPenalty, notifyBadgeChange, notifyPermissionChange, notifyDivisionChange } from '@/src/utils/discord';
 import {
   ChevronLeft,
   User,
@@ -157,13 +157,19 @@ export default function UserProfilePage() {
         setTempPermissions(userData.permissions || []);
         setTempIsCommander(userData.is_commander || false);
 
-        // Filter active penalties
+        // Load penalties
         const { data: penaltiesData, error: penaltiesError } = await getUserPenalties(userId);
         if (penaltiesError) throw penaltiesError;
-        setPenalties(penaltiesData || []);
+
+        // Map created_by_user to admin_username for display
+        const mappedPenalties = (penaltiesData || []).map((p: any) => ({
+          ...p,
+          admin_username: p.created_by_user?.username || 'Unknown',
+        }));
+        setPenalties(mappedPenalties);
 
         // Active suspensions
-        const active = (penaltiesData || []).filter((p: any) => {
+        const active = mappedPenalties.filter((p: any) => {
           if (p.penalty_type === 'suspension' && p.duration_hours) {
             const createdAt = new Date(p.created_at).getTime();
             const expiresAt = createdAt + p.duration_hours * 60 * 60 * 1000;
@@ -177,7 +183,13 @@ export default function UserProfilePage() {
       // Load notes
       const { data: notesData, error: notesError } = await getUserNotes(userId);
       if (notesError) throw notesError;
-      setNotes(notesData || []);
+
+      // Map created_by_user to admin_username for display
+      const mappedNotes = (notesData || []).map((n: any) => ({
+        ...n,
+        admin_username: n.created_by_user?.username || 'Unknown',
+      }));
+      setNotes(mappedNotes);
     } catch (error) {
       console.error('Error loading user data:', error);
       alert('Błąd podczas ładowania danych użytkownika.');
@@ -187,12 +199,35 @@ export default function UserProfilePage() {
   };
 
   const handleSaveBadge = async () => {
-    if (submittingRef.current || !user) return;
+    if (submittingRef.current || !user || !currentUser) return;
     submittingRef.current = true;
 
     try {
+      const oldBadge = user.badge;
       const { error } = await updateUserBadge(userId, tempBadge || null);
       if (error) throw error;
+
+      // Discord webhook
+      if (oldBadge !== tempBadge) {
+        const badges = [
+          'Rekrut', 'Oficer I', 'Oficer II', 'Oficer III', 'Oficer III+I',
+          'Detektyw I', 'Detektyw II', 'Detektyw III',
+          'Sierżant I', 'Sierżant II', 'Sierżant III',
+          'Porucznik I', 'Porucznik II', 'Porucznik III',
+          'Kapitan I', 'Kapitan II', 'Szef'
+        ];
+        const oldIndex = badges.indexOf(oldBadge || '');
+        const newIndex = badges.indexOf(tempBadge || '');
+        const isPromotion = newIndex > oldIndex;
+
+        await notifyBadgeChange({
+          user: { username: user.username, mta_nick: user.mta_nick },
+          oldBadge: oldBadge || 'Brak',
+          newBadge: tempBadge || 'Brak',
+          isPromotion,
+          createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
+        });
+      }
 
       setUser({ ...user, badge: tempBadge });
       setEditingBadge(false);
@@ -206,10 +241,12 @@ export default function UserProfilePage() {
   };
 
   const handleSaveDivision = async () => {
-    if (submittingRef.current || !user) return;
+    if (submittingRef.current || !user || !currentUser) return;
     submittingRef.current = true;
 
     try {
+      const oldDivision = user.division;
+
       // Update division
       const { error: divError } = await updateUserDivision(userId, tempDivision || null);
       if (divError) throw divError;
@@ -217,6 +254,29 @@ export default function UserProfilePage() {
       // Update commander status
       const { error: cmdError } = await updateIsCommander(userId, tempIsCommander);
       if (cmdError) throw cmdError;
+
+      // Discord webhook
+      if (oldDivision !== tempDivision) {
+        if (tempDivision) {
+          // Nadanie dywizji
+          await notifyDivisionChange({
+            user: { username: user.username, mta_nick: user.mta_nick },
+            division: tempDivision,
+            isGranted: true,
+            isCommander: tempIsCommander,
+            createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
+          });
+        } else if (oldDivision) {
+          // Odebranie dywizji
+          await notifyDivisionChange({
+            user: { username: user.username, mta_nick: user.mta_nick },
+            division: oldDivision,
+            isGranted: false,
+            isCommander: false,
+            createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
+          });
+        }
+      }
 
       setUser({ ...user, division: tempDivision, is_commander: tempIsCommander });
       setEditingDivision(false);
@@ -230,12 +290,35 @@ export default function UserProfilePage() {
   };
 
   const handleSavePermissions = async () => {
-    if (submittingRef.current || !user) return;
+    if (submittingRef.current || !user || !currentUser) return;
     submittingRef.current = true;
 
     try {
+      const oldPermissions = user.permissions || [];
       const { error } = await updateUserPermissions(userId, tempPermissions);
       if (error) throw error;
+
+      // Discord webhooks - powiadomienie o każdej zmianie
+      const added = tempPermissions.filter((p: string) => !oldPermissions.includes(p));
+      const removed = oldPermissions.filter((p: string) => !tempPermissions.includes(p));
+
+      for (const permission of added) {
+        await notifyPermissionChange({
+          user: { username: user.username, mta_nick: user.mta_nick },
+          permission,
+          isGranted: true,
+          createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
+        });
+      }
+
+      for (const permission of removed) {
+        await notifyPermissionChange({
+          user: { username: user.username, mta_nick: user.mta_nick },
+          permission,
+          isGranted: false,
+          createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
+        });
+      }
 
       setUser({ ...user, permissions: tempPermissions });
       setEditingPermissions(false);
