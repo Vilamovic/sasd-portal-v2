@@ -15,6 +15,8 @@ import {
   updateIsCommander,
   addPenalty,
   addUserNote,
+  deletePenalty,
+  deleteUserNote,
   clearUserPlusMinusPenalties,
   clearUserSuspensions,
   clearUserWrittenWarnings,
@@ -47,7 +49,7 @@ import {
  * Tylko dla admin/dev
  */
 export default function UserProfilePage() {
-  const { user: currentUser, loading, isAdmin, isDev, role } = useAuth();
+  const { user: currentUser, loading, isAdmin, isDev, role, refreshUserData } = useAuth();
   const router = useRouter();
   const params = useParams();
   const username = params.username as string;
@@ -86,6 +88,10 @@ export default function UserProfilePage() {
   const [writtenWarningReason, setWrittenWarningReason] = useState('');
   const [writtenWarningEvidenceLink, setWrittenWarningEvidenceLink] = useState('');
   const [noteText, setNoteText] = useState('');
+
+  // Selection state for batch delete
+  const [selectedPenaltyIds, setSelectedPenaltyIds] = useState<Set<string>>(new Set());
+  const [selectedNoteIds, setSelectedNoteIds] = useState<Set<string>>(new Set());
 
   const submittingRef = useRef(false);
 
@@ -466,6 +472,8 @@ export default function UserProfilePage() {
 
       // Reload data
       await loadUserData();
+      // Refresh navbar data
+      if (refreshUserData) await refreshUserData();
       setPlusMinusReason('');
       setShowAddPlusMinusModal(false);
       alert(`${plusMinusType === 'plus' ? 'PLUS' : 'MINUS'} dodany.`);
@@ -518,6 +526,8 @@ export default function UserProfilePage() {
 
       // Reload data
       await loadUserData();
+      // Refresh navbar data
+      if (refreshUserData) await refreshUserData();
       setPenaltyReason('');
       setPenaltyDuration('24');
       setPenaltyEvidenceLink('');
@@ -563,6 +573,8 @@ export default function UserProfilePage() {
 
       // Reload data
       await loadUserData();
+      // Refresh navbar data
+      if (refreshUserData) await refreshUserData();
       setWrittenWarningReason('');
       setWrittenWarningEvidenceLink('');
       setShowAddWrittenWarningModal(false);
@@ -612,6 +624,8 @@ export default function UserProfilePage() {
       const { error } = await clearUserPlusMinusPenalties(userId);
       if (error) throw error;
       await loadUserData();
+      // Refresh navbar data
+      if (refreshUserData) await refreshUserData();
       alert('Historia PLUS/MINUS wyzerowana.');
     } catch (error) {
       console.error('Error clearing PLUS/MINUS:', error);
@@ -626,6 +640,8 @@ export default function UserProfilePage() {
       const { error } = await clearUserSuspensions(userId);
       if (error) throw error;
       await loadUserData();
+      // Refresh navbar data
+      if (refreshUserData) await refreshUserData();
       alert('Historia zawieszeń wyzerowana.');
     } catch (error) {
       console.error('Error clearing suspensions:', error);
@@ -658,6 +674,84 @@ export default function UserProfilePage() {
     } catch (error) {
       console.error('Error clearing notes:', error);
       alert('Błąd podczas zerowania notatek.');
+    }
+  };
+
+  // Toggle penalty selection
+  const togglePenaltySelection = (penaltyId: string) => {
+    setSelectedPenaltyIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(penaltyId)) {
+        newSet.delete(penaltyId);
+      } else {
+        newSet.add(penaltyId);
+      }
+      return newSet;
+    });
+  };
+
+  // Toggle note selection
+  const toggleNoteSelection = (noteId: string) => {
+    setSelectedNoteIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(noteId)) {
+        newSet.delete(noteId);
+      } else {
+        newSet.add(noteId);
+      }
+      return newSet;
+    });
+  };
+
+  // Delete selected penalties
+  const handleDeleteSelectedPenalties = async () => {
+    if (selectedPenaltyIds.size === 0) {
+      alert('Nie wybrano żadnych pozycji do usunięcia.');
+      return;
+    }
+
+    if (!confirm(`Czy na pewno chcesz usunąć ${selectedPenaltyIds.size} zaznaczonych pozycji?`)) return;
+
+    try {
+      // Delete all selected penalties
+      const deletePromises = Array.from(selectedPenaltyIds).map((id) => deletePenalty(id));
+      await Promise.all(deletePromises);
+
+      // Reload data
+      await loadUserData();
+      // Refresh navbar data
+      if (refreshUserData) await refreshUserData();
+
+      setSelectedPenaltyIds(new Set());
+      alert(`Usunięto ${selectedPenaltyIds.size} pozycji.`);
+    } catch (error) {
+      console.error('Error deleting selected penalties:', error);
+      alert('Błąd podczas usuwania pozycji.');
+    }
+  };
+
+  // Delete selected notes
+  const handleDeleteSelectedNotes = async () => {
+    if (selectedNoteIds.size === 0) {
+      alert('Nie wybrano żadnych notatek do usunięcia.');
+      return;
+    }
+
+    if (!confirm(`Czy na pewno chcesz usunąć ${selectedNoteIds.size} zaznaczonych notatek?`)) return;
+
+    try {
+      // Delete all selected notes
+      const deletePromises = Array.from(selectedNoteIds).map((id) => deleteUserNote(id));
+      await Promise.all(deletePromises);
+
+      // Reload data
+      await loadUserData();
+
+      setSelectedNoteIds(new Set());
+      alert(`Usunięto ${selectedNoteIds.size} notatek.`);
+    } catch (error) {
+      console.error('Error deleting selected notes:', error);
+      alert('Błąd podczas usuwania notatek.');
     }
   };
 
@@ -1027,14 +1121,24 @@ export default function UserProfilePage() {
         {/* PLUS/MINUS History */}
         <div className="mb-8">
           {isDev && (
-            <div className="flex justify-end mb-2">
+            <div className="flex justify-end gap-2 mb-2">
+              {selectedPenaltyIds.size > 0 && (
+                <button
+                  onClick={handleDeleteSelectedPenalties}
+                  className="flex items-center gap-2 px-3 py-2 bg-orange-600/20 border border-orange-500/50 text-orange-400 text-sm font-bold rounded-lg hover:bg-orange-600/30 transition-all"
+                  title={`Usuń ${selectedPenaltyIds.size} zaznaczonych pozycji`}
+                >
+                  <Trash2 className="w-3 h-3" />
+                  Usuń zaznaczone ({selectedPenaltyIds.size})
+                </button>
+              )}
               <button
                 onClick={handleClearPlusMinusPenalties}
                 className="flex items-center gap-2 px-3 py-2 bg-red-600/20 border border-red-500/50 text-red-400 text-sm font-bold rounded-lg hover:bg-red-600/30 transition-all"
                 title="Wyzeruj całą historię PLUS/MINUS (DEV)"
               >
                 <Trash2 className="w-3 h-3" />
-                Wyzeruj
+                Wyzeruj wszystko
               </button>
             </div>
           )}
@@ -1062,6 +1166,7 @@ export default function UserProfilePage() {
                 <table className="w-full">
                   <thead className="bg-[#051a0f]/50 border-b border-[#1a4d32]/50">
                     <tr>
+                      {isDev && <th className="px-4 py-4 w-12"></th>}
                       <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Typ</th>
                       <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Powód</th>
                       <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Nadane przez</th>
@@ -1073,6 +1178,16 @@ export default function UserProfilePage() {
                       .filter((p) => p.penalty_type === 'plus' || p.penalty_type === 'minus')
                       .map((penalty) => (
                         <tr key={penalty.id} className="hover:bg-[#0a2818]/30 transition-colors">
+                          {isDev && (
+                            <td className="px-4 py-4">
+                              <input
+                                type="checkbox"
+                                checked={selectedPenaltyIds.has(penalty.id)}
+                                onChange={() => togglePenaltySelection(penalty.id)}
+                                className="w-4 h-4 rounded border-[#1a4d32] bg-[#0a2818] text-[#c9a227] focus:ring-[#c9a227] focus:ring-offset-0 cursor-pointer"
+                              />
+                            </td>
+                          )}
                           <td className="px-6 py-4">
                             <span className={`font-bold ${getPenaltyTypeColor(penalty.penalty_type)}`}>
                               {getPenaltyTypeDisplay(penalty.penalty_type)}
@@ -1093,14 +1208,24 @@ export default function UserProfilePage() {
         {/* Penalties History */}
         <div className="mb-8">
           {isDev && (
-            <div className="flex justify-end mb-2">
+            <div className="flex justify-end gap-2 mb-2">
+              {selectedPenaltyIds.size > 0 && (
+                <button
+                  onClick={handleDeleteSelectedPenalties}
+                  className="flex items-center gap-2 px-3 py-2 bg-orange-600/20 border border-orange-500/50 text-orange-400 text-sm font-bold rounded-lg hover:bg-orange-600/30 transition-all"
+                  title={`Usuń ${selectedPenaltyIds.size} zaznaczonych pozycji`}
+                >
+                  <Trash2 className="w-3 h-3" />
+                  Usuń zaznaczone ({selectedPenaltyIds.size})
+                </button>
+              )}
               <button
                 onClick={handleClearSuspensions}
                 className="flex items-center gap-2 px-3 py-2 bg-red-600/20 border border-red-500/50 text-red-400 text-sm font-bold rounded-lg hover:bg-red-600/30 transition-all"
                 title="Wyzeruj całą historię zawieszeń (DEV)"
               >
                 <Trash2 className="w-3 h-3" />
-                Wyzeruj
+                Wyzeruj wszystko
               </button>
             </div>
           )}
@@ -1128,6 +1253,7 @@ export default function UserProfilePage() {
                 <table className="w-full">
                   <thead className="bg-[#051a0f]/50 border-b border-[#1a4d32]/50">
                     <tr>
+                      {isDev && <th className="px-4 py-4 w-12"></th>}
                       <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Powód</th>
                       <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Czas trwania</th>
                       <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Nadane przez</th>
@@ -1139,6 +1265,16 @@ export default function UserProfilePage() {
                       .filter((p) => ['zawieszenie_sluzba', 'zawieszenie_dywizja', 'zawieszenie_uprawnienia', 'zawieszenie_poscigowe'].includes(p.penalty_type))
                       .map((penalty) => (
                         <tr key={penalty.id} className="hover:bg-[#0a2818]/30 transition-colors">
+                          {isDev && (
+                            <td className="px-4 py-4">
+                              <input
+                                type="checkbox"
+                                checked={selectedPenaltyIds.has(penalty.id)}
+                                onChange={() => togglePenaltySelection(penalty.id)}
+                                className="w-4 h-4 rounded border-[#1a4d32] bg-[#0a2818] text-[#c9a227] focus:ring-[#c9a227] focus:ring-offset-0 cursor-pointer"
+                              />
+                            </td>
+                          )}
                           <td className="px-6 py-4 text-white">{penalty.reason}</td>
                           <td className="px-6 py-4 text-orange-400 font-semibold">
                             {penalty.duration_hours ? `${penalty.duration_hours}h` : 'Permanentne'}
@@ -1157,14 +1293,24 @@ export default function UserProfilePage() {
         {/* Written Warnings History */}
         <div className="mb-8">
           {isDev && (
-            <div className="flex justify-end mb-2">
+            <div className="flex justify-end gap-2 mb-2">
+              {selectedPenaltyIds.size > 0 && (
+                <button
+                  onClick={handleDeleteSelectedPenalties}
+                  className="flex items-center gap-2 px-3 py-2 bg-orange-600/20 border border-orange-500/50 text-orange-400 text-sm font-bold rounded-lg hover:bg-orange-600/30 transition-all"
+                  title={`Usuń ${selectedPenaltyIds.size} zaznaczonych pozycji`}
+                >
+                  <Trash2 className="w-3 h-3" />
+                  Usuń zaznaczone ({selectedPenaltyIds.size})
+                </button>
+              )}
               <button
                 onClick={handleClearWrittenWarnings}
                 className="flex items-center gap-2 px-3 py-2 bg-red-600/20 border border-red-500/50 text-red-400 text-sm font-bold rounded-lg hover:bg-red-600/30 transition-all"
                 title="Wyzeruj całą historię upomnienia pisemnych (DEV)"
               >
                 <Trash2 className="w-3 h-3" />
-                Wyzeruj
+                Wyzeruj wszystko
               </button>
             </div>
           )}
@@ -1192,6 +1338,7 @@ export default function UserProfilePage() {
                 <table className="w-full">
                   <thead className="bg-[#051a0f]/50 border-b border-[#1a4d32]/50">
                     <tr>
+                      {isDev && <th className="px-4 py-4 w-12"></th>}
                       <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Powód</th>
                       <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Nadane przez</th>
                       <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Data</th>
@@ -1202,6 +1349,16 @@ export default function UserProfilePage() {
                       .filter((p) => p.penalty_type === 'upomnienie_pisemne')
                       .map((penalty) => (
                         <tr key={penalty.id} className="hover:bg-[#0a2818]/30 transition-colors">
+                          {isDev && (
+                            <td className="px-4 py-4">
+                              <input
+                                type="checkbox"
+                                checked={selectedPenaltyIds.has(penalty.id)}
+                                onChange={() => togglePenaltySelection(penalty.id)}
+                                className="w-4 h-4 rounded border-[#1a4d32] bg-[#0a2818] text-[#c9a227] focus:ring-[#c9a227] focus:ring-offset-0 cursor-pointer"
+                              />
+                            </td>
+                          )}
                           <td className="px-6 py-4 text-white">{penalty.reason}</td>
                           <td className="px-6 py-4 text-[#8fb5a0]">{penalty.admin_username}</td>
                           <td className="px-6 py-4 text-[#8fb5a0] text-sm">{formatDate(penalty.created_at)}</td>
@@ -1217,14 +1374,24 @@ export default function UserProfilePage() {
         {/* Private Notes */}
         <div className="mb-8">
           {isDev && (
-            <div className="flex justify-end mb-2">
+            <div className="flex justify-end gap-2 mb-2">
+              {selectedNoteIds.size > 0 && (
+                <button
+                  onClick={handleDeleteSelectedNotes}
+                  className="flex items-center gap-2 px-3 py-2 bg-orange-600/20 border border-orange-500/50 text-orange-400 text-sm font-bold rounded-lg hover:bg-orange-600/30 transition-all"
+                  title={`Usuń ${selectedNoteIds.size} zaznaczonych notatek`}
+                >
+                  <Trash2 className="w-3 h-3" />
+                  Usuń zaznaczone ({selectedNoteIds.size})
+                </button>
+              )}
               <button
                 onClick={handleClearUserNotes}
                 className="flex items-center gap-2 px-3 py-2 bg-red-600/20 border border-red-500/50 text-red-400 text-sm font-bold rounded-lg hover:bg-red-600/30 transition-all"
                 title="Wyzeruj wszystkie notatki (DEV)"
               >
                 <Trash2 className="w-3 h-3" />
-                Wyzeruj
+                Wyzeruj wszystko
               </button>
             </div>
           )}
@@ -1254,15 +1421,25 @@ export default function UserProfilePage() {
                     key={note.id}
                     className="p-6 hover:bg-[#0a2818]/30 transition-colors"
                   >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[#c9a227] font-semibold">{note.admin_username}</span>
-                        <span className="text-[#8fb5a0] text-xs">
-                          {formatDate(note.created_at)}
-                        </span>
+                    <div className="flex items-start gap-4">
+                      {isDev && (
+                        <input
+                          type="checkbox"
+                          checked={selectedNoteIds.has(note.id)}
+                          onChange={() => toggleNoteSelection(note.id)}
+                          className="w-4 h-4 mt-1 rounded border-[#1a4d32] bg-[#0a2818] text-[#c9a227] focus:ring-[#c9a227] focus:ring-offset-0 cursor-pointer"
+                        />
+                      )}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-[#c9a227] font-semibold">{note.admin_username}</span>
+                          <span className="text-[#8fb5a0] text-xs">
+                            {formatDate(note.created_at)}
+                          </span>
+                        </div>
+                        <p className="text-white">{note.note}</p>
                       </div>
                     </div>
-                    <p className="text-white">{note.note}</p>
                   </div>
                 ))}
               </div>

@@ -64,6 +64,31 @@ export function AuthProvider({ children }) {
   }, []);
 
   /**
+   * Odświeża dane użytkownika (plus_count, minus_count, aktywne kary)
+   * Wywołaj po operacjach CRUD w user profile
+   */
+  const refreshUserData = useCallback(async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data: userData } = await getUserById(user.id);
+
+      if (userData) {
+        setPlusCount(userData.plus_count || 0);
+        setMinusCount(userData.minus_count || 0);
+        setDivision(userData.division || null);
+        setPermissions(userData.permissions || []);
+        setIsCommander(userData.is_commander || false);
+      }
+
+      // Odśwież aktywne kary
+      await fetchActivePenalties(user.id);
+    } catch (error) {
+      console.error('refreshUserData error:', error);
+    }
+  }, [user?.id, fetchActivePenalties]);
+
+  /**
    * Sprawdza czy użytkownik ma ustawiony MTA nick
    */
   const checkMtaNick = useCallback(async (userId) => {
@@ -511,6 +536,7 @@ export function AuthProvider({ children }) {
     signInWithDiscord,
     signOut,
     forceRelogin,
+    refreshUserData, // Nowa funkcja do odświeżania danych navbara
     // Kartoteka & Dywizje
     division,
     permissions,
