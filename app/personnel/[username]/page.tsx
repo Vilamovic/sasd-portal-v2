@@ -567,58 +567,58 @@ export default function UserProfilePage() {
 
   // Clear functions (DEV only)
   const handleClearPlusMinusPenalties = async () => {
-    if (!isDev || !confirm('Czy na pewno chcesz wyczyścić całą historię PLUS/MINUS tego użytkownika?')) return;
+    if (!isDev || !confirm('Czy na pewno chcesz wyzerować całą historię PLUS/MINUS tego użytkownika?')) return;
 
     try {
       const { error } = await clearUserPlusMinusPenalties(userId);
       if (error) throw error;
       await loadUserData();
-      alert('Historia PLUS/MINUS wyczyszczona.');
+      alert('Historia PLUS/MINUS wyzerowana.');
     } catch (error) {
       console.error('Error clearing PLUS/MINUS:', error);
-      alert('Błąd podczas czyszczenia historii.');
+      alert('Błąd podczas zerowania historii.');
     }
   };
 
   const handleClearSuspensions = async () => {
-    if (!isDev || !confirm('Czy na pewno chcesz wyczyścić całą historię zawieszeń tego użytkownika?')) return;
+    if (!isDev || !confirm('Czy na pewno chcesz wyzerować całą historię zawieszeń tego użytkownika?')) return;
 
     try {
       const { error } = await clearUserSuspensions(userId);
       if (error) throw error;
       await loadUserData();
-      alert('Historia zawieszeń wyczyszczona.');
+      alert('Historia zawieszeń wyzerowana.');
     } catch (error) {
       console.error('Error clearing suspensions:', error);
-      alert('Błąd podczas czyszczenia historii.');
+      alert('Błąd podczas zerowania historii.');
     }
   };
 
   const handleClearWrittenWarnings = async () => {
-    if (!isDev || !confirm('Czy na pewno chcesz wyczyścić całą historię upomnienia pisemnych tego użytkownika?')) return;
+    if (!isDev || !confirm('Czy na pewno chcesz wyzerować całą historię upomnienia pisemnych tego użytkownika?')) return;
 
     try {
       const { error } = await clearUserWrittenWarnings(userId);
       if (error) throw error;
       await loadUserData();
-      alert('Historia upomnienia pisemnych wyczyszczona.');
+      alert('Historia upomnienia pisemnych wyzerowana.');
     } catch (error) {
       console.error('Error clearing written warnings:', error);
-      alert('Błąd podczas czyszczenia historii.');
+      alert('Błąd podczas zerowania historii.');
     }
   };
 
   const handleClearUserNotes = async () => {
-    if (!isDev || !confirm('Czy na pewno chcesz wyczyścić wszystkie notatki tego użytkownika?')) return;
+    if (!isDev || !confirm('Czy na pewno chcesz wyzerować wszystkie notatki tego użytkownika?')) return;
 
     try {
       const { error } = await clearUserNotes(userId);
       if (error) throw error;
       await loadUserData();
-      alert('Notatki wyczyszczone.');
+      alert('Notatki wyzerowane.');
     } catch (error) {
       console.error('Error clearing notes:', error);
-      alert('Błąd podczas czyszczenia notatek.');
+      alert('Błąd podczas zerowania notatek.');
     }
   };
 
@@ -941,6 +941,18 @@ export default function UserProfilePage() {
         {/* Active Suspensions */}
         {activePenalties.length > 0 && (
           <div className="mb-8">
+            {isDev && (
+              <div className="flex justify-end mb-2">
+                <button
+                  onClick={handleClearSuspensions}
+                  className="flex items-center gap-2 px-3 py-2 bg-red-600/20 border border-red-500/50 text-red-400 text-sm font-bold rounded-lg hover:bg-red-600/30 transition-all"
+                  title="Wyzeruj wszystkie zawieszenia (DEV)"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  Wyzeruj
+                </button>
+              </div>
+            )}
             <h3 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
               <AlertTriangle className="w-6 h-6 text-orange-400" />
               Aktywne Zawieszenia
@@ -975,30 +987,30 @@ export default function UserProfilePage() {
 
         {/* PLUS/MINUS History */}
         <div className="mb-8">
+          {isDev && (
+            <div className="flex justify-end mb-2">
+              <button
+                onClick={handleClearPlusMinusPenalties}
+                className="flex items-center gap-2 px-3 py-2 bg-red-600/20 border border-red-500/50 text-red-400 text-sm font-bold rounded-lg hover:bg-red-600/30 transition-all"
+                title="Wyzeruj całą historię PLUS/MINUS (DEV)"
+              >
+                <Trash2 className="w-3 h-3" />
+                Wyzeruj
+              </button>
+            </div>
+          )}
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-2xl font-bold text-white flex items-center gap-2">
               <Award className="w-6 h-6 text-[#c9a227]" />
               Historia PLUS/MINUS
             </h3>
-            <div className="flex items-center gap-3">
-              {isDev && (
-                <button
-                  onClick={handleClearPlusMinusPenalties}
-                  className="flex items-center gap-2 px-4 py-3 bg-red-600/20 border border-red-500/50 text-red-400 font-bold rounded-xl hover:bg-red-600/30 transition-all"
-                  title="Wyczyść historię PLUS/MINUS (DEV)"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Wyczyść
-                </button>
-              )}
-              <button
-                onClick={() => setShowAddPlusMinusModal(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#c9a227] to-[#e6b830] text-[#020a06] font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
-              >
-                <Plus className="w-4 h-4" />
-                Dodaj PLUS/MINUS
-              </button>
-            </div>
+            <button
+              onClick={() => setShowAddPlusMinusModal(true)}
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#c9a227] to-[#e6b830] text-[#020a06] font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
+            >
+              <Plus className="w-4 h-4" />
+              Dodaj PLUS/MINUS
+            </button>
           </div>
           <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 overflow-hidden shadow-xl">
             {penalties.filter((p) => p.penalty_type === 'plus' || p.penalty_type === 'minus').length === 0 ? (
@@ -1041,30 +1053,30 @@ export default function UserProfilePage() {
 
         {/* Penalties History */}
         <div className="mb-8">
+          {isDev && (
+            <div className="flex justify-end mb-2">
+              <button
+                onClick={handleClearSuspensions}
+                className="flex items-center gap-2 px-3 py-2 bg-red-600/20 border border-red-500/50 text-red-400 text-sm font-bold rounded-lg hover:bg-red-600/30 transition-all"
+                title="Wyzeruj całą historię zawieszeń (DEV)"
+              >
+                <Trash2 className="w-3 h-3" />
+                Wyzeruj
+              </button>
+            </div>
+          )}
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-2xl font-bold text-white flex items-center gap-2">
               <AlertTriangle className="w-6 h-6 text-red-400" />
               Historia Kar (Zawieszenia)
             </h3>
-            <div className="flex items-center gap-3">
-              {isDev && (
-                <button
-                  onClick={handleClearSuspensions}
-                  className="flex items-center gap-2 px-4 py-3 bg-red-600/20 border border-red-500/50 text-red-400 font-bold rounded-xl hover:bg-red-600/30 transition-all"
-                  title="Wyczyść historię zawieszeń (DEV)"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Wyczyść
-                </button>
-              )}
-              <button
-                onClick={() => setShowAddPenaltyModal(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
-              >
-                <AlertTriangle className="w-4 h-4" />
-                Nadaj Karę
-              </button>
-            </div>
+            <button
+              onClick={() => setShowAddPenaltyModal(true)}
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
+            >
+              <AlertTriangle className="w-4 h-4" />
+              Nadaj Karę
+            </button>
           </div>
           <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 overflow-hidden shadow-xl">
             {penalties.filter((p) => ['zawieszenie_sluzba', 'zawieszenie_dywizja', 'zawieszenie_uprawnienia', 'zawieszenie_poscigowe'].includes(p.penalty_type)).length === 0 ? (
@@ -1105,21 +1117,23 @@ export default function UserProfilePage() {
 
         {/* Written Warnings History */}
         <div className="mb-8">
+          {isDev && (
+            <div className="flex justify-end mb-2">
+              <button
+                onClick={handleClearWrittenWarnings}
+                className="flex items-center gap-2 px-3 py-2 bg-red-600/20 border border-red-500/50 text-red-400 text-sm font-bold rounded-lg hover:bg-red-600/30 transition-all"
+                title="Wyzeruj całą historię upomnienia pisemnych (DEV)"
+              >
+                <Trash2 className="w-3 h-3" />
+                Wyzeruj
+              </button>
+            </div>
+          )}
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-2xl font-bold text-white flex items-center gap-2">
               <FileText className="w-6 h-6 text-orange-400" />
               Historia Upomnienia Pisemne
             </h3>
-            {isDev && (
-              <button
-                onClick={handleClearWrittenWarnings}
-                className="flex items-center gap-2 px-4 py-3 bg-red-600/20 border border-red-500/50 text-red-400 font-bold rounded-xl hover:bg-red-600/30 transition-all"
-                title="Wyczyść historię upomnienia pisemnych (DEV)"
-              >
-                <Trash2 className="w-4 h-4" />
-                Wyczyść
-              </button>
-            )}
           </div>
           <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 overflow-hidden shadow-xl">
             {penalties.filter((p) => p.penalty_type === 'upomnienie_pisemne').length === 0 ? (
@@ -1156,30 +1170,30 @@ export default function UserProfilePage() {
 
         {/* Private Notes */}
         <div className="mb-8">
+          {isDev && (
+            <div className="flex justify-end mb-2">
+              <button
+                onClick={handleClearUserNotes}
+                className="flex items-center gap-2 px-3 py-2 bg-red-600/20 border border-red-500/50 text-red-400 text-sm font-bold rounded-lg hover:bg-red-600/30 transition-all"
+                title="Wyzeruj wszystkie notatki (DEV)"
+              >
+                <Trash2 className="w-3 h-3" />
+                Wyzeruj
+              </button>
+            </div>
+          )}
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-2xl font-bold text-white flex items-center gap-2">
               <FileText className="w-6 h-6 text-[#c9a227]" />
               Notatki Prywatne (Admin)
             </h3>
-            <div className="flex items-center gap-3">
-              {isDev && (
-                <button
-                  onClick={handleClearUserNotes}
-                  className="flex items-center gap-2 px-4 py-3 bg-red-600/20 border border-red-500/50 text-red-400 font-bold rounded-xl hover:bg-red-600/30 transition-all"
-                  title="Wyczyść wszystkie notatki (DEV)"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Wyczyść
-                </button>
-              )}
-              <button
-                onClick={() => setShowAddNoteModal(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#14b8a6] to-[#0d9488] text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
-              >
-                <Plus className="w-4 h-4" />
-                Dodaj Notatkę
-              </button>
-            </div>
+            <button
+              onClick={() => setShowAddNoteModal(true)}
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#14b8a6] to-[#0d9488] text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
+            >
+              <Plus className="w-4 h-4" />
+              Dodaj Notatkę
+            </button>
           </div>
           <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 overflow-hidden shadow-xl">
             {notes.length === 0 ? (
