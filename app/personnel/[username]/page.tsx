@@ -437,9 +437,9 @@ export default function UserProfilePage() {
     try {
       const { error } = await addPenalty({
         user_id: userId,
-        admin_id: currentUser.id,
+        created_by: currentUser.id,
         penalty_type: plusMinusType,
-        reason: plusMinusReason.trim(),
+        description: plusMinusReason.trim(),
         duration_hours: null,
       });
       if (error) throw error;
@@ -486,9 +486,9 @@ export default function UserProfilePage() {
     try {
       const { error } = await addPenalty({
         user_id: userId,
-        admin_id: currentUser.id,
+        created_by: currentUser.id,
         penalty_type: penaltyType, // Use ENUM value directly: 'zawieszenie_sluzba' or 'upomnienie_pisemne'
-        reason: penaltyReason.trim(),
+        description: penaltyReason.trim(),
         duration_hours: duration,
       });
       if (error) throw error;
@@ -530,8 +530,8 @@ export default function UserProfilePage() {
     try {
       const { error } = await addUserNote({
         user_id: userId,
-        admin_id: currentUser.id,
-        note_text: noteText.trim(),
+        created_by: currentUser.id,
+        note: noteText.trim(),
       });
       if (error) throw error;
 
@@ -1041,7 +1041,7 @@ export default function UserProfilePage() {
                         </span>
                       </div>
                     </div>
-                    <p className="text-white">{note.note_text}</p>
+                    <p className="text-white">{note.note}</p>
                   </div>
                 ))}
               </div>
