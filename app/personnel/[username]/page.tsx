@@ -72,6 +72,7 @@ export default function UserProfilePage() {
   // Modal states
   const [showAddPlusMinusModal, setShowAddPlusMinusModal] = useState(false);
   const [showAddPenaltyModal, setShowAddPenaltyModal] = useState(false);
+  const [showAddWrittenWarningModal, setShowAddWrittenWarningModal] = useState(false);
   const [showAddNoteModal, setShowAddNoteModal] = useState(false);
 
   // Modal form states
@@ -82,6 +83,8 @@ export default function UserProfilePage() {
   const [penaltyReason, setPenaltyReason] = useState('');
   const [penaltyDuration, setPenaltyDuration] = useState('24');
   const [penaltyEvidenceLink, setPenaltyEvidenceLink] = useState('');
+  const [writtenWarningReason, setWrittenWarningReason] = useState('');
+  const [writtenWarningEvidenceLink, setWrittenWarningEvidenceLink] = useState('');
   const [noteText, setNoteText] = useState('');
 
   const submittingRef = useRef(false);
@@ -481,28 +484,22 @@ export default function UserProfilePage() {
       return;
     }
 
-    // Duration validation only for suspension types
-    let duration = null;
-    let expiresAt = null;
-    const isSuspension = penaltyType !== 'upomnienie_pisemne';
-    const actualType = isSuspension ? suspensionSubtype : penaltyType;
-
-    if (isSuspension) {
-      duration = parseInt(penaltyDuration);
-      if (isNaN(duration) || duration <= 0) {
-        alert('Czas trwania musi być liczbą większą od 0.');
-        return;
-      }
-      // Calculate expires_at (server-based time + duration)
-      expiresAt = new Date(Date.now() + duration * 60 * 60 * 1000).toISOString();
+    // Duration validation
+    const duration = parseInt(penaltyDuration);
+    if (isNaN(duration) || duration <= 0) {
+      alert('Czas trwania musi być liczbą większą od 0.');
+      return;
     }
+
+    // Calculate expires_at (server-based time + duration)
+    const expiresAt = new Date(Date.now() + duration * 60 * 60 * 1000).toISOString();
 
     submittingRef.current = true;
     try {
       const { error } = await addPenalty({
         user_id: userId,
         created_by: currentUser.id,
-        type: actualType, // Use suspensionSubtype for suspensions, penaltyType for upomnienie
+        type: suspensionSubtype, // Use selected suspension subtype
         description: penaltyReason.trim(),
         duration_hours: duration,
         expires_at: expiresAt,
@@ -511,7 +508,7 @@ export default function UserProfilePage() {
 
       // Send Discord notification
       await notifyPenalty({
-        type: actualType,
+        type: suspensionSubtype,
         user: { username: user.username, mta_nick: user.mta_nick },
         description: penaltyReason.trim(),
         evidenceLink: penaltyEvidenceLink.trim() || null,
@@ -524,13 +521,55 @@ export default function UserProfilePage() {
       setPenaltyReason('');
       setPenaltyDuration('24');
       setPenaltyEvidenceLink('');
-      setPenaltyType('zawieszenie_sluzba');
       setSuspensionSubtype('zawieszenie_sluzba');
       setShowAddPenaltyModal(false);
-      alert(`Kara (${isSuspension ? 'zawieszenie' : 'upomnienie pisemne'}) nadana.`);
+      alert('Zawieszenie nadane.');
     } catch (error) {
       console.error('Error adding penalty:', error);
       alert('Błąd podczas nadawania kary.');
+    } finally {
+      submittingRef.current = false;
+    }
+  };
+
+  const handleAddWrittenWarning = async () => {
+    if (submittingRef.current || !currentUser) return;
+    if (!writtenWarningReason.trim()) {
+      alert('Powód jest wymagany.');
+      return;
+    }
+
+    submittingRef.current = true;
+    try {
+      const { error } = await addPenalty({
+        user_id: userId,
+        created_by: currentUser.id,
+        type: 'upomnienie_pisemne',
+        description: writtenWarningReason.trim(),
+        duration_hours: null,
+        expires_at: null,
+      });
+      if (error) throw error;
+
+      // Send Discord notification
+      await notifyPenalty({
+        type: 'upomnienie_pisemne',
+        user: { username: user.username, mta_nick: user.mta_nick },
+        description: writtenWarningReason.trim(),
+        evidenceLink: writtenWarningEvidenceLink.trim() || null,
+        durationHours: null,
+        createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
+      });
+
+      // Reload data
+      await loadUserData();
+      setWrittenWarningReason('');
+      setWrittenWarningEvidenceLink('');
+      setShowAddWrittenWarningModal(false);
+      alert('Upomnienie pisemne nadane.');
+    } catch (error) {
+      console.error('Error adding written warning:', error);
+      alert('Błąd podczas nadawania upomnienia.');
     } finally {
       submittingRef.current = false;
     }
@@ -1134,6 +1173,13 @@ export default function UserProfilePage() {
               <FileText className="w-6 h-6 text-orange-400" />
               Historia Upomnienia Pisemne
             </h3>
+            <button
+              onClick={() => setShowAddWrittenWarningModal(true)}
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
+            >
+              <FileText className="w-4 h-4" />
+              Nadaj Upomnienie
+            </button>
           </div>
           <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 overflow-hidden shadow-xl">
             {penalties.filter((p) => p.penalty_type === 'upomnienie_pisemne').length === 0 ? (
@@ -1338,56 +1384,25 @@ export default function UserProfilePage() {
             </div>
 
             <div className="space-y-4">
-              {/* Type Selection */}
+              {/* Suspension Subtype */}
               <div>
-                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Typ kary</label>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setPenaltyType('zawieszenie_sluzba')}
-                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all ${
-                      penaltyType !== 'upomnienie_pisemne'
-                        ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg'
-                        : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32]'
-                    }`}
-                  >
-                    <AlertTriangle className="w-5 h-5" />
-                    Zawieszenie
-                  </button>
-                  <button
-                    onClick={() => setPenaltyType('upomnienie_pisemne')}
-                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all ${
-                      penaltyType === 'upomnienie_pisemne'
-                        ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg'
-                        : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32]'
-                    }`}
-                  >
-                    <FileText className="w-5 h-5" />
-                    Upomnienie Pisemne
-                  </button>
-                </div>
+                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Rodzaj zawieszenia</label>
+                <select
+                  value={suspensionSubtype}
+                  onChange={(e) => setSuspensionSubtype(e.target.value as any)}
+                  className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white focus:outline-none focus:border-red-500 transition-colors"
+                >
+                  <option value="zawieszenie_sluzba">Zawieszenie frakcyjne (służba)</option>
+                  <option value="zawieszenie_dywizja">Zawieszenie dywizyjne</option>
+                  <option value="zawieszenie_uprawnienia">Zawieszenie uprawnieniowe</option>
+                  <option value="zawieszenie_poscigowe">Zawieszenie pościgowe</option>
+                </select>
               </div>
-
-              {/* Suspension Subtype - Only for suspensions */}
-              {penaltyType !== 'upomnienie_pisemne' && (
-                <div>
-                  <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Rodzaj zawieszenia</label>
-                  <select
-                    value={suspensionSubtype}
-                    onChange={(e) => setSuspensionSubtype(e.target.value as any)}
-                    className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white focus:outline-none focus:border-red-500 transition-colors"
-                  >
-                    <option value="zawieszenie_sluzba">Zawieszenie frakcyjne (służba)</option>
-                    <option value="zawieszenie_dywizja">Zawieszenie dywizyjne</option>
-                    <option value="zawieszenie_uprawnienia">Zawieszenie uprawnieniowe</option>
-                    <option value="zawieszenie_poscigowe">Zawieszenie pościgowe</option>
-                  </select>
-                </div>
-              )}
 
               {/* Reason */}
               <div>
                 <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">
-                  Powód {penaltyType !== 'upomnienie_pisemne' ? 'zawieszenia' : 'upomnienia'}
+                  Powód zawieszenia
                 </label>
                 <textarea
                   value={penaltyReason}
@@ -1412,41 +1427,37 @@ export default function UserProfilePage() {
                 />
               </div>
 
-              {/* Duration - Only for suspension */}
-              {penaltyType !== 'upomnienie_pisemne' && (
-                <div>
-                  <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Czas trwania (godziny)</label>
-                  <div className="grid grid-cols-4 gap-2 mb-3">
-                    {['1', '6', '12', '24', '48', '72', '168', '720'].map((hours) => (
-                      <button
-                        key={hours}
-                        onClick={() => setPenaltyDuration(hours)}
-                        className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
-                          penaltyDuration === hours
-                            ? 'bg-red-500 text-white'
-                            : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32] hover:bg-[#133524]'
-                        }`}
-                      >
-                        {parseInt(hours) >= 24 ? `${parseInt(hours) / 24}d` : `${hours}h`}
-                      </button>
-                    ))}
-                  </div>
-                  <input
-                    type="number"
-                    value={penaltyDuration}
-                    onChange={(e) => setPenaltyDuration(e.target.value)}
-                    placeholder="Lub wpisz własną liczbę godzin..."
-                    className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-red-500 transition-colors"
-                  />
+              {/* Duration */}
+              <div>
+                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Czas trwania (godziny)</label>
+                <div className="grid grid-cols-4 gap-2 mb-3">
+                  {['1', '6', '12', '24', '48', '72', '168', '720'].map((hours) => (
+                    <button
+                      key={hours}
+                      onClick={() => setPenaltyDuration(hours)}
+                      className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
+                        penaltyDuration === hours
+                          ? 'bg-red-500 text-white'
+                          : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32] hover:bg-[#133524]'
+                      }`}
+                    >
+                      {parseInt(hours) >= 24 ? `${parseInt(hours) / 24}d` : `${hours}h`}
+                    </button>
+                  ))}
                 </div>
-              )}
+                <input
+                  type="number"
+                  value={penaltyDuration}
+                  onChange={(e) => setPenaltyDuration(e.target.value)}
+                  placeholder="Lub wpisz własną liczbę godzin..."
+                  className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-red-500 transition-colors"
+                />
+              </div>
 
               {/* Warning */}
               <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl">
                 <p className="text-red-400 text-xs">
-                  <strong>Uwaga:</strong> {penaltyType !== 'upomnienie_pisemne'
-                    ? 'Zawieszenie uniemożliwi użytkownikowi dostęp do egzaminów i innych funkcji przez podany czas.'
-                    : 'Upomnienie pisemne zostanie zapisane w kartotece użytkownika.'}
+                  <strong>Uwaga:</strong> Zawieszenie uniemożliwi użytkownikowi dostęp do egzaminów i innych funkcji przez podany czas.
                 </p>
               </div>
 
@@ -1530,6 +1541,86 @@ export default function UserProfilePage() {
                   onClick={() => {
                     setShowAddNoteModal(false);
                     setNoteText('');
+                  }}
+                  className="px-6 py-3 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
+                >
+                  Anuluj
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Written Warning Modal */}
+      {showAddWrittenWarningModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+          <div className="glass-strong rounded-2xl border border-orange-500/30 p-8 max-w-lg w-full shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-white flex items-center gap-2">
+                <FileText className="w-6 h-6 text-orange-400" />
+                Nadaj Upomnienie Pisemne
+              </h3>
+              <button
+                onClick={() => {
+                  setShowAddWrittenWarningModal(false);
+                  setWrittenWarningReason('');
+                  setWrittenWarningEvidenceLink('');
+                }}
+                className="text-[#8fb5a0] hover:text-white transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Reason */}
+              <div>
+                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Powód upomnienia</label>
+                <textarea
+                  value={writtenWarningReason}
+                  onChange={(e) => setWrittenWarningReason(e.target.value)}
+                  placeholder="Opisz powód nadania upomnienia..."
+                  rows={4}
+                  className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-orange-500 transition-colors resize-none"
+                />
+              </div>
+
+              {/* Evidence Link (Optional) */}
+              <div>
+                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">
+                  Link do dowodów <span className="text-xs text-[#8fb5a0]/70">(opcjonalny)</span>
+                </label>
+                <input
+                  type="url"
+                  value={writtenWarningEvidenceLink}
+                  onChange={(e) => setWrittenWarningEvidenceLink(e.target.value)}
+                  placeholder="https://..."
+                  className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-orange-500 transition-colors"
+                />
+              </div>
+
+              {/* Warning */}
+              <div className="p-3 bg-orange-500/10 border border-orange-500/30 rounded-xl">
+                <p className="text-orange-400 text-xs">
+                  <strong>Uwaga:</strong> Upomnienie pisemne zostanie zapisane w kartotece użytkownika.
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={handleAddWrittenWarning}
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
+                >
+                  <FileText className="w-4 h-4" />
+                  Nadaj Upomnienie
+                </button>
+                <button
+                  onClick={() => {
+                    setShowAddWrittenWarningModal(false);
+                    setWrittenWarningReason('');
+                    setWrittenWarningEvidenceLink('');
                   }}
                   className="px-6 py-3 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
                 >

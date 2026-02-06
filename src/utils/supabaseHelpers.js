@@ -887,13 +887,23 @@ export async function deleteUserNote(noteId) {
  */
 export async function clearUserPlusMinusPenalties(userId) {
   try {
-    const { error } = await supabase
+    // Delete all PLUS/MINUS penalties
+    const { error: deleteError } = await supabase
       .from('user_penalties')
       .delete()
       .eq('user_id', userId)
       .in('type', ['plus', 'minus']);
 
-    if (error) throw error;
+    if (deleteError) throw deleteError;
+
+    // Reset plus_count and minus_count to 0
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ plus_count: 0, minus_count: 0 })
+      .eq('id', userId);
+
+    if (updateError) throw updateError;
+
     return { error: null };
   } catch (error) {
     console.error('clearUserPlusMinusPenalties error:', error);
