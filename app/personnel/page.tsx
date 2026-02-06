@@ -37,7 +37,7 @@ import {
  * Tylko dla admin/dev
  */
 export default function KartotekaPage() {
-  const { user, loading, isAdmin } = useAuth();
+  const { user, loading, isAdmin, role } = useAuth();
   const router = useRouter();
 
   const [users, setUsers] = useState<any[]>([]);
@@ -91,10 +91,12 @@ export default function KartotekaPage() {
   }, [user, loading, router]);
 
   useEffect(() => {
-    if (!loading && user && !isAdmin) {
+    // Only redirect if role is loaded and user is not admin
+    // This prevents redirect during initial load when role might be null
+    if (!loading && user && role && !isAdmin) {
       router.push('/dashboard');
     }
-  }, [isAdmin, loading, user, router]);
+  }, [isAdmin, loading, user, role, router]);
 
   useEffect(() => {
     if (user && isAdmin) {

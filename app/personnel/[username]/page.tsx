@@ -487,7 +487,7 @@ export default function UserProfilePage() {
       const { error } = await addPenalty({
         user_id: userId,
         admin_id: currentUser.id,
-        penalty_type: penaltyType === 'zawieszenie_sluzba' ? 'suspension' : 'written_warning',
+        penalty_type: penaltyType, // Use ENUM value directly: 'zawieszenie_sluzba' or 'upomnienie_pisemne'
         reason: penaltyReason.trim(),
         duration_hours: duration,
       });
