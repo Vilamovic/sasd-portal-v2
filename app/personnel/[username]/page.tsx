@@ -6,6 +6,7 @@ import { useAuth } from '@/src/contexts/AuthContext';
 import Navbar from '@/src/components/dashboard/Navbar';
 import {
   getUserWithDetails,
+  getUserByUsername,
   getUserPenalties,
   getUserNotes,
   updateUserBadge,
@@ -44,9 +45,10 @@ export default function UserProfilePage() {
   const { user: currentUser, loading, isAdmin, role } = useAuth();
   const router = useRouter();
   const params = useParams();
-  const userId = params.userId as string;
+  const username = params.username as string;
 
   const [user, setUser] = useState<any>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [penalties, setPenalties] = useState<any[]>([]);
   const [notes, setNotes] = useState<any[]>([]);
   const [loadingData, setLoadingData] = useState(true);
@@ -118,11 +120,11 @@ export default function UserProfilePage() {
   }, [isAdmin, loading, currentUser, role, router]);
 
   useEffect(() => {
-    if (currentUser && isAdmin) {
+    if (currentUser && isAdmin && username) {
       loadUserData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUser, isAdmin, userId]);
+  }, [currentUser, isAdmin, username]);
 
   // Countdown timers for penalties
   useEffect(() => {
@@ -163,9 +165,16 @@ export default function UserProfilePage() {
     try {
       setLoadingData(true);
 
-      // Load user details
-      const { data: userData, error: userError } = await getUserWithDetails(userId);
+      // First get user by username to get the ID
+      const { data: userData, error: userError } = await getUserByUsername(username);
       if (userError) throw userError;
+      if (!userData) {
+        router.push('/personnel');
+        return;
+      }
+
+      // Set userId for subsequent operations
+      setUserId(userData.id);
       setUser(userData);
 
       // Set temp values
@@ -176,7 +185,7 @@ export default function UserProfilePage() {
         setTempIsCommander(userData.is_commander || false);
 
         // Load penalties
-        const { data: penaltiesData, error: penaltiesError } = await getUserPenalties(userId);
+        const { data: penaltiesData, error: penaltiesError } = await getUserPenalties(userData.id);
         if (penaltiesError) throw penaltiesError;
 
         // Map created_by_user to admin_username for display
@@ -199,7 +208,7 @@ export default function UserProfilePage() {
       }
 
       // Load notes
-      const { data: notesData, error: notesError } = await getUserNotes(userId);
+      const { data: notesData, error: notesError } = await getUserNotes(userData.id);
       if (notesError) throw notesError;
 
       // Map created_by_user to admin_username for display
@@ -578,7 +587,7 @@ export default function UserProfilePage() {
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
         {/* Back Button */}
         <button
-          onClick={() => router.push('/kartoteka')}
+          onClick={() => router.push('/personnel')}
           className="mb-6 flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200"
         >
           <ChevronLeft className="w-5 h-5" />

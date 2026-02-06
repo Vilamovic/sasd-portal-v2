@@ -24,6 +24,25 @@ export async function getUserById(userId) {
 }
 
 /**
+ * Pobiera użytkownika z bazy po username
+ */
+export async function getUserByUsername(username) {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('username', username)
+      .single();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('getUserByUsername error:', error);
+    return { data: null, error };
+  }
+}
+
+/**
  * Upsert użytkownika do bazy
  */
 export async function upsertUser(userData) {

@@ -832,7 +832,7 @@ export default function KartotekaPage() {
                     {/* Actions */}
                     <div className="col-span-1 flex justify-end">
                       <button
-                        onClick={() => router.push(`/kartoteka/${u.id}`)}
+                        onClick={() => router.push(`/personnel/${u.username}`)}
                         className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#14b8a6] to-[#0d9488] text-white text-xs font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg"
                       >
                         <Eye className="w-4 h-4" />

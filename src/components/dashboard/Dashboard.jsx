@@ -59,8 +59,8 @@ export default function Dashboard() {
       roles: ['user', 'admin', 'dev'],
     },
     {
-      id: 'kartoteka',
-      title: 'Kartoteka',
+      id: 'personnel',
+      title: 'Personnel',
       description: 'Zarządzaj personelem, nadawaj kary i uprawnienia. Pełny dostęp do danych wszystkich użytkowników.',
       icon: UserCog,
       iconColor: 'from-[#c9a227] to-[#e6b830]',
