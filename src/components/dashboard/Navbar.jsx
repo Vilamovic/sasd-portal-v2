@@ -111,9 +111,10 @@ export default function Navbar() {
   // Get penalty type display name
   const getPenaltyDisplayName = (type) => {
     const names = {
-      zawieszenie_sluzba: 'Zawieszenie: Służba',
-      zawieszenie_dywizja: 'Zawieszenie: Dywizja',
-      zawieszenie_uprawnienie: 'Zawieszenie: Uprawnienia',
+      zawieszenie_sluzba: 'Zawieszenie: Frakcyjne',
+      zawieszenie_dywizja: 'Zawieszenie: Dywizyjne',
+      zawieszenie_uprawnienia: 'Zawieszenie: Uprawnieniowe',
+      zawieszenie_poscigowe: 'Zawieszenie: Pościgowe',
     };
     return names[type] || type;
   };

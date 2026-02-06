@@ -15,6 +15,10 @@ import {
   updateIsCommander,
   addPenalty,
   addUserNote,
+  clearUserPlusMinusPenalties,
+  clearUserSuspensions,
+  clearUserWrittenWarnings,
+  clearUserNotes,
 } from '@/src/utils/supabaseHelpers';
 import { notifyPenalty, notifyBadgeChange, notifyPermissionChange, notifyDivisionChange } from '@/src/utils/discord';
 import {
@@ -35,6 +39,7 @@ import {
   TrendingUp,
   TrendingDown,
   Users,
+  Trash2,
 } from 'lucide-react';
 
 /**
@@ -42,7 +47,7 @@ import {
  * Tylko dla admin/dev
  */
 export default function UserProfilePage() {
-  const { user: currentUser, loading, isAdmin, role } = useAuth();
+  const { user: currentUser, loading, isAdmin, isDev, role } = useAuth();
   const router = useRouter();
   const params = useParams();
   const username = params.username as string;
@@ -73,6 +78,7 @@ export default function UserProfilePage() {
   const [plusMinusType, setPlusMinusType] = useState<'plus' | 'minus'>('plus');
   const [plusMinusReason, setPlusMinusReason] = useState('');
   const [penaltyType, setPenaltyType] = useState<'zawieszenie_sluzba' | 'upomnienie_pisemne'>('zawieszenie_sluzba');
+  const [suspensionSubtype, setSuspensionSubtype] = useState<'zawieszenie_sluzba' | 'zawieszenie_dywizja' | 'zawieszenie_uprawnienia' | 'zawieszenie_poscigowe'>('zawieszenie_sluzba');
   const [penaltyReason, setPenaltyReason] = useState('');
   const [penaltyDuration, setPenaltyDuration] = useState('24');
   const [penaltyEvidenceLink, setPenaltyEvidenceLink] = useState('');
@@ -199,7 +205,7 @@ export default function UserProfilePage() {
 
         // Active suspensions
         const active = mappedPenalties.filter((p: any) => {
-          const suspensionTypes = ['zawieszenie_sluzba', 'zawieszenie_dywizja', 'zawieszenie_uprawnienia'];
+          const suspensionTypes = ['zawieszenie_sluzba', 'zawieszenie_dywizja', 'zawieszenie_uprawnienia', 'zawieszenie_poscigowe'];
           if (suspensionTypes.includes(p.penalty_type) && p.duration_hours) {
             const createdAt = new Date(p.created_at).getTime();
             const expiresAt = createdAt + p.duration_hours * 60 * 60 * 1000;
@@ -478,7 +484,10 @@ export default function UserProfilePage() {
     // Duration validation only for suspension types
     let duration = null;
     let expiresAt = null;
-    if (penaltyType === 'zawieszenie_sluzba') {
+    const isSuspension = penaltyType !== 'upomnienie_pisemne';
+    const actualType = isSuspension ? suspensionSubtype : penaltyType;
+
+    if (isSuspension) {
       duration = parseInt(penaltyDuration);
       if (isNaN(duration) || duration <= 0) {
         alert('Czas trwania musi być liczbą większą od 0.');
@@ -493,7 +502,7 @@ export default function UserProfilePage() {
       const { error } = await addPenalty({
         user_id: userId,
         created_by: currentUser.id,
-        type: penaltyType, // Use ENUM value directly: 'zawieszenie_sluzba' or 'upomnienie_pisemne'
+        type: actualType, // Use suspensionSubtype for suspensions, penaltyType for upomnienie
         description: penaltyReason.trim(),
         duration_hours: duration,
         expires_at: expiresAt,
@@ -502,7 +511,7 @@ export default function UserProfilePage() {
 
       // Send Discord notification
       await notifyPenalty({
-        type: penaltyType,
+        type: actualType,
         user: { username: user.username, mta_nick: user.mta_nick },
         description: penaltyReason.trim(),
         evidenceLink: penaltyEvidenceLink.trim() || null,
@@ -516,8 +525,9 @@ export default function UserProfilePage() {
       setPenaltyDuration('24');
       setPenaltyEvidenceLink('');
       setPenaltyType('zawieszenie_sluzba');
+      setSuspensionSubtype('zawieszenie_sluzba');
       setShowAddPenaltyModal(false);
-      alert(`Kara (${penaltyType === 'zawieszenie_sluzba' ? 'zawieszenie' : 'upomnienie pisemne'}) nadana.`);
+      alert(`Kara (${isSuspension ? 'zawieszenie' : 'upomnienie pisemne'}) nadana.`);
     } catch (error) {
       console.error('Error adding penalty:', error);
       alert('Błąd podczas nadawania kary.');
@@ -552,6 +562,63 @@ export default function UserProfilePage() {
       alert('Błąd podczas dodawania notatki.');
     } finally {
       submittingRef.current = false;
+    }
+  };
+
+  // Clear functions (DEV only)
+  const handleClearPlusMinusPenalties = async () => {
+    if (!isDev || !confirm('Czy na pewno chcesz wyczyścić całą historię PLUS/MINUS tego użytkownika?')) return;
+
+    try {
+      const { error } = await clearUserPlusMinusPenalties(userId);
+      if (error) throw error;
+      await loadUserData();
+      alert('Historia PLUS/MINUS wyczyszczona.');
+    } catch (error) {
+      console.error('Error clearing PLUS/MINUS:', error);
+      alert('Błąd podczas czyszczenia historii.');
+    }
+  };
+
+  const handleClearSuspensions = async () => {
+    if (!isDev || !confirm('Czy na pewno chcesz wyczyścić całą historię zawieszeń tego użytkownika?')) return;
+
+    try {
+      const { error } = await clearUserSuspensions(userId);
+      if (error) throw error;
+      await loadUserData();
+      alert('Historia zawieszeń wyczyszczona.');
+    } catch (error) {
+      console.error('Error clearing suspensions:', error);
+      alert('Błąd podczas czyszczenia historii.');
+    }
+  };
+
+  const handleClearWrittenWarnings = async () => {
+    if (!isDev || !confirm('Czy na pewno chcesz wyczyścić całą historię upomnienia pisemnych tego użytkownika?')) return;
+
+    try {
+      const { error } = await clearUserWrittenWarnings(userId);
+      if (error) throw error;
+      await loadUserData();
+      alert('Historia upomnienia pisemnych wyczyszczona.');
+    } catch (error) {
+      console.error('Error clearing written warnings:', error);
+      alert('Błąd podczas czyszczenia historii.');
+    }
+  };
+
+  const handleClearUserNotes = async () => {
+    if (!isDev || !confirm('Czy na pewno chcesz wyczyścić wszystkie notatki tego użytkownika?')) return;
+
+    try {
+      const { error } = await clearUserNotes(userId);
+      if (error) throw error;
+      await loadUserData();
+      alert('Notatki wyczyszczone.');
+    } catch (error) {
+      console.error('Error clearing notes:', error);
+      alert('Błąd podczas czyszczenia notatek.');
     }
   };
 
@@ -913,13 +980,25 @@ export default function UserProfilePage() {
               <Award className="w-6 h-6 text-[#c9a227]" />
               Historia PLUS/MINUS
             </h3>
-            <button
-              onClick={() => setShowAddPlusMinusModal(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#c9a227] to-[#e6b830] text-[#020a06] font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
-            >
-              <Plus className="w-4 h-4" />
-              Dodaj PLUS/MINUS
-            </button>
+            <div className="flex items-center gap-3">
+              {isDev && (
+                <button
+                  onClick={handleClearPlusMinusPenalties}
+                  className="flex items-center gap-2 px-4 py-3 bg-red-600/20 border border-red-500/50 text-red-400 font-bold rounded-xl hover:bg-red-600/30 transition-all"
+                  title="Wyczyść historię PLUS/MINUS (DEV)"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Wyczyść
+                </button>
+              )}
+              <button
+                onClick={() => setShowAddPlusMinusModal(true)}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#c9a227] to-[#e6b830] text-[#020a06] font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
+              >
+                <Plus className="w-4 h-4" />
+                Dodaj PLUS/MINUS
+              </button>
+            </div>
           </div>
           <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 overflow-hidden shadow-xl">
             {penalties.filter((p) => p.penalty_type === 'plus' || p.penalty_type === 'minus').length === 0 ? (
@@ -967,16 +1046,28 @@ export default function UserProfilePage() {
               <AlertTriangle className="w-6 h-6 text-red-400" />
               Historia Kar (Zawieszenia)
             </h3>
-            <button
-              onClick={() => setShowAddPenaltyModal(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
-            >
-              <AlertTriangle className="w-4 h-4" />
-              Nadaj Karę
-            </button>
+            <div className="flex items-center gap-3">
+              {isDev && (
+                <button
+                  onClick={handleClearSuspensions}
+                  className="flex items-center gap-2 px-4 py-3 bg-red-600/20 border border-red-500/50 text-red-400 font-bold rounded-xl hover:bg-red-600/30 transition-all"
+                  title="Wyczyść historię zawieszeń (DEV)"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Wyczyść
+                </button>
+              )}
+              <button
+                onClick={() => setShowAddPenaltyModal(true)}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
+              >
+                <AlertTriangle className="w-4 h-4" />
+                Nadaj Karę
+              </button>
+            </div>
           </div>
           <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 overflow-hidden shadow-xl">
-            {penalties.filter((p) => ['zawieszenie_sluzba', 'zawieszenie_dywizja', 'zawieszenie_uprawnienia'].includes(p.penalty_type)).length === 0 ? (
+            {penalties.filter((p) => ['zawieszenie_sluzba', 'zawieszenie_dywizja', 'zawieszenie_uprawnienia', 'zawieszenie_poscigowe'].includes(p.penalty_type)).length === 0 ? (
               <div className="p-12 text-center">
                 <AlertTriangle className="w-16 h-16 text-[#8fb5a0] mx-auto mb-4" />
                 <p className="text-[#8fb5a0]">Brak historii kar.</p>
@@ -994,13 +1085,64 @@ export default function UserProfilePage() {
                   </thead>
                   <tbody className="divide-y divide-[#1a4d32]/30">
                     {penalties
-                      .filter((p) => ['zawieszenie_sluzba', 'zawieszenie_dywizja', 'zawieszenie_uprawnienia'].includes(p.penalty_type))
+                      .filter((p) => ['zawieszenie_sluzba', 'zawieszenie_dywizja', 'zawieszenie_uprawnienia', 'zawieszenie_poscigowe'].includes(p.penalty_type))
                       .map((penalty) => (
                         <tr key={penalty.id} className="hover:bg-[#0a2818]/30 transition-colors">
                           <td className="px-6 py-4 text-white">{penalty.reason}</td>
                           <td className="px-6 py-4 text-orange-400 font-semibold">
                             {penalty.duration_hours ? `${penalty.duration_hours}h` : 'Permanentne'}
                           </td>
+                          <td className="px-6 py-4 text-[#8fb5a0]">{penalty.admin_username}</td>
+                          <td className="px-6 py-4 text-[#8fb5a0] text-sm">{formatDate(penalty.created_at)}</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Written Warnings History */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-2xl font-bold text-white flex items-center gap-2">
+              <FileText className="w-6 h-6 text-orange-400" />
+              Historia Upomnienia Pisemne
+            </h3>
+            {isDev && (
+              <button
+                onClick={handleClearWrittenWarnings}
+                className="flex items-center gap-2 px-4 py-3 bg-red-600/20 border border-red-500/50 text-red-400 font-bold rounded-xl hover:bg-red-600/30 transition-all"
+                title="Wyczyść historię upomnienia pisemnych (DEV)"
+              >
+                <Trash2 className="w-4 h-4" />
+                Wyczyść
+              </button>
+            )}
+          </div>
+          <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 overflow-hidden shadow-xl">
+            {penalties.filter((p) => p.penalty_type === 'upomnienie_pisemne').length === 0 ? (
+              <div className="p-12 text-center">
+                <FileText className="w-16 h-16 text-[#8fb5a0] mx-auto mb-4" />
+                <p className="text-[#8fb5a0]">Brak upomnienia pisemnego.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-[#051a0f]/50 border-b border-[#1a4d32]/50">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Powód</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Nadane przez</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Data</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#1a4d32]/30">
+                    {penalties
+                      .filter((p) => p.penalty_type === 'upomnienie_pisemne')
+                      .map((penalty) => (
+                        <tr key={penalty.id} className="hover:bg-[#0a2818]/30 transition-colors">
+                          <td className="px-6 py-4 text-white">{penalty.reason}</td>
                           <td className="px-6 py-4 text-[#8fb5a0]">{penalty.admin_username}</td>
                           <td className="px-6 py-4 text-[#8fb5a0] text-sm">{formatDate(penalty.created_at)}</td>
                         </tr>
@@ -1019,13 +1161,25 @@ export default function UserProfilePage() {
               <FileText className="w-6 h-6 text-[#c9a227]" />
               Notatki Prywatne (Admin)
             </h3>
-            <button
-              onClick={() => setShowAddNoteModal(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#14b8a6] to-[#0d9488] text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
-            >
-              <Plus className="w-4 h-4" />
-              Dodaj Notatkę
-            </button>
+            <div className="flex items-center gap-3">
+              {isDev && (
+                <button
+                  onClick={handleClearUserNotes}
+                  className="flex items-center gap-2 px-4 py-3 bg-red-600/20 border border-red-500/50 text-red-400 font-bold rounded-xl hover:bg-red-600/30 transition-all"
+                  title="Wyczyść wszystkie notatki (DEV)"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Wyczyść
+                </button>
+              )}
+              <button
+                onClick={() => setShowAddNoteModal(true)}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#14b8a6] to-[#0d9488] text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
+              >
+                <Plus className="w-4 h-4" />
+                Dodaj Notatkę
+              </button>
+            </div>
           </div>
           <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 overflow-hidden shadow-xl">
             {notes.length === 0 ? (
@@ -1161,6 +1315,7 @@ export default function UserProfilePage() {
                   setPenaltyDuration('24');
                   setPenaltyEvidenceLink('');
                   setPenaltyType('zawieszenie_sluzba');
+                  setSuspensionSubtype('zawieszenie_sluzba');
                 }}
                 className="text-[#8fb5a0] hover:text-white transition-colors"
               >
@@ -1176,7 +1331,7 @@ export default function UserProfilePage() {
                   <button
                     onClick={() => setPenaltyType('zawieszenie_sluzba')}
                     className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all ${
-                      penaltyType === 'zawieszenie_sluzba'
+                      penaltyType !== 'upomnienie_pisemne'
                         ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg'
                         : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32]'
                     }`}
@@ -1198,10 +1353,27 @@ export default function UserProfilePage() {
                 </div>
               </div>
 
+              {/* Suspension Subtype - Only for suspensions */}
+              {penaltyType !== 'upomnienie_pisemne' && (
+                <div>
+                  <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Rodzaj zawieszenia</label>
+                  <select
+                    value={suspensionSubtype}
+                    onChange={(e) => setSuspensionSubtype(e.target.value as any)}
+                    className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white focus:outline-none focus:border-red-500 transition-colors"
+                  >
+                    <option value="zawieszenie_sluzba">Zawieszenie frakcyjne (służba)</option>
+                    <option value="zawieszenie_dywizja">Zawieszenie dywizyjne</option>
+                    <option value="zawieszenie_uprawnienia">Zawieszenie uprawnieniowe</option>
+                    <option value="zawieszenie_poscigowe">Zawieszenie pościgowe</option>
+                  </select>
+                </div>
+              )}
+
               {/* Reason */}
               <div>
                 <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">
-                  Powód {penaltyType === 'zawieszenie_sluzba' ? 'zawieszenia' : 'upomnienia'}
+                  Powód {penaltyType !== 'upomnienie_pisemne' ? 'zawieszenia' : 'upomnienia'}
                 </label>
                 <textarea
                   value={penaltyReason}
@@ -1227,7 +1399,7 @@ export default function UserProfilePage() {
               </div>
 
               {/* Duration - Only for suspension */}
-              {penaltyType === 'zawieszenie_sluzba' && (
+              {penaltyType !== 'upomnienie_pisemne' && (
                 <div>
                   <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Czas trwania (godziny)</label>
                   <div className="grid grid-cols-4 gap-2 mb-3">
@@ -1258,7 +1430,7 @@ export default function UserProfilePage() {
               {/* Warning */}
               <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl">
                 <p className="text-red-400 text-xs">
-                  <strong>Uwaga:</strong> {penaltyType === 'zawieszenie_sluzba'
+                  <strong>Uwaga:</strong> {penaltyType !== 'upomnienie_pisemne'
                     ? 'Zawieszenie uniemożliwi użytkownikowi dostęp do egzaminów i innych funkcji przez podany czas.'
                     : 'Upomnienie pisemne zostanie zapisane w kartotece użytkownika.'}
                 </p>

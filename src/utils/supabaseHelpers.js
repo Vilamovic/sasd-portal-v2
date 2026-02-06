@@ -882,6 +882,81 @@ export async function deleteUserNote(noteId) {
   }
 }
 
+/**
+ * Czyści wszystkie PLUS/MINUS użytkownika (Dev only)
+ */
+export async function clearUserPlusMinusPenalties(userId) {
+  try {
+    const { error } = await supabase
+      .from('user_penalties')
+      .delete()
+      .eq('user_id', userId)
+      .in('type', ['plus', 'minus']);
+
+    if (error) throw error;
+    return { error: null };
+  } catch (error) {
+    console.error('clearUserPlusMinusPenalties error:', error);
+    return { error };
+  }
+}
+
+/**
+ * Czyści wszystkie zawieszenia użytkownika (Dev only)
+ */
+export async function clearUserSuspensions(userId) {
+  try {
+    const { error } = await supabase
+      .from('user_penalties')
+      .delete()
+      .eq('user_id', userId)
+      .in('type', ['zawieszenie_sluzba', 'zawieszenie_dywizja', 'zawieszenie_uprawnienia', 'zawieszenie_poscigowe']);
+
+    if (error) throw error;
+    return { error: null };
+  } catch (error) {
+    console.error('clearUserSuspensions error:', error);
+    return { error };
+  }
+}
+
+/**
+ * Czyści wszystkie upomnienia pisemne użytkownika (Dev only)
+ */
+export async function clearUserWrittenWarnings(userId) {
+  try {
+    const { error } = await supabase
+      .from('user_penalties')
+      .delete()
+      .eq('user_id', userId)
+      .eq('type', 'upomnienie_pisemne');
+
+    if (error) throw error;
+    return { error: null };
+  } catch (error) {
+    console.error('clearUserWrittenWarnings error:', error);
+    return { error };
+  }
+}
+
+/**
+ * Czyści wszystkie notatki użytkownika (Dev only)
+ */
+export async function clearUserNotes(userId) {
+  try {
+    const { error } = await supabase
+      .from('user_notes')
+      .delete()
+      .eq('user_id', userId);
+
+    if (error) throw error;
+    return { error: null };
+  } catch (error) {
+    console.error('clearUserNotes error:', error);
+    return { error };
+  }
+}
+
 // ============================================
 // DIVISIONS - MATERIALS MANAGEMENT
 // ============================================
