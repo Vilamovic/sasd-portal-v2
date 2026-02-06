@@ -188,16 +188,19 @@ export default function UserProfilePage() {
         const { data: penaltiesData, error: penaltiesError } = await getUserPenalties(userData.id);
         if (penaltiesError) throw penaltiesError;
 
-        // Map created_by_user to admin_username for display
+        // Map created_by_user to admin_username and fix column names for display
         const mappedPenalties = (penaltiesData || []).map((p: any) => ({
           ...p,
+          penalty_type: p.type,        // Map 'type' to 'penalty_type' for UI
+          reason: p.description,       // Map 'description' to 'reason' for UI
           admin_username: p.created_by_user?.username || 'Unknown',
         }));
         setPenalties(mappedPenalties);
 
         // Active suspensions
         const active = mappedPenalties.filter((p: any) => {
-          if (p.penalty_type === 'suspension' && p.duration_hours) {
+          const suspensionTypes = ['zawieszenie_sluzba', 'zawieszenie_dywizja', 'zawieszenie_uprawnienia'];
+          if (suspensionTypes.includes(p.penalty_type) && p.duration_hours) {
             const createdAt = new Date(p.created_at).getTime();
             const expiresAt = createdAt + p.duration_hours * 60 * 60 * 1000;
             return Date.now() < expiresAt;
@@ -474,12 +477,15 @@ export default function UserProfilePage() {
 
     // Duration validation only for suspension types
     let duration = null;
+    let expiresAt = null;
     if (penaltyType === 'zawieszenie_sluzba') {
       duration = parseInt(penaltyDuration);
       if (isNaN(duration) || duration <= 0) {
         alert('Czas trwania musi być liczbą większą od 0.');
         return;
       }
+      // Calculate expires_at (server-based time + duration)
+      expiresAt = new Date(Date.now() + duration * 60 * 60 * 1000).toISOString();
     }
 
     submittingRef.current = true;
@@ -490,6 +496,7 @@ export default function UserProfilePage() {
         type: penaltyType, // Use ENUM value directly: 'zawieszenie_sluzba' or 'upomnienie_pisemne'
         description: penaltyReason.trim(),
         duration_hours: duration,
+        expires_at: expiresAt,
       });
       if (error) throw error;
 
@@ -969,7 +976,7 @@ export default function UserProfilePage() {
             </button>
           </div>
           <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 overflow-hidden shadow-xl">
-            {penalties.filter((p) => p.penalty_type === 'suspension').length === 0 ? (
+            {penalties.filter((p) => ['zawieszenie_sluzba', 'zawieszenie_dywizja', 'zawieszenie_uprawnienia'].includes(p.penalty_type)).length === 0 ? (
               <div className="p-12 text-center">
                 <AlertTriangle className="w-16 h-16 text-[#8fb5a0] mx-auto mb-4" />
                 <p className="text-[#8fb5a0]">Brak historii kar.</p>
@@ -987,7 +994,7 @@ export default function UserProfilePage() {
                   </thead>
                   <tbody className="divide-y divide-[#1a4d32]/30">
                     {penalties
-                      .filter((p) => p.penalty_type === 'suspension')
+                      .filter((p) => ['zawieszenie_sluzba', 'zawieszenie_dywizja', 'zawieszenie_uprawnienia'].includes(p.penalty_type))
                       .map((penalty) => (
                         <tr key={penalty.id} className="hover:bg-[#0a2818]/30 transition-colors">
                           <td className="px-6 py-4 text-white">{penalty.reason}</td>
