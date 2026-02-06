@@ -397,30 +397,45 @@ export default function AdminPanel({ onBack }) {
                               </button>
 
                               {showActionDropdown === u.id && !isCurrentUser && !isDevUser && (
-                                <div className="absolute right-0 mt-2 w-48 glass-strong rounded-xl shadow-2xl border border-[#1a4d32] py-2 z-50">
-                                  {/* Dev can give/remove admin */}
+                                <div className="absolute right-0 mt-2 w-52 glass-strong rounded-xl shadow-2xl border border-[#1a4d32] py-2 z-50 max-h-80 overflow-y-auto">
+                                  {/* Dev can set any role */}
                                   {isDev && (
                                     <>
+                                      <div className="px-3 py-1 text-xs text-[#8fb5a0] font-semibold">Zmień rolę:</div>
                                       <button
-                                        onClick={() => handleUpdateRole(u.id, 'admin', u.mta_nick || u.username)}
-                                        className="w-full px-4 py-3 text-left hover:bg-[#c9a227]/10 transition-colors text-[#c9a227] text-sm flex items-center gap-2"
+                                        onClick={() => handleUpdateRole(u.id, 'hcs', u.mta_nick || u.username)}
+                                        className="w-full px-4 py-2 text-left hover:bg-red-600/10 transition-colors text-red-400 text-sm flex items-center gap-2"
                                       >
                                         <ShieldCheck className="w-4 h-4" />
-                                        Nadaj Admin
+                                        HCS
                                       </button>
                                       <button
-                                        onClick={() => handleUpdateRole(u.id, 'user', u.mta_nick || u.username)}
-                                        className="w-full px-4 py-3 text-left hover:bg-[#22693f]/10 transition-colors text-[#22693f] text-sm flex items-center gap-2"
+                                        onClick={() => handleUpdateRole(u.id, 'cs', u.mta_nick || u.username)}
+                                        className="w-full px-4 py-2 text-left hover:bg-orange-600/10 transition-colors text-orange-400 text-sm flex items-center gap-2"
+                                      >
+                                        <ShieldCheck className="w-4 h-4" />
+                                        CS
+                                      </button>
+                                      <button
+                                        onClick={() => handleUpdateRole(u.id, 'deputy', u.mta_nick || u.username)}
+                                        className="w-full px-4 py-2 text-left hover:bg-blue-600/10 transition-colors text-blue-400 text-sm flex items-center gap-2"
+                                      >
+                                        <ShieldCheck className="w-4 h-4" />
+                                        Deputy
+                                      </button>
+                                      <button
+                                        onClick={() => handleUpdateRole(u.id, 'trainee', u.mta_nick || u.username)}
+                                        className="w-full px-4 py-2 text-left hover:bg-gray-600/10 transition-colors text-gray-400 text-sm flex items-center gap-2"
                                       >
                                         <ShieldOff className="w-4 h-4" />
-                                        Odbierz Admin
+                                        Trainee
                                       </button>
                                       <div className="border-t border-[#1a4d32] my-2" />
                                     </>
                                   )}
 
-                                  {/* Dev can kick anyone (except dev), Admin can kick only users */}
-                                  {((isDev) || (isAdmin && u.role === 'user')) && (
+                                  {/* Dev can kick anyone (except dev), Admin can kick only trainee/deputy */}
+                                  {((isDev) || (isAdmin && (u.role === 'trainee' || u.role === 'deputy'))) && (
                                     <button
                                       onClick={() => handleKickUser(u.id, u.mta_nick || u.username)}
                                       className="w-full px-4 py-3 text-left hover:bg-red-500/10 transition-colors text-red-400 text-sm flex items-center gap-2"

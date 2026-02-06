@@ -9,6 +9,7 @@ import {
   updateUserBadge,
   updateUserPermissions,
   updateUserDivision,
+  updateIsCommander,
 } from '@/src/utils/supabaseHelpers';
 import { notifyBadgeChange, notifyPermissionChange, notifyDivisionChange } from '@/src/utils/discord';
 import {
@@ -55,10 +56,10 @@ export default function KartotekaPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [divisionFilter, setDivisionFilter] = useState('all');
   const [roleFilter, setRoleFilter] = useState('all');
-  const [sortBy, setSortBy] = useState<'name' | 'plus' | 'minus' | 'last_seen' | 'created_at'>('name');
+  const [sortBy, setSortBy] = useState<'name' | 'badge' | 'plus' | 'minus' | 'last_seen' | 'created_at'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
-  // Badges & Divisions (English ranks - 19 levels)
+  // Stopieńs & Divisions (English ranks - 19 levels)
   const badges = [
     'Trainee',
     'Deputy Sheriff I',
@@ -82,7 +83,7 @@ export default function KartotekaPage() {
   ];
 
   const divisions = ['FTO', 'SS', 'DTU', 'GU'];
-  const permissions = ['SWAT', 'SEU', 'AIR', 'Press Desk', 'Dispatch'];
+  const permissions = ['SWAT', 'SEU', 'AIR', 'Press Desk', 'Dispatch', 'Pościgowe'];
 
   useEffect(() => {
     if (!loading && !user) {
@@ -115,8 +116,7 @@ export default function KartotekaPage() {
       result = result.filter(
         (u) =>
           u.username?.toLowerCase().includes(query) ||
-          u.mta_nick?.toLowerCase().includes(query) ||
-          u.email?.toLowerCase().includes(query)
+          u.mta_nick?.toLowerCase().includes(query)
       );
     }
 
@@ -139,6 +139,10 @@ export default function KartotekaPage() {
         case 'name':
           aVal = a.username || '';
           bVal = b.username || '';
+          break;
+        case 'badge':
+          aVal = badges.indexOf(a.badge || '');
+          bVal = badges.indexOf(b.badge || '');
           break;
         case 'plus':
           aVal = a.plus_count || 0;
@@ -169,6 +173,15 @@ export default function KartotekaPage() {
 
     setFilteredUsers(result);
   }, [users, searchQuery, divisionFilter, roleFilter, sortBy, sortOrder]);
+
+  const handleSort = (column: 'name' | 'badge' | 'plus' | 'minus' | 'last_seen') => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortOrder('asc');
+    }
+  };
 
   const loadUsers = async () => {
     try {
@@ -216,25 +229,30 @@ export default function KartotekaPage() {
         const targetUser = users.find((u) => u.id === userId);
         if (!targetUser) continue;
 
-        const currentBadge = targetUser.badge;
-        const currentIndex = badges.indexOf(currentBadge);
+        const currentStopień = targetUser.badge;
+        const currentIndex = badges.indexOf(currentStopień);
 
         // Sprawdź czy użytkownik nie ma już najwyższego stopnia
         if (currentIndex === -1 || currentIndex >= badges.length - 1) {
           continue; // Pomiń użytkowników bez stopnia lub z najwyższym stopniem
         }
 
-        const newBadge = badges[currentIndex + 1];
+        const newStopień = badges[currentIndex + 1];
 
         // Update badge
-        const { error } = await updateUserBadge(userId, newBadge);
+        const { error } = await updateUserBadge(userId, newStopień);
         if (error) throw error;
+
+        // Auto-Commander: Captain III + Division → is_commander = true
+        if (newStopień === 'Captain III' && targetUser.division) {
+          await updateIsCommander(userId, true);
+        }
 
         // Discord webhook
         await notifyBadgeChange({
           user: { username: targetUser.username, mta_nick: targetUser.mta_nick },
-          oldBadge: currentBadge || 'Brak',
-          newBadge,
+          oldStopień: currentStopień || 'Brak',
+          newStopień,
           isPromotion: true,
           createdBy: { username: user.user_metadata?.full_name || 'Admin', mta_nick: null },
         });
@@ -265,25 +283,25 @@ export default function KartotekaPage() {
         const targetUser = users.find((u) => u.id === userId);
         if (!targetUser) continue;
 
-        const currentBadge = targetUser.badge;
-        const currentIndex = badges.indexOf(currentBadge);
+        const currentStopień = targetUser.badge;
+        const currentIndex = badges.indexOf(currentStopień);
 
         // Sprawdź czy użytkownik nie ma już najniższego stopnia
         if (currentIndex <= 0) {
           continue; // Pomiń użytkowników bez stopnia lub z najniższym stopniem
         }
 
-        const newBadge = badges[currentIndex - 1];
+        const newStopień = badges[currentIndex - 1];
 
         // Update badge
-        const { error } = await updateUserBadge(userId, newBadge);
+        const { error } = await updateUserBadge(userId, newStopień);
         if (error) throw error;
 
         // Discord webhook
         await notifyBadgeChange({
           user: { username: targetUser.username, mta_nick: targetUser.mta_nick },
-          oldBadge: currentBadge || 'Brak',
-          newBadge,
+          oldStopień: currentStopień || 'Brak',
+          newStopień,
           isPromotion: false,
           createdBy: { username: user.user_metadata?.full_name || 'Admin', mta_nick: null },
         });
@@ -492,7 +510,7 @@ export default function KartotekaPage() {
       case 'SS':
         return 'bg-[#ff8c00] text-white';
       case 'DTU':
-        return 'bg-[#1e3a8a] text-white';
+        return 'bg-[#60a5fa] text-[#020a06]';
       case 'GU':
         return 'bg-[#10b981] text-white';
       default:
@@ -500,14 +518,37 @@ export default function KartotekaPage() {
     }
   };
 
-  const getRoleBadgeColor = (role: string) => {
+  const getRoleStopieńColor = (role: string) => {
     switch (role) {
       case 'dev':
         return 'bg-purple-600 text-white';
-      case 'admin':
+      case 'hcs':
         return 'bg-red-600 text-white';
-      default:
+      case 'cs':
+        return 'bg-orange-600 text-white';
+      case 'deputy':
         return 'bg-blue-600 text-white';
+      case 'trainee':
+        return 'bg-gray-600 text-white';
+      default:
+        return 'bg-gray-500 text-white';
+    }
+  };
+
+  const getRoleDisplayName = (role: string) => {
+    switch (role) {
+      case 'dev':
+        return 'DEV';
+      case 'hcs':
+        return 'HCS';
+      case 'cs':
+        return 'CS';
+      case 'deputy':
+        return 'Deputy';
+      case 'trainee':
+        return 'Trainee';
+      default:
+        return role?.toUpperCase() || 'UNKNOWN';
     }
   };
 
@@ -547,16 +588,18 @@ export default function KartotekaPage() {
 
       <Navbar />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
-        {/* Back Button */}
+      {/* Back Button - Top Left */}
+      <div className="absolute top-20 left-6 z-20">
         <button
           onClick={() => router.push('/dashboard')}
-          className="mb-6 flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200"
+          className="flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200 shadow-lg"
         >
           <ChevronLeft className="w-5 h-5" />
           <span className="text-sm font-medium">Powrót do Dashboard</span>
         </button>
+      </div>
 
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#c9a227]/10 border border-[#c9a227]/20 text-[#c9a227] text-sm font-medium mb-4">
@@ -590,7 +633,7 @@ export default function KartotekaPage() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Szukaj (nazwa, nick MTA, email)..."
+                  placeholder="Szukaj (nazwa, nick MTA)..."
                   className="w-full pl-12 pr-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-[#c9a227] transition-colors"
                 />
               </div>
@@ -625,8 +668,10 @@ export default function KartotekaPage() {
               >
                 <option value="all">Wszystkie role</option>
                 <option value="dev">Dev</option>
-                <option value="admin">Admin</option>
-                <option value="user">User</option>
+                <option value="hcs">HCS (High Coordinator of Staff)</option>
+                <option value="cs">CS (Coordinator of Staff)</option>
+                <option value="deputy">Deputy</option>
+                <option value="trainee">Trainee</option>
               </select>
               <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8fb5a0] pointer-events-none" />
             </div>
@@ -730,11 +775,35 @@ export default function KartotekaPage() {
                     )}
                   </button>
                 </div>
-                <div className="col-span-3">Użytkownik</div>
+                <button
+                  onClick={() => handleSort('name')}
+                  className="col-span-3 flex items-center gap-2 cursor-pointer hover:text-[#c9a227] transition-colors"
+                >
+                  Użytkownik
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortBy === 'name' ? 'text-[#c9a227]' : ''}`} />
+                </button>
                 <div className="col-span-2">Dywizja/Uprawnienia</div>
-                <div className="col-span-2">Stopień</div>
-                <div className="col-span-1 text-center">+/-</div>
-                <div className="col-span-2">Ostatnio</div>
+                <button
+                  onClick={() => handleSort('badge')}
+                  className="col-span-2 flex items-center gap-2 cursor-pointer hover:text-[#c9a227] transition-colors"
+                >
+                  Stopień
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortBy === 'badge' ? 'text-[#c9a227]' : ''}`} />
+                </button>
+                <button
+                  onClick={() => handleSort('plus')}
+                  className="col-span-1 flex items-center justify-center gap-1 cursor-pointer hover:text-[#c9a227] transition-colors"
+                >
+                  +/-
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortBy === 'plus' || sortBy === 'minus' ? 'text-[#c9a227]' : ''}`} />
+                </button>
+                <button
+                  onClick={() => handleSort('last_seen')}
+                  className="col-span-2 flex items-center gap-2 cursor-pointer hover:text-[#c9a227] transition-colors"
+                >
+                  Ostatnio
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortBy === 'last_seen' ? 'text-[#c9a227]' : ''}`} />
+                </button>
                 <div className="col-span-1 text-right">Akcje</div>
               </div>
             </div>
@@ -775,8 +844,8 @@ export default function KartotekaPage() {
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="text-white font-semibold">{u.username}</span>
-                            <span className={`px-2 py-0.5 rounded text-xs font-bold ${getRoleBadgeColor(u.role)}`}>
-                              {u.role}
+                            <span className={`px-2 py-0.5 rounded text-xs font-bold ${getRoleStopieńColor(u.role)}`}>
+                              {getRoleDisplayName(u.role)}
                             </span>
                           </div>
                           {u.mta_nick && (
@@ -805,7 +874,7 @@ export default function KartotekaPage() {
                       </div>
                     </div>
 
-                    {/* Badge */}
+                    {/* Stopień */}
                     <div className="col-span-2">
                       <div className="flex items-center gap-2">
                         <Award className="w-4 h-4 text-[#c9a227]" />
@@ -909,7 +978,7 @@ export default function KartotekaPage() {
 
             {/* Content based on operation type */}
             <div className="space-y-4">
-              {/* Badges Operations */}
+              {/* Stopieńs Operations */}
               {batchOperation === 'badges' && (
                 <div className="space-y-4">
                   <div className="p-4 bg-[#c9a227]/10 border border-[#c9a227]/30 rounded-xl">
@@ -993,21 +1062,51 @@ export default function KartotekaPage() {
               {batchOperation === 'divisions' && (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">
+                    <label className="block text-[#8fb5a0] text-sm font-semibold mb-3">
                       Wybierz dywizję
                     </label>
-                    <select
-                      value={batchDivision}
-                      onChange={(e) => setBatchDivision(e.target.value)}
-                      className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white focus:outline-none focus:border-[#c9a227] transition-colors"
-                    >
-                      <option value="">Wybierz dywizję...</option>
-                      {divisions.map((div) => (
-                        <option key={div} value={div}>
-                          {div}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => setBatchDivision('FTO')}
+                        className={`px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+                          batchDivision === 'FTO'
+                            ? 'bg-[#c9a227] text-[#020a06] border-2 border-[#e6b830] shadow-lg'
+                            : 'bg-[#0a2818] text-[#c9a227] border border-[#c9a227]/30 hover:bg-[#c9a227]/10'
+                        }`}
+                      >
+                        FTO
+                      </button>
+                      <button
+                        onClick={() => setBatchDivision('SS')}
+                        className={`px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+                          batchDivision === 'SS'
+                            ? 'bg-[#ff8c00] text-white border-2 border-[#ff8c00] shadow-lg'
+                            : 'bg-[#0a2818] text-[#ff8c00] border border-[#ff8c00]/30 hover:bg-[#ff8c00]/10'
+                        }`}
+                      >
+                        SS
+                      </button>
+                      <button
+                        onClick={() => setBatchDivision('DTU')}
+                        className={`px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+                          batchDivision === 'DTU'
+                            ? 'bg-[#60a5fa] text-[#020a06] border-2 border-[#60a5fa] shadow-lg'
+                            : 'bg-[#0a2818] text-[#60a5fa] border border-[#60a5fa]/30 hover:bg-[#60a5fa]/10'
+                        }`}
+                      >
+                        DTU
+                      </button>
+                      <button
+                        onClick={() => setBatchDivision('GU')}
+                        className={`px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+                          batchDivision === 'GU'
+                            ? 'bg-[#10b981] text-white border-2 border-[#10b981] shadow-lg'
+                            : 'bg-[#0a2818] text-[#10b981] border border-[#10b981]/30 hover:bg-[#10b981]/10'
+                        }`}
+                      >
+                        GU
+                      </button>
+                    </div>
                   </div>
 
                   <div className="flex gap-3">

@@ -11,7 +11,7 @@ import { Search, Archive, Eye, X, CheckCircle, XCircle, ChevronLeft, Sparkles, B
  * - Filtrowanie po typie egzaminu
  * - Archiwizacja
  * - Szczegóły pytanie-po-pytaniu
- * - Header: Nick (główny), Badge (podtytuł)
+ * - Header: Nick (główny), Stopień (podtytuł)
  * - Multiple choice support w wynikach
  */
 export default function ExamStatistics({ onBack }) {
@@ -97,10 +97,10 @@ export default function ExamStatistics({ onBack }) {
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="text-2xl font-bold text-white mb-1">
-                  {users?.mta_nick || users?.email || 'Brak nicku'}
+                  {users?.mta_nick || users?.username || 'Brak nicku'}
                 </h3>
                 <p className="text-[#8fb5a0] text-sm">
-                  {users?.badge || 'Brak badge'}
+                  @{users?.username || 'N/A'}
                 </p>
               </div>
               <button

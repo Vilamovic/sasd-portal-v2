@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { getAllExamResultsArchived, deleteExamResult, getAllExamTypes } from '@/src/utils/supabaseHelpers';
 import { notifyAdminAction } from '@/src/utils/discord';
-import { Archive, Search, Trash2, X, ChevronLeft, Filter, Sparkles } from 'lucide-react';
+import { Archive, Search, Trash2, X, ChevronLeft, Filter, Sparkles, Eye, CheckCircle, XCircle } from 'lucide-react';
 
 /**
  * ExamArchive - Premium Sheriff-themed exam archive
@@ -17,6 +17,8 @@ export default function ExamArchive({ onBack }) {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('all');
+  const [selectedResult, setSelectedResult] = useState(null);
+  const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -75,6 +77,152 @@ export default function ExamArchive({ onBack }) {
 
     return matchesSearch && matchesType;
   });
+
+  // Modal szczegółów egzaminu
+  const renderDetailsModal = () => {
+    if (!showDetails || !selectedResult) return null;
+
+    const { questions, answers, users } = selectedResult;
+
+    return (
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="glass-strong rounded-2xl border border-[#1a4d32] max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+          {/* Header */}
+          <div className="p-6 border-b border-[#1a4d32] bg-gradient-to-r from-[#0a2818]/50 to-transparent">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-2xl font-bold text-white mb-1">
+                  {users?.mta_nick || users?.username || 'Brak nicku'}
+                </h3>
+                <p className="text-[#8fb5a0] text-sm">
+                  @{users?.username || 'N/A'}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowDetails(false)}
+                className="text-[#8fb5a0] hover:text-white transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+          </div>
+
+          {/* Questions */}
+          <div className="p-6 overflow-y-auto flex-grow">
+            <div className="space-y-6">
+              {questions.map((question, qIndex) => {
+                const userAnswer = answers[question.id];
+                const correctAnswers = question.correct_answers;
+                const isTimeout = userAnswer === -1;
+
+                // Sprawdź czy odpowiedź jest poprawna
+                let isCorrect = false;
+                if (!isTimeout) {
+                  if (question.is_multiple_choice) {
+                    // Multiple choice - porównaj tablice
+                    const sortedUser = [...(userAnswer || [])].sort((a, b) => a - b);
+                    const sortedCorrect = [...correctAnswers].sort((a, b) => a - b);
+                    isCorrect =
+                      sortedUser.length === sortedCorrect.length &&
+                      sortedUser.every((val, idx) => val === sortedCorrect[idx]);
+                  } else {
+                    // Single choice
+                    isCorrect = userAnswer === correctAnswers[0];
+                  }
+                }
+
+                return (
+                  <div
+                    key={qIndex}
+                    className="glass rounded-xl border border-[#1a4d32]/50 p-5"
+                  >
+                    {/* Question Header */}
+                    <div className="flex items-start justify-between mb-4">
+                      <h4 className="text-white font-semibold flex-grow">
+                        {qIndex + 1}. {question.question}
+                      </h4>
+                      <div className="flex-shrink-0 ml-4">
+                        {isTimeout ? (
+                          <span className="text-[#8fb5a0] text-sm">
+                            Nie wybrano odpowiedzi (czas minął)
+                          </span>
+                        ) : isCorrect ? (
+                          <CheckCircle className="w-6 h-6 text-[#22c55e]" />
+                        ) : (
+                          <XCircle className="w-6 h-6 text-red-400" />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Options */}
+                    <div className="space-y-2">
+                      {question.shuffledOptions?.map((option, oIndex) => {
+                        const isUserAnswer = question.is_multiple_choice
+                          ? userAnswer?.includes(oIndex)
+                          : userAnswer === oIndex;
+                        const isCorrectOption = correctAnswers.includes(oIndex);
+
+                        let bgColor = 'bg-[#051a0f]/50';
+                        let textColor = 'text-[#8fb5a0]';
+                        let label = '';
+
+                        if (isTimeout) {
+                          // Timeout - pokaż tylko poprawne
+                          if (isCorrectOption) {
+                            bgColor = 'bg-[#14b8a6]/20';
+                            textColor = 'text-[#14b8a6]';
+                            label = '(Poprawna)';
+                          }
+                        } else {
+                          // Zielone: wybrano poprawnie
+                          if (isUserAnswer && isCorrectOption) {
+                            bgColor = 'bg-[#22c55e]/20';
+                            textColor = 'text-[#22c55e]';
+                            label = '(Poprawnie wybrano)';
+                          }
+                          // Niebieskie: poprawna nie wybrana
+                          else if (!isUserAnswer && isCorrectOption) {
+                            bgColor = 'bg-[#14b8a6]/20';
+                            textColor = 'text-[#14b8a6]';
+                            label = '(Poprawna - nie wybrano)';
+                          }
+                          // Czerwone: wybrano błędnie
+                          else if (isUserAnswer && !isCorrectOption) {
+                            bgColor = 'bg-red-500/20';
+                            textColor = 'text-red-400';
+                            label = '(Błędnie wybrano)';
+                          }
+                        }
+
+                        return (
+                          <div
+                            key={oIndex}
+                            className={`p-3 rounded-lg border border-[#1a4d32]/30 ${bgColor} ${textColor} text-sm`}
+                          >
+                            {option} {label && <span className="font-semibold">{label}</span>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="p-6 border-t border-[#1a4d32]">
+            <button
+              onClick={() => setShowDetails(false)}
+              className="w-full px-6 py-3 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
+            >
+              Zamknij
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   if (!isAdmin) {
     return (
@@ -223,13 +371,25 @@ export default function ExamArchive({ onBack }) {
                           {new Date(result.created_at).toLocaleString('pl-PL')}
                         </td>
                         <td className="px-6 py-4">
-                          <button
-                            onClick={() => handleDelete(result.id, result.users?.mta_nick || result.users?.email)}
-                            className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors border border-red-500/30"
-                            title="Usuń trwale"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => {
+                                setSelectedResult(result);
+                                setShowDetails(true);
+                              }}
+                              className="p-2.5 bg-[#14b8a6]/20 text-[#14b8a6] rounded-lg hover:bg-[#14b8a6]/30 transition-colors border border-[#14b8a6]/30"
+                              title="Szczegóły"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(result.id, result.users?.mta_nick || result.users?.email)}
+                              className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors border border-red-500/30"
+                              title="Usuń trwale"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -249,6 +409,9 @@ export default function ExamArchive({ onBack }) {
           <span className="text-sm font-medium">Powrót</span>
         </button>
       </div>
+
+      {/* Details Modal */}
+      {renderDetailsModal()}
     </div>
   );
 }

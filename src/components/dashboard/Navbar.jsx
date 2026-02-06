@@ -102,7 +102,7 @@ export default function Navbar() {
     const colors = {
       FTO: 'text-[#c9a227]', // Yellow (gold theme)
       SS: 'text-[#ff8c00]', // Orange
-      DTU: 'text-[#1e3a8a]', // Navy blue
+      DTU: 'text-[#60a5fa]', // Light blue (better contrast)
       GU: 'text-[#10b981]', // Green
     };
     return colors[division] || 'text-white';
@@ -145,7 +145,7 @@ export default function Navbar() {
 
       <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between relative z-10">
         {/* Logo Section */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
           <div className="relative group">
             {/* Glow effect */}
             <div className="absolute inset-0 bg-gradient-to-br from-[#c9a227] to-[#e6b830] rounded-full animate-pulse-glow opacity-30 blur-md scale-125" />
@@ -168,6 +168,20 @@ export default function Navbar() {
               Training Portal
             </span>
           </div>
+
+          {/* Active Penalties Timer - Left Side */}
+          {activePenalties && activePenalties.length > 0 && (
+            <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl">
+              <Clock className="w-4 h-4 text-red-400" />
+              <div className="flex flex-col">
+                {activePenalties.map((penalty) => (
+                  <span key={penalty.id} className="text-red-400 text-xs font-mono font-bold">
+                    {formatTime(penaltyTimers[penalty.id] || penalty.remaining_seconds)}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* User Menu Section */}

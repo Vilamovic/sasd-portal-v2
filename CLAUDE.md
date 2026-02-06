@@ -31,7 +31,12 @@
 ---
 
 ## 🏗️ Project Architecture & Identity
-* **Identity**: `dev` (UUID: `c254fb57-72d4-450c-87b7-cd7ffad5b715`) > `admin` > `user`.
+* **Identity**: `dev` (UUID: `2ab9b7ad-a32f-4219-b1fd-3c0e79628d75`) > `hcs` > `cs` > `deputy` > `trainee`.
+* **Role Hierarchy**:
+  - **Trainee/Deputy**: Dashboard (Materiały, Egzaminy, Dywizje), materiały read-only, egzaminy z tokenem
+  - **CS**: Deputy + dodawanie materiałów, egzaminy bez tokena, pełny dashboard, zerowanie +/-, nadawanie stopni/uprawnień (tylko Trainee/Deputy)
+  - **HCS**: Pełen dostęp oprócz limitacji DEV
+  - **Dev**: Pełen dostęp
 * **Core Systems**: Auth (Discord), Force Logout (polling 5s), Exams (JSONB), Discord Webhooks.
 
 ---
@@ -61,11 +66,12 @@ Zmienione pliki: [ścieżki]
 **Detailed Instructions:** See `/task/INSTRUCTIONS.md` for complete requirements
 
 **Key Features:**
-- Dywizje (FTO, SS, DTU, GU) - wyświetlane w Navbar
-- Uprawnienia (SWAT, SEU, AIR, Press Desk, Dispatch)
-- System stopni (17 rang hierarchii)
+- Dywizje (FTO #c9a227, SS #ff8c00, DTU #60a5fa, GU #10b981) - wyświetlane w Navbar
+- Uprawnienia (SWAT, SEU, AIR, Press Desk, Dispatch, Pościgowe)
+- System stopni (19 rang hierarchii: Trainee → Sheriff)
 - System kar i nagród (PLUS/MINUS) z timerami
-- Kartoteka użytkowników (tylko admin/dev)
+- Kartoteka użytkowników (tylko CS+)
+- Captain III auto-Commander (automatyczne nadanie is_commander przy awansie)
 
 **Database:**
 - Active Migrations: `007_add_delete_policies_for_dev.sql`, `008_add_update_badge_policy_for_dev.sql`, `009_create_active_penalties_rpc.sql`
@@ -75,12 +81,26 @@ Zmienione pliki: [ścieżki]
 
 **Status:**
 - ✅ System Kartoteki w pełni zaimplementowany
-- ✅ Navbar z dywizjami, uprawnieniami, balance, timer
+- ✅ Navbar z dywizjami, uprawnieniami, balance, timer (lewa strona)
 - ✅ User profile z historiami kar/nagród/notatek
 - ✅ Checkboxy do selekcji pojedynczych itemów (DEV)
 - ✅ RLS policies dla DEV/Admin (DELETE, UPDATE)
-- ⚠️ Migracja 009 wymaga wykonania w Supabase SQL Editor
+- ✅ Wszystkie migracje (007-009) wykonane i aktywne w Supabase
+- ✅ Nowa hierarchia ról (Trainee/Deputy/CS/HCS/Dev) z logiką uprawnień
+- ✅ Captain III auto-Commander
+- ✅ Archiwum egzaminów z podglądem
+- ✅ Sortowanie w Kartotece (strzałki UI w kolumnach)
+- ✅ Dywizje jako tagi (single-select)
+- ✅ Email privacy + User Identity (@username)
+- ✅ Badge → "Stopień" (UI text)
 
+**Recent Changes (2026-02-07):**
+- System refactor v3: Privacy (email cleanup), UI (navigation top-left, user identity format)
+- Navbar: DTU color fix (#60a5fa), timer moved left
+- Personnel: Sortable columns with arrows, division tags instead of dropdown
+- Role hierarchy: Trainee → Deputy → CS → HCS → Dev with permission gating
+- CS restrictions: can manage only Trainee/Deputy, can zero only +/-
+- Captain III + Division → auto-Commander flag
 ---
 
-Last Updated: 2026-02-06 - Navbar timer/balance fix + checkboxy selection
+Last Updated: 2026-02-07 - System Refactor v3 Complete

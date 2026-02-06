@@ -28,7 +28,7 @@ export default function Dashboard() {
         { icon: FileText, label: '12 dokumentów', value: '12' },
         { icon: Clock, label: 'Aktualizacja: dzisiaj' }
       ],
-      roles: ['user', 'admin', 'dev'],
+      roles: ['trainee', 'deputy', 'cs', 'hcs', 'dev'],
     },
     {
       id: 'exams',
@@ -42,7 +42,7 @@ export default function Dashboard() {
         { icon: FileText, label: '7 typów egzaminów', value: '7' },
         { icon: CheckCircle, label: 'Auto-ocena' }
       ],
-      roles: ['user', 'admin', 'dev'],
+      roles: ['trainee', 'deputy', 'cs', 'hcs', 'dev'],
     },
     {
       id: 'divisions',
@@ -56,7 +56,7 @@ export default function Dashboard() {
         { icon: Shield, label: '5 dywizji' },
         { icon: FileText, label: 'Materiały specjalistyczne' }
       ],
-      roles: ['user', 'admin', 'dev'],
+      roles: ['trainee', 'deputy', 'cs', 'hcs', 'dev'],
     },
     {
       id: 'personnel',
@@ -70,7 +70,7 @@ export default function Dashboard() {
         { icon: Users, label: 'Zarządzanie użytkownikami' },
         { icon: Shield, label: 'Kary i uprawnienia' }
       ],
-      roles: ['admin', 'dev'],
+      roles: ['cs', 'hcs', 'dev'],
     },
     {
       id: 'admin',
@@ -84,7 +84,7 @@ export default function Dashboard() {
         { icon: Users, label: 'Zarządzanie użytkownikami' },
         { icon: Shield, label: 'Force logout system' }
       ],
-      roles: ['admin', 'dev'],
+      roles: ['cs', 'hcs', 'dev'],
     },
   ];
 

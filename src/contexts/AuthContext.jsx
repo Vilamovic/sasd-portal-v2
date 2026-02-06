@@ -125,8 +125,8 @@ export function AuthProvider({ children }) {
     if (userId === DEV_UUID) {
       return 'dev';
     }
-    // Role z bazy danych
-    return dbUser?.role || 'user';
+    // Role z bazy danych (domyślnie trainee)
+    return dbUser?.role || 'trainee';
   }, []);
 
   /**
@@ -330,17 +330,17 @@ export function AuthProvider({ children }) {
               roleRef.current = userRole;
               startRolePolling(userId);
             } else {
-              // Fallback: ustaw rolę 'user' jeśli nie udało się utworzyć
+              // Fallback: ustaw rolę 'trainee' jeśli nie udało się utworzyć
               console.warn('Failed to create user, using default role');
-              setRole('user');
-              roleRef.current = 'user';
+              setRole('trainee');
+              roleRef.current = 'trainee';
             }
           }
         } catch (error) {
           console.error('Error loading user role:', error);
-          // Fallback: ustaw rolę 'user'
-          setRole('user');
-          roleRef.current = 'user';
+          // Fallback: ustaw rolę 'trainee'
+          setRole('trainee');
+          roleRef.current = 'trainee';
         }
       }
 
@@ -546,8 +546,14 @@ export function AuthProvider({ children }) {
     isCommander,
     // Dodatkowo dla kompatybilności
     isAuthenticated: !!user,
+    // Nowa hierarchia ról
     isDev: role === 'dev',
-    isAdmin: role === 'admin' || role === 'dev',
+    isHCS: role === 'hcs' || role === 'dev',
+    isCS: role === 'cs' || role === 'hcs' || role === 'dev',
+    isDeputy: role === 'deputy' || role === 'cs' || role === 'hcs' || role === 'dev',
+    isTrainee: !!role, // Każdy zalogowany użytkownik ma co najmniej dostęp trainee
+    // Backward compatibility - admin obejmuje CS i wyżej
+    isAdmin: role === 'cs' || role === 'hcs' || role === 'dev',
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

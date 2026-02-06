@@ -49,7 +49,7 @@ import {
  * Tylko dla admin/dev
  */
 export default function UserProfilePage() {
-  const { user: currentUser, loading, isAdmin, isDev, role, refreshUserData } = useAuth();
+  const { user: currentUser, loading, isAdmin, isDev, isHCS, isCS, role, refreshUserData } = useAuth();
   const router = useRouter();
   const params = useParams();
   const username = params.username as string;
@@ -63,10 +63,10 @@ export default function UserProfilePage() {
   const [penaltyTimers, setPenaltyTimers] = useState<Record<string, number>>({});
 
   // Inline editing
-  const [editingBadge, setEditingBadge] = useState(false);
+  const [editingStopień, setEditingStopień] = useState(false);
   const [editingDivision, setEditingDivision] = useState(false);
   const [editingPermissions, setEditingPermissions] = useState(false);
-  const [tempBadge, setTempBadge] = useState('');
+  const [tempStopień, setTempStopień] = useState('');
   const [tempDivision, setTempDivision] = useState('');
   const [tempPermissions, setTempPermissions] = useState<string[]>([]);
   const [tempIsCommander, setTempIsCommander] = useState(false);
@@ -118,7 +118,7 @@ export default function UserProfilePage() {
   ];
 
   const divisions = ['FTO', 'SS', 'DTU', 'GU'];
-  const permissions = ['SWAT', 'SEU', 'AIR', 'Press Desk', 'Dispatch'];
+  const permissions = ['SWAT', 'SEU', 'AIR', 'Press Desk', 'Dispatch', 'Pościgowe'];
 
   useEffect(() => {
     if (!loading && !currentUser) {
@@ -194,7 +194,7 @@ export default function UserProfilePage() {
 
       // Set temp values
       if (userData) {
-        setTempBadge(userData.badge || '');
+        setTempStopień(userData.badge || '');
         setTempDivision(userData.division || '');
         setTempPermissions(userData.permissions || []);
         setTempIsCommander(userData.is_commander || false);
@@ -243,17 +243,27 @@ export default function UserProfilePage() {
     }
   };
 
-  const handleSaveBadge = async () => {
+  const handleSaveStopień = async () => {
     if (submittingRef.current || !user || !currentUser) return;
     submittingRef.current = true;
 
     try {
-      const oldBadge = user.badge;
-      const { error } = await updateUserBadge(userId, tempBadge || null);
+      const oldStopień = user.badge;
+      const { error } = await updateUserBadge(userId, tempStopień || null);
       if (error) throw error;
 
+      // Auto-Commander: Captain III + Division → is_commander = true
+      let autoCommander = false;
+      if (tempStopień === 'Captain III' && user.division) {
+        const { error: commanderError } = await updateIsCommander(userId, true);
+        if (!commanderError) {
+          autoCommander = true;
+          setUser({ ...user, badge: tempStopień, is_commander: true });
+        }
+      }
+
       // Discord webhook
-      if (oldBadge !== tempBadge) {
+      if (oldStopień !== tempStopień) {
         const badgesList = [
           'Trainee', 'Deputy Sheriff I', 'Deputy Sheriff II', 'Deputy Sheriff III',
           'Senior Deputy Sheriff', 'Sergeant I', 'Sergeant II',
@@ -261,22 +271,24 @@ export default function UserProfilePage() {
           'Lieutenant', 'Captain I', 'Captain II', 'Captain III',
           'Area Commander', 'Division Chief', 'Assistant Sheriff', 'Undersheriff', 'Sheriff'
         ];
-        const oldIndex = badgesList.indexOf(oldBadge || '');
-        const newIndex = badgesList.indexOf(tempBadge || '');
+        const oldIndex = badgesList.indexOf(oldStopień || '');
+        const newIndex = badgesList.indexOf(tempStopień || '');
         const isPromotion = newIndex > oldIndex;
 
         await notifyBadgeChange({
           user: { username: user.username, mta_nick: user.mta_nick },
-          oldBadge: oldBadge || 'Brak',
-          newBadge: tempBadge || 'Brak',
+          oldStopień: oldStopień || 'Brak',
+          newStopień: tempStopień || 'Brak',
           isPromotion,
           createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
         });
       }
 
-      setUser({ ...user, badge: tempBadge });
-      setEditingBadge(false);
-      alert('Stopień zaktualizowany.');
+      if (!autoCommander) {
+        setUser({ ...user, badge: tempStopień });
+      }
+      setEditingStopień(false);
+      alert('Stopień zaktualizowany.' + (autoCommander ? ' Automatycznie nadano funkcję Commander.' : ''));
     } catch (error) {
       console.error('Error updating badge:', error);
       alert('Błąd podczas aktualizacji stopnia.');
@@ -435,7 +447,7 @@ export default function UserProfilePage() {
       case 'SS':
         return 'bg-[#ff8c00] text-white';
       case 'DTU':
-        return 'bg-[#1e3a8a] text-white';
+        return 'bg-[#60a5fa] text-[#020a06]';
       case 'GU':
         return 'bg-[#10b981] text-white';
       default:
@@ -616,9 +628,9 @@ export default function UserProfilePage() {
     }
   };
 
-  // Clear functions (DEV only)
+  // Clear functions (CS can clear +/-, HCS+ can clear everything)
   const handleClearPlusMinusPenalties = async () => {
-    if (!isDev || !confirm('Czy na pewno chcesz wyzerować całą historię PLUS/MINUS tego użytkownika?')) return;
+    if (!isCS || !confirm('Czy na pewno chcesz wyzerować całą historię PLUS/MINUS tego użytkownika?')) return;
 
     try {
       const { error } = await clearUserPlusMinusPenalties(userId);
@@ -634,7 +646,7 @@ export default function UserProfilePage() {
   };
 
   const handleClearSuspensions = async () => {
-    if (!isDev || !confirm('Czy na pewno chcesz wyzerować całą historię zawieszeń tego użytkownika?')) return;
+    if (!isHCS || !confirm('Czy na pewno chcesz wyzerować całą historię zawieszeń tego użytkownika?')) return;
 
     try {
       const { error } = await clearUserSuspensions(userId);
@@ -791,16 +803,18 @@ export default function UserProfilePage() {
 
       <Navbar />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
-        {/* Back Button */}
+      {/* Back Button - Top Left */}
+      <div className="absolute top-20 left-6 z-20">
         <button
           onClick={() => router.push('/personnel')}
-          className="mb-6 flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200"
+          className="flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200 shadow-lg"
         >
           <ChevronLeft className="w-5 h-5" />
           <span className="text-sm font-medium">Powrót do Kartoteki</span>
         </button>
+      </div>
 
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
         {/* User Header */}
         <div className="mb-8 glass-strong rounded-2xl border border-[#1a4d32]/50 p-8 shadow-xl">
           <div className="flex items-start gap-6">
@@ -813,41 +827,38 @@ export default function UserProfilePage() {
             )}
             <div className="flex-grow">
               <div className="flex items-center gap-3 mb-2">
-                <h2 className="text-3xl font-bold text-white">{user.username}</h2>
+                <div className="flex flex-col">
+                  <h2 className="text-3xl font-bold text-white">{user.mta_nick || user.username}</h2>
+                  <p className="text-[#8fb5a0] text-sm">@{user.username}</p>
+                </div>
                 <span className={`px-3 py-1 rounded text-xs font-bold ${user.role === 'dev' ? 'bg-purple-600' : user.role === 'admin' ? 'bg-red-600' : 'bg-blue-600'} text-white`}>
                   {user.role}
                 </span>
               </div>
-              {user.mta_nick && (
-                <p className="text-[#8fb5a0] mb-4">MTA Nick: {user.mta_nick}</p>
-              )}
-              {user.email && (
-                <p className="text-[#8fb5a0] text-sm mb-4">{user.email}</p>
-              )}
 
               {/* Editable Fields */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Badge */}
+                {/* Stopień */}
                 <div className="glass-medium rounded-xl p-4 border border-[#1a4d32]/30">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <Award className="w-4 h-4 text-[#c9a227]" />
                       <span className="text-[#8fb5a0] text-sm">Stopień</span>
                     </div>
-                    {!editingBadge && (
+                    {!editingStopień && (isHCS || (isCS && user.role !== 'cs' && user.role !== 'hcs')) && (
                       <button
-                        onClick={() => setEditingBadge(true)}
+                        onClick={() => setEditingStopień(true)}
                         className="text-[#c9a227] hover:text-[#e6b830] transition-colors"
                       >
                         <Edit3 className="w-4 h-4" />
                       </button>
                     )}
                   </div>
-                  {editingBadge ? (
+                  {editingStopień ? (
                     <div className="space-y-2">
                       <select
-                        value={tempBadge}
-                        onChange={(e) => setTempBadge(e.target.value)}
+                        value={tempStopień}
+                        onChange={(e) => setTempStopień(e.target.value)}
                         className="w-full px-3 py-2 bg-[#0a2818]/50 border border-[#1a4d32] rounded-lg text-white text-sm focus:outline-none focus:border-[#c9a227]"
                       >
                         <option value="">Brak</option>
@@ -859,7 +870,7 @@ export default function UserProfilePage() {
                       </select>
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={handleSaveBadge}
+                          onClick={handleSaveStopień}
                           className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-green-600 text-white text-xs rounded-lg hover:bg-green-700 transition-colors"
                         >
                           <Save className="w-3 h-3" />
@@ -867,8 +878,8 @@ export default function UserProfilePage() {
                         </button>
                         <button
                           onClick={() => {
-                            setEditingBadge(false);
-                            setTempBadge(user.badge || '');
+                            setEditingStopień(false);
+                            setTempStopień(user.badge || '');
                           }}
                           className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-[#0a2818] text-white text-xs rounded-lg hover:bg-[#133524] transition-colors"
                         >
@@ -889,7 +900,7 @@ export default function UserProfilePage() {
                       <Shield className="w-4 h-4 text-[#c9a227]" />
                       <span className="text-[#8fb5a0] text-sm">Dywizja</span>
                     </div>
-                    {!editingDivision && (
+                    {!editingDivision && (isHCS || (isCS && user.role !== 'cs' && user.role !== 'hcs')) && (
                       <button
                         onClick={() => setEditingDivision(true)}
                         className="text-[#c9a227] hover:text-[#e6b830] transition-colors"
@@ -900,18 +911,58 @@ export default function UserProfilePage() {
                   </div>
                   {editingDivision ? (
                     <div className="space-y-2">
-                      <select
-                        value={tempDivision}
-                        onChange={(e) => setTempDivision(e.target.value)}
-                        className="w-full px-3 py-2 bg-[#0a2818]/50 border border-[#1a4d32] rounded-lg text-white text-sm focus:outline-none focus:border-[#c9a227]"
-                      >
-                        <option value="">Brak</option>
-                        {divisions.map((div) => (
-                          <option key={div} value={div}>
-                            {div}
-                          </option>
-                        ))}
-                      </select>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={() => setTempDivision('')}
+                          className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+                            tempDivision === ''
+                              ? 'bg-gray-600 text-white border-2 border-gray-400'
+                              : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32] hover:bg-[#133524]'
+                          }`}
+                        >
+                          Brak
+                        </button>
+                        <button
+                          onClick={() => setTempDivision('FTO')}
+                          className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+                            tempDivision === 'FTO'
+                              ? 'bg-[#c9a227] text-[#020a06] border-2 border-[#e6b830]'
+                              : 'bg-[#0a2818] text-[#c9a227] border border-[#c9a227]/30 hover:bg-[#c9a227]/10'
+                          }`}
+                        >
+                          FTO
+                        </button>
+                        <button
+                          onClick={() => setTempDivision('SS')}
+                          className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+                            tempDivision === 'SS'
+                              ? 'bg-[#ff8c00] text-white border-2 border-[#ff8c00]'
+                              : 'bg-[#0a2818] text-[#ff8c00] border border-[#ff8c00]/30 hover:bg-[#ff8c00]/10'
+                          }`}
+                        >
+                          SS
+                        </button>
+                        <button
+                          onClick={() => setTempDivision('DTU')}
+                          className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+                            tempDivision === 'DTU'
+                              ? 'bg-[#60a5fa] text-[#020a06] border-2 border-[#60a5fa]'
+                              : 'bg-[#0a2818] text-[#60a5fa] border border-[#60a5fa]/30 hover:bg-[#60a5fa]/10'
+                          }`}
+                        >
+                          DTU
+                        </button>
+                        <button
+                          onClick={() => setTempDivision('GU')}
+                          className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+                            tempDivision === 'GU'
+                              ? 'bg-[#10b981] text-white border-2 border-[#10b981]'
+                              : 'bg-[#0a2818] text-[#10b981] border border-[#10b981]/30 hover:bg-[#10b981]/10'
+                          }`}
+                        >
+                          GU
+                        </button>
+                      </div>
                       {tempDivision && (
                         <label className="flex items-center gap-2 text-sm text-[#8fb5a0]">
                           <input
@@ -964,7 +1015,7 @@ export default function UserProfilePage() {
                       <Users className="w-4 h-4 text-[#c9a227]" />
                       <span className="text-[#8fb5a0] text-sm">Uprawnienia</span>
                     </div>
-                    {!editingPermissions && (
+                    {!editingPermissions && (isHCS || (isCS && user.role !== 'cs' && user.role !== 'hcs')) && (
                       <button
                         onClick={() => setEditingPermissions(true)}
                         className="text-[#c9a227] hover:text-[#e6b830] transition-colors"
@@ -1074,12 +1125,12 @@ export default function UserProfilePage() {
         {/* Active Suspensions */}
         {activePenalties.length > 0 && (
           <div className="mb-8">
-            {isDev && (
+            {isHCS && (
               <div className="flex justify-end mb-2">
                 <button
                   onClick={handleClearSuspensions}
                   className="flex items-center gap-2 px-3 py-2 bg-red-600/20 border border-red-500/50 text-red-400 text-sm font-bold rounded-lg hover:bg-red-600/30 transition-all"
-                  title="Wyzeruj wszystkie zawieszenia (DEV)"
+                  title="Wyzeruj wszystkie zawieszenia (HCS+)"
                 >
                   <Trash2 className="w-3 h-3" />
                   Wyzeruj
@@ -1120,13 +1171,13 @@ export default function UserProfilePage() {
 
         {/* PLUS/MINUS History */}
         <div className="mb-8">
-          {isDev && (
+          {isCS && (
             <div className="flex justify-end gap-2 mb-2">
-              {selectedPenaltyIds.size > 0 && (
+              {isDev && selectedPenaltyIds.size > 0 && (
                 <button
                   onClick={handleDeleteSelectedPenalties}
                   className="flex items-center gap-2 px-3 py-2 bg-orange-600/20 border border-orange-500/50 text-orange-400 text-sm font-bold rounded-lg hover:bg-orange-600/30 transition-all"
-                  title={`Usuń ${selectedPenaltyIds.size} zaznaczonych pozycji`}
+                  title={`Usuń ${selectedPenaltyIds.size} zaznaczonych pozycji (DEV)`}
                 >
                   <Trash2 className="w-3 h-3" />
                   Usuń zaznaczone ({selectedPenaltyIds.size})
@@ -1135,7 +1186,7 @@ export default function UserProfilePage() {
               <button
                 onClick={handleClearPlusMinusPenalties}
                 className="flex items-center gap-2 px-3 py-2 bg-red-600/20 border border-red-500/50 text-red-400 text-sm font-bold rounded-lg hover:bg-red-600/30 transition-all"
-                title="Wyzeruj całą historię PLUS/MINUS (DEV)"
+                title="Wyzeruj całą historię PLUS/MINUS (CS+)"
               >
                 <Trash2 className="w-3 h-3" />
                 Wyzeruj wszystko
@@ -1207,13 +1258,13 @@ export default function UserProfilePage() {
 
         {/* Penalties History */}
         <div className="mb-8">
-          {isDev && (
+          {isHCS && (
             <div className="flex justify-end gap-2 mb-2">
-              {selectedPenaltyIds.size > 0 && (
+              {isDev && selectedPenaltyIds.size > 0 && (
                 <button
                   onClick={handleDeleteSelectedPenalties}
                   className="flex items-center gap-2 px-3 py-2 bg-orange-600/20 border border-orange-500/50 text-orange-400 text-sm font-bold rounded-lg hover:bg-orange-600/30 transition-all"
-                  title={`Usuń ${selectedPenaltyIds.size} zaznaczonych pozycji`}
+                  title={`Usuń ${selectedPenaltyIds.size} zaznaczonych pozycji (DEV)`}
                 >
                   <Trash2 className="w-3 h-3" />
                   Usuń zaznaczone ({selectedPenaltyIds.size})
@@ -1222,7 +1273,7 @@ export default function UserProfilePage() {
               <button
                 onClick={handleClearSuspensions}
                 className="flex items-center gap-2 px-3 py-2 bg-red-600/20 border border-red-500/50 text-red-400 text-sm font-bold rounded-lg hover:bg-red-600/30 transition-all"
-                title="Wyzeruj całą historię zawieszeń (DEV)"
+                title="Wyzeruj całą historię zawieszeń (HCS+)"
               >
                 <Trash2 className="w-3 h-3" />
                 Wyzeruj wszystko
