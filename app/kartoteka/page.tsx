@@ -4,7 +4,13 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
 import Navbar from '@/src/components/dashboard/Navbar';
-import { getAllUsersWithDetails } from '@/src/utils/supabaseHelpers';
+import {
+  getAllUsersWithDetails,
+  updateUserBadge,
+  updateUserPermissions,
+  updateUserDivision,
+} from '@/src/utils/supabaseHelpers';
+import { notifyBadgeChange, notifyPermissionChange, notifyDivisionChange } from '@/src/utils/discord';
 import {
   ChevronLeft,
   Users,
@@ -20,6 +26,10 @@ import {
   CheckSquare,
   Square,
   Sparkles,
+  TrendingUp,
+  TrendingDown,
+  X,
+  Check,
 } from 'lucide-react';
 
 /**
@@ -35,6 +45,12 @@ export default function KartotekaPage() {
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
 
+  // Batch Operations Modal
+  const [showBatchModal, setShowBatchModal] = useState(false);
+  const [batchOperation, setBatchOperation] = useState<'badges' | 'permissions' | 'divisions'>('badges');
+  const [batchPermissions, setBatchPermissions] = useState<string[]>([]);
+  const [batchDivision, setBatchDivision] = useState('');
+
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [divisionFilter, setDivisionFilter] = useState('all');
@@ -42,13 +58,27 @@ export default function KartotekaPage() {
   const [sortBy, setSortBy] = useState<'name' | 'plus' | 'minus' | 'last_seen' | 'created_at'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
-  // Badges & Divisions
+  // Badges & Divisions (English ranks - 19 levels)
   const badges = [
-    'Rekrut', 'Oficer I', 'Oficer II', 'Oficer III', 'Oficer III+I',
-    'Detektyw I', 'Detektyw II', 'Detektyw III',
-    'Sierżant I', 'Sierżant II', 'Sierżant III',
-    'Porucznik I', 'Porucznik II', 'Porucznik III',
-    'Kapitan I', 'Kapitan II', 'Szef'
+    'Trainee',
+    'Deputy Sheriff I',
+    'Deputy Sheriff II',
+    'Deputy Sheriff III',
+    'Senior Deputy Sheriff',
+    'Sergeant I',
+    'Sergeant II',
+    'Detective I',
+    'Detective II',
+    'Detective III',
+    'Lieutenant',
+    'Captain I',
+    'Captain II',
+    'Captain III',
+    'Area Commander',
+    'Division Chief',
+    'Assistant Sheriff',
+    'Undersheriff',
+    'Sheriff'
   ];
 
   const divisions = ['FTO', 'SS', 'DTU', 'GU'];
@@ -168,6 +198,289 @@ export default function KartotekaPage() {
     } else {
       setSelectedUsers(new Set(filteredUsers.map((u) => u.id)));
     }
+  };
+
+  // Batch Operations Handlers
+  const handleBatchPromote = async () => {
+    if (!user) return;
+    const confirmed = confirm(`Czy na pewno chcesz awansować ${selectedUsers.size} użytkowników?`);
+    if (!confirmed) return;
+
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const userId of Array.from(selectedUsers)) {
+      try {
+        const targetUser = users.find((u) => u.id === userId);
+        if (!targetUser) continue;
+
+        const currentBadge = targetUser.badge;
+        const currentIndex = badges.indexOf(currentBadge);
+
+        // Sprawdź czy użytkownik nie ma już najwyższego stopnia
+        if (currentIndex === -1 || currentIndex >= badges.length - 1) {
+          continue; // Pomiń użytkowników bez stopnia lub z najwyższym stopniem
+        }
+
+        const newBadge = badges[currentIndex + 1];
+
+        // Update badge
+        const { error } = await updateUserBadge(userId, newBadge);
+        if (error) throw error;
+
+        // Discord webhook
+        await notifyBadgeChange({
+          user: { username: targetUser.username, mta_nick: targetUser.mta_nick },
+          oldBadge: currentBadge || 'Brak',
+          newBadge,
+          isPromotion: true,
+          createdBy: { username: user.user_metadata?.full_name || 'Admin', mta_nick: null },
+        });
+
+        successCount++;
+      } catch (error) {
+        console.error(`Error promoting user ${userId}:`, error);
+        errorCount++;
+      }
+    }
+
+    await loadUsers();
+    setSelectedUsers(new Set());
+    setShowBatchModal(false);
+    alert(`Awansowano ${successCount} użytkowników. Błędy: ${errorCount}`);
+  };
+
+  const handleBatchDemote = async () => {
+    if (!user) return;
+    const confirmed = confirm(`Czy na pewno chcesz zdegradować ${selectedUsers.size} użytkowników?`);
+    if (!confirmed) return;
+
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const userId of Array.from(selectedUsers)) {
+      try {
+        const targetUser = users.find((u) => u.id === userId);
+        if (!targetUser) continue;
+
+        const currentBadge = targetUser.badge;
+        const currentIndex = badges.indexOf(currentBadge);
+
+        // Sprawdź czy użytkownik nie ma już najniższego stopnia
+        if (currentIndex <= 0) {
+          continue; // Pomiń użytkowników bez stopnia lub z najniższym stopniem
+        }
+
+        const newBadge = badges[currentIndex - 1];
+
+        // Update badge
+        const { error } = await updateUserBadge(userId, newBadge);
+        if (error) throw error;
+
+        // Discord webhook
+        await notifyBadgeChange({
+          user: { username: targetUser.username, mta_nick: targetUser.mta_nick },
+          oldBadge: currentBadge || 'Brak',
+          newBadge,
+          isPromotion: false,
+          createdBy: { username: user.user_metadata?.full_name || 'Admin', mta_nick: null },
+        });
+
+        successCount++;
+      } catch (error) {
+        console.error(`Error demoting user ${userId}:`, error);
+        errorCount++;
+      }
+    }
+
+    await loadUsers();
+    setSelectedUsers(new Set());
+    setShowBatchModal(false);
+    alert(`Zdegradowano ${successCount} użytkowników. Błędy: ${errorCount}`);
+  };
+
+  const handleBatchAddPermissions = async () => {
+    if (!user || batchPermissions.length === 0) {
+      alert('Wybierz przynajmniej jedno uprawnienie.');
+      return;
+    }
+
+    const confirmed = confirm(`Czy na pewno chcesz dodać uprawnienia dla ${selectedUsers.size} użytkowników?`);
+    if (!confirmed) return;
+
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const userId of Array.from(selectedUsers)) {
+      try {
+        const targetUser = users.find((u) => u.id === userId);
+        if (!targetUser) continue;
+
+        const currentPermissions = targetUser.permissions || [];
+        const newPermissions = [...new Set([...currentPermissions, ...batchPermissions])];
+
+        // Update permissions
+        const { error } = await updateUserPermissions(userId, newPermissions);
+        if (error) throw error;
+
+        // Discord webhooks dla każdego dodanego uprawnienia
+        const added = batchPermissions.filter((p: string) => !currentPermissions.includes(p));
+        for (const permission of added) {
+          await notifyPermissionChange({
+            user: { username: targetUser.username, mta_nick: targetUser.mta_nick },
+            permission,
+            isGranted: true,
+            createdBy: { username: user.user_metadata?.full_name || 'Admin', mta_nick: null },
+          });
+        }
+
+        successCount++;
+      } catch (error) {
+        console.error(`Error adding permissions to user ${userId}:`, error);
+        errorCount++;
+      }
+    }
+
+    await loadUsers();
+    setSelectedUsers(new Set());
+    setBatchPermissions([]);
+    setShowBatchModal(false);
+    alert(`Dodano uprawnienia dla ${successCount} użytkowników. Błędy: ${errorCount}`);
+  };
+
+  const handleBatchRemovePermissions = async () => {
+    if (!user || batchPermissions.length === 0) {
+      alert('Wybierz przynajmniej jedno uprawnienie.');
+      return;
+    }
+
+    const confirmed = confirm(`Czy na pewno chcesz usunąć uprawnienia dla ${selectedUsers.size} użytkowników?`);
+    if (!confirmed) return;
+
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const userId of Array.from(selectedUsers)) {
+      try {
+        const targetUser = users.find((u) => u.id === userId);
+        if (!targetUser) continue;
+
+        const currentPermissions = targetUser.permissions || [];
+        const newPermissions = currentPermissions.filter((p: string) => !batchPermissions.includes(p));
+
+        // Update permissions
+        const { error } = await updateUserPermissions(userId, newPermissions);
+        if (error) throw error;
+
+        // Discord webhooks dla każdego usuniętego uprawnienia
+        const removed = batchPermissions.filter((p: string) => currentPermissions.includes(p));
+        for (const permission of removed) {
+          await notifyPermissionChange({
+            user: { username: targetUser.username, mta_nick: targetUser.mta_nick },
+            permission,
+            isGranted: false,
+            createdBy: { username: user.user_metadata?.full_name || 'Admin', mta_nick: null },
+          });
+        }
+
+        successCount++;
+      } catch (error) {
+        console.error(`Error removing permissions from user ${userId}:`, error);
+        errorCount++;
+      }
+    }
+
+    await loadUsers();
+    setSelectedUsers(new Set());
+    setBatchPermissions([]);
+    setShowBatchModal(false);
+    alert(`Usunięto uprawnienia dla ${successCount} użytkowników. Błędy: ${errorCount}`);
+  };
+
+  const handleBatchAssignDivision = async () => {
+    if (!user || !batchDivision) {
+      alert('Wybierz dywizję.');
+      return;
+    }
+
+    const confirmed = confirm(`Czy na pewno chcesz przypisać dywizję ${batchDivision} dla ${selectedUsers.size} użytkowników?`);
+    if (!confirmed) return;
+
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const userId of Array.from(selectedUsers)) {
+      try {
+        const targetUser = users.find((u) => u.id === userId);
+        if (!targetUser) continue;
+
+        // Update division
+        const { error } = await updateUserDivision(userId, batchDivision);
+        if (error) throw error;
+
+        // Discord webhook
+        await notifyDivisionChange({
+          user: { username: targetUser.username, mta_nick: targetUser.mta_nick },
+          division: batchDivision,
+          isGranted: true,
+          isCommander: false,
+          createdBy: { username: user.user_metadata?.full_name || 'Admin', mta_nick: null },
+        });
+
+        successCount++;
+      } catch (error) {
+        console.error(`Error assigning division to user ${userId}:`, error);
+        errorCount++;
+      }
+    }
+
+    await loadUsers();
+    setSelectedUsers(new Set());
+    setBatchDivision('');
+    setShowBatchModal(false);
+    alert(`Przypisano dywizję dla ${successCount} użytkowników. Błędy: ${errorCount}`);
+  };
+
+  const handleBatchRemoveDivision = async () => {
+    if (!user) return;
+
+    const confirmed = confirm(`Czy na pewno chcesz usunąć dywizje dla ${selectedUsers.size} użytkowników?`);
+    if (!confirmed) return;
+
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const userId of Array.from(selectedUsers)) {
+      try {
+        const targetUser = users.find((u) => u.id === userId);
+        if (!targetUser || !targetUser.division) continue;
+
+        const oldDivision = targetUser.division;
+
+        // Update division
+        const { error } = await updateUserDivision(userId, null);
+        if (error) throw error;
+
+        // Discord webhook
+        await notifyDivisionChange({
+          user: { username: targetUser.username, mta_nick: targetUser.mta_nick },
+          division: oldDivision,
+          isGranted: false,
+          isCommander: false,
+          createdBy: { username: user.user_metadata?.full_name || 'Admin', mta_nick: null },
+        });
+
+        successCount++;
+      } catch (error) {
+        console.error(`Error removing division from user ${userId}:`, error);
+        errorCount++;
+      }
+    }
+
+    await loadUsers();
+    setSelectedUsers(new Set());
+    setShowBatchModal(false);
+    alert(`Usunięto dywizje dla ${successCount} użytkowników. Błędy: ${errorCount}`);
   };
 
   const getDivisionColor = (division: string | null) => {
@@ -355,7 +668,7 @@ export default function KartotekaPage() {
         </div>
 
         {/* Multi-Select Controls */}
-        {selectedUsers.size > 0 && (
+        {selectedUsers.size > 1 && (
           <div className="mb-6 glass-strong rounded-xl border border-[#c9a227]/30 p-4 shadow-lg bg-[#c9a227]/5 animate-fadeIn">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -365,6 +678,13 @@ export default function KartotekaPage() {
                 </span>
               </div>
               <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowBatchModal(true)}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#c9a227] to-[#e6b830] text-[#020a06] font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
+                >
+                  <UserCog className="w-4 h-4" />
+                  Zarządzaj zaznaczonymi
+                </button>
                 <button
                   onClick={() => setSelectedUsers(new Set())}
                   className="px-4 py-2.5 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
@@ -526,6 +846,203 @@ export default function KartotekaPage() {
           </div>
         )}
       </div>
+
+      {/* Batch Operations Modal */}
+      {showBatchModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+          <div className="glass-strong rounded-2xl border border-[#c9a227]/30 p-8 max-w-2xl w-full shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-white flex items-center gap-2">
+                <UserCog className="w-6 h-6 text-[#c9a227]" />
+                Zarządzaj zaznaczonymi ({selectedUsers.size})
+              </h3>
+              <button
+                onClick={() => {
+                  setShowBatchModal(false);
+                  setBatchPermissions([]);
+                  setBatchDivision('');
+                }}
+                className="text-[#8fb5a0] hover:text-white transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Operation Type Tabs */}
+            <div className="flex gap-2 mb-6">
+              <button
+                onClick={() => setBatchOperation('badges')}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all ${
+                  batchOperation === 'badges'
+                    ? 'bg-gradient-to-r from-[#c9a227] to-[#e6b830] text-[#020a06] shadow-lg'
+                    : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32]'
+                }`}
+              >
+                <Award className="w-5 h-5" />
+                Stopnie
+              </button>
+              <button
+                onClick={() => setBatchOperation('permissions')}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all ${
+                  batchOperation === 'permissions'
+                    ? 'bg-gradient-to-r from-[#c9a227] to-[#e6b830] text-[#020a06] shadow-lg'
+                    : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32]'
+                }`}
+              >
+                <Shield className="w-5 h-5" />
+                Uprawnienia
+              </button>
+              <button
+                onClick={() => setBatchOperation('divisions')}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all ${
+                  batchOperation === 'divisions'
+                    ? 'bg-gradient-to-r from-[#c9a227] to-[#e6b830] text-[#020a06] shadow-lg'
+                    : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32]'
+                }`}
+              >
+                <Shield className="w-5 h-5" />
+                Dywizje
+              </button>
+            </div>
+
+            {/* Content based on operation type */}
+            <div className="space-y-4">
+              {/* Badges Operations */}
+              {batchOperation === 'badges' && (
+                <div className="space-y-4">
+                  <div className="p-4 bg-[#c9a227]/10 border border-[#c9a227]/30 rounded-xl">
+                    <p className="text-[#c9a227] text-sm">
+                      Każdy użytkownik zostanie awansowany/zdegradowany o 1 stopień względem swojego aktualnego stopnia.
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleBatchPromote}
+                      className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
+                    >
+                      <TrendingUp className="w-5 h-5" />
+                      Awansuj wszystkich
+                    </button>
+                    <button
+                      onClick={handleBatchDemote}
+                      className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
+                    >
+                      <TrendingDown className="w-5 h-5" />
+                      Degraduj wszystkich
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Permissions Operations */}
+              {batchOperation === 'permissions' && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">
+                      Wybierz uprawnienia
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {permissions.map((perm) => (
+                        <label
+                          key={perm}
+                          className="flex items-center gap-2 px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl cursor-pointer hover:bg-[#133524] transition-colors"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={batchPermissions.includes(perm)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setBatchPermissions([...batchPermissions, perm]);
+                              } else {
+                                setBatchPermissions(batchPermissions.filter((p) => p !== perm));
+                              }
+                            }}
+                            className="rounded border-[#1a4d32] bg-[#0a2818] text-[#c9a227] focus:ring-[#c9a227]"
+                          />
+                          <span className="text-white text-sm font-medium">{perm}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleBatchAddPermissions}
+                      disabled={batchPermissions.length === 0}
+                      className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Check className="w-5 h-5" />
+                      Dodaj uprawnienia
+                    </button>
+                    <button
+                      onClick={handleBatchRemovePermissions}
+                      disabled={batchPermissions.length === 0}
+                      className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <X className="w-5 h-5" />
+                      Usuń uprawnienia
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Divisions Operations */}
+              {batchOperation === 'divisions' && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">
+                      Wybierz dywizję
+                    </label>
+                    <select
+                      value={batchDivision}
+                      onChange={(e) => setBatchDivision(e.target.value)}
+                      className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white focus:outline-none focus:border-[#c9a227] transition-colors"
+                    >
+                      <option value="">Wybierz dywizję...</option>
+                      {divisions.map((div) => (
+                        <option key={div} value={div}>
+                          {div}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleBatchAssignDivision}
+                      disabled={!batchDivision}
+                      className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Check className="w-5 h-5" />
+                      Przypisz dywizję
+                    </button>
+                    <button
+                      onClick={handleBatchRemoveDivision}
+                      className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
+                    >
+                      <X className="w-5 h-5" />
+                      Usuń dywizje
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Cancel Button */}
+              <button
+                onClick={() => {
+                  setShowBatchModal(false);
+                  setBatchPermissions([]);
+                  setBatchDivision('');
+                }}
+                className="w-full px-6 py-3 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
+              >
+                Anuluj
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style jsx global>{`
         @keyframes fadeIn {
