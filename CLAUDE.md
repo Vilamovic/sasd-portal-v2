@@ -40,6 +40,8 @@
 * **Z-Index**: Navbar `z-[60]`, Dropdown `z-[9999]`.
 * **Tailwind v4**: Zakaz `@apply` dla custom hexów w CSS.
 * **Vercel**: Dummy commit triggeruje deploy (`git commit --allow-empty`).
+* **Navbar Sync**: Po operacjach CRUD wywołaj `refreshUserData()` z AuthContext dla natychmiastowej aktualizacji (zamiast czekać 30s na polling).
+* **Timer Countdown**: RPC function `get_active_penalties()` oblicza `remaining_seconds` server-side. Navbar korzysta z tego do countdown timerów.
 
 ---
 
@@ -66,19 +68,19 @@ Zmienione pliki: [ścieżki]
 - Kartoteka użytkowników (tylko admin/dev)
 
 **Database:**
-- Migration: `migrations/003_kartoteka_system.sql` (NOT executed yet)
+- Active Migrations: `007_add_delete_policies_for_dev.sql`, `008_add_update_badge_policy_for_dev.sql`, `009_create_active_penalties_rpc.sql`
 - Project ref: `jecootmlzlwxubvumxrk`
-- New tables: `user_penalties`, `user_notes`
-- New columns in `users`: `division`, `permissions`, `plus_count`, `minus_count`
+- Tables: `user_penalties`, `user_notes`
+- RPC: `get_active_penalties(p_user_id)` - zwraca aktywne kary z `remaining_seconds`
 
 **Status:**
-- ✅ Migration SQL file created
-- ✅ MCP config updated to correct database
-- ✅ Complete instructions documented in `/task/INSTRUCTIONS.md`
-- ⏳ Awaiting migration execution
-- ⏳ Navbar modifications pending
-- ⏳ Kartoteka pages pending
+- ✅ System Kartoteki w pełni zaimplementowany
+- ✅ Navbar z dywizjami, uprawnieniami, balance, timer
+- ✅ User profile z historiami kar/nagród/notatek
+- ✅ Checkboxy do selekcji pojedynczych itemów (DEV)
+- ✅ RLS policies dla DEV/Admin (DELETE, UPDATE)
+- ⚠️ Migracja 009 wymaga wykonania w Supabase SQL Editor
 
 ---
 
-Last Updated: 2026-02-05 23:30 - System Kartoteki planning phase completed
+Last Updated: 2026-02-06 - Navbar timer/balance fix + checkboxy selection
