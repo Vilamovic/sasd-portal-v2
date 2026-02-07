@@ -4,10 +4,13 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
 import Navbar from '@/src/components/dashboard/Navbar';
-import AdminPanel from '@/src/components/admin/AdminPanel';
+import AdminPanelPage from '@/src/components/admin/AdminPanel/AdminPanelPage';
 
+/**
+ * AdminPage - Routing wrapper for Admin Panel
+ */
 export default function AdminPage() {
-  const { user, loading, isAdmin } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   // Redirect to login if not authenticated
@@ -37,9 +40,7 @@ export default function AdminPage() {
   return (
     <>
       <Navbar />
-      {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-      {/* @ts-ignore JSDoc types not recognized by TSC */}
-      <AdminPanel onBack={() => router.push('/dashboard')} />
+      <AdminPanelPage onBack={() => router.push('/dashboard')} />
     </>
   );
 }

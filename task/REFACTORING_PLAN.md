@@ -75,7 +75,7 @@ import { addPenalty } from '@/src/lib/db/penalties';
 ---
 
 ### **2️⃣ app/personnel/[username]/page.tsx (1868 linii)** - USER PROFILE
-**Status:** ❌ TODO
+**Status:** ✅ DONE (commit: 3344e57)
 **Priorytet:** 🔴 KRYTYCZNY
 
 **Problem:**
@@ -113,7 +113,7 @@ src/components/personnel/UserProfile/
 ---
 
 ### **3️⃣ app/personnel/page.tsx (1124 linie)** - KARTOTEKA LIST
-**Status:** ❌ TODO
+**Status:** ✅ DONE (commit: aab7d02)
 **Priorytet:** 🔴 KRYTYCZNY
 
 **Problem:**
@@ -143,7 +143,7 @@ src/components/personnel/PersonnelList/
 ---
 
 ### **4️⃣ src/components/exam/ExamTaker.jsx (831 linii)** - EXAM FLOW
-**Status:** ❌ TODO
+**Status:** ✅ DONE (commit: 8f9a7b2)
 **Priorytet:** 🟡 WYSOKI
 
 **Problem:**
@@ -155,24 +155,25 @@ src/components/personnel/PersonnelList/
 **Plan podziału:**
 ```
 src/components/exam/ExamTaker/
-├── ExamTakerPage.jsx          (100 linii - orchestrator + router)
-├── ExamTypeSelection.jsx      (wybór typu egzaminu)
-├── TokenModal.jsx             (weryfikacja tokenu dla non-admin)
-├── ExamQuestion.jsx           (pytanie + answers + multiple choice)
-├── ExamResults.jsx            (ekran wyników z podsumowaniem)
-├── TimerDisplay.jsx           (countdown component)
+├── ExamTakerPage.tsx          (orchestrator - TODO)
+├── ExamTypeSelection.tsx      (100L - wybór typu egzaminu)
+├── TokenModal.tsx             (94L - weryfikacja tokenu dla non-admin)
+├── ExamQuestion.tsx           (182L - pytanie + answers + multiple choice)
+├── ExamResults.tsx            (125L - ekran wyników z podsumowaniem)
+├── TimerDisplay.tsx           (45L - countdown component)
 └── hooks/
-    ├── useExamState.ts        (exam state + localStorage recovery)
-    ├── useExamTimer.ts        (timer logic + auto-advance)
-    └── useTokenVerification.ts (token modal logic)
+    ├── useExamState.ts        (196L - exam state + localStorage recovery)
+    ├── useExamTimer.ts        (82L - timer logic + auto-advance)
+    └── useTokenVerification.ts (50L - token modal logic)
 ```
 
+**Result:** 832L → ~20L routing wrapper (pending orchestrator) + 774L w 8 plikach
 **Impact:** WYSOKI - główny flow aplikacji
 
 ---
 
 ### **5️⃣ src/utils/discord.js (641 linii)** - WEBHOOKS
-**Status:** ❌ TODO
+**Status:** ✅ DONE (commit: 22b7700)
 **Priorytet:** 🟡 WYSOKI
 
 **Problem:**
@@ -182,12 +183,13 @@ src/components/exam/ExamTaker/
 **Plan podziału:**
 ```
 src/lib/webhooks/
-├── auth.ts          (notifyUserAuth, notifyLogout...)
-├── exams.ts         (notifyExamSubmission, notifyCheat...)
-├── admin.ts         (notifyAdminAction, notifyRoleChange...)
-└── personnel.ts     (notifyPenalty, notifyBadgeChange, notifyPermissionChange...)
+├── auth.ts          (106L - notifyUserAuth, notifyLogout)
+├── exams.ts         (150L - notifyExamSubmission, notifyCheat)
+├── admin.ts         (188L - notifyAdminAction, notifyRoleChange, notifyExamQuestionAction)
+└── personnel.ts     (201L - notifyPenalty, notifyBadgeChange, notifyPermissionChange)
 ```
 
+**Result:** 641L deleted + 645L w 4 plikach + 12 plików zaktualizowanych (importy)
 **Impact:** ŚREDNI
 
 ---
