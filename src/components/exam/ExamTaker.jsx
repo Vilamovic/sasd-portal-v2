@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { generateExam, calculateExamResult } from '@/src/utils/examUtils';
-import { getAllExamTypes, getQuestionsByExamType, saveExamResult, verifyAndConsumeExamToken } from '@/src/utils/supabaseHelpers';
+import { getAllExamTypes, getQuestionsByExamType, saveExamResult } from '@/src/lib/db/exams';
+import { verifyAndConsumeExamToken } from '@/src/lib/db/tokens';
 import { notifyExamSubmission, notifyCheat } from '@/src/utils/discord';
 import { Target, Clock, CheckCircle, XCircle, ArrowRight, ChevronLeft, Trophy, AlertCircle, Sparkles, Key } from 'lucide-react';
 

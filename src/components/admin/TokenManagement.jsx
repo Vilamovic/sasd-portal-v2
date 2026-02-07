@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { supabase } from '@/src/supabaseClient';
-import { createExamAccessToken, getAllExamTokens, deleteExamAccessToken, getAllExamTypes } from '@/src/utils/supabaseHelpers';
+import { createExamAccessToken, getAllExamTokens, deleteExamAccessToken } from '@/src/lib/db/tokens';
+import { getAllExamTypes } from '@/src/lib/db/exams';
 import { Key, Search, Trash2, Shield, ChevronLeft, Sparkles, Copy, CheckCircle, Users } from 'lucide-react';
 import Link from 'next/link';
 

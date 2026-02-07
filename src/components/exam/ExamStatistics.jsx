@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
-import { getAllExamResultsNonArchived, archiveExamResult, getAllExamTypes } from '@/src/utils/supabaseHelpers';
+import { getAllExamResultsNonArchived, archiveExamResult, getAllExamTypes } from '@/src/lib/db/exams';
 import { Search, Archive, Eye, X, CheckCircle, XCircle, ChevronLeft, Sparkles, BarChart3, Filter } from 'lucide-react';
 
 /**

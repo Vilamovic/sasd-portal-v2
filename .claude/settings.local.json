@@ -38,7 +38,8 @@
       "Bash(node check_badge_values.js:*)",
       "Bash(git diff:*)",
       "Bash(where:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(wc:*)"
     ]
   }
 }

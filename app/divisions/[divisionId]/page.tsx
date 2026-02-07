@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
 import Navbar from '@/src/components/dashboard/Navbar';
-import { getDivisionMaterials, addDivisionMaterial, updateDivisionMaterial, deleteDivisionMaterial } from '@/src/utils/supabaseHelpers';
+import { getDivisionMaterials, addDivisionMaterial, updateDivisionMaterial, deleteDivisionMaterial } from '@/src/lib/db/divisions';
 import { ChevronLeft, FileText, Plus, Trash2, Edit3, Save, X, Image as ImageIcon, Video, Link as LinkIcon, File, Sparkles, ArrowRight } from 'lucide-react';
 
 /**

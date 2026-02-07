@@ -7,21 +7,25 @@ import Navbar from '@/src/components/dashboard/Navbar';
 import {
   getUserWithDetails,
   getUserByUsername,
-  getUserPenalties,
-  getUserNotes,
   updateUserBadge,
   updateUserDivision,
   updateUserPermissions,
   updateIsCommander,
+} from '@/src/lib/db/users';
+import {
+  getUserPenalties,
   addPenalty,
-  addUserNote,
   deletePenalty,
-  deleteUserNote,
   clearUserPlusMinusPenalties,
   clearUserSuspensions,
   clearUserWrittenWarnings,
+} from '@/src/lib/db/penalties';
+import {
+  getUserNotes,
+  addUserNote,
+  deleteUserNote,
   clearUserNotes,
-} from '@/src/utils/supabaseHelpers';
+} from '@/src/lib/db/notes';
 import { notifyPenalty, notifyBadgeChange, notifyPermissionChange, notifyDivisionChange } from '@/src/utils/discord';
 import {
   ChevronLeft,

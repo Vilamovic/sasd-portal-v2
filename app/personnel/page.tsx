@@ -10,7 +10,7 @@ import {
   updateUserPermissions,
   updateUserDivision,
   updateIsCommander,
-} from '@/src/utils/supabaseHelpers';
+} from '@/src/lib/db/users';
 import { notifyBadgeChange, notifyPermissionChange, notifyDivisionChange } from '@/src/utils/discord';
 import {
   ChevronLeft,

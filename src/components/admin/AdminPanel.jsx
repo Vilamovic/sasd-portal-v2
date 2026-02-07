@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { supabase } from '@/src/supabaseClient';
-import { setForceLogoutForUser, deleteUser } from '@/src/utils/supabaseHelpers';
+import { setForceLogoutForUser, deleteUser } from '@/src/lib/db/users';
 import { notifyAdminAction } from '@/src/utils/discord';
 import { Users, Search, UserMinus, Shield, ShieldCheck, ShieldOff, ChevronDown, ArrowUpDown, ChevronLeft, Sparkles, MoreVertical, Key } from 'lucide-react';
 import Link from 'next/link';
