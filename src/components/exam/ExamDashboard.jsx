@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useTranslation } from '@/src/contexts/TranslationContext';
 import { Target, BarChart3, Settings, Archive, ArrowRight, CheckCircle, Clock, ChevronLeft, Sparkles } from 'lucide-react';
@@ -7,10 +8,23 @@ import { Target, BarChart3, Settings, Archive, ArrowRight, CheckCircle, Clock, C
 /**
  * ExamDashboard - Premium Sheriff-themed exam navigation
  * 4 tiles for admin, 1 centered card for users
+ * Uses Next.js routing for stats/archive (fixes Invariants violations)
  */
 export default function ExamDashboard({ onNavigate, onBack }) {
+  const router = useRouter();
   const { role, isAdmin } = useAuth();
   const { t } = useTranslation();
+
+  // Navigation handler - uses Next.js router for stats/archive
+  const handleTileClick = (tileId) => {
+    if (tileId === 'statistics') {
+      router.push('/exams/stats');
+    } else if (tileId === 'archive') {
+      router.push('/exams/archive');
+    } else if (onNavigate) {
+      onNavigate(tileId);
+    }
+  };
   // Guard: Wait for role to load
   if (!role) {
     return (
@@ -117,7 +131,7 @@ export default function ExamDashboard({ onNavigate, onBack }) {
             />
 
             <button
-              onClick={() => onNavigate && onNavigate(startExamTile.id)}
+              onClick={() => handleTileClick(startExamTile.id)}
               className="relative w-full glass-strong rounded-3xl border border-[#22c55e]/30 hover:border-[#22c55e]/60 shadow-2xl hover:shadow-[#22c55e]/20 transition-all duration-300 hover:scale-[1.01] overflow-hidden group"
             >
               {/* Decorative accents */}
@@ -239,7 +253,7 @@ export default function ExamDashboard({ onNavigate, onBack }) {
 
                 {/* Main Card */}
                 <button
-                  onClick={() => onNavigate && onNavigate(tile.id)}
+                  onClick={() => handleTileClick(tile.id)}
                   className={`relative w-full glass-strong rounded-2xl p-6 border border-[#1a4d32]/50 ${tile.borderHover} transition-all duration-300 hover:scale-[1.02] shadow-xl hover:shadow-2xl text-left overflow-hidden`}
                 >
                   {/* Corner accents */}
