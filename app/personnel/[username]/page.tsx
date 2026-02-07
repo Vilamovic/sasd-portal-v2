@@ -26,6 +26,10 @@ import {
   deleteUserNote,
   clearUserNotes,
 } from '@/src/lib/db/notes';
+import AddNoteModal from '@/src/components/personnel/UserProfile/Modals/AddNoteModal';
+import AddPlusMinusModal from '@/src/components/personnel/UserProfile/Modals/AddPlusMinusModal';
+import AddPenaltyModal from '@/src/components/personnel/UserProfile/Modals/AddPenaltyModal';
+import AddWrittenWarningModal from '@/src/components/personnel/UserProfile/Modals/AddWrittenWarningModal';
 import { notifyPenalty, notifyBadgeChange, notifyPermissionChange, notifyDivisionChange } from '@/src/utils/discord';
 import {
   ChevronLeft,
@@ -1508,365 +1512,46 @@ export default function UserProfilePage() {
       </div>
 
       {/* PLUS/MINUS Modal */}
-      {showAddPlusMinusModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-          <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 p-8 max-w-lg w-full shadow-2xl">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-white flex items-center gap-2">
-                <Award className="w-6 h-6 text-[#c9a227]" />
-                Dodaj PLUS/MINUS
-              </h3>
-              <button
-                onClick={() => {
-                  setShowAddPlusMinusModal(false);
-                  setPlusMinusReason('');
-                  setPlusMinusType('plus');
-                }}
-                className="text-[#8fb5a0] hover:text-white transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {/* Type Selection */}
-              <div>
-                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Typ</label>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setPlusMinusType('plus')}
-                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all ${
-                      plusMinusType === 'plus'
-                        ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg'
-                        : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32]'
-                    }`}
-                  >
-                    <Plus className="w-5 h-5" />
-                    PLUS
-                  </button>
-                  <button
-                    onClick={() => setPlusMinusType('minus')}
-                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all ${
-                      plusMinusType === 'minus'
-                        ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg'
-                        : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32]'
-                    }`}
-                  >
-                    <Minus className="w-5 h-5" />
-                    MINUS
-                  </button>
-                </div>
-              </div>
-
-              {/* Reason */}
-              <div>
-                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Powód</label>
-                <textarea
-                  value={plusMinusReason}
-                  onChange={(e) => setPlusMinusReason(e.target.value)}
-                  placeholder="Opisz powód nadania PLUS/MINUS..."
-                  rows={4}
-                  className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-[#c9a227] transition-colors resize-none"
-                />
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={handleAddPlusMinus}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#c9a227] to-[#e6b830] text-[#020a06] font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
-                >
-                  <Save className="w-4 h-4" />
-                  Dodaj
-                </button>
-                <button
-                  onClick={() => {
-                    setShowAddPlusMinusModal(false);
-                    setPlusMinusReason('');
-                    setPlusMinusType('plus');
-                  }}
-                  className="px-6 py-3 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
-                >
-                  Anuluj
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <AddPlusMinusModal
+        isOpen={showAddPlusMinusModal}
+        onClose={() => setShowAddPlusMinusModal(false)}
+        userId={userId}
+        currentUser={currentUser}
+        user={user}
+        onSuccess={loadUserData}
+        refreshUserData={refreshUserData}
+      />
 
       {/* Penalty Modal */}
-      {showAddPenaltyModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-          <div className="glass-strong rounded-2xl border border-red-500/30 p-8 max-w-lg w-full shadow-2xl">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-white flex items-center gap-2">
-                <AlertTriangle className="w-6 h-6 text-red-400" />
-                Nadaj Karę
-              </h3>
-              <button
-                onClick={() => {
-                  setShowAddPenaltyModal(false);
-                  setPenaltyReason('');
-                  setPenaltyDuration('24');
-                  setPenaltyEvidenceLink('');
-                  setPenaltyType('zawieszenie_sluzba');
-                  setSuspensionSubtype('zawieszenie_sluzba');
-                }}
-                className="text-[#8fb5a0] hover:text-white transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {/* Suspension Subtype */}
-              <div>
-                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Rodzaj zawieszenia</label>
-                <select
-                  value={suspensionSubtype}
-                  onChange={(e) => setSuspensionSubtype(e.target.value as any)}
-                  className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white focus:outline-none focus:border-red-500 transition-colors"
-                >
-                  <option value="zawieszenie_sluzba">Zawieszenie frakcyjne (służba)</option>
-                  <option value="zawieszenie_dywizja">Zawieszenie dywizyjne</option>
-                  <option value="zawieszenie_uprawnienia">Zawieszenie uprawnieniowe</option>
-                  <option value="zawieszenie_poscigowe">Zawieszenie pościgowe</option>
-                </select>
-              </div>
-
-              {/* Reason */}
-              <div>
-                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">
-                  Powód zawieszenia
-                </label>
-                <textarea
-                  value={penaltyReason}
-                  onChange={(e) => setPenaltyReason(e.target.value)}
-                  placeholder="Opisz powód nadania kary..."
-                  rows={4}
-                  className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-red-500 transition-colors resize-none"
-                />
-              </div>
-
-              {/* Evidence Link (Optional) */}
-              <div>
-                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">
-                  Link do dowodów <span className="text-xs text-[#8fb5a0]/70">(opcjonalny)</span>
-                </label>
-                <input
-                  type="url"
-                  value={penaltyEvidenceLink}
-                  onChange={(e) => setPenaltyEvidenceLink(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-red-500 transition-colors"
-                />
-              </div>
-
-              {/* Duration */}
-              <div>
-                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Czas trwania (godziny)</label>
-                <div className="grid grid-cols-4 gap-2 mb-3">
-                  {['1', '6', '12', '24', '48', '72', '168', '720'].map((hours) => (
-                    <button
-                      key={hours}
-                      onClick={() => setPenaltyDuration(hours)}
-                      className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
-                        penaltyDuration === hours
-                          ? 'bg-red-500 text-white'
-                          : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32] hover:bg-[#133524]'
-                      }`}
-                    >
-                      {parseInt(hours) >= 24 ? `${parseInt(hours) / 24}d` : `${hours}h`}
-                    </button>
-                  ))}
-                </div>
-                <input
-                  type="number"
-                  value={penaltyDuration}
-                  onChange={(e) => setPenaltyDuration(e.target.value)}
-                  placeholder="Lub wpisz własną liczbę godzin..."
-                  className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-red-500 transition-colors"
-                />
-              </div>
-
-              {/* Warning */}
-              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl">
-                <p className="text-red-400 text-xs">
-                  <strong>Uwaga:</strong> Zawieszenie uniemożliwi użytkownikowi dostęp do egzaminów i innych funkcji przez podany czas.
-                </p>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={handleAddPenalty}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
-                >
-                  <AlertTriangle className="w-4 h-4" />
-                  Nadaj Karę
-                </button>
-                <button
-                  onClick={() => {
-                    setShowAddPenaltyModal(false);
-                    setPenaltyReason('');
-                    setPenaltyDuration('24');
-                    setPenaltyEvidenceLink('');
-                    setPenaltyType('zawieszenie_sluzba');
-                  }}
-                  className="px-6 py-3 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
-                >
-                  Anuluj
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <AddPenaltyModal
+        isOpen={showAddPenaltyModal}
+        onClose={() => setShowAddPenaltyModal(false)}
+        userId={userId}
+        currentUser={currentUser}
+        user={user}
+        onSuccess={loadUserData}
+        refreshUserData={refreshUserData}
+      />
 
       {/* Note Modal */}
-      {showAddNoteModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-          <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 p-8 max-w-lg w-full shadow-2xl">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-white flex items-center gap-2">
-                <FileText className="w-6 h-6 text-[#c9a227]" />
-                Dodaj Notatkę Prywatną
-              </h3>
-              <button
-                onClick={() => {
-                  setShowAddNoteModal(false);
-                  setNoteText('');
-                }}
-                className="text-[#8fb5a0] hover:text-white transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {/* Note Text */}
-              <div>
-                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Treść notatki</label>
-                <textarea
-                  value={noteText}
-                  onChange={(e) => setNoteText(e.target.value)}
-                  placeholder="Wpisz notatkę widoczną tylko dla administratorów..."
-                  rows={6}
-                  className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-[#c9a227] transition-colors resize-none"
-                />
-              </div>
-
-              {/* Info */}
-              <div className="p-3 bg-[#c9a227]/10 border border-[#c9a227]/30 rounded-xl">
-                <p className="text-[#c9a227] text-xs">
-                  <strong>Informacja:</strong> Notatki prywatne są widoczne tylko dla administratorów i służą do wewnętrznych uwag.
-                </p>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={handleAddNote}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#14b8a6] to-[#0d9488] text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
-                >
-                  <Save className="w-4 h-4" />
-                  Dodaj Notatkę
-                </button>
-                <button
-                  onClick={() => {
-                    setShowAddNoteModal(false);
-                    setNoteText('');
-                  }}
-                  className="px-6 py-3 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
-                >
-                  Anuluj
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <AddNoteModal
+        isOpen={showAddNoteModal}
+        onClose={() => setShowAddNoteModal(false)}
+        userId={userId}
+        currentUserId={currentUser?.id}
+        onSuccess={loadUserData}
+      />
 
       {/* Written Warning Modal */}
-      {showAddWrittenWarningModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-          <div className="glass-strong rounded-2xl border border-orange-500/30 p-8 max-w-lg w-full shadow-2xl">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-white flex items-center gap-2">
-                <FileText className="w-6 h-6 text-orange-400" />
-                Nadaj Upomnienie Pisemne
-              </h3>
-              <button
-                onClick={() => {
-                  setShowAddWrittenWarningModal(false);
-                  setWrittenWarningReason('');
-                  setWrittenWarningEvidenceLink('');
-                }}
-                className="text-[#8fb5a0] hover:text-white transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {/* Reason */}
-              <div>
-                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Powód upomnienia</label>
-                <textarea
-                  value={writtenWarningReason}
-                  onChange={(e) => setWrittenWarningReason(e.target.value)}
-                  placeholder="Opisz powód nadania upomnienia..."
-                  rows={4}
-                  className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-orange-500 transition-colors resize-none"
-                />
-              </div>
-
-              {/* Evidence Link (Optional) */}
-              <div>
-                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">
-                  Link do dowodów <span className="text-xs text-[#8fb5a0]/70">(opcjonalny)</span>
-                </label>
-                <input
-                  type="url"
-                  value={writtenWarningEvidenceLink}
-                  onChange={(e) => setWrittenWarningEvidenceLink(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-orange-500 transition-colors"
-                />
-              </div>
-
-              {/* Warning */}
-              <div className="p-3 bg-orange-500/10 border border-orange-500/30 rounded-xl">
-                <p className="text-orange-400 text-xs">
-                  <strong>Uwaga:</strong> Upomnienie pisemne zostanie zapisane w kartotece użytkownika.
-                </p>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={handleAddWrittenWarning}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
-                >
-                  <FileText className="w-4 h-4" />
-                  Nadaj Upomnienie
-                </button>
-                <button
-                  onClick={() => {
-                    setShowAddWrittenWarningModal(false);
-                    setWrittenWarningReason('');
-                    setWrittenWarningEvidenceLink('');
-                  }}
-                  className="px-6 py-3 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
-                >
-                  Anuluj
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <AddWrittenWarningModal
+        isOpen={showAddWrittenWarningModal}
+        onClose={() => setShowAddWrittenWarningModal(false)}
+        userId={userId}
+        currentUser={currentUser}
+        user={user}
+        onSuccess={loadUserData}
+        refreshUserData={refreshUserData}
+      />
     </div>
   );
 }
