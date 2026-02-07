@@ -410,12 +410,26 @@ src/
 - [x] Commit: `refactor: ETAP 1.3 COMPLETE - PersonnelList refactoring` (commit: aab7d02)
 - **Rezultat**: app/personnel/page.tsx: 1124 → 8 linii (-1116 linii, -99.3%)
 
-### **ETAP 2.1: ExamTaker**
-- [ ] Stwórz folder `src/components/exam/ExamTaker/`
-- [ ] Podziel na komponenty
-- [ ] Stwórz hooks
+### **ETAP 2.1: ExamTaker** 🚧 IN PROGRESS (2026-02-07)
+- [x] Stwórz folder `src/components/exam/ExamTaker/`
+- [x] **Phase A**: TokenModal.tsx (110L), ExamTypeSelection.tsx (95L)
+- [x] **Phase B**: TimerDisplay.tsx (32L), ExamResults.tsx (129L), ExamQuestion.tsx (144L)
+- [x] **Phase C**: Hooks (3 pliki, 264L total)
+  - [x] useExamState.ts (141L) - exam state + localStorage recovery
+  - [x] useExamTimer.ts (48L) - timer countdown + auto-advance
+  - [x] useTokenVerification.ts (75L) - token modal logic
+- [ ] **Phase D**: ExamTakerPage.tsx orchestrator (~300-400L)
+  - [ ] finishExam() logic (save results, discord webhook, clear localStorage)
+  - [ ] handleNextQuestion() (timeout handling, last question check)
+  - [ ] handleAnswerSelect() (single vs multiple choice)
+  - [ ] startExam() (admin bypass vs token requirement)
+  - [ ] Cheating detection (visibilitychange, window.blur)
+  - [ ] Conditional rendering (loading, type selection, question, results)
+- [ ] Zaktualizuj `src/components/exam/ExamTaker.jsx` → routing wrapper
 - [ ] Test build
-- [ ] Commit: `refactor: Podział ExamTaker na komponenty`
+- [ ] Commit: `refactor: ETAP 2.1 COMPLETE - ExamTaker refactoring`
+- **Progress**: 8/10 plików (774L created), orchestrator remaining
+- **Rezultat (target)**: ExamTaker.jsx: 832L → ~10L (routing wrapper)
 
 ### **ETAP 2.2: Discord Webhooks**
 - [ ] Stwórz folder `src/lib/webhooks/`
@@ -488,14 +502,17 @@ src/
 **Data rozpoczęcia:** 2026-02-07
 **Data zakończenia:** _TBD_
 
-**Ukończone etapy:** 3/10
-**Progress:** ███░░░░░░░ 30%
+**Ukończone etapy:** 3/10 (+ 0.8 częściowo)
+**Progress:** ███▓░░░░░░ 35%
 
 ### Changelog:
-- **2026-02-07 (morning):** ✅ ETAP 1.1 - supabaseHelpers.js → src/lib/db/* (7 plików, 12 importów, commit: ec3a458)
+- **2026-02-07 (morning):** ✅ ETAP 1.1 - supabaseHelpers.js → src/lib/db/* (7 plików, commit: ec3a458)
 - **2026-02-07 (afternoon):** ✅ ETAP 1.2 - UserProfile complete (14 komponentów, 1876L → 15L, commits: 2c520b1, c6e346d, 0a0dbca, 3344e57)
 - **2026-02-07 (evening):** ✅ ETAP 1.3 - PersonnelList complete (9 komponentów, 1124L → 8L, commit: aab7d02)
+- **2026-02-07 (late evening):** 🚧 ETAP 2.1 - ExamTaker in progress (8/10 plików, 774L created)
+  - Phase A-C: Components + Hooks DONE
+  - Phase D: Orchestrator PENDING (~300-400L remaining)
 
 ---
 
-**Ostatnia aktualizacja:** 2026-02-07 (ETAP 1.3 ukończony - PersonnelList)
+**Ostatnia aktualizacja:** 2026-02-07 (ETAP 2.1 częściowo - orchestrator pozostały)
