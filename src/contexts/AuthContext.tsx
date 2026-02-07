@@ -109,7 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   /**
    * useForceLogout - realtime + polling + force logout
    */
-  useForceLogout(user?.id, loginTimestampRef, {
+  useForceLogout(user?.id, loginTimestampRef, role, {
     onRoleChange: (newRole) => setRole(newRole),
     onUserDataUpdate: (userData) => {
       setDivision(userData.division || null);

@@ -26,13 +26,19 @@ export interface ForceLogoutCallbacks {
 export function useForceLogout(
   userId: string | undefined,
   loginTimestampRef: React.MutableRefObject<number | null>,
+  currentRole: string | null,
   callbacks: ForceLogoutCallbacks
 ) {
   const roleCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const realtimeCleanupRef = useRef<(() => void) | null>(null);
-  const roleRef = useRef<string | null>(null);
+  const roleRef = useRef<string | null>(currentRole);
 
   const { onRoleChange, onUserDataUpdate, onForceLogout } = callbacks;
+
+  // Synchronize roleRef with external role state
+  useEffect(() => {
+    roleRef.current = currentRole;
+  }, [currentRole]);
 
   /**
    * Funkcja sprawdzająca user data (role + force logout + kartoteka)
