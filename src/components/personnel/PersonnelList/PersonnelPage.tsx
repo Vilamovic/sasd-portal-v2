@@ -140,13 +140,13 @@ export default function PersonnelPage() {
   const getRoleColor = (role: string) => {
     switch (role) {
       case 'dev':
-        return 'bg-purple-600 text-white';
+        return 'bg-pink-600 text-white';
       case 'hcs':
-        return 'bg-red-600 text-white';
+        return 'bg-red-900 text-white';
       case 'cs':
-        return 'bg-orange-600 text-white';
+        return 'bg-red-600 text-white';
       case 'deputy':
-        return 'bg-blue-600 text-white';
+        return 'bg-teal-600 text-white';
       case 'trainee':
         return 'bg-gray-600 text-white';
       default:
