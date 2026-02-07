@@ -621,4 +621,33 @@ src/
 **Usunięty martwy kod:** 1069L
 **Wyeliminowane duplikacje:** 223L
 
-**Ostatnia aktualizacja:** 2026-02-07 (All done in 1 day!) 🚀
+---
+
+## 🐛 POST-REFACTORING BUGFIXES
+
+### Bug #1: Dashboard Flickering (commit: c642126)
+**Data:** 2026-02-07
+**Opis:** Dashboard migał między 3 a 5 kartami co ~200ms
+**Root Cause:** `useForceLogout` miał `roleRef.current = null` niezzsynchronizowany z current role
+**Fix:** Dodano `currentRole` parameter + sync useEffect
+**Pliki:** `src/contexts/hooks/useForceLogout.ts`, `src/contexts/AuthContext.tsx`
+
+### Bug #2: Infinite Loop - 18k errorów/5s (commit: f1af92f) 🚨 CRITICAL
+**Data:** 2026-02-07
+**Opis:** 18,000 błędów w 5 sekund (3600/s) - infinite re-render loop
+**Root Cause:** Callbacks w dependencies useEffect → re-render → nowe refs → trigger useEffect
+**Fix:** Owinięto callbacks w `useCallback` z pustymi dependencies (stable refs)
+**Pliki:** `src/contexts/AuthContext.tsx`, `src/contexts/hooks/useAuthSession.ts`
+
+### Bug #3: Constraint Violation - users_role_check (commit: d086ed6)
+**Data:** 2026-02-07
+**Opis:** 400 Bad Request przy tworzeniu nowego usera
+**Root Cause:** `upsertUser` nie przekazywał `role` field, constraint wymagał
+**Fix:** Dodano `role: 'trainee'` jako default w userData przed upsert (2 miejsca)
+**Pliki:** `src/contexts/hooks/useAuthSession.ts`
+
+**Status:** ✅ Wszystkie 3 bugi naprawione i pushed na production
+
+---
+
+**Ostatnia aktualizacja:** 2026-02-07 (Refactoring + Bugfixes complete in 1 day!) 🚀
