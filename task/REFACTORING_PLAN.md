@@ -16,7 +16,7 @@
 - [x] `src/components/exam/ExamTaker.jsx` - **831 linii** ✅ **DONE** (2026-02-07)
 - [x] `src/utils/discord.js` - **641 linii** ✅ **DONE** (2026-02-07)
 - [x] `src/components/materials/Materials.jsx` - **586 linii** ✅ **DONE** (2026-02-07)
-- [ ] `src/contexts/AuthContext.jsx` - **573 linie**
+- [x] `src/contexts/AuthContext.jsx` - **573 linie** ✅ **DONE** (2026-02-07)
 - [ ] `src/components/exam/ExamQuestions.jsx` - **570 linii**
 - [ ] `src/components/admin/AdminPanel.jsx` - **539 linii**
 - [ ] `app/divisions/[divisionId]/page.tsx` - **462 linie**
@@ -216,7 +216,7 @@ src/components/materials/Materials/
 ---
 
 ### **7️⃣ src/contexts/AuthContext.jsx (573 linie)** - AUTH CONTEXT
-**Status:** ❌ TODO
+**Status:** ✅ DONE (commit: a5d934e)
 **Priorytet:** 🟡 WYSOKI
 
 **Problem:**
@@ -226,14 +226,15 @@ src/components/materials/Materials/
 **Plan podziału:**
 ```
 src/contexts/
-├── AuthContext.tsx            (200 linii - tylko provider + state)
+├── AuthContext.tsx            (214L - orchestrator)
 └── hooks/
-    ├── useAuthSession.ts      (session management + Discord OAuth)
-    ├── useForceLogout.ts      (polling logic co 5s)
-    ├── usePenalties.ts        (fetchActivePenalties + refresh)
-    └── useRoleCheck.ts        (role validation + hierarchy)
+    ├── useAuthSession.ts      (261L - session + Discord OAuth + MTA)
+    ├── useForceLogout.ts      (159L - realtime + fallback polling 30s)
+    ├── usePenalties.ts        (92L - fetchActivePenalties + polling)
+    └── useRoleCheck.ts        (77L - role hierarchy helpers)
 ```
 
+**Result:** 573L → 803L (orchestrator + 4 hooki, +230L separation of concerns)
 **Impact:** WYSOKI - używany wszędzie
 
 ---
