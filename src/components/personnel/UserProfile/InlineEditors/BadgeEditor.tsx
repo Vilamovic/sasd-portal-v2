@@ -45,7 +45,8 @@ export default function BadgeEditor({ user, currentUser, userId, isHCS, isCS, on
   const [tempStopień, setTempStopień] = useState(user?.badge || '');
   const submittingRef = useRef(false);
 
-  const canEdit = isHCS || (isCS && (user?.role === 'trainee' || user?.role === 'deputy'));
+  // CS/HCS/Dev can edit all users (isCS includes cs/hcs/dev from role hierarchy)
+  const canEdit = isCS;
 
   const handleSave = async () => {
     if (submittingRef.current || !user || !currentUser) return;

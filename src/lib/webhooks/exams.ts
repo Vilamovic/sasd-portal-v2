@@ -2,37 +2,10 @@
  * Discord Webhooks - System Egzaminacyjny
  */
 
+import { sendWebhook } from './utils';
+
 const WEBHOOK_EXAMS = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_EXAMS;
-const WEBHOOK_ALERT = 'https://discord.com/api/webhooks/1468697045257687112/Dg3MBXbjWK6UajRdQebKMiuh1l5KFrMxPJ5oprSHvtk7_QQGZnodeyKzWnXAikQGoYyU';
-
-/**
- * Wysyła wiadomość na Discord webhook
- */
-async function sendWebhook(webhookUrl: string | undefined, payload: any) {
-  if (!webhookUrl) {
-    console.warn('Discord webhook URL not configured');
-    return { success: false, error: 'Webhook URL missing' };
-  }
-
-  try {
-    const response = await fetch(webhookUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Webhook failed: ${response.status}`);
-    }
-
-    return { success: true };
-  } catch (error: any) {
-    console.error('Discord webhook error:', error);
-    return { success: false, error: error.message };
-  }
-}
+const WEBHOOK_ALERT = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_ALERT;
 
 /**
  * Powiadomienie o ukończeniu egzaminu

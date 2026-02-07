@@ -11,6 +11,17 @@ import { Target, BarChart3, Settings, Archive, ArrowRight, CheckCircle, Clock, C
 export default function ExamDashboard({ onNavigate, onBack }) {
   const { role, isAdmin } = useAuth();
   const { t } = useTranslation();
+  // Guard: Wait for role to load
+  if (!role) {
+    return (
+      <div className="min-h-screen bg-[#020a06] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-[#c9a227]/30 border-t-[#c9a227] rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-[#8fb5a0] text-lg">Ładowanie...</p>
+        </div>
+      </div>
+    );
+  }
 
   const tiles = [
     {

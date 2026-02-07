@@ -2,36 +2,9 @@
  * Discord Webhooks - System Zarządzania Personelem (Kartoteka)
  */
 
-const WEBHOOK_KARTOTEKA = 'https://discord.com/api/webhooks/1469077729562329198/q6y-YC61ry9qhWkVvk_ohwiNgn6Anfco-1cwTsLbsiisMbNx0gcx_2ZwAnRj9ZoyDj1P';
+import { sendWebhook } from './utils';
 
-/**
- * Wysyła wiadomość na Discord webhook
- */
-async function sendWebhook(webhookUrl: string | undefined, payload: any) {
-  if (!webhookUrl) {
-    console.warn('Discord webhook URL not configured');
-    return { success: false, error: 'Webhook URL missing' };
-  }
-
-  try {
-    const response = await fetch(webhookUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Webhook failed: ${response.status}`);
-    }
-
-    return { success: true };
-  } catch (error: any) {
-    console.error('Discord webhook error:', error);
-    return { success: false, error: error.message };
-  }
-}
+const WEBHOOK_KARTOTEKA = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_KARTOTEKA;
 
 /**
  * Powiadomienie o nadaniu kary/nagrody (PLUS/MINUS/zawieszenie)

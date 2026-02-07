@@ -24,7 +24,8 @@ export default function DivisionEditor({ user, currentUser, userId, isHCS, isCS,
   const [tempIsCommander, setTempIsCommander] = useState(user?.is_commander || false);
   const submittingRef = useRef(false);
 
-  const canEdit = isHCS || (isCS && (user?.role === 'trainee' || user?.role === 'deputy'));
+  // CS/HCS/Dev can edit all users (isCS includes cs/hcs/dev from role hierarchy)
+  const canEdit = isCS;
 
   const getDivisionColor = (division: string | null) => {
     switch (division) {

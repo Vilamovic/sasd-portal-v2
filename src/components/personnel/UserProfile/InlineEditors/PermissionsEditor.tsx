@@ -25,7 +25,8 @@ export default function PermissionsEditor({ user, currentUser, userId, isHCS, is
   const [tempPermissions, setTempPermissions] = useState<string[]>(user?.permissions || []);
   const submittingRef = useRef(false);
 
-  const canEdit = isHCS || (isCS && (user?.role === 'trainee' || user?.role === 'deputy'));
+  // CS/HCS/Dev can edit all users (isCS includes cs/hcs/dev from role hierarchy)
+  const canEdit = isCS;
 
   const togglePermission = (perm: string) => {
     if (tempPermissions.includes(perm)) {

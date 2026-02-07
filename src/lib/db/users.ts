@@ -138,7 +138,7 @@ export async function setForceLogoutForUser(userId: string) {
 
 /**
  * Ustawia force logout timestamp dla wielu użytkowników (role-based)
- * @param {string} scope - 'all' (dev only) | 'user' (admin can kick users)
+ * @param {string} scope - 'all' (dev only) | 'user' (admin can kick trainee/deputy)
  */
 export async function setForceLogoutTimestamp(scope: 'all' | 'user') {
   try {
@@ -148,7 +148,7 @@ export async function setForceLogoutTimestamp(scope: 'all' | 'user') {
       .update({ force_logout_after: timestamp });
 
     if (scope === 'user') {
-      query = query.eq('role', 'user');
+      query = query.in('role', ['trainee', 'deputy']);
     }
     // scope === 'all' → brak filtra (wszyscy oprócz dev - handled by RLS)
 
