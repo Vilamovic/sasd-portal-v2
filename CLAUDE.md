@@ -110,14 +110,15 @@ Zmienione pliki: [ścieżki]
 - **ETAP 2.2**: Discord Webhooks complete (4 pliki webhook, 12 files updated, commit: 22b7700)
 - **ETAP 2.3**: Materials complete (5 plików, 586L → 11L, commit: bcc5d37)
 - **ETAP 2.4**: AuthContext complete (5 plików, 573L → 803L orchestrator + 4 hooki, commit: a5d934e)
+- **ETAP 2.5**: ExamQuestions complete (6 plików, 570L → 11L, commit: 6d27e2e)
 
-**📊 Overall Progress:** 70% (7/10 etapów)
+**📊 Overall Progress:** 80% (8/10 etapów)
 
 **Next Steps:**
-1. ETAP 2.5: ExamQuestions component (~570L)
-2. ETAP 2.6: AdminPanel refactoring (~539L)
-3. ETAP 2.7: Divisions refactoring (~462L)
+1. ETAP 2.6: AdminPanel refactoring (~539L)
+2. ETAP 2.7: Divisions refactoring (~462L)
+3. ETAP 3: Średnie pliki (300-500L) - optional refinement
 
 ---
 
-Last Updated: 2026-02-07 - ETAP 2.4 complete, 7/10 etapów (70%)
+Last Updated: 2026-02-07 - ETAP 2.5 complete, 8/10 etapów (80%)

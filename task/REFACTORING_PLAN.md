@@ -17,7 +17,7 @@
 - [x] `src/utils/discord.js` - **641 linii** ✅ **DONE** (2026-02-07)
 - [x] `src/components/materials/Materials.jsx` - **586 linii** ✅ **DONE** (2026-02-07)
 - [x] `src/contexts/AuthContext.jsx` - **573 linie** ✅ **DONE** (2026-02-07)
-- [ ] `src/components/exam/ExamQuestions.jsx` - **570 linii**
+- [x] `src/components/exam/ExamQuestions.jsx` - **570 linii** ✅ **DONE** (2026-02-07)
 - [ ] `src/components/admin/AdminPanel.jsx` - **539 linii**
 - [ ] `app/divisions/[divisionId]/page.tsx` - **462 linie**
 
@@ -240,7 +240,7 @@ src/contexts/
 ---
 
 ### **8️⃣ src/components/exam/ExamQuestions.jsx (570 linii)** - QUESTIONS MGMT
-**Status:** ❌ TODO
+**Status:** ✅ DONE (commit: 6d27e2e)
 **Priorytet:** 🟡 WYSOKI
 
 **Problem:**
@@ -249,14 +249,15 @@ src/contexts/
 **Plan podziału:**
 ```
 src/components/exam/ExamQuestions/
-├── ExamQuestionsPage.jsx      (orchestrator)
-├── TypeSelection.tsx          (wybór typu egzaminu)
-├── QuestionsList.tsx          (lista pytań)
-├── QuestionEditor.tsx         (inline edit + save/cancel)
+├── ExamQuestionsPage.tsx      (368L - orchestrator)
+├── QuestionTypeSelector.tsx   (89L - selection screen)
+├── QuestionList.tsx           (137L - lista pytań)
+├── QuestionEditor.tsx         (189L - formularz add/edit)
 └── hooks/
-    └── useExamQuestions.ts    (load, add, edit, delete)
+    └── useQuestions.ts        (178L - CRUD + webhooks)
 ```
 
+**Result:** 570L → 11L (-559L, -98%) + 972L w 6 plikach
 **Impact:** ŚREDNI
 
 ---
