@@ -2,13 +2,13 @@
 
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useDivisionMaterials } from './hooks/useDivisionMaterials';
-import BackButton from './BackButton';
+import BackButton from '@/src/components/shared/BackButton';
 import PageHeader from './PageHeader';
 import EditModeInfo from './EditModeInfo';
 import MaterialForm from './MaterialForm';
 import MaterialCard from './MaterialCard';
 import EmptyState from './EmptyState';
-import LoadingState from './LoadingState';
+import LoadingState from '@/src/components/shared/LoadingState';
 
 interface DivisionPageProps {
   divisionId: string;
@@ -87,7 +87,7 @@ export default function DivisionPage({ divisionId, onBack }: DivisionPageProps) 
 
   // Loading state
   if (loading || !user) {
-    return <LoadingState />;
+    return <LoadingState message="Ładowanie..." />;
   }
 
   // Access denied (will be redirected by routing wrapper)
@@ -117,7 +117,7 @@ export default function DivisionPage({ divisionId, onBack }: DivisionPageProps) 
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
         {/* Back Button */}
-        <BackButton onClick={onBack} />
+        <BackButton onClick={onBack} destination="Dywizji" />
 
         {/* Header */}
         <PageHeader

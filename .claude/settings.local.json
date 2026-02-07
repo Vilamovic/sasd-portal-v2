@@ -40,7 +40,8 @@
       "Bash(where:*)",
       "Bash(find:*)",
       "Bash(wc:*)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(test:*)"
     ]
   }
 }

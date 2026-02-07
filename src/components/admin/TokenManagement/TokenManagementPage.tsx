@@ -2,9 +2,9 @@
 
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useTokenManagement } from './hooks/useTokenManagement';
-import BackButton from './BackButton';
-import LoadingState from './LoadingState';
-import AccessDenied from './AccessDenied';
+import BackButton from '@/src/components/shared/BackButton';
+import LoadingState from '@/src/components/shared/LoadingState';
+import AccessDenied from '@/src/components/shared/AccessDenied';
 import PageHeader from './PageHeader';
 import GenerateTokenForm from './GenerateTokenForm';
 import SearchBar from './SearchBar';
@@ -45,11 +45,11 @@ export default function TokenManagementPage({ onBack }: TokenManagementPageProps
 
   // Access control
   if (!isCS) {
-    return <AccessDenied onBack={onBack} />;
+    return <AccessDenied onBack={onBack} message="Tylko administratorzy mogą zarządzać tokenami." />;
   }
 
   if (loading) {
-    return <LoadingState />;
+    return <LoadingState message="Ładowanie tokenów..." />;
   }
 
   return (
@@ -65,7 +65,7 @@ export default function TokenManagementPage({ onBack }: TokenManagementPageProps
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
         {/* Back Button */}
-        <BackButton onClick={onBack} />
+        <BackButton onClick={onBack} destination="Dashboard" />
 
         {/* Header */}
         <PageHeader tokensCount={filteredTokens.length} />

@@ -2,21 +2,21 @@ import { Shield } from 'lucide-react';
 
 interface AccessDeniedProps {
   onBack: () => void;
+  message: string;
 }
 
 /**
- * AccessDenied - Unauthorized access view
- * - Only CS+ can access Admin Panel
+ * AccessDenied - Universal unauthorized access view (Sheriff Theme pattern)
+ *
+ * Shared component used across AdminPanel, TokenManagement
  */
-export default function AccessDenied({ onBack }: AccessDeniedProps) {
+export default function AccessDenied({ onBack, message }: AccessDeniedProps) {
   return (
     <div className="min-h-screen bg-[#020a06] flex items-center justify-center p-8">
       <div className="text-center">
         <Shield className="w-16 h-16 text-red-400 mx-auto mb-4" />
         <h2 className="text-2xl font-bold text-white mb-2">Brak dostępu</h2>
-        <p className="text-[#8fb5a0] mb-6">
-          Tylko CS i wyżej mogą zarządzać użytkownikami.
-        </p>
+        <p className="text-[#8fb5a0] mb-6">{message}</p>
         <button
           onClick={onBack}
           className="px-6 py-3 bg-gradient-to-r from-[#c9a227] to-[#e6b830] text-[#020a06] font-bold rounded-xl hover:opacity-90 transition-all duration-300 hover:scale-[1.02] shadow-lg"

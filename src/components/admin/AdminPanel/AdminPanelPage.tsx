@@ -2,14 +2,14 @@
 
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useAdminPanel } from './hooks/useAdminPanel';
-import BackButton from './BackButton';
+import BackButton from '@/src/components/shared/BackButton';
 import PageHeader from './PageHeader';
 import SearchBar from './SearchBar';
 import UsersTable from './UsersTable';
 import RoleDropdown from './RoleDropdown';
 import ActionButtons from './ActionButtons';
-import AccessDenied from './AccessDenied';
-import LoadingState from './LoadingState';
+import AccessDenied from '@/src/components/shared/AccessDenied';
+import LoadingState from '@/src/components/shared/LoadingState';
 
 interface AdminPanelPageProps {
   onBack: () => void;
@@ -51,11 +51,11 @@ export default function AdminPanelPage({ onBack }: AdminPanelPageProps) {
 
   // Access control
   if (!isAdmin) {
-    return <AccessDenied onBack={onBack} />;
+    return <AccessDenied onBack={onBack} message="Tylko CS i wyżej mogą zarządzać użytkownikami." />;
   }
 
   if (loading) {
-    return <LoadingState />;
+    return <LoadingState message="Ładowanie użytkowników..." />;
   }
 
   const currentUser = showActionDropdown
@@ -75,7 +75,7 @@ export default function AdminPanelPage({ onBack }: AdminPanelPageProps) {
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
         {/* Back Button */}
-        <BackButton onClick={onBack} />
+        <BackButton onClick={onBack} destination="Dashboard" />
 
         {/* Header */}
         <PageHeader userCount={filteredUsers.length} />
