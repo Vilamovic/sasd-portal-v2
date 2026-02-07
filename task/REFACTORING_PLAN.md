@@ -382,7 +382,7 @@ src/
 - [x] Test build (`npm run build`)
 - [x] Commit: `refactor: Podział supabaseHelpers na src/lib/db/*` (commit: ec3a458)
 
-### **ETAP 1.2: Personnel - User Profile** 🚧 IN PROGRESS
+### **ETAP 1.2: Personnel - User Profile** ✅ DONE (2026-02-07)
 #### **ETAP 1.2a: Modals** ✅ DONE (2026-02-07)
 - [x] Stwórz folder `src/components/personnel/UserProfile/Modals/`
 - [x] Wydziel 4 modals (AddNote, AddPlusMinus, AddPenalty, AddWrittenWarning)
@@ -390,23 +390,25 @@ src/
 - [x] Commit: `refactor: ETAP 1.2a - Wydzielenie modals z UserProfile` (commit: 2c520b1)
 - **Rezultat**: UserProfile 1876 → 1557 linii (-319 linii, -17%)
 
-#### **ETAP 1.2b-e: Pozostałe komponenty** ⏳ TODO
-- [ ] Wydziel Inline Editors (Badge, Division, Permissions) ~240 linii
-- [ ] Wydziel Tables (Penalties, Notes) ~300 linii
-- [ ] Wydziel ProfileHeader ~100 linii
-- [ ] Stwórz hooks (`useUserProfile`, `usePenaltyTimers`) ~150 linii
-- [ ] Stwórz UserProfilePage orchestrator ~150 linii
-- [ ] Zaktualizuj `app/personnel/[username]/page.tsx` (tylko routing)
-- [ ] Test build
-- [ ] Commit: `refactor: ETAP 1.2 complete - User Profile komponenty`
+#### **ETAP 1.2b-e: Pozostałe komponenty** ✅ DONE (2026-02-07)
+- [x] Wydziel Inline Editors (Badge, Division, Permissions) ~240 linii (commit: c6e346d)
+- [x] Wydziel Tables (Penalties, Notes) ~300 linii (commit: 0a0dbca)
+- [x] Wydziel ProfileHeader + ProfileStats + ActiveSuspensions
+- [x] Stwórz hooks (`useUserProfile`, `usePenaltyTimers`)
+- [x] Stwórz UserProfilePage orchestrator
+- [x] Zaktualizuj `app/personnel/[username]/page.tsx` (tylko routing)
+- [x] Test build
+- [x] Commit: `refactor: ETAP 1.2 COMPLETE` (commit: 3344e57)
+- **Rezultat**: app/personnel/[username]/page.tsx: 1876 → 15 linii (-1861 linii, -99%)
 
-### **ETAP 1.3: Personnel - List**
-- [ ] Stwórz folder `src/components/personnel/PersonnelList/`
-- [ ] Podziel `app/personnel/page.tsx` na komponenty
-- [ ] Stwórz hooks (`usePersonnelList`, `useBatchOperations`)
-- [ ] Zaktualizuj `app/personnel/page.tsx` (tylko routing)
-- [ ] Test build
-- [ ] Commit: `refactor: Podział Personnel List na komponenty`
+### **ETAP 1.3: Personnel - List** ✅ DONE (2026-02-07)
+- [x] Stwórz folder `src/components/personnel/PersonnelList/`
+- [x] Podziel `app/personnel/page.tsx` na komponenty (9 plików)
+- [x] Stwórz hooks (`usePersonnelList`, `useBatchOperations`)
+- [x] Zaktualizuj `app/personnel/page.tsx` (tylko routing)
+- [x] Test build
+- [x] Commit: `refactor: ETAP 1.3 COMPLETE - PersonnelList refactoring` (commit: aab7d02)
+- **Rezultat**: app/personnel/page.tsx: 1124 → 8 linii (-1116 linii, -99.3%)
 
 ### **ETAP 2.1: ExamTaker**
 - [ ] Stwórz folder `src/components/exam/ExamTaker/`
@@ -486,13 +488,14 @@ src/
 **Data rozpoczęcia:** 2026-02-07
 **Data zakończenia:** _TBD_
 
-**Ukończone etapy:** 1.5/10
-**Progress:** █▓░░░░░░░░ 15%
+**Ukończone etapy:** 3/10
+**Progress:** ███░░░░░░░ 30%
 
 ### Changelog:
 - **2026-02-07 (morning):** ✅ ETAP 1.1 - supabaseHelpers.js → src/lib/db/* (7 plików, 12 importów, commit: ec3a458)
-- **2026-02-07 (afternoon):** ✅ ETAP 1.2a - UserProfile modals (4 komponenty, -319 linii, commit: 2c520b1)
+- **2026-02-07 (afternoon):** ✅ ETAP 1.2 - UserProfile complete (14 komponentów, 1876L → 15L, commits: 2c520b1, c6e346d, 0a0dbca, 3344e57)
+- **2026-02-07 (evening):** ✅ ETAP 1.3 - PersonnelList complete (9 komponentów, 1124L → 8L, commit: aab7d02)
 
 ---
 
-**Ostatnia aktualizacja:** 2026-02-07 (ETAP 1.2a ukończony - modals)
+**Ostatnia aktualizacja:** 2026-02-07 (ETAP 1.3 ukończony - PersonnelList)
