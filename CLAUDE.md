@@ -48,6 +48,7 @@
 * **Navbar Sync**: Po operacjach CRUD wywołaj `refreshUserData()` z AuthContext dla natychmiastowej aktualizacji (zamiast czekać 30s na polling).
 * **Timer Countdown**: RPC function `get_active_penalties()` oblicza `remaining_seconds` server-side. Navbar korzysta z tego do countdown timerów.
 * **Button Positioning**: WSZYSTKIE przyciski "Powrót" ZAWSZE WEWNĄTRZ kontenera `max-w-7xl mx-auto px-6 py-8` jako pierwszy element z `mb-6` - jednolity standard dla obecnych i przyszłych stron (wzorzec z `/exams`, `/materials`, `/personnel`, `/divisions`, `/tokens`).
+* **Shared Components**: ZAWSZE używaj komponentów z `/src/components/shared/` dla BackButton, LoadingState, AccessDenied zamiast tworzyć nowe kopie. Importuj: `@/src/components/shared/ComponentName`.
 
 ---
 
@@ -62,8 +63,9 @@ Zmienione pliki: [ścieżki]
 
 ## 📋 Current Task Status
 
-### 🎯 ACTIVE: Refaktoryzacja Projektu (Code Quality)
+### ✅ COMPLETED: Refaktoryzacja Projektu + Code Cleanup
 **Start Date:** 2026-02-07
+**Completion Date:** 2026-02-07
 **Detailed Instructions:** See `/task/REFACTORING_PLAN.md` for complete plan
 **Previous Task:** System Kartoteki (COMPLETED 2026-02-05)
 
@@ -116,19 +118,25 @@ Zmienione pliki: [ścieżki]
 - **ETAP 3.1**: Dead Code Removal (1069L deleted, commit: 4a8e582)
 - **ETAP 3.2**: ExamResults DRY Fix (840L → 617L, commit: 789539b)
 - **ETAP 3.3**: TokenManagement refactor (422L → 10 plików, commit: 789539b)
+- **ETAP 3.4**: Code Cleanup + Shared Components (1132L deleted, commit: efd1cb0)
 
-**📊 Overall Progress:** 100% (13/13 etapów - 10 TOP + 3 Cleanup) 🎉
+**📊 Overall Progress:** 100% (14/14 etapów - 10 TOP + 4 Cleanup) 🎉
 
 **Metryki sukcesu:**
-- ~10,000+ linii zrefaktoryzowane
-- 90+ nowych plików (komponenty + hooki)
-- 1069L martwego kodu usunięte
-- 223L duplikacji wyeliminowane
+- ~11,000+ linii zrefaktoryzowane/usunięte
+- 93+ nowych plików (komponenty + hooki + shared)
+- 2,201L martwego kodu usunięte (1069L + 1132L)
+- 375L duplikacji wyeliminowane (223L + 152L)
 - Średnia wielkość pliku: ~100L (było: 936L) - **redukcja 89%**
 - Sheriff Theme zachowany w 100%
 - Build: ✅ SUCCESSFUL (npm run build)
-- Git push: ✅ 25 commitów na origin/master
+- Git push: ✅ 26 commitów na origin/master
+- Bundle size: **-4% reduction** (Code Cleanup)
 
 ---
 
-Last Updated: 2026-02-07 - 🎉 COMPLETE REFACTORING SUCCESS! (13/13 etapów, 100%) 🚀
+Last Updated: 2026-02-07 - 🎉 COMPLETE REFACTORING + CLEANUP SUCCESS! (14/14 etapów, 100%) 🚀
+- Refactoring: 13/13 etapów ✅
+- Code Cleanup: -1,132L martwy kod + shared components ✅
+- Bundle: -4% size reduction ✅
+- Commit: efd1cb0 (pushed to origin/master) ✅
