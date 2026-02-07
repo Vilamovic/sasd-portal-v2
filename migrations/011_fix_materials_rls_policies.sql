@@ -20,6 +20,12 @@ DROP POLICY IF EXISTS "Admins can delete materials" ON materials;
 DROP POLICY IF EXISTS "Users can view materials" ON materials;
 DROP POLICY IF EXISTS "Anyone can view materials" ON materials;
 
+-- Drop new policies in case migration was partially run before
+DROP POLICY IF EXISTS "Authenticated users can view materials" ON materials;
+DROP POLICY IF EXISTS "Staff can insert materials" ON materials;
+DROP POLICY IF EXISTS "Staff can update materials" ON materials;
+DROP POLICY IF EXISTS "Senior staff can delete materials" ON materials;
+
 -- ================================================
 -- 2. CREATE NEW POLICIES FOR materials TABLE
 -- ================================================
@@ -78,6 +84,12 @@ DROP POLICY IF EXISTS "Admins can delete division materials" ON division_materia
 DROP POLICY IF EXISTS "Users can view division materials" ON division_materials;
 DROP POLICY IF EXISTS "Anyone can view division materials" ON division_materials;
 DROP POLICY IF EXISTS "Commanders can manage division materials" ON division_materials;
+
+-- Drop new policies in case migration was partially run before
+DROP POLICY IF EXISTS "Authenticated users can view division materials" ON division_materials;
+DROP POLICY IF EXISTS "Staff and commanders can insert division materials" ON division_materials;
+DROP POLICY IF EXISTS "Staff and commanders can update division materials" ON division_materials;
+DROP POLICY IF EXISTS "Senior staff can delete division materials" ON division_materials;
 
 -- ================================================
 -- 4. CREATE NEW POLICIES FOR division_materials TABLE
