@@ -9,13 +9,13 @@
 
 ### 🔴 KRYTYCZNE (>1000 linii) - PRIORYTET 1
 - [x] `src/utils/supabaseHelpers.js` - **1046 linii** ✅ **DONE** (2026-02-07)
-- [ ] `app/personnel/[username]/page.tsx` - **1868 linii** (NAJGORSZY!)
-- [ ] `app/personnel/page.tsx` - **1124 linie**
+- [x] `app/personnel/[username]/page.tsx` - **1868 linii** ✅ **DONE** (2026-02-07)
+- [x] `app/personnel/page.tsx` - **1124 linie** ✅ **DONE** (2026-02-07)
 
 ### 🟡 WYSOKIE (500-1000 linii) - PRIORYTET 2
-- [ ] `src/components/exam/ExamTaker.jsx` - **831 linii**
-- [ ] `src/utils/discord.js` - **641 linii**
-- [ ] `src/components/materials/Materials.jsx` - **586 linii**
+- [x] `src/components/exam/ExamTaker.jsx` - **831 linii** ✅ **DONE** (2026-02-07)
+- [x] `src/utils/discord.js` - **641 linii** ✅ **DONE** (2026-02-07)
+- [x] `src/components/materials/Materials.jsx` - **586 linii** ✅ **DONE** (2026-02-07)
 - [ ] `src/contexts/AuthContext.jsx` - **573 linie**
 - [ ] `src/components/exam/ExamQuestions.jsx` - **570 linii**
 - [ ] `src/components/admin/AdminPanel.jsx` - **539 linii**
@@ -193,7 +193,7 @@ src/lib/webhooks/
 ---
 
 ### **6️⃣ src/components/materials/Materials.jsx (586 linii)** - MATERIALS
-**Status:** ❌ TODO
+**Status:** ✅ DONE (commit: bcc5d37)
 **Priorytet:** 🟡 WYSOKI
 
 **Problem:**
@@ -202,14 +202,15 @@ src/lib/webhooks/
 
 **Plan podziału:**
 ```
-src/components/materials/
-├── MaterialsPage.jsx          (100 linii - orchestrator)
-├── MaterialsList.tsx          (lista z read mode)
-├── MaterialForm.tsx           (dodawanie/edycja)
+src/components/materials/Materials/
+├── MaterialsPage.tsx          (338L - orchestrator)
+├── MaterialsList.tsx          (121L - grid + empty state)
+├── MaterialModal.tsx          (259L - combined view/edit/fullscreen)
 └── hooks/
-    └── useMaterials.ts        (load, add, edit, delete)
+    └── useMaterials.ts        (120L - CRUD operations)
 ```
 
+**Result:** 586L → 11L (-575L, -98%) + 849L w 4 nowych plikach
 **Impact:** ŚREDNI
 
 ---
