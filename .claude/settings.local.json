@@ -36,7 +36,8 @@
       "Bash(node check_db_structure.js:*)",
       "Bash(powershell -Command:*)",
       "Bash(node check_badge_values.js:*)",
-      "Bash(git diff:*)"
+      "Bash(git diff:*)",
+      "Bash(where:*)"
     ]
   }
 }

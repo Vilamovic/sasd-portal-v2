@@ -74,7 +74,11 @@ Zmienione pliki: [ścieżki]
 - Captain III auto-Commander (automatyczne nadanie is_commander przy awansie)
 
 **Database:**
-- Active Migrations: `007_add_delete_policies_for_dev.sql`, `008_add_update_badge_policy_for_dev.sql`, `009_create_active_penalties_rpc.sql`
+- ⚠️ **PENDING MIGRATION**: `010_refactor_v3_fixes.sql` - **MUST RUN IN SUPABASE!**
+  - Adds "Pościgowe" to permission_type ENUM
+  - Adds is_commander column to users table
+  - Updates RLS policies for new role hierarchy (cs/hcs instead of admin)
+- Completed Migrations: `007`, `008`, `009` (executed, files removed from repo)
 - Project ref: `jecootmlzlwxubvumxrk`
 - Tables: `user_penalties`, `user_notes`
 - RPC: `get_active_penalties(p_user_id)` - zwraca aktywne kary z `remaining_seconds`
@@ -101,6 +105,7 @@ Zmienione pliki: [ścieżki]
 - Role hierarchy: Trainee → Deputy → CS → HCS → Dev with permission gating
 - CS restrictions: can manage only Trainee/Deputy, can zero only +/-
 - Captain III + Division → auto-Commander flag
+- **Database**: Created migration 010 for Refactor v3 (Pościgowe permission, is_commander column, RLS policies update)
 ---
 
 Last Updated: 2026-02-07 - System Refactor v3 Complete

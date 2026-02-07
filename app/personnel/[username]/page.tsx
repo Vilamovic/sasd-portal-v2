@@ -845,7 +845,7 @@ export default function UserProfilePage() {
                       <Award className="w-4 h-4 text-[#c9a227]" />
                       <span className="text-[#8fb5a0] text-sm">Stopień</span>
                     </div>
-                    {!editingStopień && (isHCS || (isCS && user.role !== 'cs' && user.role !== 'hcs')) && (
+                    {!editingStopień && (isHCS || (isCS && (user.role === 'trainee' || user.role === 'deputy'))) && (
                       <button
                         onClick={() => setEditingStopień(true)}
                         className="text-[#c9a227] hover:text-[#e6b830] transition-colors"
@@ -900,7 +900,7 @@ export default function UserProfilePage() {
                       <Shield className="w-4 h-4 text-[#c9a227]" />
                       <span className="text-[#8fb5a0] text-sm">Dywizja</span>
                     </div>
-                    {!editingDivision && (isHCS || (isCS && user.role !== 'cs' && user.role !== 'hcs')) && (
+                    {!editingDivision && (isHCS || (isCS && (user.role === 'trainee' || user.role === 'deputy'))) && (
                       <button
                         onClick={() => setEditingDivision(true)}
                         className="text-[#c9a227] hover:text-[#e6b830] transition-colors"
@@ -1015,7 +1015,7 @@ export default function UserProfilePage() {
                       <Users className="w-4 h-4 text-[#c9a227]" />
                       <span className="text-[#8fb5a0] text-sm">Uprawnienia</span>
                     </div>
-                    {!editingPermissions && (isHCS || (isCS && user.role !== 'cs' && user.role !== 'hcs')) && (
+                    {!editingPermissions && (isHCS || (isCS && (user.role === 'trainee' || user.role === 'deputy'))) && (
                       <button
                         onClick={() => setEditingPermissions(true)}
                         className="text-[#c9a227] hover:text-[#e6b830] transition-colors"
@@ -1189,7 +1189,7 @@ export default function UserProfilePage() {
                 title="Wyzeruj całą historię PLUS/MINUS (CS+)"
               >
                 <Trash2 className="w-3 h-3" />
-                Wyzeruj wszystko
+                Wyzeruj +/-
               </button>
             </div>
           )}

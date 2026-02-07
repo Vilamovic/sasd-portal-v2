@@ -276,20 +276,11 @@ export default function AdminPanel({ onBack }) {
               <thead className="bg-[#051a0f]/50 border-b border-[#1a4d32]/50">
                 <tr>
                   <th
-                    onClick={() => handleSort('username')}
-                    className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227] cursor-pointer hover:text-[#e6b830] transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      Username
-                      <ArrowUpDown className="w-4 h-4" />
-                    </div>
-                  </th>
-                  <th
                     onClick={() => handleSort('mta_nick')}
                     className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227] cursor-pointer hover:text-[#e6b830] transition-colors"
                   >
                     <div className="flex items-center gap-2">
-                      Nick
+                      Użytkownik
                       <ArrowUpDown className="w-4 h-4" />
                     </div>
                   </th>
@@ -298,7 +289,7 @@ export default function AdminPanel({ onBack }) {
                     className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227] cursor-pointer hover:text-[#e6b830] transition-colors"
                   >
                     <div className="flex items-center gap-2">
-                      Badge
+                      Stopień
                       <ArrowUpDown className="w-4 h-4" />
                     </div>
                   </th>
@@ -356,12 +347,14 @@ export default function AdminPanel({ onBack }) {
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1a4d32] to-[#22693f] flex items-center justify-center text-white font-bold">
-                              {(u.username || '?')[0].toUpperCase()}
+                              {((u.mta_nick || u.username) || '?')[0].toUpperCase()}
                             </div>
-                            <span className="text-white font-medium">{u.username || 'N/A'}</span>
+                            <div>
+                              <div className="text-white font-medium">{u.mta_nick || u.username || 'N/A'}</div>
+                              <div className="text-[#8fb5a0] text-xs">@{u.username || 'N/A'}</div>
+                            </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-[#8fb5a0]">{u.mta_nick || 'Brak nicku'}</td>
                         <td className="px-6 py-4 text-[#8fb5a0]">{u.badge || 'N/A'}</td>
                         {isDev && (
                           <td className="px-6 py-4 text-[#8fb5a0] text-sm">

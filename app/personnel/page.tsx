@@ -668,48 +668,12 @@ export default function KartotekaPage() {
               >
                 <option value="all">Wszystkie role</option>
                 <option value="dev">Dev</option>
-                <option value="hcs">HCS (High Coordinator of Staff)</option>
-                <option value="cs">CS (Coordinator of Staff)</option>
+                <option value="hcs">HCS (High Command Staff)</option>
+                <option value="cs">CS (Command Staff)</option>
                 <option value="deputy">Deputy</option>
                 <option value="trainee">Trainee</option>
               </select>
               <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8fb5a0] pointer-events-none" />
-            </div>
-          </div>
-
-          {/* Sort Controls */}
-          <div className="mt-4 flex items-center gap-3 flex-wrap">
-            <span className="text-[#8fb5a0] text-sm">Sortuj:</span>
-            <div className="flex items-center gap-2 flex-wrap">
-              {[
-                { value: 'name', label: 'Nazwa' },
-                { value: 'plus', label: 'PLUS' },
-                { value: 'minus', label: 'MINUS' },
-                { value: 'last_seen', label: 'Ostatnio widziany' },
-                { value: 'created_at', label: 'Data rejestracji' },
-              ].map((sort) => (
-                <button
-                  key={sort.value}
-                  onClick={() => {
-                    if (sortBy === sort.value) {
-                      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-                    } else {
-                      setSortBy(sort.value as any);
-                      setSortOrder('asc');
-                    }
-                  }}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    sortBy === sort.value
-                      ? 'bg-[#c9a227] text-[#020a06]'
-                      : 'bg-[#0a2818] text-[#8fb5a0] hover:bg-[#133524]'
-                  }`}
-                >
-                  {sort.label}
-                  {sortBy === sort.value && (
-                    <ArrowUpDown className={`w-3 h-3 ${sortOrder === 'desc' ? 'rotate-180' : ''}`} />
-                  )}
-                </button>
-              ))}
             </div>
           </div>
         </div>
@@ -843,14 +807,12 @@ export default function KartotekaPage() {
                         )}
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="text-white font-semibold">{u.username}</span>
+                            <span className="text-white font-semibold">{u.mta_nick || u.username}</span>
                             <span className={`px-2 py-0.5 rounded text-xs font-bold ${getRoleStopieńColor(u.role)}`}>
                               {getRoleDisplayName(u.role)}
                             </span>
                           </div>
-                          {u.mta_nick && (
-                            <span className="text-[#8fb5a0] text-xs">MTA: {u.mta_nick}</span>
-                          )}
+                          <span className="text-[#8fb5a0] text-xs">@{u.username}</span>
                         </div>
                       </div>
                     </div>
