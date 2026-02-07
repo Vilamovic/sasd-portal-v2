@@ -62,9 +62,10 @@ Zmienione pliki: [ścieżki]
 
 ## 📋 Current Task Status
 
-### 🎯 ACTIVE: System Kartoteki (Zarządzanie Personelem)
-**Start Date:** 2026-02-05
-**Detailed Instructions:** See `/task/INSTRUCTIONS.md` for complete requirements
+### 🎯 ACTIVE: Refaktoryzacja Projektu (Code Quality)
+**Start Date:** 2026-02-07
+**Detailed Instructions:** See `/task/REFACTORING_PLAN.md` for complete plan
+**Previous Task:** System Kartoteki (COMPLETED 2026-02-05)
 
 **Key Features:**
 - Dywizje (FTO #c9a227, SS #ff8c00, DTU #60a5fa, GU #10b981) - wyświetlane w Navbar
@@ -99,38 +100,27 @@ Zmienione pliki: [ścieżki]
 - ✅ Badge → "Stopień" (UI text)
 - ✅ UI standardization complete: button positioning, naming conventions, user display order
 
-**Recent Changes (2026-02-07):**
-- System refactor v3: Privacy (email cleanup), UI (navigation top-left, user identity format)
-- Navbar: DTU color fix (#60a5fa), timer moved left
-- Personnel: Sortable columns with arrows, division tags instead of dropdown
-- Role hierarchy: Trainee → Deputy → CS → HCS → Dev with permission gating
-- CS restrictions: can manage only Trainee/Deputy, can zero only +/-
-- Captain III + Division → auto-Commander flag
-- **Database**: Migrations 010, 011, 012 executed
-  - 010: Pościgowe permission, is_commander, RLS for penalties/users
-  - 011: RLS for materials/division_materials (CS/HCS access to divisions)
-  - 012: RLS for exam_access_tokens (CS/HCS can generate tokens)
-- **UI Fixes**:
-  - Button standardization: "Powrót" buttons inside container (see MEMORY.md for pattern)
-  - AdminPanel dropdown fix: CS/HCS see role management options (was empty before)
-  - Role hierarchy in dropdown: CS manages trainee/deputy, HCS manages all except dev
-  - User display: Nick MTA → @username format
-  - Naming: HCS = "High Command Staff", CS = "Command Staff"
-  - CS button text: "Wyzeruj +/-" instead of "Wyzeruj wszystko"
+**Refactoring Progress (2026-02-07):**
 
-**Refactoring Phase 1 (2026-02-07):**
-- ✅ **ETAP 1.1 COMPLETE**: supabaseHelpers.js → src/lib/db/* (commit: ec3a458)
-  - 1046-line monolith split into 7 domain-specific files
-  - users.ts (6.3K), exams.ts (5.2K), materials.ts (1.4K), tokens.ts (4.8K), penalties.ts (3.7K), notes.ts (1.9K), divisions.ts (2.0K)
-  - 12 import statements updated across codebase
-  - TypeScript signatures aligned with original JS flexibility (string | null, number | string)
-- ✅ **ETAP 1.2a COMPLETE**: UserProfile modals extraction (commit: 2c520b1)
-  - app/personnel/[username]/page.tsx: 1876 → 1557 linii (-319 linii, -17%)
-  - 4 modal components extracted to src/components/personnel/UserProfile/Modals/
-  - AddNoteModal.tsx (120L), AddPlusMinusModal.tsx (160L), AddPenaltyModal.tsx (220L), AddWrittenWarningModal.tsx (150L)
-  - Build successful, functionality preserved
-  - Remaining: Inline editors, tables, hooks, orchestrator (~940 lines to refactor)
-  - See task/REFACTORING_PLAN.md for full roadmap (Progress: 15%)
+**✅ COMPLETED:**
+- **ETAP 1.1**: supabaseHelpers.js → src/lib/db/* (7 plików, commit: ec3a458)
+- **ETAP 1.2**: UserProfile complete (14 komponentów, 1876L → 15L, commits: 2c520b1, c6e346d, 0a0dbca, 3344e57)
+- **ETAP 1.3**: PersonnelList complete (9 komponentów, 1124L → 8L, commit: aab7d02)
+
+**🚧 IN PROGRESS:**
+- **ETAP 2.1**: ExamTaker refactoring (832L → orchestrator)
+  - ✅ Components (5): TokenModal, ExamTypeSelection, TimerDisplay, ExamResults, ExamQuestion
+  - ✅ Hooks (3): useExamState, useExamTimer, useTokenVerification
+  - ⏳ TODO: ExamTakerPage orchestrator (~300-400L) + routing wrapper
+  - **Progress**: 8/10 plików (774L created)
+
+**📊 Overall Progress:** 30% → 35% (3.5/10 etapów)
+
+**Next Steps:**
+1. Dokończyć ETAP 2.1d (ExamTakerPage orchestrator)
+2. Build test + commit
+3. Przejść do ETAP 2.2 (Discord Webhooks) lub ETAP 2.3 (Materials)
+
 ---
 
-Last Updated: 2026-02-07 - Etap 1.2a Refaktoryzacji ukończony (modals)
+Last Updated: 2026-02-07 - ETAP 2.1 (a-c) ukończony, orchestrator pozostały
