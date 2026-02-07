@@ -13,7 +13,10 @@ import Link from 'next/link';
  * - RPC update_user_role
  * - Force Logout + Delete User
  * - Wyszukiwanie po nicku/username/badge (bez emailu dla non-dev)
- * - Dropdown "Akcja" (Nadaj/Odbierz/Wyrzuć)
+ * - Dropdown "Akcja" z role hierarchy:
+ *   - CS: manage trainee/deputy only
+ *   - HCS: manage all except dev
+ *   - Dev: manage everyone
  * - Sortowanie (username, nick, badge, role, created_at, last_seen)
  * - Przycisk "Wyrzuć": force logout → wait 2s → delete user
  * - Discord webhook przy usunięciu
@@ -203,7 +206,7 @@ export default function AdminPanel({ onBack }) {
           <Shield className="w-16 h-16 text-red-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-2">Brak dostępu</h2>
           <p className="text-[#8fb5a0] mb-6">
-            Tylko administratorzy mogą zarządzać użytkownikami.
+            Tylko CS i wyżej mogą zarządzać użytkownikami.
           </p>
           <button
             onClick={onBack}
@@ -400,44 +403,53 @@ export default function AdminPanel({ onBack }) {
 
                               {showActionDropdown === u.id && !isCurrentUser && !isDevUser && (
                                 <div className="absolute right-0 mt-2 w-52 glass-strong rounded-xl shadow-2xl border border-[#1a4d32] py-2 z-50 max-h-80 overflow-y-auto">
-                                  {/* Dev can set any role */}
-                                  {isDev && (
-                                    <>
-                                      <div className="px-3 py-1 text-xs text-[#8fb5a0] font-semibold">Zmień rolę:</div>
-                                      <button
-                                        onClick={() => handleUpdateRole(u.id, 'hcs', u.mta_nick || u.username)}
-                                        className="w-full px-4 py-2 text-left hover:bg-red-600/10 transition-colors text-red-400 text-sm flex items-center gap-2"
-                                      >
-                                        <ShieldCheck className="w-4 h-4" />
-                                        HCS
-                                      </button>
-                                      <button
-                                        onClick={() => handleUpdateRole(u.id, 'cs', u.mta_nick || u.username)}
-                                        className="w-full px-4 py-2 text-left hover:bg-orange-600/10 transition-colors text-orange-400 text-sm flex items-center gap-2"
-                                      >
-                                        <ShieldCheck className="w-4 h-4" />
-                                        CS
-                                      </button>
-                                      <button
-                                        onClick={() => handleUpdateRole(u.id, 'deputy', u.mta_nick || u.username)}
-                                        className="w-full px-4 py-2 text-left hover:bg-blue-600/10 transition-colors text-blue-400 text-sm flex items-center gap-2"
-                                      >
-                                        <ShieldCheck className="w-4 h-4" />
-                                        Deputy
-                                      </button>
-                                      <button
-                                        onClick={() => handleUpdateRole(u.id, 'trainee', u.mta_nick || u.username)}
-                                        className="w-full px-4 py-2 text-left hover:bg-gray-600/10 transition-colors text-gray-400 text-sm flex items-center gap-2"
-                                      >
-                                        <ShieldOff className="w-4 h-4" />
-                                        Trainee
-                                      </button>
-                                      <div className="border-t border-[#1a4d32] my-2" />
-                                    </>
+                                  {/* Role change options based on hierarchy */}
+                                  <div className="px-3 py-1 text-xs text-[#8fb5a0] font-semibold">Zmień rolę:</div>
+
+                                  {/* Dev and HCS can set HCS role */}
+                                  {(isDev || role === 'hcs') && (
+                                    <button
+                                      onClick={() => handleUpdateRole(u.id, 'hcs', u.mta_nick || u.username)}
+                                      className="w-full px-4 py-2 text-left hover:bg-red-600/10 transition-colors text-red-400 text-sm flex items-center gap-2"
+                                    >
+                                      <ShieldCheck className="w-4 h-4" />
+                                      HCS
+                                    </button>
                                   )}
 
-                                  {/* Dev can kick anyone (except dev), Admin can kick only trainee/deputy */}
-                                  {((isDev) || (isAdmin && (u.role === 'trainee' || u.role === 'deputy'))) && (
+                                  {/* Dev, HCS, and CS can set CS role (but CS cannot set their own) */}
+                                  {(isDev || role === 'hcs' || (role === 'cs' && u.role !== 'cs')) && (
+                                    <button
+                                      onClick={() => handleUpdateRole(u.id, 'cs', u.mta_nick || u.username)}
+                                      className="w-full px-4 py-2 text-left hover:bg-orange-600/10 transition-colors text-orange-400 text-sm flex items-center gap-2"
+                                    >
+                                      <ShieldCheck className="w-4 h-4" />
+                                      CS
+                                    </button>
+                                  )}
+
+                                  {/* Everyone (CS+) can set Deputy */}
+                                  <button
+                                    onClick={() => handleUpdateRole(u.id, 'deputy', u.mta_nick || u.username)}
+                                    className="w-full px-4 py-2 text-left hover:bg-blue-600/10 transition-colors text-blue-400 text-sm flex items-center gap-2"
+                                  >
+                                    <ShieldCheck className="w-4 h-4" />
+                                    Deputy
+                                  </button>
+
+                                  {/* Everyone (CS+) can set Trainee */}
+                                  <button
+                                    onClick={() => handleUpdateRole(u.id, 'trainee', u.mta_nick || u.username)}
+                                    className="w-full px-4 py-2 text-left hover:bg-gray-600/10 transition-colors text-gray-400 text-sm flex items-center gap-2"
+                                  >
+                                    <ShieldOff className="w-4 h-4" />
+                                    Trainee
+                                  </button>
+
+                                  <div className="border-t border-[#1a4d32] my-2" />
+
+                                  {/* Kick options: Dev/HCS can kick anyone, CS can kick only trainee/deputy */}
+                                  {(isDev || role === 'hcs' || (role === 'cs' && (u.role === 'trainee' || u.role === 'deputy'))) && (
                                     <button
                                       onClick={() => handleKickUser(u.id, u.mta_nick || u.username)}
                                       className="w-full px-4 py-3 text-left hover:bg-red-500/10 transition-colors text-red-400 text-sm flex items-center gap-2"
