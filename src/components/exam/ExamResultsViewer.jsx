@@ -118,25 +118,70 @@ export default function ExamResultsViewer({ mode = 'active' }) {
     );
   }
 
+  // Helper: get display name and exam type from joined data
+  const getUserName = (result) => result.users?.mta_nick || result.users?.username || 'Nieznany';
+  const getExamType = (result) => result.exam_types?.name || 'Nieznany';
+
   // Filtering
-  const examTypes = [...new Set(results.map((r) => r.exam_type))];
+  const examTypes = [...new Set(results.map((r) => getExamType(r)))];
   const filteredResults = results.filter((result) => {
+    const userName = getUserName(result);
+    const examType = getExamType(result);
     const matchesSearch =
       !searchTerm ||
-      result.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      result.exam_type?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterExamType === 'all' || result.exam_type === filterExamType;
+      userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      examType.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = filterExamType === 'all' || examType === filterExamType;
     return matchesSearch && matchesFilter;
   });
+
+  // Helper: reconstruct per-question details from questions + answers
+  const getQuestionDetails = (result) => {
+    const questions = Array.isArray(result.questions) ? result.questions : [];
+    const answers = result.answers && typeof result.answers === 'object' ? result.answers : {};
+
+    return questions.map((q) => {
+      const userAnswer = answers[q.id];
+      let isCorrect = false;
+
+      if (q.is_multiple_choice) {
+        if (Array.isArray(userAnswer) && Array.isArray(q.correct_answers)) {
+          const sorted1 = [...userAnswer].sort((a, b) => a - b);
+          const sorted2 = [...q.correct_answers].sort((a, b) => a - b);
+          isCorrect = sorted1.length === sorted2.length && sorted1.every((v, i) => v === sorted2[i]);
+        }
+      } else {
+        isCorrect = userAnswer === q.correct_answers?.[0];
+      }
+
+      const options = q.shuffledOptions || q.options || [];
+      let answerText = 'Brak odpowiedzi';
+      if (userAnswer === -1) {
+        answerText = 'Timeout';
+      } else if (Array.isArray(userAnswer)) {
+        answerText = userAnswer.map((i) => options[i] || `Opcja ${i + 1}`).join(', ');
+      } else if (typeof userAnswer === 'number' && options[userAnswer]) {
+        answerText = options[userAnswer];
+      }
+
+      return {
+        question: q.question,
+        answer: answerText,
+        correct: isCorrect,
+        isTimeout: userAnswer === -1,
+      };
+    });
+  };
 
   // Render Details Modal
   const renderDetailsModal = () => {
     if (!showDetailsModal || !selectedResult) return null;
 
-    const passedQuestions = selectedResult.answers?.filter((a) => a.correct).length || 0;
-    const totalQuestions = selectedResult.answers?.length || 0;
+    const passedQuestions = selectedResult.score || 0;
+    const totalQuestions = selectedResult.total_questions || 0;
     const scorePercentage = totalQuestions > 0 ? Math.round((passedQuestions / totalQuestions) * 100) : 0;
     const passed = selectedResult.passed;
+    const questionDetails = getQuestionDetails(selectedResult);
 
     return (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 animate-fadeIn">
@@ -146,9 +191,9 @@ export default function ExamResultsViewer({ mode = 'active' }) {
             <div>
               <h2 className="text-2xl font-bold text-white mb-2">Szczegóły Egzaminu</h2>
               <p className="text-[#8fb5a0]">
-                <span className="font-medium text-white">{selectedResult.user_name || 'Nieznany'}</span>
+                <span className="font-medium text-white">{getUserName(selectedResult)}</span>
                 {' • '}
-                {selectedResult.exam_type}
+                {getExamType(selectedResult)}
               </p>
             </div>
             <button
@@ -234,11 +279,11 @@ export default function ExamResultsViewer({ mode = 'active' }) {
                 Lista Pytań
               </h3>
               <div className="space-y-3">
-                {selectedResult.answers?.map((answer, index) => (
+                {questionDetails.map((detail, index) => (
                   <div
                     key={index}
                     className={`glass-strong rounded-xl p-4 border transition-all duration-200 ${
-                      answer.correct
+                      detail.correct
                         ? 'border-green-500/30 bg-green-500/5'
                         : 'border-red-500/30 bg-red-500/5'
                     }`}
@@ -246,7 +291,7 @@ export default function ExamResultsViewer({ mode = 'active' }) {
                     <div className="flex items-start gap-3">
                       <div
                         className={`mt-0.5 w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-sm ${
-                          answer.correct
+                          detail.correct
                             ? 'bg-green-500/20 text-green-400'
                             : 'bg-red-500/20 text-red-400'
                         }`}
@@ -254,19 +299,19 @@ export default function ExamResultsViewer({ mode = 'active' }) {
                         {index + 1}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-white font-medium mb-2 leading-relaxed">{answer.question}</p>
+                        <p className="text-white font-medium mb-2 leading-relaxed">{detail.question}</p>
                         <div className="flex flex-wrap items-center gap-3">
                           <span
                             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium ${
-                              answer.correct
+                              detail.correct
                                 ? 'bg-green-500/20 text-green-400'
                                 : 'bg-red-500/20 text-red-400'
                             }`}
                           >
-                            {answer.correct ? '✓ Poprawna' : '✗ Błędna'}
+                            {detail.correct ? '✓ Poprawna' : '✗ Błędna'}
                           </span>
                           <span className="text-xs text-[#8fb5a0]">
-                            Odpowiedź: <span className="text-white font-medium">{answer.answer}</span>
+                            Odpowiedź: <span className="text-white font-medium">{detail.answer}</span>
                           </span>
                         </div>
                       </div>
@@ -287,7 +332,7 @@ export default function ExamResultsViewer({ mode = 'active' }) {
             </button>
             {isArchiveMode && (
               <button
-                onClick={() => handleDelete(selectedResult.id, selectedResult.user_name)}
+                onClick={() => handleDelete(selectedResult.exam_id, getUserName(selectedResult))}
                 className="px-5 py-2.5 bg-red-500/20 hover:bg-red-500 border border-red-500/50 hover:border-red-500 text-red-400 hover:text-white rounded-xl transition-all duration-200 font-medium flex items-center gap-2"
               >
                 <Trash2 className="w-4 h-4" />
@@ -426,10 +471,7 @@ export default function ExamResultsViewer({ mode = 'active' }) {
                 </thead>
                 <tbody className="divide-y divide-[#1a4d32]/30">
                   {filteredResults.map((result, index) => {
-                    const passedQuestions = result.answers?.filter((a) => a.correct).length || 0;
-                    const totalQuestions = result.answers?.length || 0;
-                    const scorePercentage =
-                      totalQuestions > 0 ? Math.round((passedQuestions / totalQuestions) * 100) : 0;
+                    const scorePercentage = result.percentage || 0;
 
                     return (
                       <tr
@@ -438,14 +480,14 @@ export default function ExamResultsViewer({ mode = 'active' }) {
                         style={{ animationDelay: `${index * 30}ms` }}
                       >
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-white font-medium">{result.user_name || 'Nieznany'}</span>
+                          <span className="text-white font-medium">{getUserName(result)}</span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-[#8fb5a0]">{result.exam_type}</span>
+                          <span className="text-[#8fb5a0]">{getExamType(result)}</span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="text-white font-medium">
-                            {passedQuestions}/{totalQuestions} ({scorePercentage}%)
+                            {result.score || 0}/{result.total_questions || 0} ({Math.round(scorePercentage)}%)
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -481,7 +523,7 @@ export default function ExamResultsViewer({ mode = 'active' }) {
                             </button>
                             {!isArchiveMode && (
                               <button
-                                onClick={() => handleArchive(result.id, result.user_name)}
+                                onClick={() => handleArchive(result.exam_id, getUserName(result))}
                                 className="p-2.5 bg-[#1a4d32]/20 hover:bg-[#1a4d32] border border-[#1a4d32]/50 hover:border-[#22693f] rounded-lg transition-all duration-200 group"
                                 title="Archiwizuj"
                               >

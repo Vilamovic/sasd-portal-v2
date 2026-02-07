@@ -49,6 +49,8 @@
 * **Timer Countdown**: RPC function `get_active_penalties()` oblicza `remaining_seconds` server-side. Navbar korzysta z tego do countdown timerów.
 * **Button Positioning**: WSZYSTKIE przyciski "Powrót" ZAWSZE WEWNĄTRZ kontenera `max-w-7xl mx-auto px-6 py-8` jako pierwszy element z `mb-6` - jednolity standard dla obecnych i przyszłych stron (wzorzec z `/exams`, `/materials`, `/personnel`, `/divisions`, `/tokens`).
 * **Shared Components**: ZAWSZE używaj komponentów z `/src/components/shared/` dla BackButton, LoadingState, AccessDenied zamiast tworzyć nowe kopie. Importuj: `@/src/components/shared/ComponentName`.
+* **PostgreSQL ENUM Cast**: RPC functions comparing ENUM with TEXT require explicit `::text` cast. Example: `WHERE division::text = p_division` (fixes "operator does not exist: division_type = text").
+* **Next.js Routing vs State**: State-based routing with conditional components causes React Invariants violations. Use dedicated Next.js routes instead (`router.push('/path')` + separate page.jsx files).
 
 ---
 
@@ -82,9 +84,10 @@ Zmienione pliki: [ścieżki]
   - Migration 010: Pościgowe permission, is_commander column, RLS policies (cs/hcs/dev hierarchy)
   - Migration 011: Fix materials + division_materials RLS policies for cs/hcs/dev access
   - Migration 012: Fix exam_access_tokens RLS policies for token generation by cs/hcs/dev
+- ✅ **RPC Functions**: `get_active_penalties(p_user_id)`, `get_division_materials(p_division)` with ENUM::TEXT casting
+- ✅ **RLS Policies**: All policies updated for cs/hcs/dev hierarchy (division_materials, exam_results, exam_access_tokens)
 - Project ref: `jecootmlzlwxubvumxrk`
 - Tables: `user_penalties`, `user_notes`, `materials`, `division_materials`, `exam_access_tokens`
-- RPC: `get_active_penalties(p_user_id)` - zwraca aktywne kary z `remaining_seconds`
 
 **Status:**
 - ✅ System Kartoteki w pełni zaimplementowany
@@ -133,10 +136,53 @@ Zmienione pliki: [ścieżki]
 - Git push: ✅ 26 commitów na origin/master
 - Bundle size: **-4% reduction** (Code Cleanup)
 
+### 🔥 Production Bugfixes (2026-02-08)
+
+**Status:** ✅ COMPLETED - All 6 critical bugs resolved
+
+**6 Critical Bugs Fixed:**
+1. ✅ **Constraint Violation** (users_role_check) - Blocked all logins
+   - Fix: useAuthSession.ts preserves existing user roles (commit: f0bcb5a)
+2. ✅ **HCS/CS Permission Limitations** - CS/HCS couldn't edit badges/divisions/permissions
+   - Fix: Changed isDev → isCS in 7+ files (BadgeEditor, DivisionEditor, PermissionsEditor, etc.)
+3. ✅ **Division Materials Not Loading** - RPC function missing/broken
+   - Fix: Created get_division_materials() RPC with ENUM::TEXT casting
+4. ✅ **Division Materials Empty State** - Database had 15 records but UI showed "Brak materiałów"
+   - Fix: Added 15 test materials + fixed RPC access control
+5. ✅ **MaterialForm Complexity** - 5 fields too complex
+   - Fix: Simplified to 2 fields (Title + Description), made file_url/file_type nullable
+6. ✅ **Exam Stats/Archive Crashes** - React Invariants violations
+   - Fix: Replaced state-based routing with Next.js routes (/exams/stats, /exams/archive)
+
+**Key Learnings:**
+- PostgreSQL ENUM comparisons require explicit `::text` cast
+- State-based routing with conditional components = Invariants violations
+- Next.js routing with dedicated pages = stable hook order
+- RLS policies must include full cs/hcs/dev hierarchy
+
+**Files Modified:** 15+ files
+**SQL Scripts:** 4 (fix_rls_policies.sql, make_file_url_optional.sql, exam_results_policies.sql, check_rpc_function.sql)
+**Commits:** 2 (f0bcb5a + final commit)
+**Build:** ✅ SUCCESS
+**Production Impact:** Critical - blocked logins, missing data, permission errors all resolved
+
 ---
 
-Last Updated: 2026-02-07 - 🎉 COMPLETE REFACTORING + CLEANUP SUCCESS! (14/14 etapów, 100%) 🚀
+Last Updated: 2026-02-08 - 🔥 PRODUCTION BUGFIXES COMPLETE! (6/6 critical bugs resolved) 🚀
+
+**Previous Session (2026-02-07):**
 - Refactoring: 13/13 etapów ✅
 - Code Cleanup: -1,132L martwy kod + shared components ✅
 - Bundle: -4% size reduction ✅
-- Commit: efd1cb0 (pushed to origin/master) ✅
+- Commit: efd1cb0 ✅
+
+**Current Session (2026-02-08):**
+- Production Bugfixes: 6/6 critical bugs ✅
+- Constraint violation fixed (commit: f0bcb5a) ✅
+- HCS/CS permissions equalized to Dev ✅
+- Division materials + RPC function with ENUM cast ✅
+- MaterialForm simplified (5 → 2 fields) ✅
+- Exam stats/archive Next.js routing ✅
+- RLS policies updated for cs/hcs/dev hierarchy ✅
+- Build: ✅ SUCCESS
+- Git push: ✅ Pushed to origin/master
