@@ -47,6 +47,7 @@
 * **Vercel**: Dummy commit triggeruje deploy (`git commit --allow-empty`).
 * **Navbar Sync**: Po operacjach CRUD wywołaj `refreshUserData()` z AuthContext dla natychmiastowej aktualizacji (zamiast czekać 30s na polling).
 * **Timer Countdown**: RPC function `get_active_penalties()` oblicza `remaining_seconds` server-side. Navbar korzysta z tego do countdown timerów.
+* **Button Positioning**: WSZYSTKIE przyciski "Powrót" ZAWSZE w pozycji `absolute top-8 left-8` - jednolity standard dla obecnych i przyszłych stron (wzorzec z `/exams`, `/materials`, `/personnel`, `/divisions`).
 
 ---
 
@@ -74,11 +75,14 @@ Zmienione pliki: [ścieżki]
 - Captain III auto-Commander (automatyczne nadanie is_commander przy awansie)
 
 **Database:**
-- ⚠️ **PENDING MIGRATION**: `010_refactor_v3_fixes.sql` - **MUST RUN IN SUPABASE!**
-  - Adds "Pościgowe" to permission_type ENUM
-  - Adds is_commander column to users table
-  - Updates RLS policies for new role hierarchy (cs/hcs instead of admin)
-- Completed Migrations: `007`, `008`, `009` (executed, files removed from repo)
+- ✅ **Active Migrations**: `007`, `008`, `009`, `010` (all executed in Supabase)
+  - Migration 010 features:
+    - Added "Pościgowe" to permission_type ENUM
+    - Added is_commander column to users table
+    - Updated RLS policies for new role hierarchy (cs/hcs instead of admin)
+    - CS can DELETE only plus/minus penalties
+    - CS can UPDATE only trainee/deputy users
+    - HCS/Dev can DELETE all penalties and UPDATE all users
 - Project ref: `jecootmlzlwxubvumxrk`
 - Tables: `user_penalties`, `user_notes`
 - RPC: `get_active_penalties(p_user_id)` - zwraca aktywne kary z `remaining_seconds`
@@ -88,8 +92,8 @@ Zmienione pliki: [ścieżki]
 - ✅ Navbar z dywizjami, uprawnieniami, balance, timer (lewa strona)
 - ✅ User profile z historiami kar/nagród/notatek
 - ✅ Checkboxy do selekcji pojedynczych itemów (DEV)
-- ✅ RLS policies dla DEV/Admin (DELETE, UPDATE)
-- ✅ Wszystkie migracje (007-009) wykonane i aktywne w Supabase
+- ✅ RLS policies dla nowej hierarchii (CS/HCS/Dev) - migration 010 active
+- ✅ Wszystkie migracje (007-010) wykonane i aktywne w Supabase
 - ✅ Nowa hierarchia ról (Trainee/Deputy/CS/HCS/Dev) z logiką uprawnień
 - ✅ Captain III auto-Commander
 - ✅ Archiwum egzaminów z podglądem
@@ -97,6 +101,7 @@ Zmienione pliki: [ścieżki]
 - ✅ Dywizje jako tagi (single-select)
 - ✅ Email privacy + User Identity (@username)
 - ✅ Badge → "Stopień" (UI text)
+- ✅ UI standardization complete: button positioning, naming conventions, user display order
 
 **Recent Changes (2026-02-07):**
 - System refactor v3: Privacy (email cleanup), UI (navigation top-left, user identity format)
@@ -105,7 +110,14 @@ Zmienione pliki: [ścieżki]
 - Role hierarchy: Trainee → Deputy → CS → HCS → Dev with permission gating
 - CS restrictions: can manage only Trainee/Deputy, can zero only +/-
 - Captain III + Division → auto-Commander flag
-- **Database**: Created migration 010 for Refactor v3 (Pościgowe permission, is_commander column, RLS policies update)
+- **Database**: Migration 010 executed (Pościgowe permission, is_commander column, RLS policies update)
+- **UI Fixes Post-Refactor v3**:
+  - Naming: HCS = "High Command Staff", CS = "Command Staff" (changed from "Coordinator")
+  - User display order: Nick MTA → @username (kartoteka, admin panel)
+  - Button standardization: ALL "Powrót" buttons at `absolute top-8 left-8` position
+  - Removed duplicate "Sortuj" section from personnel page
+  - CS button text: "Wyzeruj +/-" instead of "Wyzeruj wszystko"
+  - Badge label changed to "Stopień" in admin panel
 ---
 
 Last Updated: 2026-02-07 - System Refactor v3 Complete
