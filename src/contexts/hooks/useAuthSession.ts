@@ -201,9 +201,12 @@ export function useAuthSession(callbacks: AuthSessionCallbacks) {
               last_seen: new Date().toISOString(),
             };
 
-            // Only set role for NEW users (don't overwrite existing)
+            // Set role: trainee for new users, preserve for existing
             if (!existingUser) {
               userData.role = 'trainee';
+            } else {
+              // Preserve existing role
+              userData.role = existingUser.role;
             }
 
             return upsertUser(userData);
