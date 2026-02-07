@@ -1,6 +1,9 @@
+import { withSentryConfig } from '@sentry/nextjs';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+
   images: {
     remotePatterns: [
       {
@@ -27,4 +30,16 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+// Wrap config with Sentry
+export default withSentryConfig(nextConfig, {
+  // Sentry Webpack Plugin Options
+  silent: true, // Suppresses source map uploading logs
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+
+  // Upload source maps for error stack traces
+  widenClientFileUpload: true,
+
+  // Hide source maps from browser devtools
+  hideSourceMaps: true,
+});
