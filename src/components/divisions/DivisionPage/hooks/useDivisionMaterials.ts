@@ -99,8 +99,8 @@ export function useDivisionMaterials({
 
   const handleAddMaterial = async () => {
     if (submittingRef.current) return;
-    if (!formTitle.trim() || !formFileUrl.trim()) {
-      alert('Tytuł i URL pliku są wymagane.');
+    if (!formTitle.trim()) {
+      alert('Tytuł jest wymagany.');
       return;
     }
 
@@ -110,8 +110,8 @@ export function useDivisionMaterials({
         division: divisionId,
         title: formTitle.trim(),
         description: formDescription.trim() || null,
-        file_url: formFileUrl.trim(),
-        file_type: formFileType,
+        file_url: formFileUrl.trim() || null,
+        file_type: formFileType || null,
         thumbnail_url: formThumbnailUrl.trim() || null,
         order_index: materials.length,
       };
@@ -133,8 +133,8 @@ export function useDivisionMaterials({
 
   const handleUpdateMaterial = async () => {
     if (submittingRef.current || !selectedMaterial) return;
-    if (!formTitle.trim() || !formFileUrl.trim()) {
-      alert('Tytuł i URL pliku są wymagane.');
+    if (!formTitle.trim()) {
+      alert('Tytuł jest wymagany.');
       return;
     }
 
@@ -143,8 +143,8 @@ export function useDivisionMaterials({
       const materialData = {
         title: formTitle.trim(),
         description: formDescription.trim() || null,
-        file_url: formFileUrl.trim(),
-        file_type: formFileType,
+        file_url: formFileUrl.trim() || null,
+        file_type: formFileType || null,
         thumbnail_url: formThumbnailUrl.trim() || null,
       };
 

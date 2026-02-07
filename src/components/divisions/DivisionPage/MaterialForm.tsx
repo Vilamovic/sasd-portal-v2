@@ -17,9 +17,10 @@ interface MaterialFormProps {
 }
 
 /**
- * MaterialForm - Add/Edit material form (uproszczona wersja jak w Materials)
- * - Title + File URL (required)
- * - Reszta pól można dodać przez edit później
+ * MaterialForm - Add/Edit material form (minimal version)
+ * - Title (required)
+ * - Description (wyświetlany na karcie)
+ * - URL opcjonalny (można dodać przez edit później)
  */
 export default function MaterialForm({
   isEditing,
@@ -52,13 +53,13 @@ export default function MaterialForm({
         className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-[#c9a227] transition-colors mb-4"
       />
 
-      {/* File URL */}
-      <input
-        type="url"
-        value={formFileUrl}
-        onChange={(e) => onFileUrlChange(e.target.value)}
-        placeholder="URL pliku (Google Drive, Dropbox...)..."
-        className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-[#c9a227] transition-colors mb-4"
+      {/* Description */}
+      <textarea
+        value={formDescription}
+        onChange={(e) => onDescriptionChange(e.target.value)}
+        placeholder="Opis materiału..."
+        rows={3}
+        className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-[#c9a227] transition-colors resize-none mb-4"
       />
 
       {/* Action Buttons */}
