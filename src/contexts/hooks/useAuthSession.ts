@@ -138,6 +138,7 @@ export function useAuthSession(callbacks: AuthSessionCallbacks) {
               email:
                 currentSession.user.email || currentSession.user.user_metadata?.email || null,
               avatar_url: currentSession.user.user_metadata?.avatar_url || null,
+              role: 'trainee', // Default role for new users
               last_seen: new Date().toISOString(),
             };
 
@@ -194,6 +195,7 @@ export function useAuthSession(callbacks: AuthSessionCallbacks) {
             'Unknown',
           email: newSession.user.email || newSession.user.user_metadata?.email || null,
           avatar_url: newSession.user.user_metadata?.avatar_url || null,
+          role: 'trainee', // Default role for new users
           last_seen: new Date().toISOString(),
         };
 
