@@ -4,10 +4,10 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
 import Navbar from '@/src/components/dashboard/Navbar';
-import TokenManagement from '@/src/components/admin/TokenManagement';
+import TokenManagementPage from '@/src/components/admin/TokenManagement/TokenManagementPage';
 
 export default function TokensPage() {
-  const { user, loading, isAdmin } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   // Redirect to login if not authenticated
@@ -37,9 +37,7 @@ export default function TokensPage() {
   return (
     <>
       <Navbar />
-      {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-      {/* @ts-ignore JSDoc types not recognized by TSC */}
-      <TokenManagement onBack={() => router.push('/dashboard')} />
+      <TokenManagementPage onBack={() => router.push('/dashboard')} />
     </>
   );
 }

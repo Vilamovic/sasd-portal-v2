@@ -3,18 +3,17 @@
 import { useState } from 'react';
 import ExamDashboard from './ExamDashboard';
 import ExamTaker from './ExamTaker';
-import ExamStatistics from './ExamStatistics';
+import ExamResultsViewer from './ExamResultsViewer';
 import ExamQuestions from './ExamQuestions';
-import ExamArchive from './ExamArchive';
 
 /**
  * Exam - Router dla systemu egzaminacyjnego
  * Zarządza nawigacją między:
  * - ExamDashboard (wybór sekcji)
  * - ExamTaker (zdawanie egzaminu)
- * - ExamStatistics (wyniki)
+ * - ExamResultsViewer mode="active" (wyniki aktywne)
  * - ExamQuestions (zarządzanie pytaniami)
- * - ExamArchive (archiwum)
+ * - ExamResultsViewer mode="archived" (archiwum)
  */
 export default function Exam({ onBack }) {
   const [activeView, setActiveView] = useState('dashboard');
@@ -33,13 +32,13 @@ export default function Exam({ onBack }) {
       return <ExamTaker onBack={handleBackToDashboard} />;
 
     case 'statistics':
-      return <ExamStatistics onBack={handleBackToDashboard} />;
+      return <ExamResultsViewer mode="active" />;
 
     case 'questions':
       return <ExamQuestions onBack={handleBackToDashboard} />;
 
     case 'archive':
-      return <ExamArchive onBack={handleBackToDashboard} />;
+      return <ExamResultsViewer mode="archived" />;
 
     case 'dashboard':
     default:
