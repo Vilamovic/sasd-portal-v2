@@ -273,7 +273,7 @@ export default function AdminPanel({ onBack }) {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8fb5a0]" />
             <input
               type="text"
-              placeholder={isDev ? "Szukaj po nicku, username, badge lub email..." : "Szukaj po nicku, username lub badge..."}
+              placeholder={isDev ? "Szukaj (nazwa, nick MTA, stopień, email)..." : "Szukaj (nazwa, nick MTA, stopień)..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-12 pr-4 py-3 bg-[#051a0f]/80 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-[#c9a227] transition-colors"
@@ -358,9 +358,17 @@ export default function AdminPanel({ onBack }) {
                       <tr key={u.id} className="border-b border-[#1a4d32]/50 hover:bg-[#051a0f]/30 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1a4d32] to-[#22693f] flex items-center justify-center text-white font-bold">
-                              {((u.mta_nick || u.username) || '?')[0].toUpperCase()}
-                            </div>
+                            {u.avatar_url ? (
+                              <img
+                                src={u.avatar_url}
+                                alt={u.mta_nick || u.username || 'User'}
+                                className="w-10 h-10 rounded-full object-cover shadow-lg border-2 border-[#c9a227]/30"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1a4d32] to-[#22693f] flex items-center justify-center text-white font-bold shadow-lg border-2 border-[#c9a227]/30">
+                                {((u.mta_nick || u.username) || '?')[0].toUpperCase()}
+                              </div>
+                            )}
                             <div>
                               <div className="text-white font-medium">{u.mta_nick || u.username || 'N/A'}</div>
                               <div className="text-[#8fb5a0] text-xs">@{u.username || 'N/A'}</div>

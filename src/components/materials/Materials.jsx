@@ -160,7 +160,6 @@ export default function Materials({ onBack }) {
       await loadMaterials();
       setShowAddForm(false);
       setNewTitle('');
-      setShowManageDropdown(false);
       alert('Materiał dodany.');
     } catch (error) {
       console.error('Error adding material:', error);
