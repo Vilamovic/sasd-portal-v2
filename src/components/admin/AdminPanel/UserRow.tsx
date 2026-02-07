@@ -37,12 +37,19 @@ export default function UserRow({
   const isDevUser = user.role === 'dev';
 
   const getRoleBadgeStyle = (roleValue: string) => {
-    if (roleValue === 'dev') {
-      return 'bg-red-500/20 text-red-400 border-red-500/30';
-    } else if (roleValue === 'admin') {
-      return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
-    } else {
-      return 'bg-[#14b8a6]/20 text-[#14b8a6] border-[#14b8a6]/30';
+    switch (roleValue) {
+      case 'dev':
+        return 'bg-pink-500/20 text-pink-400 border-pink-500/30';
+      case 'hcs':
+        return 'bg-red-900/30 text-red-400 border-red-900/40';
+      case 'cs':
+        return 'bg-red-500/20 text-red-400 border-red-500/30';
+      case 'deputy':
+        return 'bg-teal-500/20 text-teal-400 border-teal-500/30';
+      case 'trainee':
+        return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+      default:
+        return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
     }
   };
 

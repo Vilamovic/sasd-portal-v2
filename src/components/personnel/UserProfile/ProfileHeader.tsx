@@ -37,11 +37,11 @@ export default function ProfileHeader({ user, currentUser, userId, isHCS, isCS, 
               <p className="text-[#8fb5a0] text-sm">@{user.username}</p>
             </div>
             <span className={`px-3 py-1 rounded text-xs font-bold ${
-              user.role === 'dev' ? 'bg-purple-600' :
-              user.role === 'hcs' ? 'bg-red-600' :
-              user.role === 'cs' ? 'bg-[#c9a227]' :
-              user.role === 'deputy' ? 'bg-blue-600' :
-              'bg-green-600'
+              user.role === 'dev' ? 'bg-pink-600' :
+              user.role === 'hcs' ? 'bg-red-900' :
+              user.role === 'cs' ? 'bg-red-600' :
+              user.role === 'deputy' ? 'bg-teal-600' :
+              'bg-gray-600'
             } text-white`}>
               {user.role?.toUpperCase()}
             </span>
