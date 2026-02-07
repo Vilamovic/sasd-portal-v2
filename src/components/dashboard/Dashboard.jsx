@@ -60,7 +60,7 @@ export default function Dashboard() {
     },
     {
       id: 'personnel',
-      title: 'Personnel',
+      title: 'Kartoteka',
       description: 'Zarządzaj personelem, nadawaj kary i uprawnienia. Pełny dostęp do danych wszystkich użytkowników.',
       icon: UserCog,
       iconColor: 'from-[#c9a227] to-[#e6b830]',

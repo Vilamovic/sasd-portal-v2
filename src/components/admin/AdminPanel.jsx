@@ -282,8 +282,8 @@ export default function AdminPanel({ onBack }) {
         </div>
 
         {/* Users Table */}
-        <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 shadow-xl">
-          <div className="overflow-x-auto overflow-y-visible">
+        <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 shadow-xl overflow-hidden">
+          <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-[#051a0f]/50 border-b border-[#1a4d32]/50">
                 <tr>
@@ -410,7 +410,7 @@ export default function AdminPanel({ onBack }) {
                               </button>
 
                               {showActionDropdown === u.id && !isCurrentUser && !isDevUser && (
-                                <div className="absolute right-0 mt-2 w-52 glass-strong rounded-xl shadow-2xl border border-[#1a4d32] py-2 z-50 max-h-80 overflow-y-auto">
+                                <div className="absolute right-0 mt-2 w-52 glass-strong rounded-xl shadow-2xl border border-[#1a4d32] py-2 z-[100]">
                                   {/* Role change options based on hierarchy */}
                                   <div className="px-3 py-1 text-xs text-[#8fb5a0] font-semibold">Zmień rolę:</div>
 

@@ -390,6 +390,15 @@ export default function ExamQuestions({ onBack }) {
         </div>
 
         <div className="relative z-10 max-w-4xl mx-auto px-6 py-12">
+          {/* Back Button */}
+          <button
+            onClick={onBack}
+            className="mb-6 flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200"
+          >
+            <ChevronLeft className="w-5 h-5" />
+            <span className="text-sm font-medium">Powrót do Egzaminów</span>
+          </button>
+
           <div className="mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#c9a227]/10 border border-[#c9a227]/20 text-[#c9a227] text-sm font-medium mb-6">
               <Settings className="w-4 h-4" />
@@ -420,14 +429,6 @@ export default function ExamQuestions({ onBack }) {
               </button>
             ))}
           </div>
-
-          <button
-            onClick={onBack}
-            className="mt-8 flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200"
-          >
-            <ChevronLeft className="w-5 h-5" />
-            <span className="text-sm font-medium">Powrót</span>
-          </button>
         </div>
       </div>
     );
