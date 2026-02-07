@@ -8,7 +8,7 @@
 ## 📊 AUDIT WYNIKÓW (Line Count Analysis)
 
 ### 🔴 KRYTYCZNE (>1000 linii) - PRIORYTET 1
-- [ ] `src/utils/supabaseHelpers.js` - **1046 linii**
+- [x] `src/utils/supabaseHelpers.js` - **1046 linii** ✅ **DONE** (2026-02-07)
 - [ ] `app/personnel/[username]/page.tsx` - **1868 linii** (NAJGORSZY!)
 - [ ] `app/personnel/page.tsx` - **1124 linie**
 
@@ -40,7 +40,7 @@
 ## 🎯 PLAN REFAKTORYZACJI - ETAP 1 (Top 10)
 
 ### **1️⃣ supabaseHelpers.js (1046 linii)** - FOUNDATION
-**Status:** ❌ TODO
+**Status:** ✅ DONE (2026-02-07)
 **Priorytet:** 🔴 KRYTYCZNY (używany wszędzie)
 
 **Problem:**
@@ -375,12 +375,12 @@ src/
 
 ## 🚀 PLAN WYKONANIA
 
-### **ETAP 1.1: Foundation (supabaseHelpers)**
-- [ ] Stwórz folder `src/lib/db/`
-- [ ] Podziel `supabaseHelpers.js` na 7 plików
-- [ ] Zaktualizuj wszystkie importy w całym projekcie
-- [ ] Test build (`npm run build`)
-- [ ] Commit: `refactor: Podział supabaseHelpers na src/lib/db/*`
+### **ETAP 1.1: Foundation (supabaseHelpers)** ✅ DONE (2026-02-07)
+- [x] Stwórz folder `src/lib/db/`
+- [x] Podziel `supabaseHelpers.js` na 7 plików
+- [x] Zaktualizuj wszystkie importy w całym projekcie (12 plików)
+- [x] Test build (`npm run build`)
+- [x] Commit: `refactor: Podział supabaseHelpers na src/lib/db/*` (commit: ec3a458)
 
 ### **ETAP 1.2: Personnel - User Profile**
 - [ ] Stwórz folder `src/components/personnel/UserProfile/`
@@ -476,9 +476,12 @@ src/
 **Data rozpoczęcia:** 2026-02-07
 **Data zakończenia:** _TBD_
 
-**Ukończone etapy:** 0/10
-**Progress:** ░░░░░░░░░░ 0%
+**Ukończone etapy:** 1/10
+**Progress:** █░░░░░░░░░ 10%
+
+### Changelog:
+- **2026-02-07:** ✅ ETAP 1.1 - supabaseHelpers.js → src/lib/db/* (7 plików, 12 importów zaktualizowanych)
 
 ---
 
-**Ostatnia aktualizacja:** 2026-02-07 (utworzenie planu)
+**Ostatnia aktualizacja:** 2026-02-07 (ETAP 1.1 ukończony)

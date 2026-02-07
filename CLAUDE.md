@@ -117,6 +117,14 @@ Zmienione pliki: [ścieżki]
   - User display: Nick MTA → @username format
   - Naming: HCS = "High Command Staff", CS = "Command Staff"
   - CS button text: "Wyzeruj +/-" instead of "Wyzeruj wszystko"
+
+**Refactoring Phase 1 (2026-02-07):**
+- ✅ **ETAP 1.1 COMPLETE**: supabaseHelpers.js → src/lib/db/* (commit: ec3a458)
+  - 1046-line monolith split into 7 domain-specific files
+  - users.ts (6.3K), exams.ts (5.2K), materials.ts (1.4K), tokens.ts (4.8K), penalties.ts (3.7K), notes.ts (1.9K), divisions.ts (2.0K)
+  - 12 import statements updated across codebase
+  - TypeScript signatures aligned with original JS flexibility (string | null, number | string)
+  - See task/REFACTORING_PLAN.md for full roadmap (9 more stages remaining)
 ---
 
-Last Updated: 2026-02-07 - Migrations 011/012 + AdminPanel Dropdown Fix
+Last Updated: 2026-02-07 - Etap 1.1 Refaktoryzacji ukończony
