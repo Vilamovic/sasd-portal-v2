@@ -75,16 +75,12 @@ Zmienione pliki: [ścieżki]
 - Captain III auto-Commander (automatyczne nadanie is_commander przy awansie)
 
 **Database:**
-- ✅ **Active Migrations**: `007`, `008`, `009`, `010` (all executed in Supabase)
-  - Migration 010 features:
-    - Added "Pościgowe" to permission_type ENUM
-    - Added is_commander column to users table
-    - Updated RLS policies for new role hierarchy (cs/hcs instead of admin)
-    - CS can DELETE only plus/minus penalties
-    - CS can UPDATE only trainee/deputy users
-    - HCS/Dev can DELETE all penalties and UPDATE all users
+- ✅ **Active Migrations**: `007`, `008`, `009`, `010`, `011`, `012` (all executed in Supabase)
+  - Migration 010: Pościgowe permission, is_commander column, RLS policies (cs/hcs/dev hierarchy)
+  - Migration 011: Fix materials + division_materials RLS policies for cs/hcs/dev access
+  - Migration 012: Fix exam_access_tokens RLS policies for token generation by cs/hcs/dev
 - Project ref: `jecootmlzlwxubvumxrk`
-- Tables: `user_penalties`, `user_notes`
+- Tables: `user_penalties`, `user_notes`, `materials`, `division_materials`, `exam_access_tokens`
 - RPC: `get_active_penalties(p_user_id)` - zwraca aktywne kary z `remaining_seconds`
 
 **Status:**
@@ -110,14 +106,17 @@ Zmienione pliki: [ścieżki]
 - Role hierarchy: Trainee → Deputy → CS → HCS → Dev with permission gating
 - CS restrictions: can manage only Trainee/Deputy, can zero only +/-
 - Captain III + Division → auto-Commander flag
-- **Database**: Migration 010 executed (Pościgowe permission, is_commander column, RLS policies update)
-- **UI Fixes Post-Refactor v3**:
-  - Naming: HCS = "High Command Staff", CS = "Command Staff" (changed from "Coordinator")
-  - User display order: Nick MTA → @username (kartoteka, admin panel)
-  - Button standardization: ALL "Powrót" buttons at `absolute top-8 left-8` position
-  - Removed duplicate "Sortuj" section from personnel page
+- **Database**: Migrations 010, 011, 012 executed
+  - 010: Pościgowe permission, is_commander, RLS for penalties/users
+  - 011: RLS for materials/division_materials (CS/HCS access to divisions)
+  - 012: RLS for exam_access_tokens (CS/HCS can generate tokens)
+- **UI Fixes**:
+  - Button standardization: "Powrót" buttons inside container (see MEMORY.md for pattern)
+  - AdminPanel dropdown fix: CS/HCS see role management options (was empty before)
+  - Role hierarchy in dropdown: CS manages trainee/deputy, HCS manages all except dev
+  - User display: Nick MTA → @username format
+  - Naming: HCS = "High Command Staff", CS = "Command Staff"
   - CS button text: "Wyzeruj +/-" instead of "Wyzeruj wszystko"
-  - Badge label changed to "Stopień" in admin panel
 ---
 
-Last Updated: 2026-02-07 - System Refactor v3 Complete
+Last Updated: 2026-02-07 - Migrations 011/012 + AdminPanel Dropdown Fix
