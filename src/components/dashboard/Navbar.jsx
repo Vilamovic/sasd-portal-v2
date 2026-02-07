@@ -196,6 +196,8 @@ export default function Navbar() {
                 <img
                   src={avatarUrl}
                   alt={displayName}
+                  width={36}
+                  height={36}
                   className="w-9 h-9 rounded-full shadow-lg group-hover:shadow-[#c9a227]/30 transition-shadow object-cover border-2 border-[#c9a227]/30"
                 />
               ) : (
@@ -233,6 +235,8 @@ export default function Navbar() {
                     <img
                       src={avatarUrl}
                       alt={displayName}
+                      width={56}
+                      height={56}
                       className="w-14 h-14 rounded-full shadow-lg object-cover border-2 border-[#c9a227]/30"
                     />
                   ) : (

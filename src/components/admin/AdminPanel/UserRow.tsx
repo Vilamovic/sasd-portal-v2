@@ -55,6 +55,8 @@ export default function UserRow({
             <img
               src={user.avatar_url}
               alt={user.mta_nick || user.username || 'User'}
+              width={40}
+              height={40}
               className="w-10 h-10 rounded-full object-cover shadow-lg border-2 border-[#c9a227]/30"
             />
           ) : (

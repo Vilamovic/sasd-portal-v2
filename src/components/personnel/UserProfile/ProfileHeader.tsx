@@ -25,6 +25,8 @@ export default function ProfileHeader({ user, currentUser, userId, isHCS, isCS, 
           <img
             src={user.avatar_url}
             alt={user.username}
+            width={96}
+            height={96}
             className="w-24 h-24 rounded-2xl border-4 border-[#1a4d32] shadow-lg"
           />
         )}

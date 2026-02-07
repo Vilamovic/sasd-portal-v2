@@ -55,6 +55,8 @@ export default function TableRow({
               <img
                 src={user.avatar_url}
                 alt={user.username}
+                width={40}
+                height={40}
                 className="w-10 h-10 rounded-full border-2 border-[#1a4d32]"
               />
             )}
