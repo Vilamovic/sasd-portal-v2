@@ -39,6 +39,7 @@ export function useAuthSession(callbacks: AuthSessionCallbacks) {
   const userRef = useRef<any>(null);
   const loginTimestampRef = useRef<number | null>(null);
   const hasNotifiedLogin = useRef(false);
+  const isInitializing = useRef(false);
 
   const { onRoleChange, onUserDataLoaded, onStartRolePolling, onFetchPenalties } = callbacks;
 

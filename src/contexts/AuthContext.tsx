@@ -36,6 +36,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [minusCount, setMinusCount] = useState(0);
   const [isCommander, setIsCommander] = useState(false);
 
+  // ==================== CALLBACKS (stable references) ====================
+
+  const handleRoleChange = useCallback((newRole: string) => {
+    setRole(newRole);
+  }, []);
+
+  const handleUserDataLoaded = useCallback((userData: any) => {
+    setDivision(userData.division || null);
+    setPermissions(userData.permissions || []);
+    setPlusCount(userData.plus_count || 0);
+    setMinusCount(userData.minus_count || 0);
+    setIsCommander(userData.is_commander || false);
+  }, []);
+
+  const handleStartRolePolling = useCallback((userId: string) => {
+    // Will be handled by useForceLogout
+  }, []);
+
+  const handleFetchPenalties = useCallback((userId: string) => {
+    // Will be handled by usePenalties
+  }, []);
+
   // ==================== CUSTOM HOOKS ====================
 
   /**
@@ -53,20 +75,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     userRef,
     loginTimestampRef,
   } = useAuthSession({
-    onRoleChange: (newRole) => setRole(newRole),
-    onUserDataLoaded: (userData) => {
-      setDivision(userData.division || null);
-      setPermissions(userData.permissions || []);
-      setPlusCount(userData.plus_count || 0);
-      setMinusCount(userData.minus_count || 0);
-      setIsCommander(userData.is_commander || false);
-    },
-    onStartRolePolling: (userId) => {
-      // Will be handled by useForceLogout
-    },
-    onFetchPenalties: (userId) => {
-      // Will be handled by usePenalties
-    },
+    onRoleChange: handleRoleChange,
+    onUserDataLoaded: handleUserDataLoaded,
+    onStartRolePolling: handleStartRolePolling,
+    onFetchPenalties: handleFetchPenalties,
   });
 
   /**
