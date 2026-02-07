@@ -229,15 +229,15 @@ export default function ExamStatistics({ onBack }) {
     );
   };
 
-  // Access control - user nie ma dostępu
-  if (role === 'user') {
+  // Access control - trainee/deputy nie mają dostępu
+  if (role === 'trainee' || role === 'deputy') {
     return (
       <div className="min-h-screen bg-[#020a06] flex items-center justify-center p-8">
         <div className="text-center">
           <XCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-2">Brak dostępu</h2>
           <p className="text-[#8fb5a0] mb-6">
-            Tylko administratorzy mogą przeglądać statystyki egzaminów.
+            Tylko CS i wyżej mogą przeglądać statystyki egzaminów.
           </p>
           <button
             onClick={onBack}

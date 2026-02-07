@@ -231,7 +231,7 @@ export default function ExamArchive({ onBack }) {
           <X className="w-16 h-16 text-red-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-2">Brak dostępu</h2>
           <p className="text-[#8fb5a0] mb-6">
-            Tylko administratorzy mogą przeglądać archiwum egzaminów.
+            Tylko CS i wyżej mogą przeglądać archiwum egzaminów.
           </p>
           <button
             onClick={onBack}

@@ -35,7 +35,7 @@ import {
 
 /**
  * Kartoteka - Zarządzanie personelem SASD
- * Tylko dla admin/dev
+ * Tylko dla CS/HCS/Dev
  */
 export default function KartotekaPage() {
   const { user, loading, isAdmin, role } = useAuth();

@@ -168,7 +168,7 @@ export default function ExamTaker({ onBack }) {
     setShowTokenModal(true);
   };
 
-  // Weryfikuj token i rozpocznij egzamin (tylko dla users)
+  // Weryfikuj token i rozpocznij egzamin (tylko dla trainee/deputy)
   const verifyTokenAndStart = async () => {
     if (!tokenInput.trim()) {
       setTokenError('Proszę wprowadzić token dostępu.');

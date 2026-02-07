@@ -46,7 +46,7 @@ import {
 
 /**
  * User Profile Page - Pełny profil użytkownika
- * Tylko dla admin/dev
+ * Tylko dla CS/HCS/Dev
  */
 export default function UserProfilePage() {
   const { user: currentUser, loading, isAdmin, isDev, isHCS, isCS, role, refreshUserData } = useAuth();
@@ -829,8 +829,14 @@ export default function UserProfilePage() {
                   <h2 className="text-3xl font-bold text-white">{user.mta_nick || user.username}</h2>
                   <p className="text-[#8fb5a0] text-sm">@{user.username}</p>
                 </div>
-                <span className={`px-3 py-1 rounded text-xs font-bold ${user.role === 'dev' ? 'bg-purple-600' : user.role === 'admin' ? 'bg-red-600' : 'bg-blue-600'} text-white`}>
-                  {user.role}
+                <span className={`px-3 py-1 rounded text-xs font-bold ${
+                  user.role === 'dev' ? 'bg-purple-600' :
+                  user.role === 'hcs' ? 'bg-red-600' :
+                  user.role === 'cs' ? 'bg-[#c9a227]' :
+                  user.role === 'deputy' ? 'bg-blue-600' :
+                  'bg-green-600'
+                } text-white`}>
+                  {user.role?.toUpperCase()}
                 </span>
               </div>
 

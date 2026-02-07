@@ -9,7 +9,7 @@ import { ChevronLeft, FileText, Plus, Trash2, Edit3, Save, X, Image as ImageIcon
 
 /**
  * Division Materials Page - Materiały dla konkretnej dywizji
- * SWAT dostępny dla wszystkich, inne tylko dla użytkowników z dywizją/admin/dev
+ * SWAT dostępny dla wszystkich, inne tylko dla użytkowników z dywizją/CS/HCS/Dev
  */
 export default function DivisionMaterialsPage() {
   const { user, loading, division, isAdmin, isDev, isCommander } = useAuth();
