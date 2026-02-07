@@ -23,7 +23,7 @@ interface AdminPanelPageProps {
  * - Discord webhooks for admin actions
  */
 export default function AdminPanelPage({ onBack }: AdminPanelPageProps) {
-  const { user, role, isDev, isAdmin, mtaNick } = useAuth();
+  const { user, role, isDev, isCS, isAdmin, mtaNick } = useAuth();
 
   // Actor object for Discord webhooks
   const actor = {
@@ -47,7 +47,7 @@ export default function AdminPanelPage({ onBack }: AdminPanelPageProps) {
     handleUpdateRole,
     handleKickUser,
     filteredUsers,
-  } = useAdminPanel(isDev, actor);
+  } = useAdminPanel(isCS, actor);
 
   // Access control
   if (!isAdmin) {
@@ -89,7 +89,7 @@ export default function AdminPanelPage({ onBack }: AdminPanelPageProps) {
         <UsersTable
           users={filteredUsers}
           currentUserId={user.id}
-          isDev={isDev}
+          isCS={isCS}
           sortBy={sortBy}
           sortOrder={sortOrder}
           onSort={handleSort}

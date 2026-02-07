@@ -47,7 +47,7 @@ interface Actor {
  * - Kick user (force logout + delete)
  * - Dropdown state management
  */
-export function useAdminPanel(isDev: boolean, actor: Actor): UseAdminPanelReturn {
+export function useAdminPanel(isCS: boolean, actor: Actor): UseAdminPanelReturn {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -98,8 +98,8 @@ export function useAdminPanel(isDev: boolean, actor: Actor): UseAdminPanelReturn
   const filteredUsers = users.filter((u) => {
     const searchLower = searchQuery.toLowerCase();
 
-    // Dev can search by email, others cannot
-    const emailMatch = isDev && u.email?.toLowerCase().includes(searchLower);
+    // CS+ can search by email, others cannot
+    const emailMatch = isCS && u.email?.toLowerCase().includes(searchLower);
 
     return (
       !searchQuery ||

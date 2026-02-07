@@ -92,8 +92,8 @@ export default function PenaltiesTable({
       iconColor: 'text-orange-400',
       emptyText: 'Brak upomnienia pisemnego.',
       clearButtonText: 'Wyzeruj wszystko',
-      canClear: isDev,
-      clearTooltip: 'Wyzeruj całą historię upomnienia pisemnych (DEV)',
+      canClear: isCS,
+      clearTooltip: 'Wyzeruj całą historię upomnienia pisemnych (CS+)',
     },
   };
 

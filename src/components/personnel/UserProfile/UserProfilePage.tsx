@@ -109,7 +109,7 @@ export default function UserProfilePage({ username }: UserProfilePageProps) {
   };
 
   const handleClearWrittenWarnings = async () => {
-    if (!isDev || !confirm('Czy na pewno chcesz wyzerować całą historię upomnienia pisemnych tego użytkownika?')) return;
+    if (!isCS || !confirm('Czy na pewno chcesz wyzerować całą historię upomnienia pisemnych tego użytkownika?')) return;
     try {
       const { error } = await clearUserWrittenWarnings(userId);
       if (error) throw error;
@@ -122,7 +122,7 @@ export default function UserProfilePage({ username }: UserProfilePageProps) {
   };
 
   const handleClearUserNotes = async () => {
-    if (!isDev || !confirm('Czy na pewno chcesz wyzerować wszystkie notatki tego użytkownika?')) return;
+    if (!isCS || !confirm('Czy na pewno chcesz wyzerować wszystkie notatki tego użytkownika?')) return;
     try {
       const { error } = await clearUserNotes(userId);
       if (error) throw error;
@@ -351,7 +351,7 @@ export default function UserProfilePage({ username }: UserProfilePageProps) {
           onClear={handleClearUserNotes}
           onDeleteSelected={handleDeleteSelectedNotes}
           onAddNote={() => setShowAddNoteModal(true)}
-          isDev={isDev}
+          isCS={isCS}
         />
       </div>
 

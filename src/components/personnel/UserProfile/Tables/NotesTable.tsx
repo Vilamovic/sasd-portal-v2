@@ -9,7 +9,7 @@ interface NotesTableProps {
   onClear: () => void;
   onDeleteSelected: () => void;
   onAddNote: () => void;
-  isDev: boolean;
+  isCS: boolean;
 }
 
 /**
@@ -22,7 +22,7 @@ export default function NotesTable({
   onClear,
   onDeleteSelected,
   onAddNote,
-  isDev,
+  isCS,
 }: NotesTableProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -38,7 +38,7 @@ export default function NotesTable({
   return (
     <div className="mb-8">
       {/* Clear buttons */}
-      {isDev && (
+      {isCS && (
         <div className="flex justify-end gap-2 mb-2">
           {selectedIds.size > 0 && (
             <button
@@ -53,7 +53,7 @@ export default function NotesTable({
           <button
             onClick={onClear}
             className="flex items-center gap-2 px-3 py-2 bg-red-600/20 border border-red-500/50 text-red-400 text-sm font-bold rounded-lg hover:bg-red-600/30 transition-all"
-            title="Wyzeruj wszystkie notatki (DEV)"
+            title="Wyzeruj wszystkie notatki (CS+)"
           >
             <Trash2 className="w-3 h-3" />
             Wyzeruj wszystko
@@ -91,7 +91,7 @@ export default function NotesTable({
                 className="p-6 hover:bg-[#0a2818]/30 transition-colors"
               >
                 <div className="flex items-start gap-4">
-                  {isDev && (
+                  {isCS && (
                     <input
                       type="checkbox"
                       checked={selectedIds.has(note.id)}

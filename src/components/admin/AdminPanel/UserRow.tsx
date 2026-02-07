@@ -15,7 +15,7 @@ interface User {
 interface UserRowProps {
   user: User;
   currentUserId: string;
-  isDev: boolean;
+  isCS: boolean;
   onToggleDropdown: (userId: string) => void;
   buttonRef: (el: HTMLButtonElement | null) => void;
 }
@@ -29,7 +29,7 @@ interface UserRowProps {
 export default function UserRow({
   user,
   currentUserId,
-  isDev,
+  isCS,
   onToggleDropdown,
   buttonRef,
 }: UserRowProps) {
@@ -83,8 +83,8 @@ export default function UserRow({
       {/* Badge */}
       <td className="px-6 py-4 text-[#8fb5a0]">{user.badge || 'N/A'}</td>
 
-      {/* Email (Dev only) */}
-      {isDev && (
+      {/* Email (CS+ only) */}
+      {isCS && (
         <td className="px-6 py-4 text-[#8fb5a0] text-sm">{user.email || 'N/A'}</td>
       )}
 
