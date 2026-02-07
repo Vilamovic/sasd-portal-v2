@@ -1,20 +1,14 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
 import Navbar from '@/src/components/dashboard/Navbar';
 import {
-  getUserWithDetails,
   getUserByUsername,
-  updateUserBadge,
-  updateUserDivision,
-  updateUserPermissions,
-  updateIsCommander,
 } from '@/src/lib/db/users';
 import {
   getUserPenalties,
-  addPenalty,
   deletePenalty,
   clearUserPlusMinusPenalties,
   clearUserSuspensions,
@@ -22,7 +16,6 @@ import {
 } from '@/src/lib/db/penalties';
 import {
   getUserNotes,
-  addUserNote,
   deleteUserNote,
   clearUserNotes,
 } from '@/src/lib/db/notes';
@@ -30,25 +23,20 @@ import AddNoteModal from '@/src/components/personnel/UserProfile/Modals/AddNoteM
 import AddPlusMinusModal from '@/src/components/personnel/UserProfile/Modals/AddPlusMinusModal';
 import AddPenaltyModal from '@/src/components/personnel/UserProfile/Modals/AddPenaltyModal';
 import AddWrittenWarningModal from '@/src/components/personnel/UserProfile/Modals/AddWrittenWarningModal';
-import { notifyPenalty, notifyBadgeChange, notifyPermissionChange, notifyDivisionChange } from '@/src/utils/discord';
+import BadgeEditor from '@/src/components/personnel/UserProfile/InlineEditors/BadgeEditor';
+import DivisionEditor from '@/src/components/personnel/UserProfile/InlineEditors/DivisionEditor';
+import PermissionsEditor from '@/src/components/personnel/UserProfile/InlineEditors/PermissionsEditor';
 import {
   ChevronLeft,
   User,
   Award,
-  Shield,
   Calendar,
   Clock,
   Plus,
-  Minus,
   AlertTriangle,
   FileText,
-  Edit3,
-  Save,
-  X,
-  Check,
   TrendingUp,
   TrendingDown,
-  Users,
   Trash2,
 } from 'lucide-react';
 
@@ -70,63 +58,15 @@ export default function UserProfilePage() {
   const [activePenalties, setActivePenalties] = useState<any[]>([]);
   const [penaltyTimers, setPenaltyTimers] = useState<Record<string, number>>({});
 
-  // Inline editing
-  const [editingStopień, setEditingStopień] = useState(false);
-  const [editingDivision, setEditingDivision] = useState(false);
-  const [editingPermissions, setEditingPermissions] = useState(false);
-  const [tempStopień, setTempStopień] = useState('');
-  const [tempDivision, setTempDivision] = useState('');
-  const [tempPermissions, setTempPermissions] = useState<string[]>([]);
-  const [tempIsCommander, setTempIsCommander] = useState(false);
-
   // Modal states
   const [showAddPlusMinusModal, setShowAddPlusMinusModal] = useState(false);
   const [showAddPenaltyModal, setShowAddPenaltyModal] = useState(false);
   const [showAddWrittenWarningModal, setShowAddWrittenWarningModal] = useState(false);
   const [showAddNoteModal, setShowAddNoteModal] = useState(false);
 
-  // Modal form states
-  const [plusMinusType, setPlusMinusType] = useState<'plus' | 'minus'>('plus');
-  const [plusMinusReason, setPlusMinusReason] = useState('');
-  const [penaltyType, setPenaltyType] = useState<'zawieszenie_sluzba' | 'upomnienie_pisemne'>('zawieszenie_sluzba');
-  const [suspensionSubtype, setSuspensionSubtype] = useState<'zawieszenie_sluzba' | 'zawieszenie_dywizja' | 'zawieszenie_uprawnienia' | 'zawieszenie_poscigowe'>('zawieszenie_sluzba');
-  const [penaltyReason, setPenaltyReason] = useState('');
-  const [penaltyDuration, setPenaltyDuration] = useState('24');
-  const [penaltyEvidenceLink, setPenaltyEvidenceLink] = useState('');
-  const [writtenWarningReason, setWrittenWarningReason] = useState('');
-  const [writtenWarningEvidenceLink, setWrittenWarningEvidenceLink] = useState('');
-  const [noteText, setNoteText] = useState('');
-
   // Selection state for batch delete
   const [selectedPenaltyIds, setSelectedPenaltyIds] = useState<Set<string>>(new Set());
   const [selectedNoteIds, setSelectedNoteIds] = useState<Set<string>>(new Set());
-
-  const submittingRef = useRef(false);
-
-  const badges = [
-    'Trainee',
-    'Deputy Sheriff I',
-    'Deputy Sheriff II',
-    'Deputy Sheriff III',
-    'Senior Deputy Sheriff',
-    'Sergeant I',
-    'Sergeant II',
-    'Detective I',
-    'Detective II',
-    'Detective III',
-    'Lieutenant',
-    'Captain I',
-    'Captain II',
-    'Captain III',
-    'Area Commander',
-    'Division Chief',
-    'Assistant Sheriff',
-    'Undersheriff',
-    'Sheriff'
-  ];
-
-  const divisions = ['FTO', 'SS', 'DTU', 'GU'];
-  const permissions = ['SWAT', 'SEU', 'AIR', 'Press Desk', 'Dispatch', 'Pościgowe'];
 
   useEffect(() => {
     if (!loading && !currentUser) {
@@ -200,13 +140,7 @@ export default function UserProfilePage() {
       setUserId(userData.id);
       setUser(userData);
 
-      // Set temp values
       if (userData) {
-        setTempStopień(userData.badge || '');
-        setTempDivision(userData.division || '');
-        setTempPermissions(userData.permissions || []);
-        setTempIsCommander(userData.is_commander || false);
-
         // Load penalties
         const { data: penaltiesData, error: penaltiesError } = await getUserPenalties(userData.id);
         if (penaltiesError) throw penaltiesError;
@@ -251,159 +185,6 @@ export default function UserProfilePage() {
     }
   };
 
-  const handleSaveStopień = async () => {
-    if (submittingRef.current || !user || !currentUser) return;
-    submittingRef.current = true;
-
-    try {
-      const oldStopień = user.badge;
-      const { error } = await updateUserBadge(userId, tempStopień || null);
-      if (error) throw error;
-
-      // Auto-Commander: Captain III + Division → is_commander = true
-      let autoCommander = false;
-      if (tempStopień === 'Captain III' && user.division) {
-        const { error: commanderError } = await updateIsCommander(userId, true);
-        if (!commanderError) {
-          autoCommander = true;
-          setUser({ ...user, badge: tempStopień, is_commander: true });
-        }
-      }
-
-      // Discord webhook
-      if (oldStopień !== tempStopień) {
-        const badgesList = [
-          'Trainee', 'Deputy Sheriff I', 'Deputy Sheriff II', 'Deputy Sheriff III',
-          'Senior Deputy Sheriff', 'Sergeant I', 'Sergeant II',
-          'Detective I', 'Detective II', 'Detective III',
-          'Lieutenant', 'Captain I', 'Captain II', 'Captain III',
-          'Area Commander', 'Division Chief', 'Assistant Sheriff', 'Undersheriff', 'Sheriff'
-        ];
-        const oldIndex = badgesList.indexOf(oldStopień || '');
-        const newIndex = badgesList.indexOf(tempStopień || '');
-        const isPromotion = newIndex > oldIndex;
-
-        await notifyBadgeChange({
-          user: { username: user.username, mta_nick: user.mta_nick },
-          oldStopień: oldStopień || 'Brak',
-          newStopień: tempStopień || 'Brak',
-          isPromotion,
-          createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
-        });
-      }
-
-      if (!autoCommander) {
-        setUser({ ...user, badge: tempStopień });
-      }
-      setEditingStopień(false);
-      alert('Stopień zaktualizowany.' + (autoCommander ? ' Automatycznie nadano funkcję Commander.' : ''));
-    } catch (error) {
-      console.error('Error updating badge:', error);
-      alert('Błąd podczas aktualizacji stopnia.');
-    } finally {
-      submittingRef.current = false;
-    }
-  };
-
-  const handleSaveDivision = async () => {
-    if (submittingRef.current || !user || !currentUser) return;
-    submittingRef.current = true;
-
-    try {
-      const oldDivision = user.division;
-
-      // Update division
-      const { error: divError } = await updateUserDivision(userId, tempDivision || null);
-      if (divError) throw divError;
-
-      // Update commander status
-      const { error: cmdError } = await updateIsCommander(userId, tempIsCommander);
-      if (cmdError) throw cmdError;
-
-      // Discord webhook
-      if (oldDivision !== tempDivision) {
-        if (tempDivision) {
-          // Nadanie dywizji
-          await notifyDivisionChange({
-            user: { username: user.username, mta_nick: user.mta_nick },
-            division: tempDivision,
-            isGranted: true,
-            isCommander: tempIsCommander,
-            createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
-          });
-        } else if (oldDivision) {
-          // Odebranie dywizji
-          await notifyDivisionChange({
-            user: { username: user.username, mta_nick: user.mta_nick },
-            division: oldDivision,
-            isGranted: false,
-            isCommander: false,
-            createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
-          });
-        }
-      }
-
-      setUser({ ...user, division: tempDivision, is_commander: tempIsCommander });
-      setEditingDivision(false);
-      alert('Dywizja zaktualizowana.');
-    } catch (error) {
-      console.error('Error updating division:', error);
-      alert('Błąd podczas aktualizacji dywizji.');
-    } finally {
-      submittingRef.current = false;
-    }
-  };
-
-  const handleSavePermissions = async () => {
-    if (submittingRef.current || !user || !currentUser) return;
-    submittingRef.current = true;
-
-    try {
-      const oldPermissions = user.permissions || [];
-      const { error } = await updateUserPermissions(userId, tempPermissions);
-      if (error) throw error;
-
-      // Discord webhooks - powiadomienie o każdej zmianie
-      const added = tempPermissions.filter((p: string) => !oldPermissions.includes(p));
-      const removed = oldPermissions.filter((p: string) => !tempPermissions.includes(p));
-
-      for (const permission of added) {
-        await notifyPermissionChange({
-          user: { username: user.username, mta_nick: user.mta_nick },
-          permission,
-          isGranted: true,
-          createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
-        });
-      }
-
-      for (const permission of removed) {
-        await notifyPermissionChange({
-          user: { username: user.username, mta_nick: user.mta_nick },
-          permission,
-          isGranted: false,
-          createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
-        });
-      }
-
-      setUser({ ...user, permissions: tempPermissions });
-      setEditingPermissions(false);
-      alert('Uprawnienia zaktualizowane.');
-    } catch (error) {
-      console.error('Error updating permissions:', error);
-      alert('Błąd podczas aktualizacji uprawnień.');
-    } finally {
-      submittingRef.current = false;
-    }
-  };
-
-  const togglePermission = (perm: string) => {
-    if (tempPermissions.includes(perm)) {
-      setTempPermissions(tempPermissions.filter((p) => p !== perm));
-    } else {
-      setTempPermissions([...tempPermissions, perm]);
-    }
-  };
-
   const formatTime = (seconds: number) => {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
@@ -445,194 +226,6 @@ export default function UserProfilePage() {
         return 'text-orange-400';
       default:
         return 'text-gray-400';
-    }
-  };
-
-  const getDivisionColor = (division: string | null) => {
-    switch (division) {
-      case 'FTO':
-        return 'bg-[#c9a227] text-[#020a06]';
-      case 'SS':
-        return 'bg-[#ff8c00] text-white';
-      case 'DTU':
-        return 'bg-[#60a5fa] text-[#020a06]';
-      case 'GU':
-        return 'bg-[#10b981] text-white';
-      default:
-        return 'bg-gray-600 text-white';
-    }
-  };
-
-  // Modal handlers
-  const handleAddPlusMinus = async () => {
-    if (submittingRef.current || !currentUser) return;
-    if (!plusMinusReason.trim()) {
-      alert('Powód jest wymagany.');
-      return;
-    }
-
-    submittingRef.current = true;
-    try {
-      const { error } = await addPenalty({
-        user_id: userId,
-        created_by: currentUser.id,
-        type: plusMinusType,
-        description: plusMinusReason.trim(),
-        duration_hours: null,
-      });
-      if (error) throw error;
-
-      // Send Discord notification
-      await notifyPenalty({
-        type: plusMinusType,
-        user: { username: user.username, mta_nick: user.mta_nick },
-        description: plusMinusReason.trim(),
-        createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
-      });
-
-      // Reload data
-      await loadUserData();
-      // Refresh navbar data
-      if (refreshUserData) await refreshUserData();
-      setPlusMinusReason('');
-      setShowAddPlusMinusModal(false);
-      alert(`${plusMinusType === 'plus' ? 'PLUS' : 'MINUS'} dodany.`);
-    } catch (error) {
-      console.error('Error adding PLUS/MINUS:', error);
-      alert('Błąd podczas dodawania.');
-    } finally {
-      submittingRef.current = false;
-    }
-  };
-
-  const handleAddPenalty = async () => {
-    if (submittingRef.current || !currentUser) return;
-    if (!penaltyReason.trim()) {
-      alert('Powód jest wymagany.');
-      return;
-    }
-
-    // Duration validation
-    const duration = parseInt(penaltyDuration);
-    if (isNaN(duration) || duration <= 0) {
-      alert('Czas trwania musi być liczbą większą od 0.');
-      return;
-    }
-
-    // Calculate expires_at (server-based time + duration)
-    const expiresAt = new Date(Date.now() + duration * 60 * 60 * 1000).toISOString();
-
-    submittingRef.current = true;
-    try {
-      const { error } = await addPenalty({
-        user_id: userId,
-        created_by: currentUser.id,
-        type: suspensionSubtype, // Use selected suspension subtype
-        description: penaltyReason.trim(),
-        duration_hours: duration,
-        expires_at: expiresAt,
-      });
-      if (error) throw error;
-
-      // Send Discord notification
-      await notifyPenalty({
-        type: suspensionSubtype,
-        user: { username: user.username, mta_nick: user.mta_nick },
-        description: penaltyReason.trim(),
-        evidenceLink: penaltyEvidenceLink.trim() || null,
-        durationHours: duration,
-        createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
-      });
-
-      // Reload data
-      await loadUserData();
-      // Refresh navbar data
-      if (refreshUserData) await refreshUserData();
-      setPenaltyReason('');
-      setPenaltyDuration('24');
-      setPenaltyEvidenceLink('');
-      setSuspensionSubtype('zawieszenie_sluzba');
-      setShowAddPenaltyModal(false);
-      alert('Zawieszenie nadane.');
-    } catch (error) {
-      console.error('Error adding penalty:', error);
-      alert('Błąd podczas nadawania kary.');
-    } finally {
-      submittingRef.current = false;
-    }
-  };
-
-  const handleAddWrittenWarning = async () => {
-    if (submittingRef.current || !currentUser) return;
-    if (!writtenWarningReason.trim()) {
-      alert('Powód jest wymagany.');
-      return;
-    }
-
-    submittingRef.current = true;
-    try {
-      const { error } = await addPenalty({
-        user_id: userId,
-        created_by: currentUser.id,
-        type: 'upomnienie_pisemne',
-        description: writtenWarningReason.trim(),
-        duration_hours: null,
-        expires_at: null,
-      });
-      if (error) throw error;
-
-      // Send Discord notification
-      await notifyPenalty({
-        type: 'upomnienie_pisemne',
-        user: { username: user.username, mta_nick: user.mta_nick },
-        description: writtenWarningReason.trim(),
-        evidenceLink: writtenWarningEvidenceLink.trim() || null,
-        durationHours: null,
-        createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
-      });
-
-      // Reload data
-      await loadUserData();
-      // Refresh navbar data
-      if (refreshUserData) await refreshUserData();
-      setWrittenWarningReason('');
-      setWrittenWarningEvidenceLink('');
-      setShowAddWrittenWarningModal(false);
-      alert('Upomnienie pisemne nadane.');
-    } catch (error) {
-      console.error('Error adding written warning:', error);
-      alert('Błąd podczas nadawania upomnienia.');
-    } finally {
-      submittingRef.current = false;
-    }
-  };
-
-  const handleAddNote = async () => {
-    if (submittingRef.current || !currentUser) return;
-    if (!noteText.trim()) {
-      alert('Treść notatki jest wymagana.');
-      return;
-    }
-
-    submittingRef.current = true;
-    try {
-      const { error } = await addUserNote({
-        user_id: userId,
-        created_by: currentUser.id,
-        note: noteText.trim(),
-      });
-      if (error) throw error;
-
-      // Reload data
-      await loadUserData();
-      setNoteText('');
-      setShowAddNoteModal(false);
-      alert('Notatka dodana.');
-    } catch (error) {
-      console.error('Error adding note:', error);
-      alert('Błąd podczas dodawania notatki.');
-    } finally {
-      submittingRef.current = false;
     }
   };
 
@@ -850,246 +443,30 @@ export default function UserProfilePage() {
 
               {/* Editable Fields */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Stopień */}
-                <div className="glass-medium rounded-xl p-4 border border-[#1a4d32]/30">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <Award className="w-4 h-4 text-[#c9a227]" />
-                      <span className="text-[#8fb5a0] text-sm">Stopień</span>
-                    </div>
-                    {!editingStopień && (isHCS || (isCS && (user.role === 'trainee' || user.role === 'deputy'))) && (
-                      <button
-                        onClick={() => setEditingStopień(true)}
-                        className="text-[#c9a227] hover:text-[#e6b830] transition-colors"
-                      >
-                        <Edit3 className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                  {editingStopień ? (
-                    <div className="space-y-2">
-                      <select
-                        value={tempStopień}
-                        onChange={(e) => setTempStopień(e.target.value)}
-                        className="w-full px-3 py-2 bg-[#0a2818]/50 border border-[#1a4d32] rounded-lg text-white text-sm focus:outline-none focus:border-[#c9a227]"
-                      >
-                        <option value="">Brak</option>
-                        {badges.map((badge) => (
-                          <option key={badge} value={badge}>
-                            {badge}
-                          </option>
-                        ))}
-                      </select>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={handleSaveStopień}
-                          className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-green-600 text-white text-xs rounded-lg hover:bg-green-700 transition-colors"
-                        >
-                          <Save className="w-3 h-3" />
-                          Zapisz
-                        </button>
-                        <button
-                          onClick={() => {
-                            setEditingStopień(false);
-                            setTempStopień(user.badge || '');
-                          }}
-                          className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-[#0a2818] text-white text-xs rounded-lg hover:bg-[#133524] transition-colors"
-                        >
-                          <X className="w-3 h-3" />
-                          Anuluj
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <p className="text-white font-semibold">{user.badge || 'Brak'}</p>
-                  )}
-                </div>
-
-                {/* Division */}
-                <div className="glass-medium rounded-xl p-4 border border-[#1a4d32]/30">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-4 h-4 text-[#c9a227]" />
-                      <span className="text-[#8fb5a0] text-sm">Dywizja</span>
-                    </div>
-                    {!editingDivision && (isHCS || (isCS && (user.role === 'trainee' || user.role === 'deputy'))) && (
-                      <button
-                        onClick={() => setEditingDivision(true)}
-                        className="text-[#c9a227] hover:text-[#e6b830] transition-colors"
-                      >
-                        <Edit3 className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                  {editingDivision ? (
-                    <div className="space-y-2">
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          onClick={() => setTempDivision('')}
-                          className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
-                            tempDivision === ''
-                              ? 'bg-gray-600 text-white border-2 border-gray-400'
-                              : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32] hover:bg-[#133524]'
-                          }`}
-                        >
-                          Brak
-                        </button>
-                        <button
-                          onClick={() => setTempDivision('FTO')}
-                          className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
-                            tempDivision === 'FTO'
-                              ? 'bg-[#c9a227] text-[#020a06] border-2 border-[#e6b830]'
-                              : 'bg-[#0a2818] text-[#c9a227] border border-[#c9a227]/30 hover:bg-[#c9a227]/10'
-                          }`}
-                        >
-                          FTO
-                        </button>
-                        <button
-                          onClick={() => setTempDivision('SS')}
-                          className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
-                            tempDivision === 'SS'
-                              ? 'bg-[#ff8c00] text-white border-2 border-[#ff8c00]'
-                              : 'bg-[#0a2818] text-[#ff8c00] border border-[#ff8c00]/30 hover:bg-[#ff8c00]/10'
-                          }`}
-                        >
-                          SS
-                        </button>
-                        <button
-                          onClick={() => setTempDivision('DTU')}
-                          className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
-                            tempDivision === 'DTU'
-                              ? 'bg-[#60a5fa] text-[#020a06] border-2 border-[#60a5fa]'
-                              : 'bg-[#0a2818] text-[#60a5fa] border border-[#60a5fa]/30 hover:bg-[#60a5fa]/10'
-                          }`}
-                        >
-                          DTU
-                        </button>
-                        <button
-                          onClick={() => setTempDivision('GU')}
-                          className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
-                            tempDivision === 'GU'
-                              ? 'bg-[#10b981] text-white border-2 border-[#10b981]'
-                              : 'bg-[#0a2818] text-[#10b981] border border-[#10b981]/30 hover:bg-[#10b981]/10'
-                          }`}
-                        >
-                          GU
-                        </button>
-                      </div>
-                      {tempDivision && (
-                        <label className="flex items-center gap-2 text-sm text-[#8fb5a0]">
-                          <input
-                            type="checkbox"
-                            checked={tempIsCommander}
-                            onChange={(e) => setTempIsCommander(e.target.checked)}
-                            className="rounded border-[#1a4d32] bg-[#0a2818] text-[#c9a227] focus:ring-[#c9a227]"
-                          />
-                          Commander
-                        </label>
-                      )}
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={handleSaveDivision}
-                          className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-green-600 text-white text-xs rounded-lg hover:bg-green-700 transition-colors"
-                        >
-                          <Save className="w-3 h-3" />
-                          Zapisz
-                        </button>
-                        <button
-                          onClick={() => {
-                            setEditingDivision(false);
-                            setTempDivision(user.division || '');
-                            setTempIsCommander(user.is_commander || false);
-                          }}
-                          className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-[#0a2818] text-white text-xs rounded-lg hover:bg-[#133524] transition-colors"
-                        >
-                          <X className="w-3 h-3" />
-                          Anuluj
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-wrap gap-1">
-                      {user.division ? (
-                        <span className={`px-2 py-1 rounded text-xs font-bold ${getDivisionColor(user.division)}`}>
-                          {user.division}{user.is_commander ? ' CMD' : ''}
-                        </span>
-                      ) : (
-                        <span className="text-white">Brak</span>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Permissions */}
-                <div className="glass-medium rounded-xl p-4 border border-[#1a4d32]/30">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-[#c9a227]" />
-                      <span className="text-[#8fb5a0] text-sm">Uprawnienia</span>
-                    </div>
-                    {!editingPermissions && (isHCS || (isCS && (user.role === 'trainee' || user.role === 'deputy'))) && (
-                      <button
-                        onClick={() => setEditingPermissions(true)}
-                        className="text-[#c9a227] hover:text-[#e6b830] transition-colors"
-                      >
-                        <Edit3 className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                  {editingPermissions ? (
-                    <div className="space-y-2">
-                      <div className="flex flex-wrap gap-2">
-                        {permissions.map((perm) => (
-                          <button
-                            key={perm}
-                            onClick={() => togglePermission(perm)}
-                            className={`px-2 py-1 rounded text-xs font-bold transition-all ${
-                              tempPermissions.includes(perm)
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32]'
-                            }`}
-                          >
-                            {perm}
-                          </button>
-                        ))}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={handleSavePermissions}
-                          className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-green-600 text-white text-xs rounded-lg hover:bg-green-700 transition-colors"
-                        >
-                          <Save className="w-3 h-3" />
-                          Zapisz
-                        </button>
-                        <button
-                          onClick={() => {
-                            setEditingPermissions(false);
-                            setTempPermissions(user.permissions || []);
-                          }}
-                          className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-[#0a2818] text-white text-xs rounded-lg hover:bg-[#133524] transition-colors"
-                        >
-                          <X className="w-3 h-3" />
-                          Anuluj
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-wrap gap-1">
-                      {user.permissions && user.permissions.length > 0 ? (
-                        user.permissions.map((perm: string) => (
-                          <span
-                            key={perm}
-                            className="px-2 py-1 rounded text-xs font-bold bg-blue-600 text-white"
-                          >
-                            {perm}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-white">Brak</span>
-                      )}
-                    </div>
-                  )}
-                </div>
+                <BadgeEditor
+                  user={user}
+                  currentUser={currentUser}
+                  userId={userId!}
+                  isHCS={isHCS}
+                  isCS={isCS}
+                  onUpdate={loadUserData}
+                />
+                <DivisionEditor
+                  user={user}
+                  currentUser={currentUser}
+                  userId={userId!}
+                  isHCS={isHCS}
+                  isCS={isCS}
+                  onUpdate={loadUserData}
+                />
+                <PermissionsEditor
+                  user={user}
+                  currentUser={currentUser}
+                  userId={userId!}
+                  isHCS={isHCS}
+                  isCS={isCS}
+                  onUpdate={loadUserData}
+                />
               </div>
             </div>
           </div>
