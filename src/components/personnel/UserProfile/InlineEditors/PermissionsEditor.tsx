@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { Users, Edit3, Save, X } from 'lucide-react';
 import { updateUserPermissions } from '@/src/lib/db/users';
-import { notifyPermissionChange } from '@/src/utils/discord';
+import { notifyPermissionChange } from '@/src/lib/webhooks/personnel';
 
 interface PermissionsEditorProps {
   user: any;
@@ -53,7 +53,7 @@ export default function PermissionsEditor({ user, currentUser, userId, isHCS, is
           user: { username: user.username, mta_nick: user.mta_nick },
           permission,
           isGranted: true,
-          createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
+          createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: undefined },
         });
       }
 
@@ -62,7 +62,7 @@ export default function PermissionsEditor({ user, currentUser, userId, isHCS, is
           user: { username: user.username, mta_nick: user.mta_nick },
           permission,
           isGranted: false,
-          createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
+          createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: undefined },
         });
       }
 

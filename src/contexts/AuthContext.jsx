@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/src/supabaseClient';
 import { getUserById, upsertUser } from '@/src/lib/db/users';
-import { notifyUserAuth } from '@/src/utils/discord';
+import { notifyUserAuth } from '@/src/lib/webhooks/auth';
 
 const AuthContext = createContext();
 

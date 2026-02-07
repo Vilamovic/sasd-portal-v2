@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { Award, X, Save, Plus, Minus } from 'lucide-react';
 import { addPenalty } from '@/src/lib/db/penalties';
-import { notifyPenalty } from '@/src/utils/discord';
+import { notifyPenalty } from '@/src/lib/webhooks/personnel';
 
 interface AddPlusMinusModalProps {
   isOpen: boolean;
@@ -45,7 +45,7 @@ export default function AddPlusMinusModal({
         created_by: currentUser.id,
         type: plusMinusType,
         description: plusMinusReason.trim(),
-        duration_hours: null,
+        duration_hours: undefined,
       });
       if (error) throw error;
 
@@ -54,7 +54,7 @@ export default function AddPlusMinusModal({
         type: plusMinusType,
         user: { username: user.username, mta_nick: user.mta_nick },
         description: plusMinusReason.trim(),
-        createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
+        createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: undefined },
       });
 
       // Refresh data

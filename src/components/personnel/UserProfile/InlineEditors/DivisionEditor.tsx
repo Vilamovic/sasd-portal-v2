@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { Shield, Edit3, Save, X } from 'lucide-react';
 import { updateUserDivision, updateIsCommander } from '@/src/lib/db/users';
-import { notifyDivisionChange } from '@/src/utils/discord';
+import { notifyDivisionChange } from '@/src/lib/webhooks/personnel';
 
 interface DivisionEditorProps {
   user: any;
@@ -65,7 +65,7 @@ export default function DivisionEditor({ user, currentUser, userId, isHCS, isCS,
             division: tempDivision,
             isGranted: true,
             isCommander: tempIsCommander,
-            createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
+            createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: undefined },
           });
         } else if (oldDivision) {
           // Odebranie dywizji
@@ -74,7 +74,7 @@ export default function DivisionEditor({ user, currentUser, userId, isHCS, isCS,
             division: oldDivision,
             isGranted: false,
             isCommander: false,
-            createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
+            createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: undefined },
           });
         }
       }

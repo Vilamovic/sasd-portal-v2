@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { calculateExamResult } from '@/src/utils/examUtils';
 import { getAllExamTypes, saveExamResult } from '@/src/lib/db/exams';
-import { notifyExamSubmission, notifyCheat } from '@/src/utils/discord';
+import { notifyExamSubmission, notifyCheat } from '@/src/lib/webhooks/exams';
 
 // Components
 import TokenModal from './TokenModal';

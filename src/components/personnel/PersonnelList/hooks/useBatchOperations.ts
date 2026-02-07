@@ -5,7 +5,7 @@ import {
   updateUserDivision,
   updateIsCommander,
 } from '@/src/lib/db/users';
-import { notifyBadgeChange, notifyPermissionChange, notifyDivisionChange } from '@/src/utils/discord';
+import { notifyBadgeChange, notifyPermissionChange, notifyDivisionChange } from '@/src/lib/webhooks/personnel';
 
 interface UseBatchOperationsProps {
   users: any[];
@@ -59,24 +59,24 @@ export function useBatchOperations({ users, badges, currentUser, onReload }: Use
           continue;
         }
 
-        const newStopień = badges[currentIndex + 1];
+        const newBadge = badges[currentIndex + 1];
 
         // Update badge
-        const { error } = await updateUserBadge(userId, newStopień);
+        const { error } = await updateUserBadge(userId, newBadge);
         if (error) throw error;
 
         // Auto-Commander: Captain III + Division → is_commander = true
-        if (newStopień === 'Captain III' && targetUser.division) {
+        if (newBadge === 'Captain III' && targetUser.division) {
           await updateIsCommander(userId, true);
         }
 
         // Discord webhook
         await notifyBadgeChange({
           user: { username: targetUser.username, mta_nick: targetUser.mta_nick },
-          oldStopień: currentStopień || 'Brak',
-          newStopień,
+          oldBadge: currentStopień || 'Brak',
+          newBadge: newBadge,
           isPromotion: true,
-          createdBy: { username: currentUser.user_metadata?.full_name || 'Admin', mta_nick: null },
+          createdBy: { username: currentUser.user_metadata?.full_name || 'Admin', mta_nick: undefined },
         });
 
         successCount++;
@@ -112,19 +112,19 @@ export function useBatchOperations({ users, badges, currentUser, onReload }: Use
           continue;
         }
 
-        const newStopień = badges[currentIndex - 1];
+        const newBadge = badges[currentIndex - 1];
 
         // Update badge
-        const { error } = await updateUserBadge(userId, newStopień);
+        const { error } = await updateUserBadge(userId, newBadge);
         if (error) throw error;
 
         // Discord webhook
         await notifyBadgeChange({
           user: { username: targetUser.username, mta_nick: targetUser.mta_nick },
-          oldStopień: currentStopień || 'Brak',
-          newStopień,
+          oldBadge: currentStopień || 'Brak',
+          newBadge,
           isPromotion: false,
-          createdBy: { username: currentUser.user_metadata?.full_name || 'Admin', mta_nick: null },
+          createdBy: { username: currentUser.user_metadata?.full_name || 'Admin', mta_nick: undefined },
         });
 
         successCount++;
@@ -170,7 +170,7 @@ export function useBatchOperations({ users, badges, currentUser, onReload }: Use
             user: { username: targetUser.username, mta_nick: targetUser.mta_nick },
             permission,
             isGranted: true,
-            createdBy: { username: currentUser.user_metadata?.full_name || 'Admin', mta_nick: null },
+            createdBy: { username: currentUser.user_metadata?.full_name || 'Admin', mta_nick: undefined },
           });
         }
 
@@ -217,7 +217,7 @@ export function useBatchOperations({ users, badges, currentUser, onReload }: Use
             user: { username: targetUser.username, mta_nick: targetUser.mta_nick },
             permission,
             isGranted: false,
-            createdBy: { username: currentUser.user_metadata?.full_name || 'Admin', mta_nick: null },
+            createdBy: { username: currentUser.user_metadata?.full_name || 'Admin', mta_nick: undefined },
           });
         }
 
@@ -257,10 +257,10 @@ export function useBatchOperations({ users, badges, currentUser, onReload }: Use
         // Discord webhook
         await notifyDivisionChange({
           user: { username: targetUser.username, mta_nick: targetUser.mta_nick },
-          division: batchDivision,
+          division: batchDivision as 'FTO' | 'SS' | 'DTU' | 'GU',
           isGranted: true,
           isCommander: false,
-          createdBy: { username: currentUser.user_metadata?.full_name || 'Admin', mta_nick: null },
+          createdBy: { username: currentUser.user_metadata?.full_name || 'Admin', mta_nick: undefined },
         });
 
         successCount++;
@@ -301,7 +301,7 @@ export function useBatchOperations({ users, badges, currentUser, onReload }: Use
           division: oldDivision,
           isGranted: false,
           isCommander: false,
-          createdBy: { username: currentUser.user_metadata?.full_name || 'Admin', mta_nick: null },
+          createdBy: { username: currentUser.user_metadata?.full_name || 'Admin', mta_nick: undefined },
         });
 
         successCount++;

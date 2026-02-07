@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { getAllExamTypes, getQuestionsByExamType, addExamQuestion, updateExamQuestion, deleteExamQuestion } from '@/src/lib/db/exams';
-import { notifyExamQuestionAction } from '@/src/utils/discord';
+import { notifyExamQuestionAction } from '@/src/lib/webhooks/admin';
 import { Plus, Edit2, Trash2, Save, X, CheckSquare, Square, ChevronLeft, Sparkles, Settings, Clock } from 'lucide-react';
 
 /**

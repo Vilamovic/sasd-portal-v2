@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { Award, Edit3, Save, X } from 'lucide-react';
 import { updateUserBadge, updateIsCommander } from '@/src/lib/db/users';
-import { notifyBadgeChange } from '@/src/utils/discord';
+import { notifyBadgeChange } from '@/src/lib/webhooks/personnel';
 
 interface BadgeEditorProps {
   user: any;
@@ -52,7 +52,7 @@ export default function BadgeEditor({ user, currentUser, userId, isHCS, isCS, on
     submittingRef.current = true;
 
     try {
-      const oldStopień = user.badge;
+      const oldBadge = user.badge;
       const { error } = await updateUserBadge(userId, tempStopień || null);
       if (error) throw error;
 
@@ -66,7 +66,7 @@ export default function BadgeEditor({ user, currentUser, userId, isHCS, isCS, on
       }
 
       // Discord webhook
-      if (oldStopień !== tempStopień) {
+      if (oldBadge !== tempStopień) {
         const badgesList = [
           'Trainee', 'Deputy Sheriff I', 'Deputy Sheriff II', 'Deputy Sheriff III',
           'Senior Deputy Sheriff', 'Sergeant I', 'Sergeant II',
@@ -74,16 +74,16 @@ export default function BadgeEditor({ user, currentUser, userId, isHCS, isCS, on
           'Lieutenant', 'Captain I', 'Captain II', 'Captain III',
           'Area Commander', 'Division Chief', 'Assistant Sheriff', 'Undersheriff', 'Sheriff'
         ];
-        const oldIndex = badgesList.indexOf(oldStopień || '');
+        const oldIndex = badgesList.indexOf(oldBadge || '');
         const newIndex = badgesList.indexOf(tempStopień || '');
         const isPromotion = newIndex > oldIndex;
 
         await notifyBadgeChange({
           user: { username: user.username, mta_nick: user.mta_nick },
-          oldStopień: oldStopień || 'Brak',
-          newStopień: tempStopień || 'Brak',
+          oldBadge: oldBadge || 'Brak',
+          newBadge: tempStopień || 'Brak',
           isPromotion,
-          createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
+          createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: undefined },
         });
       }
 

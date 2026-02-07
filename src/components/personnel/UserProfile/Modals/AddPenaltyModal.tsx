@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 import { addPenalty } from '@/src/lib/db/penalties';
-import { notifyPenalty } from '@/src/utils/discord';
+import { notifyPenalty } from '@/src/lib/webhooks/personnel';
 
 interface AddPenaltyModalProps {
   isOpen: boolean;
@@ -69,9 +69,9 @@ export default function AddPenaltyModal({
         type: suspensionSubtype,
         user: { username: user.username, mta_nick: user.mta_nick },
         description: penaltyReason.trim(),
-        evidenceLink: penaltyEvidenceLink.trim() || null,
+        evidenceLink: penaltyEvidenceLink.trim() || undefined,
         durationHours: duration,
-        createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
+        createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: undefined },
       });
 
       // Refresh data

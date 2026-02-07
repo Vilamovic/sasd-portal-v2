@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { FileText, X } from 'lucide-react';
 import { addPenalty } from '@/src/lib/db/penalties';
-import { notifyPenalty } from '@/src/utils/discord';
+import { notifyPenalty } from '@/src/lib/webhooks/personnel';
 
 interface AddWrittenWarningModalProps {
   isOpen: boolean;
@@ -45,8 +45,8 @@ export default function AddWrittenWarningModal({
         created_by: currentUser.id,
         type: 'upomnienie_pisemne',
         description: writtenWarningReason.trim(),
-        duration_hours: null,
-        expires_at: null,
+        duration_hours: undefined,
+        expires_at: undefined,
       });
       if (error) throw error;
 
@@ -55,9 +55,9 @@ export default function AddWrittenWarningModal({
         type: 'upomnienie_pisemne',
         user: { username: user.username, mta_nick: user.mta_nick },
         description: writtenWarningReason.trim(),
-        evidenceLink: writtenWarningEvidenceLink.trim() || null,
-        durationHours: null,
-        createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: null },
+        evidenceLink: writtenWarningEvidenceLink.trim() || undefined,
+        durationHours: undefined,
+        createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: undefined },
       });
 
       // Refresh data

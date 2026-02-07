@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { getAllExamResultsArchived, deleteExamResult, getAllExamTypes } from '@/src/lib/db/exams';
-import { notifyAdminAction } from '@/src/utils/discord';
+import { notifyAdminAction } from '@/src/lib/webhooks/admin';
 import { Archive, Search, Trash2, X, ChevronLeft, Filter, Sparkles, Eye, CheckCircle, XCircle } from 'lucide-react';
 
 /**
