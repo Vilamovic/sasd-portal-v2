@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { supabase } from '@/src/supabaseClient';
 import { setForceLogoutForUser, deleteUser } from '@/src/utils/supabaseHelpers';
@@ -29,7 +30,9 @@ export default function AdminPanel({ onBack }) {
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState('desc');
   const [showActionDropdown, setShowActionDropdown] = useState(null);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
   const dropdownRef = useRef(null);
+  const buttonRefs = useRef({});
   const submittingRef = useRef(false);
 
   // Load users
@@ -48,6 +51,25 @@ export default function AdminPanel({ onBack }) {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Calculate dropdown position based on button position
+  const handleToggleDropdown = (userId) => {
+    if (showActionDropdown === userId) {
+      setShowActionDropdown(null);
+      return;
+    }
+
+    const button = buttonRefs.current[userId];
+    if (button) {
+      const rect = button.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 8, // 8px spacing below button
+        right: window.innerWidth - rect.right + window.scrollX,
+      });
+    }
+
+    setShowActionDropdown(userId);
+  };
 
   const loadUsers = async () => {
     try {
@@ -393,82 +415,21 @@ export default function AdminPanel({ onBack }) {
                           {u.last_seen ? new Date(u.last_seen).toLocaleString('pl-PL') : 'Nigdy'}
                         </td>
                         <td className="px-6 py-4">
-                          {/* Dropdown */}
+                          {/* Dropdown Button */}
                           <div className="flex justify-center">
-                            <div className="relative" ref={showActionDropdown === u.id ? dropdownRef : null}>
-                              <button
-                                onClick={() => setShowActionDropdown(showActionDropdown === u.id ? null : u.id)}
-                                disabled={isCurrentUser || isDevUser}
-                                className={`p-2 rounded-lg transition-colors ${
-                                  isCurrentUser || isDevUser
-                                    ? 'bg-[#1a4d32]/30 text-[#8fb5a0]/50 cursor-not-allowed'
-                                    : 'bg-[#1a4d32]/50 text-[#8fb5a0] hover:bg-[#c9a227]/20 hover:text-[#c9a227]'
-                                }`}
-                                title={isCurrentUser ? 'Nie możesz zarządzać własnym kontem' : isDevUser ? 'Nie możesz zarządzać devem' : 'Akcje'}
-                              >
-                                <MoreVertical className="w-5 h-5" />
-                              </button>
-
-                              {showActionDropdown === u.id && !isCurrentUser && !isDevUser && (
-                                <div className="absolute right-0 mt-2 w-52 glass-strong rounded-xl shadow-2xl border border-[#1a4d32] py-2 z-[100]">
-                                  {/* Role change options based on hierarchy */}
-                                  <div className="px-3 py-1 text-xs text-[#8fb5a0] font-semibold">Zmień rolę:</div>
-
-                                  {/* Dev and HCS can set HCS role */}
-                                  {(isDev || role === 'hcs') && (
-                                    <button
-                                      onClick={() => handleUpdateRole(u.id, 'hcs', u.mta_nick || u.username)}
-                                      className="w-full px-4 py-2 text-left hover:bg-red-600/10 transition-colors text-red-400 text-sm flex items-center gap-2"
-                                    >
-                                      <ShieldCheck className="w-4 h-4" />
-                                      HCS
-                                    </button>
-                                  )}
-
-                                  {/* Dev, HCS, and CS can set CS role (but CS cannot set their own) */}
-                                  {(isDev || role === 'hcs' || (role === 'cs' && u.role !== 'cs')) && (
-                                    <button
-                                      onClick={() => handleUpdateRole(u.id, 'cs', u.mta_nick || u.username)}
-                                      className="w-full px-4 py-2 text-left hover:bg-orange-600/10 transition-colors text-orange-400 text-sm flex items-center gap-2"
-                                    >
-                                      <ShieldCheck className="w-4 h-4" />
-                                      CS
-                                    </button>
-                                  )}
-
-                                  {/* Everyone (CS+) can set Deputy */}
-                                  <button
-                                    onClick={() => handleUpdateRole(u.id, 'deputy', u.mta_nick || u.username)}
-                                    className="w-full px-4 py-2 text-left hover:bg-blue-600/10 transition-colors text-blue-400 text-sm flex items-center gap-2"
-                                  >
-                                    <ShieldCheck className="w-4 h-4" />
-                                    Deputy
-                                  </button>
-
-                                  {/* Everyone (CS+) can set Trainee */}
-                                  <button
-                                    onClick={() => handleUpdateRole(u.id, 'trainee', u.mta_nick || u.username)}
-                                    className="w-full px-4 py-2 text-left hover:bg-gray-600/10 transition-colors text-gray-400 text-sm flex items-center gap-2"
-                                  >
-                                    <ShieldOff className="w-4 h-4" />
-                                    Trainee
-                                  </button>
-
-                                  <div className="border-t border-[#1a4d32] my-2" />
-
-                                  {/* Kick options: Dev/HCS can kick anyone, CS can kick only trainee/deputy */}
-                                  {(isDev || role === 'hcs' || (role === 'cs' && (u.role === 'trainee' || u.role === 'deputy'))) && (
-                                    <button
-                                      onClick={() => handleKickUser(u.id, u.mta_nick || u.username)}
-                                      className="w-full px-4 py-3 text-left hover:bg-red-500/10 transition-colors text-red-400 text-sm flex items-center gap-2"
-                                    >
-                                      <UserMinus className="w-4 h-4" />
-                                      Wyrzuć
-                                    </button>
-                                  )}
-                                </div>
-                              )}
-                            </div>
+                            <button
+                              ref={(el) => (buttonRefs.current[u.id] = el)}
+                              onClick={() => handleToggleDropdown(u.id)}
+                              disabled={isCurrentUser || isDevUser}
+                              className={`p-2 rounded-lg transition-colors ${
+                                isCurrentUser || isDevUser
+                                  ? 'bg-[#1a4d32]/30 text-[#8fb5a0]/50 cursor-not-allowed'
+                                  : 'bg-[#1a4d32]/50 text-[#8fb5a0] hover:bg-[#c9a227]/20 hover:text-[#c9a227]'
+                              }`}
+                              title={isCurrentUser ? 'Nie możesz zarządzać własnym kontem' : isDevUser ? 'Nie możesz zarządzać devem' : 'Akcje'}
+                            >
+                              <MoreVertical className="w-5 h-5" />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -491,6 +452,88 @@ export default function AdminPanel({ onBack }) {
           </Link>
         </div>
       </div>
+
+      {/* Dropdown Portal - Rendered outside table hierarchy to avoid overflow issues */}
+      {showActionDropdown !== null && typeof window !== 'undefined' && createPortal(
+        (() => {
+          const currentUser = users.find(u => u.id === showActionDropdown);
+          if (!currentUser) return null;
+
+          const isCurrentUserSelf = currentUser.id === user.id;
+          const isDevUser = currentUser.role === 'dev';
+
+          if (isCurrentUserSelf || isDevUser) return null;
+
+          return (
+            <div
+              ref={dropdownRef}
+              className="w-52 glass-strong rounded-xl shadow-2xl border border-[#1a4d32] py-2 z-[9999]"
+              style={{
+                position: 'fixed',
+                top: `${dropdownPosition.top}px`,
+                right: `${dropdownPosition.right}px`,
+              }}
+            >
+              {/* Role change options based on hierarchy */}
+              <div className="px-3 py-1 text-xs text-[#8fb5a0] font-semibold">Zmień rolę:</div>
+
+              {/* Dev and HCS can set HCS role */}
+              {(isDev || role === 'hcs') && (
+                <button
+                  onClick={() => handleUpdateRole(currentUser.id, 'hcs', currentUser.mta_nick || currentUser.username)}
+                  className="w-full px-4 py-2 text-left hover:bg-red-600/10 transition-colors text-red-400 text-sm flex items-center gap-2"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  HCS
+                </button>
+              )}
+
+              {/* Dev, HCS, and CS can set CS role (but CS cannot set their own) */}
+              {(isDev || role === 'hcs' || (role === 'cs' && currentUser.role !== 'cs')) && (
+                <button
+                  onClick={() => handleUpdateRole(currentUser.id, 'cs', currentUser.mta_nick || currentUser.username)}
+                  className="w-full px-4 py-2 text-left hover:bg-orange-600/10 transition-colors text-orange-400 text-sm flex items-center gap-2"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  CS
+                </button>
+              )}
+
+              {/* Everyone (CS+) can set Deputy */}
+              <button
+                onClick={() => handleUpdateRole(currentUser.id, 'deputy', currentUser.mta_nick || currentUser.username)}
+                className="w-full px-4 py-2 text-left hover:bg-blue-600/10 transition-colors text-blue-400 text-sm flex items-center gap-2"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                Deputy
+              </button>
+
+              {/* Everyone (CS+) can set Trainee */}
+              <button
+                onClick={() => handleUpdateRole(currentUser.id, 'trainee', currentUser.mta_nick || currentUser.username)}
+                className="w-full px-4 py-2 text-left hover:bg-gray-600/10 transition-colors text-gray-400 text-sm flex items-center gap-2"
+              >
+                <ShieldOff className="w-4 h-4" />
+                Trainee
+              </button>
+
+              <div className="border-t border-[#1a4d32] my-2" />
+
+              {/* Kick options: Dev/HCS can kick anyone, CS can kick only trainee/deputy */}
+              {(isDev || role === 'hcs' || (role === 'cs' && (currentUser.role === 'trainee' || currentUser.role === 'deputy'))) && (
+                <button
+                  onClick={() => handleKickUser(currentUser.id, currentUser.mta_nick || currentUser.username)}
+                  className="w-full px-4 py-3 text-left hover:bg-red-500/10 transition-colors text-red-400 text-sm flex items-center gap-2"
+                >
+                  <UserMinus className="w-4 h-4" />
+                  Wyrzuć
+                </button>
+              )}
+            </div>
+          );
+        })(),
+        document.body
+      )}
     </div>
   );
 }
