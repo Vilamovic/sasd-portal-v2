@@ -25,7 +25,7 @@ export default function ExamDashboard({ onNavigate, onBack }) {
         { icon: CheckCircle, label: '7 typów egzaminów' },
         { icon: Clock, label: 'Auto-timer' }
       ],
-      roles: ['user', 'admin', 'dev'],
+      roles: ['trainee', 'deputy', 'cs', 'hcs', 'dev'],
     },
     {
       id: 'statistics',
@@ -39,7 +39,7 @@ export default function ExamDashboard({ onNavigate, onBack }) {
         { icon: BarChart3, label: 'Wyniki w czasie' },
         { icon: CheckCircle, label: 'Filtrowanie' }
       ],
-      roles: ['admin', 'dev'],
+      roles: ['cs', 'hcs', 'dev'],
     },
     {
       id: 'questions',
@@ -53,7 +53,7 @@ export default function ExamDashboard({ onNavigate, onBack }) {
         { icon: Settings, label: 'CRUD pytań' },
         { icon: CheckCircle, label: 'Multi-choice' }
       ],
-      roles: ['admin', 'dev'],
+      roles: ['cs', 'hcs', 'dev'],
     },
     {
       id: 'archive',
@@ -67,14 +67,14 @@ export default function ExamDashboard({ onNavigate, onBack }) {
         { icon: Archive, label: 'Historia' },
         { icon: CheckCircle, label: 'Wyszukiwanie' }
       ],
-      roles: ['admin', 'dev'],
+      roles: ['cs', 'hcs', 'dev'],
     },
   ];
 
   const visibleTiles = tiles.filter((tile) => tile.roles.includes(role));
 
-  // User view - single centered card
-  if (role === 'user') {
+  // Trainee/Deputy view - single centered card (only "Take Exam")
+  if (role === 'trainee' || role === 'deputy') {
     const startExamTile = tiles[0];
     const Icon = startExamTile.icon;
 
