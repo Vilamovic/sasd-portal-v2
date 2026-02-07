@@ -26,6 +26,8 @@ import AddWrittenWarningModal from '@/src/components/personnel/UserProfile/Modal
 import BadgeEditor from '@/src/components/personnel/UserProfile/InlineEditors/BadgeEditor';
 import DivisionEditor from '@/src/components/personnel/UserProfile/InlineEditors/DivisionEditor';
 import PermissionsEditor from '@/src/components/personnel/UserProfile/InlineEditors/PermissionsEditor';
+import PenaltiesTable from '@/src/components/personnel/UserProfile/Tables/PenaltiesTable';
+import NotesTable from '@/src/components/personnel/UserProfile/Tables/NotesTable';
 import {
   ChevronLeft,
   User,
@@ -558,334 +560,86 @@ export default function UserProfilePage() {
           </div>
         )}
 
-        {/* PLUS/MINUS History */}
-        <div className="mb-8">
-          {isCS && (
-            <div className="flex justify-end gap-2 mb-2">
-              {isDev && selectedPenaltyIds.size > 0 && (
-                <button
-                  onClick={handleDeleteSelectedPenalties}
-                  className="flex items-center gap-2 px-3 py-2 bg-orange-600/20 border border-orange-500/50 text-orange-400 text-sm font-bold rounded-lg hover:bg-orange-600/30 transition-all"
-                  title={`Usuń ${selectedPenaltyIds.size} zaznaczonych pozycji (DEV)`}
-                >
-                  <Trash2 className="w-3 h-3" />
-                  Usuń zaznaczone ({selectedPenaltyIds.size})
-                </button>
-              )}
-              <button
-                onClick={handleClearPlusMinusPenalties}
-                className="flex items-center gap-2 px-3 py-2 bg-red-600/20 border border-red-500/50 text-red-400 text-sm font-bold rounded-lg hover:bg-red-600/30 transition-all"
-                title="Wyzeruj całą historię PLUS/MINUS (CS+)"
-              >
-                <Trash2 className="w-3 h-3" />
-                Wyzeruj +/-
-              </button>
-            </div>
-          )}
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-2xl font-bold text-white flex items-center gap-2">
-              <Award className="w-6 h-6 text-[#c9a227]" />
-              Historia PLUS/MINUS
-            </h3>
-            <button
-              onClick={() => setShowAddPlusMinusModal(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#c9a227] to-[#e6b830] text-[#020a06] font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
-            >
-              <Plus className="w-4 h-4" />
-              Dodaj PLUS/MINUS
-            </button>
-          </div>
-          <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 overflow-hidden shadow-xl">
-            {penalties.filter((p) => p.penalty_type === 'plus' || p.penalty_type === 'minus').length === 0 ? (
-              <div className="p-12 text-center">
-                <Award className="w-16 h-16 text-[#8fb5a0] mx-auto mb-4" />
-                <p className="text-[#8fb5a0]">Brak historii PLUS/MINUS.</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-[#051a0f]/50 border-b border-[#1a4d32]/50">
-                    <tr>
-                      {isDev && <th className="px-4 py-4 w-12"></th>}
-                      <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Typ</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Powód</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Nadane przez</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Data</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#1a4d32]/30">
-                    {penalties
-                      .filter((p) => p.penalty_type === 'plus' || p.penalty_type === 'minus')
-                      .map((penalty) => (
-                        <tr key={penalty.id} className="hover:bg-[#0a2818]/30 transition-colors">
-                          {isDev && (
-                            <td className="px-4 py-4">
-                              <input
-                                type="checkbox"
-                                checked={selectedPenaltyIds.has(penalty.id)}
-                                onChange={() => togglePenaltySelection(penalty.id)}
-                                className="w-4 h-4 rounded border-[#1a4d32] bg-[#0a2818] text-[#c9a227] focus:ring-[#c9a227] focus:ring-offset-0 cursor-pointer"
-                              />
-                            </td>
-                          )}
-                          <td className="px-6 py-4">
-                            <span className={`font-bold ${getPenaltyTypeColor(penalty.penalty_type)}`}>
-                              {getPenaltyTypeDisplay(penalty.penalty_type)}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-white">{penalty.reason}</td>
-                          <td className="px-6 py-4 text-[#8fb5a0]">{penalty.admin_username}</td>
-                          <td className="px-6 py-4 text-[#8fb5a0] text-sm">{formatDate(penalty.created_at)}</td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </div>
 
-        {/* Penalties History */}
-        <div className="mb-8">
-          {isHCS && (
-            <div className="flex justify-end gap-2 mb-2">
-              {isDev && selectedPenaltyIds.size > 0 && (
-                <button
-                  onClick={handleDeleteSelectedPenalties}
-                  className="flex items-center gap-2 px-3 py-2 bg-orange-600/20 border border-orange-500/50 text-orange-400 text-sm font-bold rounded-lg hover:bg-orange-600/30 transition-all"
-                  title={`Usuń ${selectedPenaltyIds.size} zaznaczonych pozycji (DEV)`}
-                >
-                  <Trash2 className="w-3 h-3" />
-                  Usuń zaznaczone ({selectedPenaltyIds.size})
-                </button>
-              )}
-              <button
-                onClick={handleClearSuspensions}
-                className="flex items-center gap-2 px-3 py-2 bg-red-600/20 border border-red-500/50 text-red-400 text-sm font-bold rounded-lg hover:bg-red-600/30 transition-all"
-                title="Wyzeruj całą historię zawieszeń (HCS+)"
-              >
-                <Trash2 className="w-3 h-3" />
-                Wyzeruj wszystko
-              </button>
-            </div>
-          )}
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-2xl font-bold text-white flex items-center gap-2">
-              <AlertTriangle className="w-6 h-6 text-red-400" />
-              Historia Kar (Zawieszenia)
-            </h3>
-            <button
-              onClick={() => setShowAddPenaltyModal(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
-            >
-              <AlertTriangle className="w-4 h-4" />
-              Nadaj Karę
-            </button>
-          </div>
-          <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 overflow-hidden shadow-xl">
-            {penalties.filter((p) => ['zawieszenie_sluzba', 'zawieszenie_dywizja', 'zawieszenie_uprawnienia', 'zawieszenie_poscigowe'].includes(p.penalty_type)).length === 0 ? (
-              <div className="p-12 text-center">
-                <AlertTriangle className="w-16 h-16 text-[#8fb5a0] mx-auto mb-4" />
-                <p className="text-[#8fb5a0]">Brak historii kar.</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-[#051a0f]/50 border-b border-[#1a4d32]/50">
-                    <tr>
-                      {isDev && <th className="px-4 py-4 w-12"></th>}
-                      <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Powód</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Czas trwania</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Nadane przez</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Data</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#1a4d32]/30">
-                    {penalties
-                      .filter((p) => ['zawieszenie_sluzba', 'zawieszenie_dywizja', 'zawieszenie_uprawnienia', 'zawieszenie_poscigowe'].includes(p.penalty_type))
-                      .map((penalty) => (
-                        <tr key={penalty.id} className="hover:bg-[#0a2818]/30 transition-colors">
-                          {isDev && (
-                            <td className="px-4 py-4">
-                              <input
-                                type="checkbox"
-                                checked={selectedPenaltyIds.has(penalty.id)}
-                                onChange={() => togglePenaltySelection(penalty.id)}
-                                className="w-4 h-4 rounded border-[#1a4d32] bg-[#0a2818] text-[#c9a227] focus:ring-[#c9a227] focus:ring-offset-0 cursor-pointer"
-                              />
-                            </td>
-                          )}
-                          <td className="px-6 py-4 text-white">{penalty.reason}</td>
-                          <td className="px-6 py-4 text-orange-400 font-semibold">
-                            {penalty.duration_hours ? `${penalty.duration_hours}h` : 'Permanentne'}
-                          </td>
-                          <td className="px-6 py-4 text-[#8fb5a0]">{penalty.admin_username}</td>
-                          <td className="px-6 py-4 text-[#8fb5a0] text-sm">{formatDate(penalty.created_at)}</td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+        {/* PLUS/MINUS History */}
+        <div className="flex items-center justify-between mb-4">
+          <div /> {/* Spacer for button alignment */}
+          <button
+            onClick={() => setShowAddPlusMinusModal(true)}
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#c9a227] to-[#e6b830] text-[#020a06] font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
+          >
+            <Plus className="w-4 h-4" />
+            Dodaj PLUS/MINUS
+          </button>
         </div>
+        <PenaltiesTable
+          penalties={penalties.filter((p) => p.penalty_type === 'plus' || p.penalty_type === 'minus')}
+          section="plusminus"
+          selectedIds={selectedPenaltyIds}
+          onToggleSelection={togglePenaltySelection}
+          onClear={handleClearPlusMinusPenalties}
+          onDeleteSelected={handleDeleteSelectedPenalties}
+          isDev={isDev}
+          isHCS={isHCS}
+          isCS={isCS}
+        />
+
+        {/* Suspensions History */}
+        <div className="flex items-center justify-between mb-4">
+          <div /> {/* Spacer for button alignment */}
+          <button
+            onClick={() => setShowAddPenaltyModal(true)}
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
+          >
+            <AlertTriangle className="w-4 h-4" />
+            Nadaj Karę
+          </button>
+        </div>
+        <PenaltiesTable
+          penalties={penalties.filter((p) => ['zawieszenie_sluzba', 'zawieszenie_dywizja', 'zawieszenie_uprawnienia', 'zawieszenie_poscigowe'].includes(p.penalty_type))}
+          section="suspensions"
+          selectedIds={selectedPenaltyIds}
+          onToggleSelection={togglePenaltySelection}
+          onClear={handleClearSuspensions}
+          onDeleteSelected={handleDeleteSelectedPenalties}
+          isDev={isDev}
+          isHCS={isHCS}
+          isCS={isCS}
+        />
 
         {/* Written Warnings History */}
-        <div className="mb-8">
-          {isDev && (
-            <div className="flex justify-end gap-2 mb-2">
-              {selectedPenaltyIds.size > 0 && (
-                <button
-                  onClick={handleDeleteSelectedPenalties}
-                  className="flex items-center gap-2 px-3 py-2 bg-orange-600/20 border border-orange-500/50 text-orange-400 text-sm font-bold rounded-lg hover:bg-orange-600/30 transition-all"
-                  title={`Usuń ${selectedPenaltyIds.size} zaznaczonych pozycji`}
-                >
-                  <Trash2 className="w-3 h-3" />
-                  Usuń zaznaczone ({selectedPenaltyIds.size})
-                </button>
-              )}
-              <button
-                onClick={handleClearWrittenWarnings}
-                className="flex items-center gap-2 px-3 py-2 bg-red-600/20 border border-red-500/50 text-red-400 text-sm font-bold rounded-lg hover:bg-red-600/30 transition-all"
-                title="Wyzeruj całą historię upomnienia pisemnych (DEV)"
-              >
-                <Trash2 className="w-3 h-3" />
-                Wyzeruj wszystko
-              </button>
-            </div>
-          )}
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-2xl font-bold text-white flex items-center gap-2">
-              <FileText className="w-6 h-6 text-orange-400" />
-              Historia Upomnienia Pisemne
-            </h3>
-            <button
-              onClick={() => setShowAddWrittenWarningModal(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
-            >
-              <FileText className="w-4 h-4" />
-              Nadaj Upomnienie
-            </button>
-          </div>
-          <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 overflow-hidden shadow-xl">
-            {penalties.filter((p) => p.penalty_type === 'upomnienie_pisemne').length === 0 ? (
-              <div className="p-12 text-center">
-                <FileText className="w-16 h-16 text-[#8fb5a0] mx-auto mb-4" />
-                <p className="text-[#8fb5a0]">Brak upomnienia pisemnego.</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-[#051a0f]/50 border-b border-[#1a4d32]/50">
-                    <tr>
-                      {isDev && <th className="px-4 py-4 w-12"></th>}
-                      <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Powód</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Nadane przez</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Data</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#1a4d32]/30">
-                    {penalties
-                      .filter((p) => p.penalty_type === 'upomnienie_pisemne')
-                      .map((penalty) => (
-                        <tr key={penalty.id} className="hover:bg-[#0a2818]/30 transition-colors">
-                          {isDev && (
-                            <td className="px-4 py-4">
-                              <input
-                                type="checkbox"
-                                checked={selectedPenaltyIds.has(penalty.id)}
-                                onChange={() => togglePenaltySelection(penalty.id)}
-                                className="w-4 h-4 rounded border-[#1a4d32] bg-[#0a2818] text-[#c9a227] focus:ring-[#c9a227] focus:ring-offset-0 cursor-pointer"
-                              />
-                            </td>
-                          )}
-                          <td className="px-6 py-4 text-white">{penalty.reason}</td>
-                          <td className="px-6 py-4 text-[#8fb5a0]">{penalty.admin_username}</td>
-                          <td className="px-6 py-4 text-[#8fb5a0] text-sm">{formatDate(penalty.created_at)}</td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+        <div className="flex items-center justify-between mb-4">
+          <div /> {/* Spacer for button alignment */}
+          <button
+            onClick={() => setShowAddWrittenWarningModal(true)}
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
+          >
+            <FileText className="w-4 h-4" />
+            Nadaj Upomnienie
+          </button>
         </div>
+        <PenaltiesTable
+          penalties={penalties.filter((p) => p.penalty_type === 'upomnienie_pisemne')}
+          section="warnings"
+          selectedIds={selectedPenaltyIds}
+          onToggleSelection={togglePenaltySelection}
+          onClear={handleClearWrittenWarnings}
+          onDeleteSelected={handleDeleteSelectedPenalties}
+          isDev={isDev}
+          isHCS={isHCS}
+          isCS={isCS}
+        />
 
         {/* Private Notes */}
-        <div className="mb-8">
-          {isDev && (
-            <div className="flex justify-end gap-2 mb-2">
-              {selectedNoteIds.size > 0 && (
-                <button
-                  onClick={handleDeleteSelectedNotes}
-                  className="flex items-center gap-2 px-3 py-2 bg-orange-600/20 border border-orange-500/50 text-orange-400 text-sm font-bold rounded-lg hover:bg-orange-600/30 transition-all"
-                  title={`Usuń ${selectedNoteIds.size} zaznaczonych notatek`}
-                >
-                  <Trash2 className="w-3 h-3" />
-                  Usuń zaznaczone ({selectedNoteIds.size})
-                </button>
-              )}
-              <button
-                onClick={handleClearUserNotes}
-                className="flex items-center gap-2 px-3 py-2 bg-red-600/20 border border-red-500/50 text-red-400 text-sm font-bold rounded-lg hover:bg-red-600/30 transition-all"
-                title="Wyzeruj wszystkie notatki (DEV)"
-              >
-                <Trash2 className="w-3 h-3" />
-                Wyzeruj wszystko
-              </button>
-            </div>
-          )}
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-2xl font-bold text-white flex items-center gap-2">
-              <FileText className="w-6 h-6 text-[#c9a227]" />
-              Notatki Prywatne (Admin)
-            </h3>
-            <button
-              onClick={() => setShowAddNoteModal(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#14b8a6] to-[#0d9488] text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
-            >
-              <Plus className="w-4 h-4" />
-              Dodaj Notatkę
-            </button>
-          </div>
-          <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 overflow-hidden shadow-xl">
-            {notes.length === 0 ? (
-              <div className="p-12 text-center">
-                <FileText className="w-16 h-16 text-[#8fb5a0] mx-auto mb-4" />
-                <p className="text-[#8fb5a0]">Brak notatek.</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-[#1a4d32]/30">
-                {notes.map((note) => (
-                  <div
-                    key={note.id}
-                    className="p-6 hover:bg-[#0a2818]/30 transition-colors"
-                  >
-                    <div className="flex items-start gap-4">
-                      {isDev && (
-                        <input
-                          type="checkbox"
-                          checked={selectedNoteIds.has(note.id)}
-                          onChange={() => toggleNoteSelection(note.id)}
-                          className="w-4 h-4 mt-1 rounded border-[#1a4d32] bg-[#0a2818] text-[#c9a227] focus:ring-[#c9a227] focus:ring-offset-0 cursor-pointer"
-                        />
-                      )}
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-[#c9a227] font-semibold">{note.admin_username}</span>
-                          <span className="text-[#8fb5a0] text-xs">
-                            {formatDate(note.created_at)}
-                          </span>
-                        </div>
-                        <p className="text-white">{note.note}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+        <NotesTable
+          notes={notes}
+          selectedIds={selectedNoteIds}
+          onToggleSelection={toggleNoteSelection}
+          onClear={handleClearUserNotes}
+          onDeleteSelected={handleDeleteSelectedNotes}
+          onAddNote={() => setShowAddNoteModal(true)}
+          isDev={isDev}
+        />
       </div>
 
       {/* PLUS/MINUS Modal */}

@@ -39,7 +39,8 @@
       "Bash(git diff:*)",
       "Bash(where:*)",
       "Bash(find:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(awk:*)"
     ]
   }
 }
