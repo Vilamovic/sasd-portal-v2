@@ -124,7 +124,13 @@ Zmienione pliki: [ścieżki]
   - users.ts (6.3K), exams.ts (5.2K), materials.ts (1.4K), tokens.ts (4.8K), penalties.ts (3.7K), notes.ts (1.9K), divisions.ts (2.0K)
   - 12 import statements updated across codebase
   - TypeScript signatures aligned with original JS flexibility (string | null, number | string)
-  - See task/REFACTORING_PLAN.md for full roadmap (9 more stages remaining)
+- ✅ **ETAP 1.2a COMPLETE**: UserProfile modals extraction (commit: 2c520b1)
+  - app/personnel/[username]/page.tsx: 1876 → 1557 linii (-319 linii, -17%)
+  - 4 modal components extracted to src/components/personnel/UserProfile/Modals/
+  - AddNoteModal.tsx (120L), AddPlusMinusModal.tsx (160L), AddPenaltyModal.tsx (220L), AddWrittenWarningModal.tsx (150L)
+  - Build successful, functionality preserved
+  - Remaining: Inline editors, tables, hooks, orchestrator (~940 lines to refactor)
+  - See task/REFACTORING_PLAN.md for full roadmap (Progress: 15%)
 ---
 
-Last Updated: 2026-02-07 - Etap 1.1 Refaktoryzacji ukończony
+Last Updated: 2026-02-07 - Etap 1.2a Refaktoryzacji ukończony (modals)

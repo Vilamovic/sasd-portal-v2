@@ -382,13 +382,23 @@ src/
 - [x] Test build (`npm run build`)
 - [x] Commit: `refactor: Podział supabaseHelpers na src/lib/db/*` (commit: ec3a458)
 
-### **ETAP 1.2: Personnel - User Profile**
-- [ ] Stwórz folder `src/components/personnel/UserProfile/`
-- [ ] Podziel `app/personnel/[username]/page.tsx` na komponenty
-- [ ] Stwórz hooks (`useUserProfile`, `usePenaltyTimers`)
+### **ETAP 1.2: Personnel - User Profile** 🚧 IN PROGRESS
+#### **ETAP 1.2a: Modals** ✅ DONE (2026-02-07)
+- [x] Stwórz folder `src/components/personnel/UserProfile/Modals/`
+- [x] Wydziel 4 modals (AddNote, AddPlusMinus, AddPenalty, AddWrittenWarning)
+- [x] Test build (`npm run build`)
+- [x] Commit: `refactor: ETAP 1.2a - Wydzielenie modals z UserProfile` (commit: 2c520b1)
+- **Rezultat**: UserProfile 1876 → 1557 linii (-319 linii, -17%)
+
+#### **ETAP 1.2b-e: Pozostałe komponenty** ⏳ TODO
+- [ ] Wydziel Inline Editors (Badge, Division, Permissions) ~240 linii
+- [ ] Wydziel Tables (Penalties, Notes) ~300 linii
+- [ ] Wydziel ProfileHeader ~100 linii
+- [ ] Stwórz hooks (`useUserProfile`, `usePenaltyTimers`) ~150 linii
+- [ ] Stwórz UserProfilePage orchestrator ~150 linii
 - [ ] Zaktualizuj `app/personnel/[username]/page.tsx` (tylko routing)
 - [ ] Test build
-- [ ] Commit: `refactor: Podział User Profile na komponenty`
+- [ ] Commit: `refactor: ETAP 1.2 complete - User Profile komponenty`
 
 ### **ETAP 1.3: Personnel - List**
 - [ ] Stwórz folder `src/components/personnel/PersonnelList/`
@@ -476,12 +486,13 @@ src/
 **Data rozpoczęcia:** 2026-02-07
 **Data zakończenia:** _TBD_
 
-**Ukończone etapy:** 1/10
-**Progress:** █░░░░░░░░░ 10%
+**Ukończone etapy:** 1.5/10
+**Progress:** █▓░░░░░░░░ 15%
 
 ### Changelog:
-- **2026-02-07:** ✅ ETAP 1.1 - supabaseHelpers.js → src/lib/db/* (7 plików, 12 importów zaktualizowanych)
+- **2026-02-07 (morning):** ✅ ETAP 1.1 - supabaseHelpers.js → src/lib/db/* (7 plików, 12 importów, commit: ec3a458)
+- **2026-02-07 (afternoon):** ✅ ETAP 1.2a - UserProfile modals (4 komponenty, -319 linii, commit: 2c520b1)
 
 ---
 
-**Ostatnia aktualizacja:** 2026-02-07 (ETAP 1.1 ukończony)
+**Ostatnia aktualizacja:** 2026-02-07 (ETAP 1.2a ukończony - modals)
