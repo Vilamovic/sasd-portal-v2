@@ -111,14 +111,14 @@ Zmienione pliki: [ścieżki]
 - **ETAP 2.3**: Materials complete (5 plików, 586L → 11L, commit: bcc5d37)
 - **ETAP 2.4**: AuthContext complete (5 plików, 573L → 803L orchestrator + 4 hooki, commit: a5d934e)
 - **ETAP 2.5**: ExamQuestions complete (6 plików, 570L → 11L, commit: 6d27e2e)
+- **ETAP 2.6**: AdminPanel complete (11 plików, 539L → 30L, commit: 926c587)
 
-**📊 Overall Progress:** 80% (8/10 etapów)
+**📊 Overall Progress:** 90% (9/10 etapów)
 
 **Next Steps:**
-1. ETAP 2.6: AdminPanel refactoring (~539L)
-2. ETAP 2.7: Divisions refactoring (~462L)
-3. ETAP 3: Średnie pliki (300-500L) - optional refinement
+1. ETAP 2.7: Divisions refactoring (~462L) - OSTATNI ETAP TOP 10!
+2. ETAP 3: Średnie pliki (300-500L) - optional refinement (ExamStatistics, TokenManagement, ExamArchive, Navbar)
 
 ---
 
-Last Updated: 2026-02-07 - ETAP 2.5 complete, 8/10 etapów (80%)
+Last Updated: 2026-02-07 - ETAP 2.6 complete, 9/10 etapów (90%)

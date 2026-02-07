@@ -461,11 +461,17 @@ src/
 - [ ] Test build
 - [ ] Commit: `refactor: Podział ExamQuestions na komponenty`
 
-### **ETAP 2.6: AdminPanel**
-- [ ] Stwórz folder `src/components/admin/AdminPanel/`
-- [ ] Podziel na komponenty
-- [ ] Test build
-- [ ] Commit: `refactor: Podział AdminPanel na komponenty`
+### **ETAP 2.6: AdminPanel** ✅ DONE (2026-02-07)
+- [x] Stwórz folder `src/components/admin/AdminPanel/`
+- [x] **Phase A**: SearchBar, AccessDenied, LoadingState (3 pliki)
+- [x] **Phase B**: BackButton, PageHeader, ActionButtons, UserRow, UsersTable, RoleDropdown (6 plików)
+- [x] **Phase C**: hooks/useAdminPanel.ts (245L) - load, search, sort, update role, kick, dropdown
+- [x] **Phase D**: AdminPanelPage orchestrator (115L) - actor pattern dla Discord webhooks
+- [x] Zaktualizuj app/admin/page.tsx → routing wrapper
+- [x] Test build
+- [x] Commit: `refactor: ETAP 2.6 COMPLETE - AdminPanel totalna refaktoryzacja` (commit: 926c587)
+- **Progress**: 11 plików utworzonych (855L total)
+- **Rezultat**: AdminPanel.jsx: 539L → app/admin/page.tsx: 30L (-509L, -94%)
 
 ### **ETAP 2.7: Divisions**
 - [ ] Stwórz folder `src/components/divisions/`
@@ -507,17 +513,20 @@ src/
 **Data rozpoczęcia:** 2026-02-07
 **Data zakończenia:** _TBD_
 
-**Ukończone etapy:** 3/10 (+ 0.8 częściowo)
-**Progress:** ███▓░░░░░░ 35%
+**Ukończone etapy:** 9/10
+**Progress:** █████████░ 90%
 
 ### Changelog:
 - **2026-02-07 (morning):** ✅ ETAP 1.1 - supabaseHelpers.js → src/lib/db/* (7 plików, commit: ec3a458)
 - **2026-02-07 (afternoon):** ✅ ETAP 1.2 - UserProfile complete (14 komponentów, 1876L → 15L, commits: 2c520b1, c6e346d, 0a0dbca, 3344e57)
-- **2026-02-07 (evening):** ✅ ETAP 1.3 - PersonnelList complete (9 komponentów, 1124L → 8L, commit: aab7d02)
-- **2026-02-07 (late evening):** 🚧 ETAP 2.1 - ExamTaker in progress (8/10 plików, 774L created)
-  - Phase A-C: Components + Hooks DONE
-  - Phase D: Orchestrator PENDING (~300-400L remaining)
+- **2026-02-07 (afternoon):** ✅ ETAP 1.3 - PersonnelList complete (9 komponentów, 1124L → 8L, commit: aab7d02)
+- **2026-02-07 (evening):** ✅ ETAP 2.1 - ExamTaker complete (10 plików, 832L → 11L, commits: d7c24d2, 3dc1157)
+- **2026-02-07 (evening):** ✅ ETAP 2.2 - Discord Webhooks complete (4 pliki webhook, 12 files updated, commit: 22b7700)
+- **2026-02-07 (evening):** ✅ ETAP 2.3 - Materials complete (5 plików, 586L → 11L, commit: bcc5d37)
+- **2026-02-07 (evening):** ✅ ETAP 2.4 - AuthContext complete (5 plików, 573L → 803L orchestrator + 4 hooki, commit: a5d934e)
+- **2026-02-07 (evening):** ✅ ETAP 2.5 - ExamQuestions complete (6 plików, 570L → 11L, commit: 6d27e2e)
+- **2026-02-07 (evening):** ✅ ETAP 2.6 - AdminPanel complete (11 plików, 539L → 30L, commit: 926c587)
 
 ---
 
-**Ostatnia aktualizacja:** 2026-02-07 (ETAP 2.1 częściowo - orchestrator pozostały)
+**Ostatnia aktualizacja:** 2026-02-07 (90% ukończone - ETAP 2.7 pozostały)
