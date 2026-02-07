@@ -220,16 +220,15 @@ export default function DivisionMaterialsPage() {
 
       <Navbar />
 
-      {/* Back Button - Top Left (STANDARD) */}
-      <button
-        onClick={() => router.push('/divisions')}
-        className="absolute top-8 left-8 flex items-center gap-2 px-4 py-2 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-[#8fb5a0] hover:text-white hover:border-[#c9a227] transition-all z-10"
-      >
-        <ChevronLeft className="w-5 h-5" />
-        Powrót do Dywizji
-      </button>
-
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
+        {/* Back Button */}
+        <button
+          onClick={() => router.push('/divisions')}
+          className="mb-6 flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200"
+        >
+          <ChevronLeft className="w-5 h-5" />
+          <span className="text-sm font-medium">Powrót do Dywizji</span>
+        </button>
 
         {/* Header */}
         <div className="mb-8 flex flex-col md:flex-row md:items-start justify-between gap-4">
