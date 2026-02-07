@@ -41,7 +41,8 @@
       "Bash(find:*)",
       "Bash(wc:*)",
       "Bash(awk:*)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(node -e:*)"
     ]
   }
 }

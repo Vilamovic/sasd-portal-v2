@@ -186,20 +186,28 @@ export function useAuthSession(callbacks: AuthSessionCallbacks) {
           localStorage.setItem(`login_timestamp_${userId}`, loginTimestamp.toString());
         }
 
-        // Upsert user do bazy (non-blocking)
-        const userData = {
-          id: userId,
-          username:
-            newSession.user.user_metadata?.full_name ||
-            newSession.user.user_metadata?.name ||
-            'Unknown',
-          email: newSession.user.email || newSession.user.user_metadata?.email || null,
-          avatar_url: newSession.user.user_metadata?.avatar_url || null,
-          role: 'trainee', // Default role for new users
-          last_seen: new Date().toISOString(),
-        };
+        // Check if user exists first to avoid overwriting role
+        getUserById(userId)
+          .then(({ data: existingUser }) => {
+            // Upsert user do bazy (non-blocking)
+            const userData: any = {
+              id: userId,
+              username:
+                newSession.user.user_metadata?.full_name ||
+                newSession.user.user_metadata?.name ||
+                'Unknown',
+              email: newSession.user.email || newSession.user.user_metadata?.email || null,
+              avatar_url: newSession.user.user_metadata?.avatar_url || null,
+              last_seen: new Date().toISOString(),
+            };
 
-        upsertUser(userData)
+            // Only set role for NEW users (don't overwrite existing)
+            if (!existingUser) {
+              userData.role = 'trainee';
+            }
+
+            return upsertUser(userData);
+          })
           .then(({ data: dbUser, error: upsertError }) => {
             if (upsertError) {
               console.error('Error upserting user:', upsertError);
