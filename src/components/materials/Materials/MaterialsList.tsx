@@ -15,9 +15,8 @@ interface MaterialsListProps {
  * - Empty state (brak materiałów)
  * - Grid responsywny (1/2/3 kolumny)
  * - Delete button (tylko w edit mode)
- * - Glow effects on hover
  * - Content preview (pierwszy 150 znaków)
- * - Sheriff Theme colors
+ * - MDT Terminal styling
  */
 export default function MaterialsList({
   materials,
@@ -29,10 +28,10 @@ export default function MaterialsList({
   // Empty State
   if (materials.length === 0) {
     return (
-      <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 p-12 text-center shadow-xl">
-        <BookOpen className="w-16 h-16 text-[#8fb5a0] mx-auto mb-4" />
-        <p className="text-[#8fb5a0] text-lg">
-          Brak materiałów. Kliknij "Dodaj Materiał" aby stworzyć pierwszy.
+      <div className="panel-raised p-12 text-center" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+        <BookOpen className="w-16 h-16 mx-auto mb-4" style={{ color: 'var(--mdt-muted-text)' }} />
+        <p className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>
+          Brak materiałów. Kliknij &quot;Dodaj Materiał&quot; aby stworzyć pierwszy.
         </p>
       </div>
     );
@@ -40,65 +39,61 @@ export default function MaterialsList({
 
   // Grid with Materials
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {materials.map((material, index) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {materials.map((material) => (
         <div
           key={material.id}
-          className="group relative"
-          style={{ animationDelay: `${index * 50}ms` }}
+          className="relative"
         >
-          {/* Glow effect */}
-          <div className="absolute -inset-2 rounded-3xl opacity-0 group-hover:opacity-100 blur-xl transition-all duration-500 bg-[#c9a227]/20" />
-
           {/* Main Card */}
           <button
             onClick={() => onSelectMaterial(material)}
-            className="relative w-full glass-strong rounded-2xl p-6 border border-[#1a4d32]/50 hover:border-[#c9a227]/50 transition-all duration-300 hover:scale-[1.02] shadow-xl hover:shadow-2xl text-left overflow-hidden"
+            className="relative w-full panel-raised text-left overflow-hidden"
+            style={{ backgroundColor: 'var(--mdt-btn-face)' }}
           >
-            {/* Corner accents */}
-            <div className="absolute top-0 left-6 w-16 h-[2px] bg-gradient-to-r from-[#c9a227]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="absolute top-6 left-0 w-[2px] h-16 bg-gradient-to-b from-[#c9a227]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-            {/* Delete Button (Edit Mode Only) */}
-            {isAdmin && editMode && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(material.id, material.title);
-                }}
-                className="absolute top-4 right-4 z-10 p-2.5 bg-red-500/20 hover:bg-red-500 border border-red-500/50 hover:border-red-500 rounded-xl transition-all duration-200 group/delete animate-fadeIn shadow-lg shadow-red-500/20"
-                title="Usuń materiał"
-              >
-                <Trash2 className="w-4 h-4 text-red-400 group-hover/delete:text-white group-hover/delete:scale-110 transition-all" />
-              </button>
-            )}
-
-            {/* Icon Container */}
-            <div className="mb-5">
-              <div className="w-14 h-14 bg-gradient-to-br from-[#c9a227] to-[#e6b830] rounded-2xl flex items-center justify-center shadow-lg transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                <FileText className="w-7 h-7 text-white" strokeWidth={2} />
-              </div>
+            {/* Blue header with title */}
+            <div className="px-3 py-1 flex items-center justify-between" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
+              <span className="font-[family-name:var(--font-vt323)] text-base tracking-widest uppercase text-white truncate flex-1">
+                {material.title}
+              </span>
+              {/* Delete Button (Edit Mode Only) */}
+              {isAdmin && editMode && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(material.id, material.title);
+                  }}
+                  className="btn-win95 ml-2 p-1"
+                  style={{ backgroundColor: '#c41e1e', color: '#fff', borderColor: '#ff4444 #800000 #800000 #ff4444' }}
+                  title="Usuń materiał"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </button>
+              )}
             </div>
 
-            {/* Content */}
-            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-[#c9a227] transition-colors line-clamp-2">
-              {material.title}
-            </h3>
+            <div className="p-4">
+              {/* Icon + Content Preview */}
+              <div className="flex items-start gap-3 mb-3">
+                <div className="panel-inset p-2 flex-shrink-0" style={{ backgroundColor: 'var(--mdt-panel-alt)' }}>
+                  <FileText className="w-5 h-5" style={{ color: 'var(--mdt-content-text)' }} strokeWidth={2} />
+                </div>
+                <div
+                  className="font-mono text-xs leading-relaxed line-clamp-3"
+                  style={{ color: 'var(--mdt-muted-text)' }}
+                  dangerouslySetInnerHTML={{
+                    __html:
+                      material.content.replace(/<[^>]*>/g, ' ').substring(0, 150) +
+                      '...',
+                  }}
+                />
+              </div>
 
-            {/* Content Preview */}
-            <div
-              className="text-[#8fb5a0] text-sm leading-relaxed line-clamp-3 prose prose-invert prose-p:text-[#8fb5a0] prose-p:text-sm"
-              dangerouslySetInnerHTML={{
-                __html:
-                  material.content.replace(/<[^>]*>/g, ' ').substring(0, 150) +
-                  '...',
-              }}
-            />
-
-            {/* Footer */}
-            <div className="mt-4 pt-4 border-t border-[#1a4d32]/50 flex items-center justify-between">
-              <span className="text-xs text-[#8fb5a0]">Kliknij aby otworzyć</span>
-              <ArrowRight className="w-4 h-4 text-[#c9a227] group-hover:translate-x-1 transition-transform" />
+              {/* Footer */}
+              <div className="panel-inset flex items-center justify-between px-2 py-1" style={{ backgroundColor: 'var(--mdt-panel-alt)' }}>
+                <span className="font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>Kliknij aby otworzyc</span>
+                <ArrowRight className="w-3 h-3" style={{ color: 'var(--mdt-content-text)' }} />
+              </div>
             </div>
           </button>
         </div>

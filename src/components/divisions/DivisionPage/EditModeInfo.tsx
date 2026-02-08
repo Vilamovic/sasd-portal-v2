@@ -7,17 +7,13 @@ import { Trash2 } from 'lucide-react';
  */
 export default function EditModeInfo() {
   return (
-    <div className="mb-6 glass-strong rounded-xl border border-red-500/30 p-4 shadow-lg bg-red-500/5">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center flex-shrink-0">
-          <Trash2 className="w-5 h-5 text-red-400" />
-        </div>
-        <div>
-          <p className="text-white font-semibold text-sm">Tryb zarządzania aktywny</p>
-          <p className="text-[#8fb5a0] text-xs">
-            Kliknij "Edytuj" lub "Usuń" na kafelku aby zarządzać materiałami
-          </p>
-        </div>
+    <div className="panel-inset mb-4 p-3 flex items-center gap-3" style={{ backgroundColor: 'var(--mdt-input-bg)' }}>
+      <Trash2 className="w-4 h-4 flex-shrink-0" style={{ color: '#c41e1e' }} />
+      <div>
+        <p className="font-mono text-sm font-bold" style={{ color: 'var(--mdt-content-text)' }}>Tryb zarządzania aktywny</p>
+        <p className="font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>
+          Kliknij &quot;Edytuj&quot; lub &quot;Usuń&quot; na kafelku aby zarządzać materiałami
+        </p>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import { Filter, Shield, ChevronDown } from 'lucide-react';
+import { Filter, Shield } from 'lucide-react';
 
 interface FiltersPanelProps {
   divisions: string[];
@@ -24,11 +24,12 @@ export default function FiltersPanel({
     <>
       {/* Division Filter */}
       <div className="relative">
-        <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8fb5a0] pointer-events-none" />
+        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--mdt-muted-text)' }} />
         <select
           value={divisionFilter}
           onChange={(e) => setDivisionFilter(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white focus:outline-none focus:border-[#c9a227] transition-colors appearance-none cursor-pointer"
+          className="panel-inset w-full pl-9 pr-4 py-2 font-mono text-sm appearance-none cursor-pointer"
+          style={{ backgroundColor: 'var(--mdt-input-bg)', color: 'var(--mdt-content-text)', outline: 'none' }}
         >
           <option value="all">Wszystkie dywizje</option>
           {divisions.map((div) => (
@@ -38,16 +39,16 @@ export default function FiltersPanel({
           ))}
           <option value="none">Bez dywizji</option>
         </select>
-        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8fb5a0] pointer-events-none" />
       </div>
 
       {/* Role Filter */}
       <div className="relative">
-        <Shield className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8fb5a0] pointer-events-none" />
+        <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--mdt-muted-text)' }} />
         <select
           value={roleFilter}
           onChange={(e) => setRoleFilter(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white focus:outline-none focus:border-[#c9a227] transition-colors appearance-none cursor-pointer"
+          className="panel-inset w-full pl-9 pr-4 py-2 font-mono text-sm appearance-none cursor-pointer"
+          style={{ backgroundColor: 'var(--mdt-input-bg)', color: 'var(--mdt-content-text)', outline: 'none' }}
         >
           <option value="all">Wszystkie role</option>
           <option value="dev">Dev</option>
@@ -56,7 +57,6 @@ export default function FiltersPanel({
           <option value="deputy">Deputy</option>
           <option value="trainee">Trainee</option>
         </select>
-        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8fb5a0] pointer-events-none" />
       </div>
     </>
   );

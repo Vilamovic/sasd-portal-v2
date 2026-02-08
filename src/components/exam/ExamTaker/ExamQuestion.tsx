@@ -38,84 +38,85 @@ export default function ExamQuestion({
   })();
 
   return (
-    <div className="min-h-screen bg-[#020a06] relative overflow-hidden">
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-[#c9a227]/10 rounded-full blur-[120px] animate-pulse-glow" />
-      </div>
-
-      <div className="relative z-10 max-w-3xl mx-auto px-6 py-12">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--mdt-content)' }}>
+      <div className="max-w-3xl mx-auto px-6 py-12">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+        <div className="mb-6 panel-raised" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+          <div className="px-4 py-2 flex items-center justify-between" style={{ backgroundColor: 'var(--mdt-header)' }}>
             <div>
-              <h2 className="text-2xl font-bold text-white mb-1">{examTypeName}</h2>
-              <span className="text-sm text-[#8fb5a0]">
+              <h2 className="font-[family-name:var(--font-vt323)] text-lg" style={{ color: 'var(--mdt-header-text)' }}>{examTypeName}</h2>
+              <span className="font-mono text-xs" style={{ color: 'var(--mdt-header-text)' }}>
                 Pytanie {currentQuestionIndex + 1} z {totalQuestions}
               </span>
             </div>
-
             <TimerDisplay timeLeft={timeLeft} />
           </div>
 
           {/* Progress Bar */}
-          <div className="relative w-full h-3 bg-[#0a2818] rounded-full overflow-hidden">
-            <div
-              className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#c9a227] to-[#e6b830] transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            />
+          <div className="px-4 py-2">
+            <div className="panel-inset h-4" style={{ backgroundColor: 'var(--mdt-panel-alt)' }}>
+              <div
+                className="h-full transition-all duration-300"
+                style={{ width: `${progress}%`, backgroundColor: 'var(--mdt-blue-bar)' }}
+              />
+            </div>
           </div>
         </div>
 
         {/* Question Card */}
-        <div className="glass-strong rounded-2xl border border-[#1a4d32] p-8 mb-6 shadow-xl">
-          <div className="flex items-start gap-4 mb-6">
-            <div className="flex-shrink-0 w-10 h-10 bg-[#c9a227]/20 rounded-xl flex items-center justify-center border border-[#c9a227]/30">
-              <span className="text-[#c9a227] font-bold text-lg">{currentQuestionIndex + 1}</span>
+        <div className="panel-raised mb-4" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+          <div className="p-6">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="panel-inset flex-shrink-0 w-8 h-8 flex items-center justify-center" style={{ backgroundColor: 'var(--mdt-input-bg)' }}>
+                <span className="font-mono font-bold text-sm" style={{ color: 'var(--mdt-content-text)' }}>{currentQuestionIndex + 1}</span>
+              </div>
+              <h3 className="font-mono text-sm font-semibold leading-relaxed flex-grow" style={{ color: 'var(--mdt-content-text)' }}>
+                {currentQuestion.question}
+              </h3>
             </div>
-            <h3 className="text-xl font-semibold text-white leading-relaxed flex-grow">
-              {currentQuestion.question}
-            </h3>
-          </div>
 
-          {currentQuestion.is_multiple_choice && (
-            <div className="mb-6 px-4 py-2 bg-[#14b8a6]/10 border border-[#14b8a6]/30 rounded-lg inline-flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-[#14b8a6]" />
-              <span className="text-sm text-[#14b8a6] font-medium">Możesz wybrać wiele odpowiedzi</span>
-            </div>
-          )}
+            {currentQuestion.is_multiple_choice && (
+              <div className="mb-4 px-3 py-2 panel-inset flex items-center gap-2" style={{ backgroundColor: 'var(--mdt-input-bg)' }}>
+                <CheckCircle className="w-4 h-4" style={{ color: 'var(--mdt-muted-text)' }} />
+                <span className="font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>Możesz wybrać wiele odpowiedzi</span>
+              </div>
+            )}
 
-          {/* Answers */}
-          <div className="space-y-3">
-            {currentQuestion.shuffledOptions.map((option: string, index: number) => {
-              const isSelected = currentQuestion.is_multiple_choice
-                ? currentAnswer?.includes(index)
-                : currentAnswer === index;
+            {/* Answers */}
+            <div className="space-y-2">
+              {currentQuestion.shuffledOptions.map((option: string, index: number) => {
+                const isSelected = currentQuestion.is_multiple_choice
+                  ? currentAnswer?.includes(index)
+                  : currentAnswer === index;
 
-              return (
-                <button
-                  key={index}
-                  onClick={() => onAnswerSelect(index)}
-                  className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${
-                    isSelected
-                      ? 'bg-[#c9a227]/20 border-[#c9a227] text-white shadow-lg'
-                      : 'bg-[#0a2818]/30 border-[#1a4d32]/50 text-[#8fb5a0] hover:bg-[#0a2818]/50 hover:border-[#1a4d32]'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`flex-shrink-0 w-6 h-6 ${
-                        currentQuestion.is_multiple_choice ? 'rounded-md' : 'rounded-full'
-                      } border-2 transition-all ${
-                        isSelected ? 'bg-[#c9a227] border-[#c9a227]' : 'bg-transparent border-[#8fb5a0]'
-                      } flex items-center justify-center`}
-                    >
-                      {isSelected && <CheckCircle className="w-4 h-4 text-[#020a06]" strokeWidth={3} />}
+                return (
+                  <button
+                    key={index}
+                    onClick={() => onAnswerSelect(index)}
+                    className="w-full text-left p-3 font-mono text-sm transition-all duration-100"
+                    style={{
+                      backgroundColor: isSelected ? '#c0d8c0' : 'var(--mdt-btn-face)',
+                      border: isSelected ? '2px inset #006400' : '2px outset #ffffff',
+                      color: 'var(--mdt-content-text)',
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="flex-shrink-0 w-5 h-5 flex items-center justify-center font-mono text-xs font-bold"
+                        style={{
+                          backgroundColor: isSelected ? '#006400' : 'var(--mdt-panel-alt)',
+                          color: isSelected ? '#ffffff' : 'var(--mdt-muted-text)',
+                          border: '1px solid var(--mdt-border-mid)',
+                        }}
+                      >
+                        {isSelected ? '✓' : String.fromCharCode(65 + index)}
+                      </div>
+                      <span className="flex-grow">{option}</span>
                     </div>
-                    <span className="flex-grow font-medium">{option}</span>
-                  </div>
-                </button>
-              );
-            })}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -123,10 +124,13 @@ export default function ExamQuestion({
         <button
           onClick={onNext}
           disabled={isNextDisabled}
-          className="w-full px-6 py-4 bg-gradient-to-r from-[#22c55e] to-[#16a34a] hover:opacity-90 text-white font-bold rounded-xl transition-all disabled:from-[#133524] disabled:to-[#0a2818] disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-3 shadow-lg"
+          className="btn-win95 w-full flex items-center justify-center gap-2"
+          style={isNextDisabled ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
         >
-          {currentQuestionIndex === totalQuestions - 1 ? 'Zakończ Egzamin' : 'Następne Pytanie'}
-          <ArrowRight className="w-5 h-5" />
+          <span className="font-mono text-sm font-bold">
+            {currentQuestionIndex === totalQuestions - 1 ? 'Zakończ Egzamin' : 'Następne Pytanie'}
+          </span>
+          <ArrowRight className="w-4 h-4" />
         </button>
       </div>
     </div>

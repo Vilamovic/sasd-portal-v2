@@ -345,10 +345,9 @@ export default function ExamTakerPage({ onBack }: { onBack?: () => void }) {
     return (
       <>
         {tokenModal}
-        <div className="min-h-screen bg-[#020a06] flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#c9a227]/30 border-t-[#c9a227] mx-auto mb-4" />
-            <p className="text-[#8fb5a0]">Ładowanie egzaminu...</p>
+        <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--mdt-content)' }}>
+          <div className="panel-raised p-8 text-center" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+            <p className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>Ładowanie egzaminu...</p>
           </div>
         </div>
       </>

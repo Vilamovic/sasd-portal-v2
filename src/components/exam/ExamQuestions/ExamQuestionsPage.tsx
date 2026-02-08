@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { getAllExamTypes } from '@/src/lib/db/exams';
-import { Plus, X, ChevronLeft, Sparkles } from 'lucide-react';
+import { Plus, X, ChevronLeft } from 'lucide-react';
 
 // Components
 import QuestionTypeSelector from './QuestionTypeSelector';
@@ -225,18 +225,20 @@ export default function ExamQuestionsPage({ onBack }: { onBack?: () => void }) {
   // Access control
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-[#020a06] flex items-center justify-center p-8">
-        <div className="text-center">
-          <X className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">Brak dostępu</h2>
-          <p className="text-[#8fb5a0] mb-6">
+      <div className="min-h-screen flex items-center justify-center p-8" style={{ backgroundColor: 'var(--mdt-content)' }}>
+        <div className="panel-raised text-center p-8" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+          <div className="panel-inset p-4 mb-4" style={{ backgroundColor: '#e8d0d0' }}>
+            <X className="w-10 h-10 mx-auto mb-2" style={{ color: '#8b0000' }} />
+            <h2 className="font-[family-name:var(--font-vt323)] text-xl" style={{ color: '#8b0000' }}>Brak dostępu</h2>
+          </div>
+          <p className="font-mono text-sm mb-4" style={{ color: 'var(--mdt-muted-text)' }}>
             Tylko CS i wyżej mogą zarządzać pytaniami.
           </p>
           <button
             onClick={onBack}
-            className="px-6 py-3 bg-gradient-to-r from-[#c9a227] to-[#e6b830] text-[#020a06] font-bold rounded-xl hover:opacity-90 transition-all duration-300 hover:scale-[1.02] shadow-lg"
+            className="btn-win95"
           >
-            Powrót
+            <span className="font-mono text-sm">Powrót</span>
           </button>
         </div>
       </div>
@@ -256,48 +258,36 @@ export default function ExamQuestionsPage({ onBack }: { onBack?: () => void }) {
 
   // Questions list
   return (
-    <div className="min-h-screen bg-[#020a06] relative overflow-hidden">
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-[#c9a227]/10 rounded-full blur-[120px] animate-pulse-glow" />
-        <div
-          className="absolute bottom-1/4 -right-32 w-96 h-96 bg-[#22693f]/20 rounded-full blur-[120px] animate-pulse-glow"
-          style={{ animationDelay: '1.5s' }}
-        />
-      </div>
-
-      <div className="relative z-10 max-w-5xl mx-auto px-6 py-8">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--mdt-content)' }}>
+      <div className="max-w-5xl mx-auto px-6 py-8">
         {/* Back Button */}
         <button
           onClick={() => setSelectedType(null)}
-          className="mb-6 flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200"
+          className="btn-win95 mb-6 flex items-center gap-2"
         >
-          <ChevronLeft className="w-5 h-5" />
-          <span className="text-sm font-medium">Powrót do wyboru typu</span>
+          <ChevronLeft className="w-4 h-4" />
+          <span className="font-mono text-sm">Powrót do wyboru typu</span>
         </button>
 
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
+        <div className="mb-6 panel-raised" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+          <div className="px-4 py-2 flex items-center justify-between" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
             <div>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#c9a227]/10 border border-[#c9a227]/20 text-[#c9a227] text-sm font-medium mb-4">
-                <Sparkles className="w-4 h-4" />
-                <span>{selectedType.name}</span>
-              </div>
-              <h2 className="text-4xl font-bold text-white mb-2">
-                Pytania <span className="text-gold-gradient">Egzaminacyjne</span>
+              <h2 className="font-[family-name:var(--font-vt323)] text-xl text-white">
+                Pytania Egzaminacyjne - {selectedType.name}
               </h2>
-              <div className="w-24 h-1 bg-gradient-to-r from-[#c9a227] to-[#e6b830] rounded-full mb-2" />
-              <p className="text-[#8fb5a0]">{questions.length} pytań</p>
+              <p className="font-mono text-xs text-white/80">{questions.length} pytań</p>
             </div>
             <button
               onClick={() => {
                 resetForm();
                 setShowAddForm(true);
               }}
-              className="flex items-center gap-2 px-6 py-3 bg-[#22c55e] text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg"
+              className="btn-win95 flex items-center gap-2"
+              style={{ backgroundColor: '#3a6a3a', color: '#fff', borderColor: '#5a9a5a #1a3a1a #1a3a1a #5a9a5a' }}
             >
-              <Plus className="w-5 h-5" />
-              Dodaj Pytanie
+              <Plus className="w-4 h-4" />
+              <span className="font-mono text-sm">Dodaj Pytanie</span>
             </button>
           </div>
         </div>
@@ -315,7 +305,7 @@ export default function ExamQuestionsPage({ onBack }: { onBack?: () => void }) {
         )}
 
         {/* Questions List */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           {questions.map((question) => (
             <div key={question.id}>
               {editingQuestionId === question.id && (

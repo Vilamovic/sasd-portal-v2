@@ -52,218 +52,207 @@ export default function BatchOperationsModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-      <div className="glass-strong rounded-2xl border border-[#c9a227]/30 p-8 max-w-2xl w-full shadow-2xl">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-2xl font-bold text-white flex items-center gap-2">
-            <UserCog className="w-6 h-6 text-[#c9a227]" />
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
+      <div className="panel-raised max-w-2xl w-full mx-4" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+        {/* Title Bar */}
+        <div className="flex items-center justify-between px-3 py-2" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
+          <h3 className="font-[family-name:var(--font-vt323)] text-base tracking-widest uppercase text-white flex items-center gap-2">
+            <UserCog className="w-4 h-4" />
             Zarządzaj zaznaczonymi ({selectedUsersCount})
           </h3>
           <button
             onClick={handleClose}
-            className="text-[#8fb5a0] hover:text-white transition-colors"
+            style={{ backgroundColor: '#c41e1e', color: '#fff', border: '1px solid #555' }}
+            className="w-6 h-6 flex items-center justify-center text-xs font-bold"
           >
-            <X className="w-6 h-6" />
+            X
           </button>
         </div>
 
-        {/* Operation Type Tabs */}
-        <div className="flex gap-2 mb-6">
-          <button
-            onClick={() => setBatchOperation('badges')}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all ${
-              batchOperation === 'badges'
-                ? 'bg-gradient-to-r from-[#c9a227] to-[#e6b830] text-[#020a06] shadow-lg'
-                : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32]'
-            }`}
-          >
-            <Award className="w-5 h-5" />
-            Stopnie
-          </button>
-          <button
-            onClick={() => setBatchOperation('permissions')}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all ${
-              batchOperation === 'permissions'
-                ? 'bg-gradient-to-r from-[#c9a227] to-[#e6b830] text-[#020a06] shadow-lg'
-                : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32]'
-            }`}
-          >
-            <Shield className="w-5 h-5" />
-            Uprawnienia
-          </button>
-          <button
-            onClick={() => setBatchOperation('divisions')}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all ${
-              batchOperation === 'divisions'
-                ? 'bg-gradient-to-r from-[#c9a227] to-[#e6b830] text-[#020a06] shadow-lg'
-                : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32]'
-            }`}
-          >
-            <Shield className="w-5 h-5" />
-            Dywizje
-          </button>
-        </div>
+        <div className="p-4">
+          {/* Operation Type Tabs */}
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => setBatchOperation('badges')}
+              className="btn-win95 flex-1 flex items-center justify-center gap-2"
+              style={batchOperation === 'badges' ? { backgroundColor: 'var(--mdt-input-bg)', borderColor: '#555 #fff #fff #555' } : {}}
+            >
+              <Award className="w-4 h-4" />
+              Stopnie
+            </button>
+            <button
+              onClick={() => setBatchOperation('permissions')}
+              className="btn-win95 flex-1 flex items-center justify-center gap-2"
+              style={batchOperation === 'permissions' ? { backgroundColor: 'var(--mdt-input-bg)', borderColor: '#555 #fff #fff #555' } : {}}
+            >
+              <Shield className="w-4 h-4" />
+              Uprawnienia
+            </button>
+            <button
+              onClick={() => setBatchOperation('divisions')}
+              className="btn-win95 flex-1 flex items-center justify-center gap-2"
+              style={batchOperation === 'divisions' ? { backgroundColor: 'var(--mdt-input-bg)', borderColor: '#555 #fff #fff #555' } : {}}
+            >
+              <Shield className="w-4 h-4" />
+              Dywizje
+            </button>
+          </div>
 
-        {/* Content based on operation type */}
-        <div className="space-y-4">
-          {/* Stopnie Operations */}
-          {batchOperation === 'badges' && (
-            <div className="space-y-4">
-              <div className="p-4 bg-[#c9a227]/10 border border-[#c9a227]/30 rounded-xl">
-                <p className="text-[#c9a227] text-sm">
-                  Każdy użytkownik zostanie awansowany/zdegradowany o 1 stopień względem swojego aktualnego stopnia.
-                </p>
+          {/* Content based on operation type */}
+          <div className="space-y-4">
+            {/* Stopnie Operations */}
+            {batchOperation === 'badges' && (
+              <div className="space-y-4">
+                <div className="panel-inset p-3" style={{ backgroundColor: 'var(--mdt-panel-alt)' }}>
+                  <p className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>
+                    Każdy użytkownik zostanie awansowany/zdegradowany o 1 stopień względem swojego aktualnego stopnia.
+                  </p>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={onPromote}
+                    className="btn-win95 flex-1 flex items-center justify-center gap-2"
+                    style={{ backgroundColor: '#3a6a3a', color: '#fff', borderColor: '#5a9a5a #1a3a1a #1a3a1a #5a9a5a' }}
+                  >
+                    <TrendingUp className="w-4 h-4" />
+                    Awansuj wszystkich
+                  </button>
+                  <button
+                    onClick={onDemote}
+                    className="btn-win95 flex-1 flex items-center justify-center gap-2"
+                    style={{ backgroundColor: '#c41e1e', color: '#fff', borderColor: '#ff4444 #800000 #800000 #ff4444' }}
+                  >
+                    <TrendingDown className="w-4 h-4" />
+                    Degraduj wszystkich
+                  </button>
+                </div>
               </div>
+            )}
 
-              <div className="flex gap-3">
-                <button
-                  onClick={onPromote}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
-                >
-                  <TrendingUp className="w-5 h-5" />
-                  Awansuj wszystkich
-                </button>
-                <button
-                  onClick={onDemote}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
-                >
-                  <TrendingDown className="w-5 h-5" />
-                  Degraduj wszystkich
-                </button>
+            {/* Permissions Operations */}
+            {batchOperation === 'permissions' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="block font-mono text-sm font-bold mb-2" style={{ color: 'var(--mdt-muted-text)' }}>
+                    Wybierz uprawnienia
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {permissions.map((perm) => (
+                      <label
+                        key={perm}
+                        className="panel-inset flex items-center gap-2 px-3 py-2 cursor-pointer"
+                        style={{ backgroundColor: 'var(--mdt-input-bg)' }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={batchPermissions.includes(perm)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setBatchPermissions([...batchPermissions, perm]);
+                            } else {
+                              setBatchPermissions(batchPermissions.filter((p) => p !== perm));
+                            }
+                          }}
+                        />
+                        <span className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>{perm}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={onAddPermissions}
+                    disabled={batchPermissions.length === 0}
+                    className="btn-win95 flex-1 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ backgroundColor: '#3a6a3a', color: '#fff', borderColor: '#5a9a5a #1a3a1a #1a3a1a #5a9a5a' }}
+                  >
+                    <Check className="w-4 h-4" />
+                    Dodaj uprawnienia
+                  </button>
+                  <button
+                    onClick={onRemovePermissions}
+                    disabled={batchPermissions.length === 0}
+                    className="btn-win95 flex-1 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ backgroundColor: '#c41e1e', color: '#fff', borderColor: '#ff4444 #800000 #800000 #ff4444' }}
+                  >
+                    <X className="w-4 h-4" />
+                    Usuń uprawnienia
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Permissions Operations */}
-          {batchOperation === 'permissions' && (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">
-                  Wybierz uprawnienia
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {permissions.map((perm) => (
-                    <label
-                      key={perm}
-                      className="flex items-center gap-2 px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl cursor-pointer hover:bg-[#133524] transition-colors"
+            {/* Divisions Operations */}
+            {batchOperation === 'divisions' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="block font-mono text-sm font-bold mb-2" style={{ color: 'var(--mdt-muted-text)' }}>
+                    Wybierz dywizję
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setBatchDivision('FTO')}
+                      className="btn-win95 font-mono text-sm font-bold"
+                      style={batchDivision === 'FTO' ? { backgroundColor: '#c9a227', color: '#000', borderColor: '#555 #fff #fff #555' } : {}}
                     >
-                      <input
-                        type="checkbox"
-                        checked={batchPermissions.includes(perm)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setBatchPermissions([...batchPermissions, perm]);
-                          } else {
-                            setBatchPermissions(batchPermissions.filter((p) => p !== perm));
-                          }
-                        }}
-                        className="rounded border-[#1a4d32] bg-[#0a2818] text-[#c9a227] focus:ring-[#c9a227]"
-                      />
-                      <span className="text-white text-sm font-medium">{perm}</span>
-                    </label>
-                  ))}
+                      FTO
+                    </button>
+                    <button
+                      onClick={() => setBatchDivision('SS')}
+                      className="btn-win95 font-mono text-sm font-bold"
+                      style={batchDivision === 'SS' ? { backgroundColor: '#ff8c00', color: '#fff', borderColor: '#555 #fff #fff #555' } : {}}
+                    >
+                      SS
+                    </button>
+                    <button
+                      onClick={() => setBatchDivision('DTU')}
+                      className="btn-win95 font-mono text-sm font-bold"
+                      style={batchDivision === 'DTU' ? { backgroundColor: '#60a5fa', color: '#000', borderColor: '#555 #fff #fff #555' } : {}}
+                    >
+                      DTU
+                    </button>
+                    <button
+                      onClick={() => setBatchDivision('GU')}
+                      className="btn-win95 font-mono text-sm font-bold"
+                      style={batchDivision === 'GU' ? { backgroundColor: '#10b981', color: '#fff', borderColor: '#555 #fff #fff #555' } : {}}
+                    >
+                      GU
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex gap-3">
-                <button
-                  onClick={onAddPermissions}
-                  disabled={batchPermissions.length === 0}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Check className="w-5 h-5" />
-                  Dodaj uprawnienia
-                </button>
-                <button
-                  onClick={onRemovePermissions}
-                  disabled={batchPermissions.length === 0}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <X className="w-5 h-5" />
-                  Usuń uprawnienia
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Divisions Operations */}
-          {batchOperation === 'divisions' && (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-[#8fb5a0] text-sm font-semibold mb-3">
-                  Wybierz dywizję
-                </label>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex gap-3">
                   <button
-                    onClick={() => setBatchDivision('FTO')}
-                    className={`px-4 py-3 rounded-xl text-sm font-bold transition-all ${
-                      batchDivision === 'FTO'
-                        ? 'bg-[#c9a227] text-[#020a06] border-2 border-[#e6b830] shadow-lg'
-                        : 'bg-[#0a2818] text-[#c9a227] border border-[#c9a227]/30 hover:bg-[#c9a227]/10'
-                    }`}
+                    onClick={onAssignDivision}
+                    disabled={!batchDivision}
+                    className="btn-win95 flex-1 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ backgroundColor: '#3a6a3a', color: '#fff', borderColor: '#5a9a5a #1a3a1a #1a3a1a #5a9a5a' }}
                   >
-                    FTO
+                    <Check className="w-4 h-4" />
+                    Przypisz dywizję
                   </button>
                   <button
-                    onClick={() => setBatchDivision('SS')}
-                    className={`px-4 py-3 rounded-xl text-sm font-bold transition-all ${
-                      batchDivision === 'SS'
-                        ? 'bg-[#ff8c00] text-white border-2 border-[#ff8c00] shadow-lg'
-                        : 'bg-[#0a2818] text-[#ff8c00] border border-[#ff8c00]/30 hover:bg-[#ff8c00]/10'
-                    }`}
+                    onClick={onRemoveDivision}
+                    className="btn-win95 flex-1 flex items-center justify-center gap-2"
+                    style={{ backgroundColor: '#c41e1e', color: '#fff', borderColor: '#ff4444 #800000 #800000 #ff4444' }}
                   >
-                    SS
-                  </button>
-                  <button
-                    onClick={() => setBatchDivision('DTU')}
-                    className={`px-4 py-3 rounded-xl text-sm font-bold transition-all ${
-                      batchDivision === 'DTU'
-                        ? 'bg-[#60a5fa] text-[#020a06] border-2 border-[#60a5fa] shadow-lg'
-                        : 'bg-[#0a2818] text-[#60a5fa] border border-[#60a5fa]/30 hover:bg-[#60a5fa]/10'
-                    }`}
-                  >
-                    DTU
-                  </button>
-                  <button
-                    onClick={() => setBatchDivision('GU')}
-                    className={`px-4 py-3 rounded-xl text-sm font-bold transition-all ${
-                      batchDivision === 'GU'
-                        ? 'bg-[#10b981] text-white border-2 border-[#10b981] shadow-lg'
-                        : 'bg-[#0a2818] text-[#10b981] border border-[#10b981]/30 hover:bg-[#10b981]/10'
-                    }`}
-                  >
-                    GU
+                    <X className="w-4 h-4" />
+                    Usuń dywizje
                   </button>
                 </div>
               </div>
+            )}
 
-              <div className="flex gap-3">
-                <button
-                  onClick={onAssignDivision}
-                  disabled={!batchDivision}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Check className="w-5 h-5" />
-                  Przypisz dywizję
-                </button>
-                <button
-                  onClick={onRemoveDivision}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
-                >
-                  <X className="w-5 h-5" />
-                  Usuń dywizje
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Cancel Button */}
-          <button
-            onClick={handleClose}
-            className="w-full px-6 py-3 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
-          >
-            Anuluj
-          </button>
+            {/* Cancel Button */}
+            <button
+              onClick={handleClose}
+              className="btn-win95 w-full"
+            >
+              Anuluj
+            </button>
+          </div>
         </div>
       </div>
     </div>

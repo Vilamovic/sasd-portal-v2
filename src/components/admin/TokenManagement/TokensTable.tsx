@@ -25,31 +25,57 @@ export default function TokensTable({
   onDeleteToken,
 }: TokensTableProps) {
   return (
-    <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 shadow-xl">
+    <div className="panel-raised overflow-hidden" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-[#051a0f]/50 border-b border-[#1a4d32]/50">
-            <tr>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227]">
+          <thead>
+            <tr style={{ backgroundColor: 'var(--mdt-header)' }}>
+              <th
+                className="px-4 py-2 text-left font-[family-name:var(--font-vt323)] text-base"
+                style={{ color: '#ccc' }}
+              >
                 Użytkownik
               </th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227]">
+              <th
+                className="px-4 py-2 text-left font-[family-name:var(--font-vt323)] text-base"
+                style={{ color: '#ccc' }}
+              >
                 Nick MTA
               </th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227]">
+              <th
+                className="px-4 py-2 text-left font-[family-name:var(--font-vt323)] text-base"
+                style={{ color: '#ccc' }}
+              >
                 Typ Egzaminu
               </th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227]">Token</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227]">
+              <th
+                className="px-4 py-2 text-left font-[family-name:var(--font-vt323)] text-base"
+                style={{ color: '#ccc' }}
+              >
+                Token
+              </th>
+              <th
+                className="px-4 py-2 text-left font-[family-name:var(--font-vt323)] text-base"
+                style={{ color: '#ccc' }}
+              >
                 Status
               </th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227]">
+              <th
+                className="px-4 py-2 text-left font-[family-name:var(--font-vt323)] text-base"
+                style={{ color: '#ccc' }}
+              >
                 Utworzono
               </th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227]">
+              <th
+                className="px-4 py-2 text-left font-[family-name:var(--font-vt323)] text-base"
+                style={{ color: '#ccc' }}
+              >
                 Wygasa
               </th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227]">
+              <th
+                className="px-4 py-2 text-left font-[family-name:var(--font-vt323)] text-base"
+                style={{ color: '#ccc' }}
+              >
                 Akcja
               </th>
             </tr>
@@ -57,72 +83,87 @@ export default function TokensTable({
           <tbody>
             {tokens.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-6 py-8 text-center text-[#8fb5a0]">
+                <td
+                  colSpan={8}
+                  className="px-4 py-6 text-center font-mono text-sm"
+                  style={{ color: 'var(--mdt-muted-text)' }}
+                >
                   Brak tokenów do wyświetlenia
                 </td>
               </tr>
             ) : (
-              tokens.map((t) => {
+              tokens.map((t, index) => {
                 const isExpired = new Date(t.expires_at) < new Date();
                 const isUsed = t.used;
+
+                const statusStyle: React.CSSProperties = isUsed
+                  ? { backgroundColor: '#d1d5db', color: '#374151', border: '1px solid #9ca3af' }
+                  : isExpired
+                  ? { backgroundColor: '#fca5a5', color: '#7f1d1d', border: '1px solid #dc2626' }
+                  : { backgroundColor: '#86efac', color: '#14532d', border: '1px solid #16a34a' };
 
                 return (
                   <tr
                     key={t.id}
-                    className="border-b border-[#1a4d32]/50 hover:bg-[#051a0f]/30 transition-colors"
+                    style={{
+                      backgroundColor: index % 2 === 0 ? 'var(--mdt-row-even)' : 'var(--mdt-row-odd)',
+                    }}
                   >
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1a4d32] to-[#22693f] flex items-center justify-center text-white font-bold">
+                    <td className="px-4 py-2">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-8 h-8 rounded-full flex items-center justify-center font-bold font-mono text-sm"
+                          style={{ backgroundColor: 'var(--mdt-surface-light)', color: '#fff', border: '1px solid var(--mdt-border-mid)' }}
+                        >
                           {(t.user_username || '?')[0].toUpperCase()}
                         </div>
-                        <span className="text-white font-medium">{t.user_username || 'N/A'}</span>
+                        <span className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>
+                          {t.user_username || 'N/A'}
+                        </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-[#8fb5a0]">{t.user_mta_nick || 'Brak'}</td>
-                    <td className="px-6 py-4 text-[#8fb5a0]">{t.exam_type_name || 'N/A'}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-2 font-mono text-sm" style={{ color: 'var(--mdt-muted-text)' }}>
+                      {t.user_mta_nick || 'Brak'}
+                    </td>
+                    <td className="px-4 py-2 font-mono text-sm" style={{ color: 'var(--mdt-muted-text)' }}>
+                      {t.exam_type_name || 'N/A'}
+                    </td>
+                    <td className="px-4 py-2">
                       <button
                         onClick={() => onCopyToken(t.token)}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#1a4d32]/50 hover:bg-[#c9a227]/20 transition-colors group"
+                        className="btn-win95 flex items-center gap-2 px-2 py-1 font-mono text-xs"
                         title="Kliknij aby skopiować"
                       >
-                        <span className="text-white font-mono text-xs">
-                          {t.token.substring(0, 8)}...
-                        </span>
+                        <span>{t.token.substring(0, 8)}...</span>
                         {copiedToken === t.token ? (
-                          <CheckCircle className="w-4 h-4 text-[#22c55e]" />
+                          <CheckCircle className="w-3 h-3" style={{ color: '#16a34a' }} />
                         ) : (
-                          <Copy className="w-4 h-4 text-[#8fb5a0] group-hover:text-[#c9a227]" />
+                          <Copy className="w-3 h-3" style={{ color: 'var(--mdt-muted-text)' }} />
                         )}
                       </button>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-2">
                       <span
-                        className={`px-3 py-1 text-xs font-semibold rounded-full border ${
-                          isUsed
-                            ? 'bg-[#8fb5a0]/20 text-[#8fb5a0] border-[#8fb5a0]/30'
-                            : isExpired
-                            ? 'bg-red-500/20 text-red-400 border-red-500/30'
-                            : 'bg-[#22c55e]/20 text-[#22c55e] border-[#22c55e]/30'
-                        }`}
+                        className="px-2 py-0.5 text-xs font-mono font-semibold"
+                        style={statusStyle}
                       >
                         {isUsed ? 'Użyty' : isExpired ? 'Wygasły' : 'Aktywny'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-[#8fb5a0] text-sm">
+                    <td className="px-4 py-2 font-mono text-sm" style={{ color: 'var(--mdt-muted-text)' }}>
                       {new Date(t.created_at).toLocaleDateString('pl-PL')}
                     </td>
-                    <td className="px-6 py-4 text-[#8fb5a0] text-sm">
+                    <td className="px-4 py-2 font-mono text-sm" style={{ color: 'var(--mdt-muted-text)' }}>
                       {new Date(t.expires_at).toLocaleDateString('pl-PL')}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-2">
                       <button
                         onClick={() => onDeleteToken(t.id, t.user_username)}
-                        className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 transition-all duration-200 group"
+                        className="btn-win95 p-1"
+                        style={{ backgroundColor: '#c41e1e', color: '#fff', borderColor: '#ff4444 #800000 #800000 #ff4444' }}
                         title="Usuń token"
                       >
-                        <Trash2 className="w-4 h-4 text-red-400 group-hover:text-red-300" />
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </td>
                   </tr>

@@ -63,16 +63,7 @@ export default function AdminPanelPage({ onBack }: AdminPanelPageProps) {
     : null;
 
   return (
-    <div className="min-h-screen bg-[#020a06] relative">
-      {/* Background effects */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-[#c9a227]/10 rounded-full blur-[120px] animate-pulse-glow" />
-        <div
-          className="absolute bottom-1/4 -right-32 w-96 h-96 bg-[#22693f]/20 rounded-full blur-[120px] animate-pulse-glow"
-          style={{ animationDelay: '1.5s' }}
-        />
-      </div>
-
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--mdt-content)' }}>
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
         {/* Back Button */}
         <BackButton onClick={onBack} destination="Dashboard" />
@@ -81,7 +72,7 @@ export default function AdminPanelPage({ onBack }: AdminPanelPageProps) {
         <PageHeader userCount={filteredUsers.length} />
 
         {/* Search */}
-        <div className="mb-6">
+        <div className="mb-4">
           <SearchBar value={searchQuery} onChange={setSearchQuery} isDev={isDev} />
         </div>
 

@@ -23,50 +23,55 @@ export default function TableHeader({
   handleSort,
 }: TableHeaderProps) {
   return (
-    <div className="bg-[#051a0f]/50 border-b border-[#1a4d32]/50 px-6 py-4">
-      <div className="grid grid-cols-12 gap-4 items-center text-[#8fb5a0] text-xs font-bold uppercase">
+    <div style={{ backgroundColor: 'var(--mdt-header)' }} className="px-4 py-2 border-b border-gray-400">
+      <div className="grid grid-cols-12 gap-4 items-center">
         <div className="col-span-1 flex items-center">
           <button
             onClick={toggleSelectAll}
-            className="text-[#c9a227] hover:text-[#e6b830] transition-colors"
+            className="font-mono text-sm"
+            style={{ color: '#ccc' }}
           >
             {selectedCount === totalCount ? (
-              <CheckSquare className="w-5 h-5" />
+              <CheckSquare className="w-4 h-4" />
             ) : (
-              <Square className="w-5 h-5" />
+              <Square className="w-4 h-4" />
             )}
           </button>
         </div>
         <button
           onClick={() => handleSort('name')}
-          className="col-span-3 flex items-center gap-2 cursor-pointer hover:text-[#c9a227] transition-colors"
+          className="col-span-3 flex items-center gap-1 cursor-pointer font-[family-name:var(--font-vt323)] text-sm tracking-widest uppercase"
+          style={{ color: '#ccc' }}
         >
           Użytkownik
-          <ArrowUpDown className={`w-3.5 h-3.5 ${sortBy === 'name' ? 'text-[#c9a227]' : ''}`} />
+          <ArrowUpDown className={`w-3 h-3 ${sortBy === 'name' ? 'text-white' : ''}`} />
         </button>
-        <div className="col-span-2">Dywizja/Uprawnienia</div>
+        <div className="col-span-2 font-[family-name:var(--font-vt323)] text-sm tracking-widest uppercase" style={{ color: '#ccc' }}>Dywizja/Uprawnienia</div>
         <button
           onClick={() => handleSort('badge')}
-          className="col-span-2 flex items-center gap-2 cursor-pointer hover:text-[#c9a227] transition-colors"
+          className="col-span-2 flex items-center gap-1 cursor-pointer font-[family-name:var(--font-vt323)] text-sm tracking-widest uppercase"
+          style={{ color: '#ccc' }}
         >
           Stopień
-          <ArrowUpDown className={`w-3.5 h-3.5 ${sortBy === 'badge' ? 'text-[#c9a227]' : ''}`} />
+          <ArrowUpDown className={`w-3 h-3 ${sortBy === 'badge' ? 'text-white' : ''}`} />
         </button>
         <button
           onClick={() => handleSort('plus')}
-          className="col-span-1 flex items-center justify-center gap-1 cursor-pointer hover:text-[#c9a227] transition-colors"
+          className="col-span-1 flex items-center justify-center gap-1 cursor-pointer font-[family-name:var(--font-vt323)] text-sm tracking-widest uppercase"
+          style={{ color: '#ccc' }}
         >
           +/-
-          <ArrowUpDown className={`w-3.5 h-3.5 ${sortBy === 'plus' || sortBy === 'minus' ? 'text-[#c9a227]' : ''}`} />
+          <ArrowUpDown className={`w-3 h-3 ${sortBy === 'plus' || sortBy === 'minus' ? 'text-white' : ''}`} />
         </button>
         <button
           onClick={() => handleSort('last_seen')}
-          className="col-span-2 flex items-center gap-2 cursor-pointer hover:text-[#c9a227] transition-colors"
+          className="col-span-2 flex items-center gap-1 cursor-pointer font-[family-name:var(--font-vt323)] text-sm tracking-widest uppercase"
+          style={{ color: '#ccc' }}
         >
           Ostatnio
-          <ArrowUpDown className={`w-3.5 h-3.5 ${sortBy === 'last_seen' ? 'text-[#c9a227]' : ''}`} />
+          <ArrowUpDown className={`w-3 h-3 ${sortBy === 'last_seen' ? 'text-white' : ''}`} />
         </button>
-        <div className="col-span-1 text-right">Akcje</div>
+        <div className="col-span-1 text-right font-[family-name:var(--font-vt323)] text-sm tracking-widest uppercase" style={{ color: '#ccc' }}>Akcje</div>
       </div>
     </div>
   );

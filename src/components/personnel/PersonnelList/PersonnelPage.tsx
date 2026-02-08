@@ -139,10 +139,9 @@ export default function PersonnelPage() {
   // Loading State
   if (loading || !user) {
     return (
-      <div className="min-h-screen bg-[#020a06] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#c9a227]/30 border-t-[#c9a227] rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-[#8fb5a0] text-lg">Ładowanie...</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--mdt-content)' }}>
+        <div className="text-center panel-raised p-8" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+          <p className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>Ładowanie...</p>
         </div>
       </div>
     );
@@ -153,47 +152,40 @@ export default function PersonnelPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#020a06] relative overflow-hidden">
-      {/* Background effects */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-[#c9a227]/10 rounded-full blur-[120px] animate-pulse-glow" />
-        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-[#22693f]/20 rounded-full blur-[120px] animate-pulse-glow" style={{ animationDelay: '1.5s' }} />
-      </div>
-
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--mdt-content)' }}>
       <Navbar />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
         {/* Back Button */}
         <button
           onClick={() => router.push('/dashboard')}
-          className="mb-6 flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200"
+          className="btn-win95 mb-6 flex items-center gap-2"
         >
           <ChevronLeft className="w-5 h-5" />
           <span className="text-sm font-medium">Powrót do Dashboard</span>
         </button>
 
         {/* Header */}
-        <div className="mb-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#c9a227]/10 border border-[#c9a227]/20 text-[#c9a227] text-sm font-medium mb-4">
-            <Sparkles className="w-4 h-4" />
-            <span>System zarządzania</span>
+        <div className="mb-4">
+          <div style={{ backgroundColor: 'var(--mdt-blue-bar)' }} className="px-4 py-2 mb-2">
+            <h2 className="font-[family-name:var(--font-vt323)] text-base tracking-widest uppercase text-white">
+              Kartoteka Personelu
+            </h2>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
-            <span className="text-gold-gradient">Kartoteka</span> Personelu
-          </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-[#c9a227] to-[#e6b830] rounded-full mb-3" />
-          <div className="flex items-center gap-3">
-            <p className="text-[#8fb5a0]">Zarządzaj personelem, nadawaj uprawnienia i kary</p>
-            {filteredUsers.length > 0 && (
-              <span className="px-3 py-1 bg-[#c9a227]/10 border border-[#c9a227]/30 rounded-full text-[#c9a227] text-xs font-bold">
-                {filteredUsers.length} {filteredUsers.length === 1 ? 'użytkownik' : filteredUsers.length < 5 ? 'użytkowników' : 'użytkowników'}
-              </span>
-            )}
+          <div className="panel-raised px-4 py-2" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+            <div className="flex items-center gap-3">
+              <p className="font-mono text-sm" style={{ color: 'var(--mdt-muted-text)' }}>Zarządzaj personelem, nadawaj uprawnienia i kary</p>
+              {filteredUsers.length > 0 && (
+                <span className="font-mono text-sm font-bold" style={{ color: 'var(--mdt-content-text)' }}>
+                  [{filteredUsers.length} {filteredUsers.length === 1 ? 'użytkownik' : 'użytkowników'}]
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Search & Filters */}
-        <div className="mb-6 glass-strong rounded-2xl border border-[#1a4d32]/50 p-6 shadow-xl">
+        <div className="mb-4 panel-raised p-4" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
             <FiltersPanel
@@ -208,25 +200,25 @@ export default function PersonnelPage() {
 
         {/* Multi-Select Controls */}
         {selectedUsers.size > 1 && (
-          <div className="mb-6 glass-strong rounded-xl border border-[#c9a227]/30 p-4 shadow-lg bg-[#c9a227]/5 animate-fadeIn">
+          <div className="mb-4 panel-raised p-4" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <CheckSquare className="w-5 h-5 text-[#c9a227]" />
-                <span className="text-white font-semibold">
-                  Zaznaczono: {selectedUsers.size} {selectedUsers.size === 1 ? 'użytkownik' : selectedUsers.size < 5 ? 'użytkowników' : 'użytkowników'}
+                <CheckSquare className="w-5 h-5" style={{ color: 'var(--mdt-content-text)' }} />
+                <span className="font-mono text-sm font-bold" style={{ color: 'var(--mdt-content-text)' }}>
+                  Zaznaczono: {selectedUsers.size} {selectedUsers.size === 1 ? 'użytkownik' : 'użytkowników'}
                 </span>
               </div>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setShowBatchModal(true)}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#c9a227] to-[#e6b830] text-[#020a06] font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
+                  className="btn-win95 flex items-center gap-2"
                 >
                   <UserCog className="w-4 h-4" />
                   Zarządzaj zaznaczonymi
                 </button>
                 <button
                   onClick={() => toggleSelectAll([])}
-                  className="px-4 py-2.5 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
+                  className="btn-win95"
                 >
                   Anuluj
                 </button>
@@ -275,21 +267,6 @@ export default function PersonnelPage() {
         onAssignDivision={() => handleBatchAssignDivision(batchDivision)}
         onRemoveDivision={handleBatchRemoveDivision}
       />
-
-      <style jsx global>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
-        .animate-fadeIn {
-          animation: fadeIn 0.2s ease-in-out;
-        }
-      `}</style>
     </div>
   );
 }

@@ -28,7 +28,7 @@ interface MaterialModalProps {
  * Features:
  * - Shared QuillEditor integration
  * - Fullscreen toggle
- * - Sheriff Theme styling
+ * - MDT Terminal styling
  */
 export default function MaterialModal({
   selectedMaterial,
@@ -50,42 +50,45 @@ export default function MaterialModal({
   // Fullscreen Mode
   if (fullscreen && editing) {
     return (
-      <div className="fixed inset-0 bg-[#020a06] z-[70] overflow-hidden flex flex-col">
+      <div className="fixed inset-0 z-[70] overflow-hidden flex flex-col" style={{ backgroundColor: 'var(--mdt-sidebar)' }}>
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 bg-[#051a0f] border-b border-[#1a4d32]">
+        <div className="flex items-center justify-between px-3 py-1" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
           <input
             type="text"
             value={editTitle}
             onChange={(e) => setEditTitle(e.target.value)}
-            className="text-2xl font-bold bg-transparent text-white border-none focus:outline-none flex-grow"
-            placeholder="Tytuł materiału..."
+            className="font-[family-name:var(--font-vt323)] text-xl tracking-widest uppercase text-white bg-transparent border-none flex-grow"
+            style={{ outline: 'none' }}
+            placeholder="Tytul materialu..."
           />
           <div className="flex items-center gap-2 ml-4">
             <button
               onClick={() => setFullscreen(false)}
-              className="p-2.5 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
-              title="Wyjdź z pełnego ekranu"
+              className="btn-win95 p-1"
+              title="Wyjdz z pelnego ekranu"
             >
-              <Minimize2 className="w-5 h-5" />
+              <Minimize2 className="w-4 h-4" />
             </button>
             <button
               onClick={onSave}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#22c55e] to-[#16a34a] text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg"
+              className="btn-win95 flex items-center gap-1"
+              style={{ backgroundColor: '#3a6a3a', color: '#fff', borderColor: '#5a9a5a #1a3a1a #1a3a1a #5a9a5a' }}
             >
               <Save className="w-4 h-4" />
               Zapisz
             </button>
             <button
               onClick={onCancel}
-              className="p-2.5 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
+              className="btn-win95 p-1"
+              style={{ backgroundColor: '#c41e1e', color: '#fff', borderColor: '#ff4444 #800000 #800000 #ff4444' }}
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>
 
         {/* Editor */}
-        <div className="flex-grow overflow-hidden p-6">
+        <div className="flex-grow overflow-hidden p-4">
           <QuillEditor
             value={editContent}
             onChange={setEditContent}
@@ -100,66 +103,69 @@ export default function MaterialModal({
   // Modal (View/Edit Mode)
   return (
     <>
-      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6 animate-fadeIn">
-        <div className="w-full max-w-5xl max-h-[90vh] overflow-hidden rounded-3xl shadow-2xl">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div className="w-full max-w-5xl max-h-[90vh] overflow-hidden panel-raised" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
           {editing ? (
             // Edit Mode
-            <div className="glass-strong border border-[#1a4d32]/50">
+            <>
               {/* Edit Header */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 border-b border-[#1a4d32]/50 bg-[#051a0f]/50">
+              <div className="flex items-center justify-between px-3 py-1" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
                 <input
                   type="text"
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  className="text-2xl font-bold bg-[#0a2818]/50 text-white border border-[#1a4d32] rounded-xl px-4 py-3 flex-grow focus:outline-none focus:border-[#c9a227] transition-colors"
-                  placeholder="Tytuł materiału..."
+                  className="font-[family-name:var(--font-vt323)] text-xl tracking-widest uppercase text-white bg-transparent border-none flex-grow"
+                  style={{ outline: 'none' }}
+                  placeholder="Tytul materialu..."
                 />
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 ml-4">
                   <button
                     onClick={() => setFullscreen(true)}
-                    className="p-2.5 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
-                    title="Pełny ekran"
+                    className="btn-win95 p-1"
+                    title="Pelny ekran"
                   >
-                    <Maximize2 className="w-5 h-5" />
+                    <Maximize2 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={onSave}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#22c55e] to-[#16a34a] text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg"
+                    className="btn-win95 flex items-center gap-1"
+                    style={{ backgroundColor: '#3a6a3a', color: '#fff', borderColor: '#5a9a5a #1a3a1a #1a3a1a #5a9a5a' }}
                   >
                     <Save className="w-4 h-4" />
                     Zapisz
                   </button>
                   <button
                     onClick={onCancel}
-                    className="p-2.5 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
+                    className="btn-win95 p-1"
+                    style={{ backgroundColor: '#c41e1e', color: '#fff', borderColor: '#ff4444 #800000 #800000 #ff4444' }}
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
               </div>
 
               {/* Editor */}
-              <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+              <div className="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
                 <QuillEditor
                   value={editContent}
                   onChange={setEditContent}
                   minHeight="450px"
                 />
               </div>
-            </div>
+            </>
           ) : (
             // View Mode
-            <div className="glass-strong border border-[#1a4d32]/50">
+            <>
               {/* View Header */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 border-b border-[#1a4d32]/50 bg-[#051a0f]/50">
-                <h3 className="text-2xl font-bold text-white">
+              <div className="flex items-center justify-between px-3 py-1" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
+                <span className="font-[family-name:var(--font-vt323)] text-xl tracking-widest uppercase text-white truncate flex-1">
                   {selectedMaterial.title}
-                </h3>
-                <div className="flex items-center gap-2">
+                </span>
+                <div className="flex items-center gap-2 ml-4">
                   {isAdmin && (
                     <button
                       onClick={onStartEdit}
-                      className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#14b8a6] to-[#0d9488] text-white font-semibold rounded-xl hover:opacity-90 transition-all duration-300 shadow-lg"
+                      className="btn-win95 flex items-center gap-1"
                     >
                       <Edit3 className="w-4 h-4" />
                       Edytuj
@@ -167,41 +173,26 @@ export default function MaterialModal({
                   )}
                   <button
                     onClick={onClose}
-                    className="p-2.5 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
+                    className="btn-win95 p-1"
+                    style={{ backgroundColor: '#c41e1e', color: '#fff', borderColor: '#ff4444 #800000 #800000 #ff4444' }}
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
               </div>
 
               {/* Content */}
-              <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+              <div className="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
                 <div
-                  className="prose prose-invert max-w-none prose-headings:text-white prose-p:text-[#8fb5a0] prose-a:text-[#c9a227] prose-strong:text-white prose-li:text-[#8fb5a0] break-words"
-                  style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}
+                  className="prose max-w-none font-mono text-sm"
+                  style={{ color: 'var(--mdt-content-text)', wordWrap: 'break-word', overflowWrap: 'break-word' }}
                   dangerouslySetInnerHTML={{ __html: selectedMaterial.content }}
                 />
               </div>
-            </div>
+            </>
           )}
         </div>
       </div>
-
-      {/* Modal Styles */}
-      <style jsx global>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
-        .animate-fadeIn {
-          animation: fadeIn 0.2s ease-in-out;
-        }
-      `}</style>
     </>
   );
 }

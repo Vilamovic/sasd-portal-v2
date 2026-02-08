@@ -92,10 +92,9 @@ export default function ExamResultsViewer({ mode = 'active' }: { mode?: 'active'
   // Access control
   if (authLoading || !user) {
     return (
-      <div className="min-h-screen bg-[#020a06] flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#c9a227] mb-4"></div>
-          <p className="text-[#8fb5a0]">Ładowanie...</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--mdt-content)' }}>
+        <div className="text-center panel-raised p-8" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+          <p className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>Ładowanie...</p>
         </div>
       </div>
     );
@@ -103,18 +102,20 @@ export default function ExamResultsViewer({ mode = 'active' }: { mode?: 'active'
 
   if (!isCS) {
     return (
-      <div className="min-h-screen bg-[#020a06] flex items-center justify-center px-6">
-        <div className="text-center max-w-md glass-strong rounded-2xl p-8 border border-[#1a4d32]/50">
-          <div className="mb-6 text-6xl">🚫</div>
-          <h2 className="text-2xl font-bold text-white mb-4">Brak dostępu</h2>
-          <p className="text-[#8fb5a0] mb-6">
+      <div className="min-h-screen flex items-center justify-center px-6" style={{ backgroundColor: 'var(--mdt-content)' }}>
+        <div className="text-center max-w-md panel-raised p-8" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+          <div className="mb-4 panel-inset p-4" style={{ backgroundColor: 'var(--mdt-panel-alt)' }}>
+            <p className="font-mono text-sm font-bold" style={{ color: 'var(--mdt-content-text)' }}>BRAK DOSTĘPU</p>
+          </div>
+          <h2 className="font-[family-name:var(--font-vt323)] text-xl mb-2" style={{ color: 'var(--mdt-content-text)' }}>Brak dostępu</h2>
+          <p className="font-mono text-sm mb-4" style={{ color: 'var(--mdt-muted-text)' }}>
             {pageTitle} są dostępne tylko dla CS+.
           </p>
           <a
             href="/dashboard"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-[#c9a227] hover:bg-[#e6b830] text-[#051a0f] rounded-xl font-medium transition-all duration-200"
+            className="btn-win95 inline-flex items-center gap-2"
           >
-            Powrót do Dashboard
+            <span className="font-mono text-sm">Powrót do Dashboard</span>
           </a>
         </div>
       </div>
@@ -187,86 +188,66 @@ export default function ExamResultsViewer({ mode = 'active' }: { mode?: 'active'
     const questionDetails = getQuestionDetails(selectedResult);
 
     return (
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 animate-fadeIn">
-        <div className="bg-[#051a0f] border border-[#1a4d32]/50 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-          {/* Modal Header */}
-          <div className="px-8 py-6 border-b border-[#1a4d32]/50 flex items-start justify-between">
-            <div>
-              <h2 className="text-2xl font-bold text-white mb-2">Szczegóły Egzaminu</h2>
-              <p className="text-[#8fb5a0]">
-                <span className="font-medium text-white">{getUserName(selectedResult)}</span>
-                {' • '}
-                {getExamType(selectedResult)}
-              </p>
-            </div>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
+        <div className="panel-raised max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+          {/* Modal Header - Blue title bar */}
+          <div className="px-4 py-2 flex items-center justify-between" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
+            <h2 className="font-[family-name:var(--font-vt323)] text-lg text-white">
+              Szczegóły Egzaminu - {getUserName(selectedResult)} / {getExamType(selectedResult)}
+            </h2>
             <button
               onClick={closeDetailsModal}
-              className="p-2.5 bg-[#051a0f]/80 hover:bg-red-500/20 border border-[#1a4d32]/50 hover:border-red-500/50 rounded-xl transition-all duration-200 group"
+              className="btn-win95 p-1"
             >
-              <X className="w-5 h-5 text-[#8fb5a0] group-hover:text-red-400 transition-colors" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Modal Content */}
-          <div className="px-8 py-6 overflow-y-auto flex-1">
+          <div className="px-6 py-4 overflow-y-auto flex-1">
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
               {/* Score Card */}
-              <div className="glass-strong rounded-xl p-5 border border-[#1a4d32]/50">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${passed ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
-                    <FileText className={`w-5 h-5 ${passed ? 'text-green-400' : 'text-red-400'}`} />
-                  </div>
-                  <div>
-                    <p className="text-xs text-[#8fb5a0] uppercase tracking-wider">Wynik</p>
-                    <p className={`text-2xl font-bold ${passed ? 'text-green-400' : 'text-red-400'}`}>
-                      {scorePercentage}%
-                    </p>
-                  </div>
+              <div className="panel-inset p-4" style={{ backgroundColor: 'var(--mdt-input-bg)' }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <FileText className="w-4 h-4" style={{ color: 'var(--mdt-muted-text)' }} />
+                  <span className="font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>WYNIK</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${passed ? 'bg-green-400' : 'bg-red-400'} animate-pulse`} />
-                  <span className={`text-sm font-medium ${passed ? 'text-green-400' : 'text-red-400'}`}>
-                    {passed ? 'Zdany' : 'Niezdany'}
-                  </span>
-                </div>
+                <p className="font-[family-name:var(--font-vt323)] text-2xl" style={{ color: passed ? '#006400' : '#8b0000' }}>
+                  {scorePercentage}%
+                </p>
+                <span className="font-mono text-xs font-bold" style={{ color: passed ? '#006400' : '#8b0000' }}>
+                  {passed ? 'Zdany' : 'Niezdany'}
+                </span>
               </div>
 
               {/* Questions Card */}
-              <div className="glass-strong rounded-xl p-5 border border-[#1a4d32]/50">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#c9a227]/20 flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-[#c9a227]" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-[#8fb5a0] uppercase tracking-wider">Pytania</p>
-                    <p className="text-2xl font-bold text-white">
-                      {passedQuestions}/{totalQuestions}
-                    </p>
-                  </div>
+              <div className="panel-inset p-4" style={{ backgroundColor: 'var(--mdt-input-bg)' }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <FileText className="w-4 h-4" style={{ color: 'var(--mdt-muted-text)' }} />
+                  <span className="font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>PYTANIA</span>
                 </div>
-                <p className="text-sm text-[#8fb5a0]">Poprawne odpowiedzi</p>
+                <p className="font-[family-name:var(--font-vt323)] text-2xl" style={{ color: 'var(--mdt-content-text)' }}>
+                  {passedQuestions}/{totalQuestions}
+                </p>
+                <span className="font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>Poprawne odpowiedzi</span>
               </div>
 
               {/* Date Card */}
-              <div className="glass-strong rounded-xl p-5 border border-[#1a4d32]/50">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#1a4d32]/50 flex items-center justify-center">
-                    <Calendar className="w-5 h-5 text-[#8fb5a0]" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-[#8fb5a0] uppercase tracking-wider">Data</p>
-                    <p className="text-sm font-medium text-white">
-                      {new Date(selectedResult.created_at).toLocaleDateString('pl-PL', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric',
-                      })}
-                    </p>
-                  </div>
+              <div className="panel-inset p-4" style={{ backgroundColor: 'var(--mdt-input-bg)' }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <Calendar className="w-4 h-4" style={{ color: 'var(--mdt-muted-text)' }} />
+                  <span className="font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>DATA</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-[#8fb5a0]">
-                  <Clock className="w-3.5 h-3.5" />
+                <p className="font-mono text-sm font-medium" style={{ color: 'var(--mdt-content-text)' }}>
+                  {new Date(selectedResult.created_at).toLocaleDateString('pl-PL', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                  })}
+                </p>
+                <div className="flex items-center gap-1 font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>
+                  <Clock className="w-3 h-3" />
                   {new Date(selectedResult.created_at).toLocaleTimeString('pl-PL', {
                     hour: '2-digit',
                     minute: '2-digit',
@@ -277,44 +258,39 @@ export default function ExamResultsViewer({ mode = 'active' }: { mode?: 'active'
 
             {/* Questions List */}
             <div>
-              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-[#c9a227]" />
-                Lista Pytań
-              </h3>
-              <div className="space-y-3">
+              <div className="px-3 py-1 mb-3" style={{ backgroundColor: 'var(--mdt-header)' }}>
+                <h3 className="font-[family-name:var(--font-vt323)] text-base flex items-center gap-2" style={{ color: '#ccc' }}>
+                  <FileText className="w-4 h-4" />
+                  Lista Pytań
+                </h3>
+              </div>
+              <div className="space-y-2">
                 {questionDetails.map((detail: any, index: number) => (
                   <div
                     key={index}
-                    className={`glass-strong rounded-xl p-4 border transition-all duration-200 ${
-                      detail.correct
-                        ? 'border-green-500/30 bg-green-500/5'
-                        : 'border-red-500/30 bg-red-500/5'
-                    }`}
+                    className="panel-inset p-3"
+                    style={{
+                      backgroundColor: detail.correct ? '#d0e8d0' : '#e8d0d0',
+                    }}
                   >
-                    <div className="flex items-start gap-3">
-                      <div
-                        className={`mt-0.5 w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-sm ${
-                          detail.correct
-                            ? 'bg-green-500/20 text-green-400'
-                            : 'bg-red-500/20 text-red-400'
-                        }`}
+                    <div className="flex items-start gap-2">
+                      <span
+                        className="font-mono text-xs font-bold flex-shrink-0 w-5 h-5 flex items-center justify-center"
+                        style={{ color: detail.correct ? '#006400' : '#8b0000' }}
                       >
                         {index + 1}
-                      </div>
+                      </span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-white font-medium mb-2 leading-relaxed">{detail.question}</p>
-                        <div className="flex flex-wrap items-center gap-3">
+                        <p className="font-mono text-sm mb-1" style={{ color: 'var(--mdt-content-text)' }}>{detail.question}</p>
+                        <div className="flex flex-wrap items-center gap-2">
                           <span
-                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium ${
-                              detail.correct
-                                ? 'bg-green-500/20 text-green-400'
-                                : 'bg-red-500/20 text-red-400'
-                            }`}
+                            className="font-mono text-xs font-bold"
+                            style={{ color: detail.correct ? '#006400' : '#8b0000' }}
                           >
-                            {detail.correct ? '✓ Poprawna' : '✗ Błędna'}
+                            {detail.correct ? '[OK]' : '[ERR]'}
                           </span>
-                          <span className="text-xs text-[#8fb5a0]">
-                            Odpowiedź: <span className="text-white font-medium">{detail.answer}</span>
+                          <span className="font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>
+                            Odpowiedź: <span className="font-bold" style={{ color: 'var(--mdt-content-text)' }}>{detail.answer}</span>
                           </span>
                         </div>
                       </div>
@@ -326,20 +302,21 @@ export default function ExamResultsViewer({ mode = 'active' }: { mode?: 'active'
           </div>
 
           {/* Modal Footer */}
-          <div className="px-8 py-5 border-t border-[#1a4d32]/50 bg-[#020a06]/50 flex items-center justify-between">
+          <div className="px-6 py-3 flex items-center justify-between" style={{ backgroundColor: 'var(--mdt-btn-face)', borderTop: '1px solid var(--mdt-border-mid)' }}>
             <button
               onClick={closeDetailsModal}
-              className="px-5 py-2.5 bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white rounded-xl transition-all duration-200 font-medium"
+              className="btn-win95"
             >
-              Zamknij
+              <span className="font-mono text-sm">Zamknij</span>
             </button>
             {isArchiveMode && (
               <button
                 onClick={() => handleDelete(selectedResult.exam_id, getUserName(selectedResult))}
-                className="px-5 py-2.5 bg-red-500/20 hover:bg-red-500 border border-red-500/50 hover:border-red-500 text-red-400 hover:text-white rounded-xl transition-all duration-200 font-medium flex items-center gap-2"
+                className="btn-win95 flex items-center gap-2"
+                style={{ backgroundColor: '#c41e1e', color: '#fff', borderColor: '#ff4444 #800000 #800000 #ff4444' }}
               >
                 <Trash2 className="w-4 h-4" />
-                Usuń Wynik
+                <span className="font-mono text-sm">Usuń Wynik</span>
               </button>
             )}
           </div>
@@ -349,53 +326,48 @@ export default function ExamResultsViewer({ mode = 'active' }: { mode?: 'active'
   };
 
   return (
-    <div className="min-h-screen bg-[#020a06] relative overflow-hidden">
-      {/* Background effects */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-[#c9a227]/10 rounded-full blur-[120px] animate-pulse-glow" />
-        <div
-          className="absolute bottom-1/4 -right-32 w-96 h-96 bg-[#22693f]/20 rounded-full blur-[120px] animate-pulse-glow"
-          style={{ animationDelay: '1.5s' }}
-        />
-      </div>
-
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--mdt-content)' }}>
+      <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Back Button */}
         <BackButton onClick={() => router.push('/exams')} destination="Egzaminów" />
 
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
-            {isArchiveMode ? <Archive className="w-10 h-10 text-[#c9a227]" /> : <FileText className="w-10 h-10 text-[#c9a227]" />}
-            {pageTitle}
-          </h1>
-          <p className="text-[#8fb5a0]">
-            Przeglądaj {isArchiveMode ? 'zarchiwizowane' : 'aktywne'} wyniki egzaminów użytkowników
-          </p>
+        <div className="mb-6 panel-raised" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+          <div className="px-4 py-2 flex items-center gap-2" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
+            {isArchiveMode ? <Archive className="w-5 h-5 text-white" /> : <FileText className="w-5 h-5 text-white" />}
+            <h1 className="font-[family-name:var(--font-vt323)] text-xl text-white">{pageTitle}</h1>
+          </div>
+          <div className="px-4 py-2">
+            <p className="font-mono text-sm" style={{ color: 'var(--mdt-muted-text)' }}>
+              Przeglądaj {isArchiveMode ? 'zarchiwizowane' : 'aktywne'} wyniki egzaminów użytkowników
+            </p>
+          </div>
         </div>
 
         {/* Search & Filter Bar */}
-        <div className="mb-6 glass-strong rounded-2xl p-5 border border-[#1a4d32]/50">
-          <div className="flex flex-col md:flex-row gap-4">
+        <div className="mb-4 panel-raised p-4" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+          <div className="flex flex-col md:flex-row gap-3">
             {/* Search */}
             <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8fb5a0]" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--mdt-muted-text)' }} />
               <input
                 type="text"
                 placeholder="Szukaj po nazwie użytkownika lub typie egzaminu..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-[#020a06]/50 border border-[#1a4d32]/50 rounded-xl text-white placeholder-[#8fb5a0]/50 focus:outline-none focus:border-[#c9a227]/50 transition-all"
+                className="panel-inset w-full pl-9 pr-3 py-2 font-mono text-sm"
+                style={{ backgroundColor: 'var(--mdt-input-bg)', color: 'var(--mdt-content-text)', outline: 'none' }}
               />
             </div>
 
             {/* Filter */}
             <div className="relative">
-              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8fb5a0] pointer-events-none" />
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--mdt-muted-text)' }} />
               <select
                 value={filterExamType}
                 onChange={(e) => setFilterExamType(e.target.value)}
-                className="pl-12 pr-10 py-3 bg-[#020a06]/50 border border-[#1a4d32]/50 rounded-xl text-white focus:outline-none focus:border-[#c9a227]/50 transition-all appearance-none cursor-pointer min-w-[200px]"
+                className="panel-inset pl-9 pr-3 py-2 font-mono text-sm cursor-pointer min-w-[200px]"
+                style={{ backgroundColor: 'var(--mdt-input-bg)', color: 'var(--mdt-content-text)', outline: 'none' }}
               >
                 <option value="all">Wszystkie typy</option>
                 {examTypes.map((type) => (
@@ -408,17 +380,17 @@ export default function ExamResultsViewer({ mode = 'active' }: { mode?: 'active'
           </div>
 
           {/* Results Count */}
-          <div className="mt-4 pt-4 border-t border-[#1a4d32]/30 flex items-center justify-between text-sm">
-            <span className="text-[#8fb5a0]">
-              Znaleziono: <span className="text-white font-medium">{filteredResults.length}</span> wyników
+          <div className="mt-3 pt-3 flex items-center justify-between font-mono text-xs" style={{ borderTop: '1px solid var(--mdt-border-mid)', color: 'var(--mdt-muted-text)' }}>
+            <span>
+              Znaleziono: <span className="font-bold" style={{ color: 'var(--mdt-content-text)' }}>{filteredResults.length}</span> wyników
             </span>
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="text-[#c9a227] hover:text-[#e6b830] transition-colors flex items-center gap-1"
+                className="btn-win95 flex items-center gap-1"
               >
-                Wyczyść wyszukiwanie
-                <X className="w-4 h-4" />
+                <span className="font-mono text-xs">Wyczyść</span>
+                <X className="w-3 h-3" />
               </button>
             )}
           </div>
@@ -426,82 +398,73 @@ export default function ExamResultsViewer({ mode = 'active' }: { mode?: 'active'
 
         {/* Results Table */}
         {loading ? (
-          <div className="glass-strong rounded-2xl p-12 border border-[#1a4d32]/50 text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#c9a227] mb-4"></div>
-            <p className="text-[#8fb5a0]">Ładowanie {isArchiveMode ? 'archiwum' : 'wyników'}...</p>
+          <div className="panel-raised p-8 text-center" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+            <p className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>Ładowanie {isArchiveMode ? 'archiwum' : 'wyników'}...</p>
           </div>
         ) : filteredResults.length === 0 ? (
-          <div className="glass-strong rounded-2xl p-12 border border-[#1a4d32]/50 text-center">
-            <div className="text-6xl mb-4">📋</div>
-            <h3 className="text-xl font-bold text-white mb-2">Brak wyników</h3>
-            <p className="text-[#8fb5a0]">
+          <div className="panel-raised p-8 text-center" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+            <p className="font-[family-name:var(--font-vt323)] text-xl mb-2" style={{ color: 'var(--mdt-content-text)' }}>Brak wyników</p>
+            <p className="font-mono text-sm" style={{ color: 'var(--mdt-muted-text)' }}>
               {searchTerm || filterExamType !== 'all'
                 ? 'Nie znaleziono wyników pasujących do filtrów.'
                 : `Brak ${isArchiveMode ? 'zarchiwizowanych' : 'aktywnych'} wyników egzaminów.`}
             </p>
           </div>
         ) : (
-          <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 overflow-hidden">
+          <div className="panel-raised overflow-hidden" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-[#1a4d32]/50 bg-[#020a06]/50">
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-[#8fb5a0] uppercase tracking-wider">
+                  <tr style={{ backgroundColor: 'var(--mdt-header)' }}>
+                    <th className="px-4 py-2 text-left font-[family-name:var(--font-vt323)] text-sm" style={{ color: '#ccc' }}>
                       Użytkownik
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-[#8fb5a0] uppercase tracking-wider">
+                    <th className="px-4 py-2 text-left font-[family-name:var(--font-vt323)] text-sm" style={{ color: '#ccc' }}>
                       Typ Egzaminu
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-[#8fb5a0] uppercase tracking-wider">
+                    <th className="px-4 py-2 text-left font-[family-name:var(--font-vt323)] text-sm" style={{ color: '#ccc' }}>
                       Wynik
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-[#8fb5a0] uppercase tracking-wider">
+                    <th className="px-4 py-2 text-left font-[family-name:var(--font-vt323)] text-sm" style={{ color: '#ccc' }}>
                       Status
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-[#8fb5a0] uppercase tracking-wider">
+                    <th className="px-4 py-2 text-left font-[family-name:var(--font-vt323)] text-sm" style={{ color: '#ccc' }}>
                       Data
                     </th>
-                    <th className="px-6 py-4 text-center text-xs font-semibold text-[#8fb5a0] uppercase tracking-wider">
+                    <th className="px-4 py-2 text-center font-[family-name:var(--font-vt323)] text-sm" style={{ color: '#ccc' }}>
                       Akcje
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#1a4d32]/30">
+                <tbody>
                   {filteredResults.map((result, index) => {
                     const scorePercentage = result.percentage || 0;
 
                     return (
                       <tr
                         key={result.id}
-                        className="hover:bg-[#051a0f]/50 transition-colors"
-                        style={{ animationDelay: `${index * 30}ms` }}
+                        style={{ backgroundColor: index % 2 === 0 ? 'var(--mdt-row-even)' : 'var(--mdt-row-odd)' }}
                       >
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-white font-medium">{getUserName(result)}</span>
+                        <td className="px-4 py-2 whitespace-nowrap">
+                          <span className="font-mono text-sm font-medium" style={{ color: 'var(--mdt-content-text)' }}>{getUserName(result)}</span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-[#8fb5a0]">{getExamType(result)}</span>
+                        <td className="px-4 py-2 whitespace-nowrap">
+                          <span className="font-mono text-sm" style={{ color: 'var(--mdt-muted-text)' }}>{getExamType(result)}</span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-white font-medium">
+                        <td className="px-4 py-2 whitespace-nowrap">
+                          <span className="font-mono text-sm font-medium" style={{ color: 'var(--mdt-content-text)' }}>
                             {result.score || 0}/{result.total_questions || 0} ({Math.round(scorePercentage)}%)
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 py-2 whitespace-nowrap">
                           <span
-                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium ${
-                              result.passed
-                                ? 'bg-green-500/20 text-green-400'
-                                : 'bg-red-500/20 text-red-400'
-                            }`}
+                            className="font-mono text-xs font-bold"
+                            style={{ color: result.passed ? '#006400' : '#8b0000' }}
                           >
-                            <div
-                              className={`w-1.5 h-1.5 rounded-full ${result.passed ? 'bg-green-400' : 'bg-red-400'}`}
-                            />
-                            {result.passed ? 'Zdany' : 'Niezdany'}
+                            {result.passed ? '[ZDANY]' : '[NIEZDANY]'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-[#8fb5a0] text-sm">
+                        <td className="px-4 py-2 whitespace-nowrap font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>
                           {new Date(result.created_at).toLocaleDateString('pl-PL', {
                             day: '2-digit',
                             month: 'short',
@@ -510,21 +473,21 @@ export default function ExamResultsViewer({ mode = 'active' }: { mode?: 'active'
                             minute: '2-digit',
                           })}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <td className="px-4 py-2 whitespace-nowrap text-center">
                           <div className="flex items-center justify-center gap-2">
                             <button
                               onClick={() => openDetailsModal(result)}
-                              className="px-4 py-2 bg-[#c9a227]/20 hover:bg-[#c9a227] border border-[#c9a227]/50 hover:border-[#c9a227] text-[#c9a227] hover:text-[#051a0f] rounded-lg transition-all duration-200 text-sm font-medium"
+                              className="btn-win95"
                             >
-                              Szczegóły
+                              <span className="font-mono text-xs">Szczegóły</span>
                             </button>
                             {!isArchiveMode && (
                               <button
                                 onClick={() => handleArchive(result.exam_id, getUserName(result))}
-                                className="p-2.5 bg-[#1a4d32]/20 hover:bg-[#1a4d32] border border-[#1a4d32]/50 hover:border-[#22693f] rounded-lg transition-all duration-200 group"
+                                className="btn-win95"
                                 title="Archiwizuj"
                               >
-                                <Archive className="w-4 h-4 text-[#8fb5a0] group-hover:text-white transition-colors" />
+                                <Archive className="w-3 h-3" />
                               </button>
                             )}
                           </div>

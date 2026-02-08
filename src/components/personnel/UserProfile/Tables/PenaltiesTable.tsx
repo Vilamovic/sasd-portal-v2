@@ -46,13 +46,13 @@ export default function PenaltiesTable({
   const getPenaltyTypeColor = (type: string) => {
     switch (type) {
       case 'plus':
-        return 'text-green-400';
+        return 'text-green-700';
       case 'minus':
-        return 'text-red-400';
+        return 'text-red-700';
       case 'suspension':
-        return 'text-orange-400';
+        return 'text-orange-600';
       default:
-        return 'text-gray-400';
+        return 'text-gray-600';
     }
   };
 
@@ -61,7 +61,6 @@ export default function PenaltiesTable({
     plusminus: {
       title: 'Historia PLUS/MINUS',
       icon: Award,
-      iconColor: 'text-[#c9a227]',
       emptyText: 'Brak historii PLUS/MINUS.',
       clearButtonText: 'Wyzeruj +/-',
       canClear: isCS,
@@ -70,7 +69,6 @@ export default function PenaltiesTable({
     suspensions: {
       title: 'Historia Kar (Zawieszenia)',
       icon: AlertTriangle,
-      iconColor: 'text-red-400',
       emptyText: 'Brak historii kar.',
       clearButtonText: 'Wyzeruj wszystko',
       canClear: isHCS,
@@ -79,7 +77,6 @@ export default function PenaltiesTable({
     warnings: {
       title: 'Historia Upomnienia Pisemne',
       icon: FileText,
-      iconColor: 'text-orange-400',
       emptyText: 'Brak upomnienia pisemnego.',
       clearButtonText: 'Wyzeruj wszystko',
       canClear: isCS,
@@ -91,14 +88,15 @@ export default function PenaltiesTable({
   const Icon = cfg.icon;
 
   return (
-    <div className="mb-8">
+    <div className="mb-4">
       {/* Clear buttons */}
       {cfg.canClear && (
         <div className="flex justify-end gap-2 mb-2">
           {isDev && selectedIds.size > 0 && (
             <button
               onClick={onDeleteSelected}
-              className="flex items-center gap-2 px-3 py-2 bg-orange-600/20 border border-orange-500/50 text-orange-400 text-sm font-bold rounded-lg hover:bg-orange-600/30 transition-all"
+              className="btn-win95 flex items-center gap-2 text-sm"
+              style={{ backgroundColor: '#c41e1e', color: '#fff', borderColor: '#ff4444 #800000 #800000 #ff4444' }}
               title={`Usuń ${selectedIds.size} zaznaczonych pozycji${section === 'warnings' ? '' : ' (DEV)'}`}
             >
               <Trash2 className="w-3 h-3" />
@@ -107,7 +105,8 @@ export default function PenaltiesTable({
           )}
           <button
             onClick={onClear}
-            className="flex items-center gap-2 px-3 py-2 bg-red-600/20 border border-red-500/50 text-red-400 text-sm font-bold rounded-lg hover:bg-red-600/30 transition-all"
+            className="btn-win95 flex items-center gap-2 text-sm"
+            style={{ backgroundColor: '#c41e1e', color: '#fff', borderColor: '#ff4444 #800000 #800000 #ff4444' }}
             title={cfg.clearTooltip}
           >
             <Trash2 className="w-3 h-3" />
@@ -116,64 +115,69 @@ export default function PenaltiesTable({
         </div>
       )}
 
-      {/* Header */}
-      <h3 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
-        <Icon className={`w-6 h-6 ${cfg.iconColor}`} />
-        {cfg.title}
-      </h3>
-
       {/* Table */}
-      <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 overflow-hidden shadow-xl">
+      <div className="panel-raised" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+        {/* Blue title bar */}
+        <div style={{ backgroundColor: 'var(--mdt-blue-bar)' }} className="px-4 py-2 flex items-center gap-2">
+          <Icon className="w-4 h-4 text-white" />
+          <h3 className="font-[family-name:var(--font-vt323)] text-base tracking-widest uppercase text-white">
+            {cfg.title}
+          </h3>
+        </div>
+
         {penalties.length === 0 ? (
-          <div className="p-12 text-center">
-            <Icon className="w-16 h-16 text-[#8fb5a0] mx-auto mb-4" />
-            <p className="text-[#8fb5a0]">{cfg.emptyText}</p>
+          <div className="p-8 text-center">
+            <Icon className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--mdt-muted-text)' }} />
+            <p className="font-mono text-sm" style={{ color: 'var(--mdt-muted-text)' }}>{cfg.emptyText}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-[#051a0f]/50 border-b border-[#1a4d32]/50">
+              <thead style={{ backgroundColor: 'var(--mdt-header)' }}>
                 <tr>
-                  {isDev && <th className="px-4 py-4 w-12"></th>}
+                  {isDev && <th className="px-3 py-2 w-10"></th>}
                   {section === 'plusminus' && (
-                    <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Typ</th>
+                    <th className="px-4 py-2 text-left font-[family-name:var(--font-vt323)] text-sm tracking-widest uppercase" style={{ color: '#ccc' }}>Typ</th>
                   )}
-                  <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Powód</th>
+                  <th className="px-4 py-2 text-left font-[family-name:var(--font-vt323)] text-sm tracking-widest uppercase" style={{ color: '#ccc' }}>Powód</th>
                   {section === 'suspensions' && (
-                    <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Czas trwania</th>
+                    <th className="px-4 py-2 text-left font-[family-name:var(--font-vt323)] text-sm tracking-widest uppercase" style={{ color: '#ccc' }}>Czas trwania</th>
                   )}
-                  <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Nadane przez</th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-[#8fb5a0] uppercase">Data</th>
+                  <th className="px-4 py-2 text-left font-[family-name:var(--font-vt323)] text-sm tracking-widest uppercase" style={{ color: '#ccc' }}>Nadane przez</th>
+                  <th className="px-4 py-2 text-left font-[family-name:var(--font-vt323)] text-sm tracking-widest uppercase" style={{ color: '#ccc' }}>Data</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#1a4d32]/30">
-                {penalties.map((penalty) => (
-                  <tr key={penalty.id} className="hover:bg-[#0a2818]/30 transition-colors">
+              <tbody>
+                {penalties.map((penalty, index) => (
+                  <tr
+                    key={penalty.id}
+                    style={{ backgroundColor: index % 2 === 0 ? 'var(--mdt-row-even)' : 'var(--mdt-row-odd)' }}
+                  >
                     {isDev && (
-                      <td className="px-4 py-4">
+                      <td className="px-3 py-2">
                         <input
                           type="checkbox"
                           checked={selectedIds.has(penalty.id)}
                           onChange={() => onToggleSelection(penalty.id)}
-                          className="w-4 h-4 rounded border-[#1a4d32] bg-[#0a2818] text-[#c9a227] focus:ring-[#c9a227] focus:ring-offset-0 cursor-pointer"
+                          className="cursor-pointer"
                         />
                       </td>
                     )}
                     {section === 'plusminus' && (
-                      <td className="px-6 py-4">
-                        <span className={`font-bold ${getPenaltyTypeColor(penalty.penalty_type)}`}>
+                      <td className="px-4 py-2">
+                        <span className={`font-mono text-sm font-bold ${getPenaltyTypeColor(penalty.penalty_type)}`}>
                           {getPenaltyTypeDisplay(penalty.penalty_type)}
                         </span>
                       </td>
                     )}
-                    <td className="px-6 py-4 text-white">{penalty.reason}</td>
+                    <td className="px-4 py-2 font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>{penalty.reason}</td>
                     {section === 'suspensions' && (
-                      <td className="px-6 py-4 text-orange-400 font-semibold">
+                      <td className="px-4 py-2 font-mono text-sm font-bold" style={{ color: '#c41e1e' }}>
                         {penalty.duration_hours ? `${penalty.duration_hours}h` : 'Permanentne'}
                       </td>
                     )}
-                    <td className="px-6 py-4 text-[#8fb5a0]">{penalty.admin_username}</td>
-                    <td className="px-6 py-4 text-[#8fb5a0] text-sm">{formatDate(penalty.created_at)}</td>
+                    <td className="px-4 py-2 font-mono text-sm" style={{ color: 'var(--mdt-muted-text)' }}>{penalty.admin_username}</td>
+                    <td className="px-4 py-2 font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>{formatDate(penalty.created_at)}</td>
                   </tr>
                 ))}
               </tbody>

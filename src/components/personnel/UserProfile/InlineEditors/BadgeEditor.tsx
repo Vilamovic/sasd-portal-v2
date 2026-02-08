@@ -86,27 +86,29 @@ export default function BadgeEditor({ user, currentUser, userId, isHCS, isCS, on
   };
 
   return (
-    <div className="glass-medium rounded-xl p-4 border border-[#1a4d32]/30">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <Award className="w-4 h-4 text-[#c9a227]" />
-          <span className="text-[#8fb5a0] text-sm">Stopień</span>
+    <div className="panel-inset p-3" style={{ backgroundColor: 'var(--mdt-input-bg)' }}>
+      <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center gap-1">
+          <Award className="w-3 h-3" style={{ color: 'var(--mdt-muted-text)' }} />
+          <span className="font-mono text-xs font-bold" style={{ color: 'var(--mdt-muted-text)' }}>Stopień</span>
         </div>
         {!editing && canEdit && (
           <button
             onClick={() => setEditing(true)}
-            className="text-[#c9a227] hover:text-[#e6b830] transition-colors"
+            className="font-mono text-xs"
+            style={{ color: 'var(--mdt-content-text)' }}
           >
-            <Edit3 className="w-4 h-4" />
+            <Edit3 className="w-3 h-3" />
           </button>
         )}
       </div>
       {editing ? (
-        <div className="space-y-2">
+        <div className="space-y-1">
           <select
             value={tempStopień}
             onChange={(e) => setTempStopień(e.target.value)}
-            className="w-full px-3 py-2 bg-[#0a2818]/50 border border-[#1a4d32] rounded-lg text-white text-sm focus:outline-none focus:border-[#c9a227]"
+            className="panel-inset w-full px-2 py-1 font-mono text-xs"
+            style={{ backgroundColor: 'var(--mdt-panel-alt)', color: 'var(--mdt-content-text)', outline: 'none' }}
           >
             <option value="">Brak</option>
             {badges.map((badge) => (
@@ -115,17 +117,18 @@ export default function BadgeEditor({ user, currentUser, userId, isHCS, isCS, on
               </option>
             ))}
           </select>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <button
               onClick={handleSave}
-              className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-green-600 text-white text-xs rounded-lg hover:bg-green-700 transition-colors"
+              className="btn-win95 flex-1 flex items-center justify-center gap-1 text-xs py-0.5"
+              style={{ backgroundColor: '#3a6a3a', color: '#fff', borderColor: '#5a9a5a #1a3a1a #1a3a1a #5a9a5a' }}
             >
               <Save className="w-3 h-3" />
               Zapisz
             </button>
             <button
               onClick={handleCancel}
-              className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-[#0a2818] text-white text-xs rounded-lg hover:bg-[#133524] transition-colors"
+              className="btn-win95 flex-1 flex items-center justify-center gap-1 text-xs py-0.5"
             >
               <X className="w-3 h-3" />
               Anuluj
@@ -133,7 +136,7 @@ export default function BadgeEditor({ user, currentUser, userId, isHCS, isCS, on
           </div>
         </div>
       ) : (
-        <p className="text-white font-semibold">{user?.badge || 'Brak'}</p>
+        <p className="font-mono text-sm font-bold" style={{ color: 'var(--mdt-content-text)' }}>{user?.badge || 'Brak'}</p>
       )}
     </div>
   );

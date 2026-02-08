@@ -26,14 +26,15 @@ export default function NotesTable({
   isCS,
 }: NotesTableProps) {
   return (
-    <div className="mb-8">
+    <div className="mb-4">
       {/* Clear buttons */}
       {isCS && (
         <div className="flex justify-end gap-2 mb-2">
           {selectedIds.size > 0 && (
             <button
               onClick={onDeleteSelected}
-              className="flex items-center gap-2 px-3 py-2 bg-orange-600/20 border border-orange-500/50 text-orange-400 text-sm font-bold rounded-lg hover:bg-orange-600/30 transition-all"
+              className="btn-win95 flex items-center gap-2 text-sm"
+              style={{ backgroundColor: '#c41e1e', color: '#fff', borderColor: '#ff4444 #800000 #800000 #ff4444' }}
               title={`Usuń ${selectedIds.size} zaznaczonych notatek`}
             >
               <Trash2 className="w-3 h-3" />
@@ -42,7 +43,8 @@ export default function NotesTable({
           )}
           <button
             onClick={onClear}
-            className="flex items-center gap-2 px-3 py-2 bg-red-600/20 border border-red-500/50 text-red-400 text-sm font-bold rounded-lg hover:bg-red-600/30 transition-all"
+            className="btn-win95 flex items-center gap-2 text-sm"
+            style={{ backgroundColor: '#c41e1e', color: '#fff', borderColor: '#ff4444 #800000 #800000 #ff4444' }}
             title="Wyzeruj wszystkie notatki (CS+)"
           >
             <Trash2 className="w-3 h-3" />
@@ -52,14 +54,16 @@ export default function NotesTable({
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-2xl font-bold text-white flex items-center gap-2">
-          <FileText className="w-6 h-6 text-[#c9a227]" />
-          Notatki Prywatne (Admin)
-        </h3>
+      <div className="flex items-center justify-between mb-2">
+        <div style={{ backgroundColor: 'var(--mdt-blue-bar)' }} className="px-4 py-2 flex items-center gap-2 flex-1 mr-4">
+          <FileText className="w-4 h-4 text-white" />
+          <h3 className="font-[family-name:var(--font-vt323)] text-base tracking-widest uppercase text-white">
+            Notatki Prywatne (Admin)
+          </h3>
+        </div>
         <button
           onClick={onAddNote}
-          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#14b8a6] to-[#0d9488] text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
+          className="btn-win95 flex items-center gap-2"
         >
           <Plus className="w-4 h-4" />
           Dodaj Notatkę
@@ -67,36 +71,37 @@ export default function NotesTable({
       </div>
 
       {/* Table */}
-      <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 overflow-hidden shadow-xl">
+      <div className="panel-raised" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
         {notes.length === 0 ? (
-          <div className="p-12 text-center">
-            <FileText className="w-16 h-16 text-[#8fb5a0] mx-auto mb-4" />
-            <p className="text-[#8fb5a0]">Brak notatek.</p>
+          <div className="p-8 text-center">
+            <FileText className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--mdt-muted-text)' }} />
+            <p className="font-mono text-sm" style={{ color: 'var(--mdt-muted-text)' }}>Brak notatek.</p>
           </div>
         ) : (
-          <div className="divide-y divide-[#1a4d32]/30">
-            {notes.map((note) => (
+          <div>
+            {notes.map((note, index) => (
               <div
                 key={note.id}
-                className="p-6 hover:bg-[#0a2818]/30 transition-colors"
+                className="px-4 py-3 border-b border-gray-300 last:border-b-0"
+                style={{ backgroundColor: index % 2 === 0 ? 'var(--mdt-row-even)' : 'var(--mdt-row-odd)' }}
               >
-                <div className="flex items-start gap-4">
+                <div className="flex items-start gap-3">
                   {isCS && (
                     <input
                       type="checkbox"
                       checked={selectedIds.has(note.id)}
                       onChange={() => onToggleSelection(note.id)}
-                      className="w-4 h-4 mt-1 rounded border-[#1a4d32] bg-[#0a2818] text-[#c9a227] focus:ring-[#c9a227] focus:ring-offset-0 cursor-pointer"
+                      className="mt-1 cursor-pointer"
                     />
                   )}
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-[#c9a227] font-semibold">{note.admin_username}</span>
-                      <span className="text-[#8fb5a0] text-xs">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-mono text-sm font-bold" style={{ color: 'var(--mdt-content-text)' }}>{note.admin_username}</span>
+                      <span className="font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>
                         {formatDate(note.created_at)}
                       </span>
                     </div>
-                    <p className="text-white">{note.note}</p>
+                    <p className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>{note.note}</p>
                   </div>
                 </div>
               </div>

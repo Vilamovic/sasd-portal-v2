@@ -34,20 +34,28 @@ export default function GenerateTokenForm({
   onGenerate,
 }: GenerateTokenFormProps) {
   return (
-    <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 shadow-xl p-6 mb-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Sparkles className="w-5 h-5 text-[#c9a227]" />
-        <h3 className="text-xl font-bold text-white">Wygeneruj Nowy Token</h3>
+    <div className="panel-raised mb-4" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+      <div
+        className="px-3 py-2 flex items-center gap-2"
+        style={{ backgroundColor: 'var(--mdt-blue-bar)' }}
+      >
+        <Sparkles className="w-4 h-4 text-white" />
+        <h3 className="font-[family-name:var(--font-vt323)] text-white text-lg">
+          Wygeneruj Nowy Token
+        </h3>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Select User */}
         <div>
-          <label className="block text-sm font-medium text-[#8fb5a0] mb-2">Użytkownik</label>
+          <label className="block font-mono text-sm mb-1" style={{ color: 'var(--mdt-muted-text)' }}>
+            Użytkownik
+          </label>
           <select
             value={selectedUserId}
             onChange={(e) => onUserChange(e.target.value)}
-            className="w-full px-4 py-3 bg-[#051a0f]/80 border border-[#1a4d32] rounded-xl text-white focus:outline-none focus:border-[#c9a227] transition-colors"
+            className="panel-inset w-full px-3 py-2 font-mono text-sm"
+            style={{ backgroundColor: 'var(--mdt-input-bg)', color: 'var(--mdt-content-text)', outline: 'none' }}
           >
             <option value="">Wybierz użytkownika...</option>
             {users.map((u) => (
@@ -60,11 +68,14 @@ export default function GenerateTokenForm({
 
         {/* Select Exam Type */}
         <div>
-          <label className="block text-sm font-medium text-[#8fb5a0] mb-2">Typ Egzaminu</label>
+          <label className="block font-mono text-sm mb-1" style={{ color: 'var(--mdt-muted-text)' }}>
+            Typ Egzaminu
+          </label>
           <select
             value={selectedExamTypeId}
             onChange={(e) => onExamTypeChange(e.target.value)}
-            className="w-full px-4 py-3 bg-[#051a0f]/80 border border-[#1a4d32] rounded-xl text-white focus:outline-none focus:border-[#c9a227] transition-colors"
+            className="panel-inset w-full px-3 py-2 font-mono text-sm"
+            style={{ backgroundColor: 'var(--mdt-input-bg)', color: 'var(--mdt-content-text)', outline: 'none' }}
           >
             <option value="">Wybierz typ egzaminu...</option>
             {examTypes.map((et) => (
@@ -80,11 +91,19 @@ export default function GenerateTokenForm({
           <button
             onClick={onGenerate}
             disabled={generating || !selectedUserId || !selectedExamTypeId}
-            className="w-full px-6 py-3 bg-gradient-to-r from-[#22c55e] to-[#16a34a] hover:opacity-90 text-white font-semibold rounded-xl transition-all disabled:from-[#133524] disabled:to-[#0a2818] disabled:cursor-not-allowed disabled:opacity-50 shadow-lg flex items-center justify-center gap-2"
+            className="btn-win95 w-full font-mono text-sm flex items-center justify-center gap-2"
+            style={
+              generating || !selectedUserId || !selectedExamTypeId
+                ? { color: 'var(--mdt-border-mid)', cursor: 'not-allowed' }
+                : { backgroundColor: '#3a6a3a', color: '#fff', borderColor: '#5a9a5a #1a3a1a #1a3a1a #5a9a5a' }
+            }
           >
             {generating ? (
               <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div
+                  className="w-3 h-3 border-2 border-t-transparent animate-spin"
+                  style={{ borderColor: 'currentColor', borderTopColor: 'transparent' }}
+                />
                 Generowanie...
               </>
             ) : (

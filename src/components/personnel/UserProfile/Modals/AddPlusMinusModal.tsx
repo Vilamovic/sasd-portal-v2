@@ -82,46 +82,42 @@ export default function AddPlusMinusModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-      <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 p-8 max-w-lg w-full shadow-2xl">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Award className="w-6 h-6 text-[#c9a227]" />
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
+      <div className="panel-raised max-w-lg w-full mx-4" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+        {/* Title Bar */}
+        <div className="flex items-center justify-between px-3 py-2" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
+          <h3 className="font-[family-name:var(--font-vt323)] text-base tracking-widest uppercase text-white flex items-center gap-2">
+            <Award className="w-4 h-4" />
             Dodaj PLUS/MINUS
           </h3>
           <button
             onClick={handleClose}
-            className="text-[#8fb5a0] hover:text-white transition-colors"
+            style={{ backgroundColor: '#c41e1e', color: '#fff', border: '1px solid #555' }}
+            className="w-6 h-6 flex items-center justify-center text-xs font-bold"
           >
-            <X className="w-6 h-6" />
+            X
           </button>
         </div>
 
-        <div className="space-y-4">
+        <div className="p-4 space-y-3">
           {/* Type Selection */}
           <div>
-            <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Typ</label>
+            <label className="block font-mono text-sm font-bold mb-2" style={{ color: 'var(--mdt-muted-text)' }}>Typ</label>
             <div className="flex gap-3">
               <button
                 onClick={() => setPlusMinusType('plus')}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all ${
-                  plusMinusType === 'plus'
-                    ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg'
-                    : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32]'
-                }`}
+                className="btn-win95 flex-1 flex items-center justify-center gap-2"
+                style={plusMinusType === 'plus' ? { backgroundColor: '#3a6a3a', color: '#fff', borderColor: '#5a9a5a #1a3a1a #1a3a1a #5a9a5a' } : {}}
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="w-4 h-4" />
                 PLUS
               </button>
               <button
                 onClick={() => setPlusMinusType('minus')}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all ${
-                  plusMinusType === 'minus'
-                    ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg'
-                    : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32]'
-                }`}
+                className="btn-win95 flex-1 flex items-center justify-center gap-2"
+                style={plusMinusType === 'minus' ? { backgroundColor: '#c41e1e', color: '#fff', borderColor: '#ff4444 #800000 #800000 #ff4444' } : {}}
               >
-                <Minus className="w-5 h-5" />
+                <Minus className="w-4 h-4" />
                 MINUS
               </button>
             </div>
@@ -129,28 +125,30 @@ export default function AddPlusMinusModal({
 
           {/* Reason */}
           <div>
-            <label className="block text-[#8fb5a0] text-sm font-semibold mb-2">Powód</label>
+            <label className="block font-mono text-sm font-bold mb-1" style={{ color: 'var(--mdt-muted-text)' }}>Powód</label>
             <textarea
               value={plusMinusReason}
               onChange={(e) => setPlusMinusReason(e.target.value)}
               placeholder="Opisz powód nadania PLUS/MINUS..."
               rows={4}
-              className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-[#c9a227] transition-colors resize-none"
+              className="panel-inset w-full px-3 py-2 font-mono text-sm resize-none"
+              style={{ backgroundColor: 'var(--mdt-input-bg)', color: 'var(--mdt-content-text)', outline: 'none' }}
             />
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-3 pt-1">
             <button
               onClick={handleSubmit}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#c9a227] to-[#e6b830] text-[#020a06] font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
+              className="btn-win95 flex-1 flex items-center justify-center gap-2"
+              style={{ backgroundColor: '#3a6a3a', color: '#fff', borderColor: '#5a9a5a #1a3a1a #1a3a1a #5a9a5a' }}
             >
               <Save className="w-4 h-4" />
               Dodaj
             </button>
             <button
               onClick={handleClose}
-              className="px-6 py-3 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
+              className="btn-win95 px-6"
             >
               Anuluj
             </button>

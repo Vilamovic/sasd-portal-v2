@@ -9,10 +9,10 @@ export default function ActionButtons() {
     <div className="mt-8">
       <Link
         href="/admin/tokens"
-        className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[#c9a227] to-[#e6b830] hover:opacity-90 text-[#020a06] font-bold transition-all duration-300 hover:scale-[1.02] shadow-lg"
+        className="btn-win95 inline-flex items-center gap-2 font-mono text-sm"
       >
-        <Key className="w-5 h-5" />
-        <span className="text-sm font-medium">Tokeny Egzaminacyjne</span>
+        <Key className="w-4 h-4" />
+        <span>Tokeny Egzaminacyjne</span>
       </Link>
     </div>
   );

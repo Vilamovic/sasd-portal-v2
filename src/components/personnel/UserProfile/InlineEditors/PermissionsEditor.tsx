@@ -84,49 +84,48 @@ export default function PermissionsEditor({ user, currentUser, userId, isHCS, is
   };
 
   return (
-    <div className="glass-medium rounded-xl p-4 border border-[#1a4d32]/30">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <Users className="w-4 h-4 text-[#c9a227]" />
-          <span className="text-[#8fb5a0] text-sm">Uprawnienia</span>
+    <div className="panel-inset p-3" style={{ backgroundColor: 'var(--mdt-input-bg)' }}>
+      <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center gap-1">
+          <Users className="w-3 h-3" style={{ color: 'var(--mdt-muted-text)' }} />
+          <span className="font-mono text-xs font-bold" style={{ color: 'var(--mdt-muted-text)' }}>Uprawnienia</span>
         </div>
         {!editing && canEdit && (
           <button
             onClick={() => setEditing(true)}
-            className="text-[#c9a227] hover:text-[#e6b830] transition-colors"
+            className="font-mono text-xs"
+            style={{ color: 'var(--mdt-content-text)' }}
           >
-            <Edit3 className="w-4 h-4" />
+            <Edit3 className="w-3 h-3" />
           </button>
         )}
       </div>
       {editing ? (
-        <div className="space-y-2">
-          <div className="flex flex-wrap gap-2">
+        <div className="space-y-1">
+          <div className="flex flex-wrap gap-1">
             {permissions.map((perm) => (
               <button
                 key={perm}
                 onClick={() => togglePermission(perm)}
-                className={`px-2 py-1 rounded text-xs font-bold transition-all ${
-                  tempPermissions.includes(perm)
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32]'
-                }`}
+                className="btn-win95 text-xs py-0.5 px-2 font-bold"
+                style={tempPermissions.includes(perm) ? { backgroundColor: '#2563eb', color: '#fff', borderColor: '#60a5fa #1e40af #1e40af #60a5fa' } : {}}
               >
                 {perm}
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <button
               onClick={handleSave}
-              className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-green-600 text-white text-xs rounded-lg hover:bg-green-700 transition-colors"
+              className="btn-win95 flex-1 flex items-center justify-center gap-1 text-xs py-0.5"
+              style={{ backgroundColor: '#3a6a3a', color: '#fff', borderColor: '#5a9a5a #1a3a1a #1a3a1a #5a9a5a' }}
             >
               <Save className="w-3 h-3" />
               Zapisz
             </button>
             <button
               onClick={handleCancel}
-              className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-[#0a2818] text-white text-xs rounded-lg hover:bg-[#133524] transition-colors"
+              className="btn-win95 flex-1 flex items-center justify-center gap-1 text-xs py-0.5"
             >
               <X className="w-3 h-3" />
               Anuluj
@@ -139,13 +138,13 @@ export default function PermissionsEditor({ user, currentUser, userId, isHCS, is
             user.permissions.map((perm: string) => (
               <span
                 key={perm}
-                className="px-2 py-1 rounded text-xs font-bold bg-blue-600 text-white"
+                className="px-1 py-0.5 text-xs font-bold font-mono bg-blue-600 text-white"
               >
                 {perm}
               </span>
             ))
           ) : (
-            <span className="text-white">Brak</span>
+            <span className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>Brak</span>
           )}
         </div>
       )}

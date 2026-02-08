@@ -84,97 +84,83 @@ export default function DivisionEditor({ user, currentUser, userId, isHCS, isCS,
   };
 
   return (
-    <div className="glass-medium rounded-xl p-4 border border-[#1a4d32]/30">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <Shield className="w-4 h-4 text-[#c9a227]" />
-          <span className="text-[#8fb5a0] text-sm">Dywizja</span>
+    <div className="panel-inset p-3" style={{ backgroundColor: 'var(--mdt-input-bg)' }}>
+      <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center gap-1">
+          <Shield className="w-3 h-3" style={{ color: 'var(--mdt-muted-text)' }} />
+          <span className="font-mono text-xs font-bold" style={{ color: 'var(--mdt-muted-text)' }}>Dywizja</span>
         </div>
         {!editing && canEdit && (
           <button
             onClick={() => setEditing(true)}
-            className="text-[#c9a227] hover:text-[#e6b830] transition-colors"
+            className="font-mono text-xs"
+            style={{ color: 'var(--mdt-content-text)' }}
           >
-            <Edit3 className="w-4 h-4" />
+            <Edit3 className="w-3 h-3" />
           </button>
         )}
       </div>
       {editing ? (
-        <div className="space-y-2">
-          <div className="flex flex-wrap gap-2">
+        <div className="space-y-1">
+          <div className="flex flex-wrap gap-1">
             <button
               onClick={() => setTempDivision('')}
-              className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
-                tempDivision === ''
-                  ? 'bg-gray-600 text-white border-2 border-gray-400'
-                  : 'bg-[#0a2818] text-[#8fb5a0] border border-[#1a4d32] hover:bg-[#133524]'
-              }`}
+              className="btn-win95 text-xs py-0.5 px-2"
+              style={tempDivision === '' ? { backgroundColor: 'var(--mdt-subtle-text)', color: '#fff', borderColor: 'var(--mdt-muted-text) #fff #fff var(--mdt-muted-text)' } : {}}
             >
               Brak
             </button>
             <button
               onClick={() => setTempDivision('FTO')}
-              className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
-                tempDivision === 'FTO'
-                  ? 'bg-[#c9a227] text-[#020a06] border-2 border-[#e6b830]'
-                  : 'bg-[#0a2818] text-[#c9a227] border border-[#c9a227]/30 hover:bg-[#c9a227]/10'
-              }`}
+              className="btn-win95 text-xs py-0.5 px-2 font-bold"
+              style={tempDivision === 'FTO' ? { backgroundColor: '#c9a227', color: '#000', borderColor: '#555 #fff #fff #555' } : {}}
             >
               FTO
             </button>
             <button
               onClick={() => setTempDivision('SS')}
-              className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
-                tempDivision === 'SS'
-                  ? 'bg-[#ff8c00] text-white border-2 border-[#ff8c00]'
-                  : 'bg-[#0a2818] text-[#ff8c00] border border-[#ff8c00]/30 hover:bg-[#ff8c00]/10'
-              }`}
+              className="btn-win95 text-xs py-0.5 px-2 font-bold"
+              style={tempDivision === 'SS' ? { backgroundColor: '#ff8c00', color: '#fff', borderColor: '#555 #fff #fff #555' } : {}}
             >
               SS
             </button>
             <button
               onClick={() => setTempDivision('DTU')}
-              className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
-                tempDivision === 'DTU'
-                  ? 'bg-[#60a5fa] text-[#020a06] border-2 border-[#60a5fa]'
-                  : 'bg-[#0a2818] text-[#60a5fa] border border-[#60a5fa]/30 hover:bg-[#60a5fa]/10'
-              }`}
+              className="btn-win95 text-xs py-0.5 px-2 font-bold"
+              style={tempDivision === 'DTU' ? { backgroundColor: '#60a5fa', color: '#000', borderColor: '#555 #fff #fff #555' } : {}}
             >
               DTU
             </button>
             <button
               onClick={() => setTempDivision('GU')}
-              className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
-                tempDivision === 'GU'
-                  ? 'bg-[#10b981] text-white border-2 border-[#10b981]'
-                  : 'bg-[#0a2818] text-[#10b981] border border-[#10b981]/30 hover:bg-[#10b981]/10'
-              }`}
+              className="btn-win95 text-xs py-0.5 px-2 font-bold"
+              style={tempDivision === 'GU' ? { backgroundColor: '#10b981', color: '#fff', borderColor: '#555 #fff #fff #555' } : {}}
             >
               GU
             </button>
           </div>
           {tempDivision && (
-            <label className="flex items-center gap-2 text-sm text-[#8fb5a0]">
+            <label className="flex items-center gap-2 font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>
               <input
                 type="checkbox"
                 checked={tempIsCommander}
                 onChange={(e) => setTempIsCommander(e.target.checked)}
-                className="rounded border-[#1a4d32] bg-[#0a2818] text-[#c9a227] focus:ring-[#c9a227]"
               />
               Commander
             </label>
           )}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <button
               onClick={handleSave}
-              className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-green-600 text-white text-xs rounded-lg hover:bg-green-700 transition-colors"
+              className="btn-win95 flex-1 flex items-center justify-center gap-1 text-xs py-0.5"
+              style={{ backgroundColor: '#3a6a3a', color: '#fff', borderColor: '#5a9a5a #1a3a1a #1a3a1a #5a9a5a' }}
             >
               <Save className="w-3 h-3" />
               Zapisz
             </button>
             <button
               onClick={handleCancel}
-              className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-[#0a2818] text-white text-xs rounded-lg hover:bg-[#133524] transition-colors"
+              className="btn-win95 flex-1 flex items-center justify-center gap-1 text-xs py-0.5"
             >
               <X className="w-3 h-3" />
               Anuluj
@@ -184,11 +170,11 @@ export default function DivisionEditor({ user, currentUser, userId, isHCS, isCS,
       ) : (
         <div className="flex flex-wrap gap-1">
           {user?.division ? (
-            <span className={`px-2 py-1 rounded text-xs font-bold ${getDivisionColor(user.division)}`}>
+            <span className={`px-1 py-0.5 text-xs font-bold font-mono ${getDivisionColor(user.division)}`}>
               {user.division}{user.is_commander ? ' CMD' : ''}
             </span>
           ) : (
-            <span className="text-white">Brak</span>
+            <span className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>Brak</span>
           )}
         </div>
       )}

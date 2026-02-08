@@ -4,13 +4,8 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useTranslation } from '@/src/contexts/TranslationContext';
-import { LogOut, User, ChevronDown, Shield, Gamepad2, Award, Clock } from 'lucide-react';
+import { LogOut, User, ChevronDown, Shield, Gamepad2, Award, Clock, Sun, Moon } from 'lucide-react';
 
-/**
- * Navbar - Premium Sheriff-themed navigation bar
- * With user profile dropdown and logout functionality
- * OPTIMIZED: React.memo to prevent unnecessary re-renders
- */
 export default function Navbar() {
   const {
     user,
@@ -29,10 +24,32 @@ export default function Navbar() {
   const { t } = useTranslation();
   const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Countdown timer state for penalties
   const [penaltyTimers, setPenaltyTimers] = useState<Record<string, number>>({});
+
+  // Theme toggle: read from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('sasd-theme');
+    if (saved === 'dark') {
+      setDarkMode(true);
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const next = !darkMode;
+    setDarkMode(next);
+    if (next) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('sasd-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('sasd-theme', 'light');
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -62,10 +79,8 @@ export default function Navbar() {
       setPenaltyTimers(newTimers);
     };
 
-    // Initial update
     updateTimers();
 
-    // Update every second
     const interval = setInterval(() => {
       setPenaltyTimers((prev) => {
         const updated: Record<string, number> = {};
@@ -97,15 +112,15 @@ export default function Navbar() {
     return isCommander ? `${division} Commander` : division;
   };
 
-  // Get division color
+  // Get division color for MDT style
   const getDivisionColor = () => {
     const colors = {
-      FTO: 'text-[#c9a227]', // Yellow (gold theme)
-      SS: 'text-[#ff8c00]', // Orange
-      DTU: 'text-[#60a5fa]', // Light blue (better contrast)
-      GU: 'text-[#10b981]', // Green
+      FTO: '#c9a227',
+      SS: '#ff8c00',
+      DTU: '#60a5fa',
+      GU: '#10b981',
     };
-    return colors[division as keyof typeof colors] || 'text-white';
+    return colors[division as keyof typeof colors] || '#d4d4d4';
   };
 
   // Get penalty type display name
@@ -126,221 +141,189 @@ export default function Navbar() {
       router.refresh();
     } catch (error) {
       console.error('Logout error:', error);
-      // Fallback to reload if router fails
       window.location.href = '/';
     }
   };
 
   // Discord username
   const discordUsername = user?.user_metadata?.global_name || user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'Użytkownik';
-  // Avatar URL z Discorda
   const avatarUrl = user?.user_metadata?.avatar_url;
-  // Główna nazwa do wyświetlenia
   const displayName = mtaNick || discordUsername;
 
   return (
-    <nav className="h-16 bg-gradient-to-r from-[#020a06] via-[#051a0f] to-[#0a2818] border-b border-[#1a4d32]/50 shadow-2xl relative z-50">
-      {/* Subtle animated gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#c9a227]/5 via-transparent to-[#c9a227]/5 opacity-50" />
-
-      <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between relative z-10">
-        {/* Logo Section */}
-        <div className="flex items-center gap-6">
-          <div className="relative group">
-            {/* Glow effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-[#c9a227] to-[#e6b830] rounded-full animate-pulse-glow opacity-30 blur-md scale-125" />
-
-            {/* Main badge icon */}
-            <div className="relative w-11 h-11 bg-gradient-to-br from-[#c9a227] to-[#e6b830] rounded-full flex items-center justify-center shadow-lg shadow-[#c9a227]/20 group-hover:shadow-[#c9a227]/40 transition-all duration-300">
-              <Shield className="w-6 h-6 text-[#020a06]" strokeWidth={2.5} />
-            </div>
-          </div>
-
-          {/* Title */}
-          <div className="flex flex-col">
-            <span className="text-white font-bold text-lg tracking-wide hidden sm:block">
-              SAN ANDREAS SHERIFF&apos;S DEPARTMENT
-            </span>
-            <span className="text-white font-bold text-lg tracking-wide sm:hidden">
-              SASD
-            </span>
-            <span className="text-[#c9a227] text-xs font-semibold tracking-widest uppercase">
-              Training Portal
-            </span>
-          </div>
-
-          {/* Active Penalties Timer - Left Side */}
-          {activePenalties && activePenalties.length > 0 && (
-            <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl">
-              <Clock className="w-4 h-4 text-red-400" />
-              <div className="flex flex-col">
-                {activePenalties.map((penalty: any) => (
-                  <span key={penalty.id} className="text-red-400 text-xs font-mono font-bold">
-                    {formatTime(penaltyTimers[penalty.id] || penalty.remaining_seconds)}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+    <nav className="flex items-center justify-between px-5 py-2 relative z-[60]" style={{ backgroundColor: 'var(--mdt-header)' }}>
+      {/* Left: Logo + Title + Penalties */}
+      <div className="flex items-center gap-4">
+        <Shield className="h-7 w-7 text-amber-400" />
+        <div className="flex items-center gap-2">
+          <span className="font-[family-name:var(--font-vt323)] text-2xl tracking-wider hidden sm:block" style={{ color: 'var(--mdt-header-text)' }}>
+            SASD
+          </span>
+          <span className="font-[family-name:var(--font-vt323)] text-2xl hidden sm:block" style={{ color: 'var(--mdt-subtle-text)' }}>
+            {'>>'}
+          </span>
+          <span className="font-[family-name:var(--font-vt323)] text-2xl tracking-wider" style={{ color: 'var(--mdt-header-text)' }}>
+            PORTAL
+          </span>
         </div>
 
-        {/* User Menu Section */}
-        <div className="relative z-[60]" ref={dropdownRef}>
-          <button
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex items-center gap-3 px-4 py-2 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/50 transition-all duration-300 group"
-          >
-            {/* Avatar */}
-            <div className="relative">
+        {/* Active Penalties Timer */}
+        {activePenalties && activePenalties.length > 0 && (
+          <div className="hidden md:flex items-center gap-2 panel-inset px-3 py-1" style={{ backgroundColor: '#4a1a1a' }}>
+            <Clock className="w-4 h-4 text-red-400" />
+            <div className="flex flex-col">
+              {activePenalties.map((penalty: any) => (
+                <span key={penalty.id} className="text-red-400 text-xs font-mono font-bold">
+                  {formatTime(penaltyTimers[penalty.id] || penalty.remaining_seconds)}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Right: Theme Toggle + User Menu */}
+      <div className="flex items-center gap-3">
+        {/* Theme Toggle */}
+        <button
+          onClick={toggleTheme}
+          className="btn-win95 flex items-center justify-center p-1.5"
+          title={darkMode ? 'Tryb jasny' : 'Tryb ciemny'}
+          aria-label={darkMode ? 'Przełącz na tryb jasny' : 'Przełącz na tryb ciemny'}
+        >
+          {darkMode ? (
+            <Sun className="w-5 h-5" style={{ color: '#ffc107' }} />
+          ) : (
+            <Moon className="w-5 h-5" style={{ color: 'var(--mdt-muted-text)' }} />
+          )}
+        </button>
+
+      <div className="relative z-[60]" ref={dropdownRef}>
+        <button
+          onClick={() => setDropdownOpen(!dropdownOpen)}
+          className="btn-win95 flex items-center gap-3 py-1 px-3"
+        >
+          {/* Avatar */}
+          <div className="relative">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={displayName}
+                width={28}
+                height={28}
+                className="w-7 h-7 rounded-full object-cover"
+                style={{ border: '1px solid var(--border)' }}
+              />
+            ) : (
+              <div className="w-7 h-7 flex items-center justify-center" style={{ backgroundColor: 'var(--mdt-blue-bar)', color: '#fff' }}>
+                <User className="w-4 h-4" />
+              </div>
+            )}
+            {/* Online indicator */}
+            <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full" style={{ border: '1px solid var(--mdt-btn-face)' }} />
+          </div>
+
+          {/* User Info */}
+          <div className="hidden md:flex flex-col items-start">
+            <span className="font-mono text-xs font-bold" style={{ color: 'var(--mdt-btn-text)' }}>{displayName}</span>
+            <span className="font-mono text-[10px]" style={{ color: 'var(--mdt-muted-text)' }}>@{discordUsername}</span>
+          </div>
+          <ChevronDown
+            className={`w-3 h-3 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
+            style={{ color: 'var(--mdt-muted-text)' }}
+          />
+        </button>
+
+        {/* Dropdown Menu */}
+        {dropdownOpen && (
+          <div className="absolute right-0 top-full mt-1 w-72 panel-raised z-[9999] overflow-hidden" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+            {/* Blue title bar */}
+            <div className="flex items-center gap-3 px-3 py-2" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
               {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt={displayName}
-                  width={36}
-                  height={36}
-                  className="w-9 h-9 rounded-full shadow-lg group-hover:shadow-[#c9a227]/30 transition-shadow object-cover border-2 border-[#c9a227]/30"
-                />
+                <img src={avatarUrl} alt={displayName} width={32} height={32} className="w-8 h-8 rounded-full object-cover" style={{ border: '1px solid var(--mdt-muted-text)' }} />
               ) : (
-                <div className="w-9 h-9 bg-gradient-to-br from-[#c9a227] to-[#e6b830] rounded-full flex items-center justify-center shadow-lg group-hover:shadow-[#c9a227]/30 transition-shadow">
-                  <User className="w-5 h-5 text-[#020a06]" strokeWidth={2.5} />
+                <div className="w-8 h-8 flex items-center justify-center" style={{ backgroundColor: 'var(--mdt-active-btn)', color: '#fff' }}>
+                  <User className="w-5 h-5" />
                 </div>
               )}
-              {/* Online indicator */}
-              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#22c55e] rounded-full border-2 border-[#051a0f]" />
-            </div>
-
-            {/* User Info - Hidden on mobile */}
-            <div className="hidden md:flex flex-col items-start">
-              <span className="text-white font-semibold text-sm">{mtaNick || discordUsername}</span>
-              <span className="text-[#c9a227] text-xs font-medium">@{discordUsername}</span>
-            </div>
-            {/* Chevron */}
-            <ChevronDown
-              className={`w-4 h-4 text-[#8fb5a0] group-hover:text-white transition-all duration-200 ${
-                dropdownOpen ? 'rotate-180' : ''
-              }`}
-            />
-          </button>
-
-          {/* Dropdown Menu */}
-          {dropdownOpen && (
-            <div className="absolute right-0 top-full mt-2 w-80 bg-[#051a0f] rounded-2xl shadow-2xl border border-[#1a4d32] z-[9999] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-              {/* Decorative top border */}
-              <div className="h-1 bg-gradient-to-r from-transparent via-[#c9a227] to-transparent" />
-
-              {/* Header */}
-              <div className="p-4 border-b border-[#1a4d32]/50 bg-gradient-to-br from-[#0a2818]/50 to-transparent">
-                <div className="flex items-center gap-3">
-                  {avatarUrl ? (
-                    <img
-                      src={avatarUrl}
-                      alt={displayName}
-                      width={56}
-                      height={56}
-                      className="w-14 h-14 rounded-full shadow-lg object-cover border-2 border-[#c9a227]/30"
-                    />
-                  ) : (
-                    <div className="w-14 h-14 bg-gradient-to-br from-[#c9a227] to-[#e6b830] rounded-full flex items-center justify-center shadow-lg">
-                      <User className="w-8 h-8 text-[#020a06]" strokeWidth={2.5} />
-                    </div>
-                  )}
-                  <div className="flex flex-col">
-                    <span className="text-white font-bold text-base">{mtaNick || discordUsername}</span>
-                    <span className="text-[#c9a227] text-sm font-medium">@{discordUsername}</span>
-                  </div>
-                </div>
+              <div className="flex flex-col">
+                <span className="font-[family-name:var(--font-vt323)] text-sm text-white tracking-wider">{displayName}</span>
+                <span className="font-mono text-[10px] text-blue-200">@{discordUsername}</span>
               </div>
+            </div>
 
-              {/* Menu Items */}
-              <div className="p-3 space-y-1">
-                {/* Division & Permissions */}
-                {(division || (permissions && permissions.length > 0)) && (
-                  <div className="px-3 py-3 flex items-center gap-3 rounded-xl bg-[#0a2818]/30">
-                    <Shield className={getDivisionColor()} />
-                    <div className="flex flex-col flex-1">
-                      <span className="text-xs text-[#8fb5a0] uppercase tracking-wide">
-                        {division ? 'Dywizja' : 'Uprawnienia'}
-                      </span>
-                      <div className="mt-1 flex flex-wrap gap-1">
-                        {division && (
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-bold ${getDivisionColor()} bg-white/10`}>
-                            {getDivisionDisplay()}
-                          </span>
-                        )}
-                        {permissions && permissions.length > 0 && (
-                          <>
-                            {division && <span className="text-white/50 text-xs">|</span>}
-                            {permissions.map((perm: string, idx: number) => (
-                              <span
-                                key={idx}
-                                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white bg-white/10"
-                              >
-                                {perm}
-                              </span>
-                            ))}
-                          </>
-                        )}
-                      </div>
-                    </div>
+            {/* Menu Items */}
+            <div className="p-2 space-y-1">
+              {/* Division & Permissions */}
+              {(division || (permissions && permissions.length > 0)) && (
+                <div className="panel-inset p-2" style={{ backgroundColor: 'var(--mdt-panel-alt)' }}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Shield className="w-4 h-4" style={{ color: getDivisionColor() }} />
+                    <span className="font-mono text-xs font-bold uppercase" style={{ color: 'var(--mdt-muted-text)' }}>
+                      {division ? 'Dywizja' : 'Uprawnienia'}
+                    </span>
                   </div>
-                )}
-
-                {/* Plus/Minus Counter */}
-                {(plusCount > 0 || minusCount > 0) && (
-                  <div className="px-3 py-3 flex items-center gap-3 rounded-xl bg-[#0a2818]/30">
-                    <Award className="w-5 h-5 text-[#c9a227]" />
-                    <div className="flex flex-col flex-1">
-                      <span className="text-xs text-[#8fb5a0] uppercase tracking-wide">Bilans</span>
-                      <div className="mt-1 flex gap-3">
-                        <span className="text-[#22c55e] font-bold text-sm">+{plusCount}</span>
-                        <span className="text-white/50">|</span>
-                        <span className="text-[#ef4444] font-bold text-sm">-{minusCount}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Active Penalties (Suspensions) */}
-                {activePenalties && activePenalties.length > 0 && (
-                  <div className="px-3 py-3 flex flex-col gap-2 rounded-xl bg-red-500/10 border border-red-500/20">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-red-400" />
-                      <span className="text-xs text-red-400 uppercase tracking-wide font-semibold">
-                        Aktywne Zawieszenia
+                  <div className="flex flex-wrap gap-1">
+                    {division && (
+                      <span className="font-mono text-xs font-bold px-2 py-0.5" style={{ color: getDivisionColor(), backgroundColor: '#1a1a1a' }}>
+                        {getDivisionDisplay()}
                       </span>
-                    </div>
-                    {activePenalties.map((penalty: any) => (
-                      <div key={penalty.id} className="flex flex-col gap-1 pl-6">
-                        <span className="text-white text-xs font-medium">
-                          {getPenaltyDisplayName(penalty.type)}
-                        </span>
-                        <span className="text-red-400 text-xs font-mono">
-                          {formatTime(penaltyTimers[penalty.id] || penalty.remaining_seconds)}
-                        </span>
-                      </div>
+                    )}
+                    {permissions && permissions.length > 0 && permissions.map((perm: string, idx: number) => (
+                      <span key={idx} className="font-mono text-xs px-2 py-0.5" style={{ color: '#d4d4d4', backgroundColor: '#333' }}>
+                        {perm}
+                      </span>
                     ))}
                   </div>
-                )}
+                </div>
+              )}
 
-                {/* Separator */}
-                <div className="h-px bg-gradient-to-r from-transparent via-[#1a4d32] to-transparent my-2" />
+              {/* Plus/Minus Counter */}
+              {(plusCount > 0 || minusCount > 0) && (
+                <div className="panel-inset p-2 flex items-center gap-3" style={{ backgroundColor: 'var(--mdt-panel-alt)' }}>
+                  <Award className="w-4 h-4" style={{ color: 'var(--mdt-blue-bar)' }} />
+                  <span className="font-mono text-xs font-bold" style={{ color: 'var(--mdt-muted-text)' }}>BILANS:</span>
+                  <span className="font-mono text-xs font-bold text-green-700">+{plusCount}</span>
+                  <span style={{ color: 'var(--mdt-subtle-text)' }}>|</span>
+                  <span className="font-mono text-xs font-bold text-red-700">-{minusCount}</span>
+                </div>
+              )}
 
-                {/* Logout Button */}
-                <button
-                  onClick={handleLogout}
-                  className="w-full px-3 py-3 flex items-center gap-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 transition-all duration-200 group"
-                >
-                  <LogOut className="w-5 h-5 text-red-400 group-hover:text-red-300" />
-                  <span className="text-red-400 group-hover:text-red-300 font-semibold text-sm">
-                    {t('nav.logout')}
-                  </span>
-                </button>
-              </div>
+              {/* Active Penalties */}
+              {activePenalties && activePenalties.length > 0 && (
+                <div className="panel-inset p-2 glow-red" style={{ backgroundColor: '#4a1a1a' }}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Clock className="w-4 h-4 text-red-400" />
+                    <span className="font-mono text-xs font-bold text-red-400 uppercase">Aktywne Zawieszenia</span>
+                  </div>
+                  {activePenalties.map((penalty: any) => (
+                    <div key={penalty.id} className="flex items-center justify-between pl-6">
+                      <span className="font-mono text-[10px] text-red-300">{getPenaltyDisplayName(penalty.type)}</span>
+                      <span className="font-mono text-xs font-bold text-red-400">
+                        {formatTime(penaltyTimers[penalty.id] || penalty.remaining_seconds)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Separator */}
+              <div className="h-px my-1" style={{ backgroundColor: 'var(--border)' }} />
+
+              {/* Logout Button */}
+              <button
+                onClick={handleLogout}
+                className="btn-win95 w-full flex items-center justify-center gap-2 py-2"
+                style={{ backgroundColor: '#c41e1e', color: '#fff', borderColor: '#ff4444 #800000 #800000 #ff4444' }}
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="font-mono text-xs font-bold">{t('nav.logout')}</span>
+              </button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+      </div>
       </div>
     </nav>
   );
 }
-

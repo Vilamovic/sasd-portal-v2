@@ -6,20 +6,27 @@ interface PageHeaderProps {
 
 export default function PageHeader({ tokensCount }: PageHeaderProps) {
   return (
-    <div className="mb-8">
-      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#c9a227]/10 border border-[#c9a227]/20 text-[#c9a227] text-sm font-medium mb-6">
-        <Shield className="w-4 h-4" />
-        <span>Panel administratora</span>
+    <div className="mb-6">
+      <div
+        className="px-3 py-2 mb-4 flex items-center gap-2"
+        style={{ backgroundColor: 'var(--mdt-blue-bar)' }}
+      >
+        <Shield className="w-4 h-4 text-white" />
+        <span className="font-[family-name:var(--font-vt323)] text-white text-lg">
+          Panel administratora
+        </span>
       </div>
 
-      <div className="flex items-center gap-3 mb-4">
-        <Key className="w-8 h-8 text-[#c9a227]" />
-        <h2 className="text-4xl font-bold text-white">
-          Tokeny <span className="text-gold-gradient">Egzaminacyjne</span>
+      <div className="flex items-center gap-3 mb-2">
+        <Key className="w-6 h-6" style={{ color: 'var(--mdt-content-text)' }} />
+        <h2
+          className="text-2xl font-[family-name:var(--font-vt323)]"
+          style={{ color: 'var(--mdt-content-text)' }}
+        >
+          Tokeny Egzaminacyjne
         </h2>
       </div>
-      <div className="w-24 h-1 bg-gradient-to-r from-[#c9a227] to-[#e6b830] rounded-full mb-4" />
-      <p className="text-[#8fb5a0]">
+      <p className="font-mono text-sm" style={{ color: 'var(--mdt-muted-text)' }}>
         Zarządzanie tokenami dostępu do egzaminów ({tokensCount})
       </p>
     </div>

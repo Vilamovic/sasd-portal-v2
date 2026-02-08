@@ -36,7 +36,6 @@ interface MaterialCardProps {
  * - Icon + title + description
  * - Edit/Delete buttons (edit mode only)
  * - Open material link
- * - Hover effects
  */
 export default function MaterialCard({
   material,
@@ -50,84 +49,77 @@ export default function MaterialCard({
   const getFileIcon = (fileType: string) => {
     switch (fileType) {
       case 'pdf':
-        return <FileText className="w-7 h-7 text-white" />;
+        return <FileText className="w-6 h-6 text-white" />;
       case 'image':
-        return <ImageIcon className="w-7 h-7 text-white" />;
+        return <ImageIcon className="w-6 h-6 text-white" />;
       case 'video':
-        return <Video className="w-7 h-7 text-white" />;
+        return <Video className="w-6 h-6 text-white" />;
       case 'link':
-        return <LinkIcon className="w-7 h-7 text-white" />;
+        return <LinkIcon className="w-6 h-6 text-white" />;
       default:
-        return <File className="w-7 h-7 text-white" />;
+        return <File className="w-6 h-6 text-white" />;
     }
   };
 
   return (
-    <div
-      className="group relative"
-      style={{ animationDelay: `${index * 50}ms` }}
-    >
-      {/* Glow effect */}
-      <div className="absolute -inset-2 rounded-3xl opacity-0 group-hover:opacity-100 blur-xl transition-all duration-500 bg-[#c9a227]/20" />
-
-      {/* Main Card */}
-      <div className="relative w-full glass-strong rounded-2xl p-6 border border-[#1a4d32]/50 hover:border-[#c9a227]/50 transition-all duration-300 hover:scale-[1.02] shadow-xl hover:shadow-2xl overflow-hidden">
-        {/* Corner accents */}
-        <div className="absolute top-0 left-6 w-16 h-[2px] bg-gradient-to-r from-[#c9a227]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div className="absolute top-6 left-0 w-[2px] h-16 bg-gradient-to-b from-[#c9a227]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-        {/* Edit/Delete Buttons (Edit Mode Only) */}
-        {canManage && editMode && (
-          <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
-            <button
-              onClick={() => onEdit(material)}
-              className="p-2.5 bg-[#14b8a6]/20 hover:bg-[#14b8a6] border border-[#14b8a6]/50 hover:border-[#14b8a6] rounded-xl transition-all duration-200 group/edit animate-fadeIn shadow-lg shadow-[#14b8a6]/20"
-              title="Edytuj materiał"
-            >
-              <Edit3 className="w-4 h-4 text-[#14b8a6] group-hover/edit:text-white group-hover/edit:scale-110 transition-all" />
-            </button>
-            <button
-              onClick={() => onDelete(material.id, material.title)}
-              className="p-2.5 bg-red-500/20 hover:bg-red-500 border border-red-500/50 hover:border-red-500 rounded-xl transition-all duration-200 group/delete animate-fadeIn shadow-lg shadow-red-500/20"
-              title="Usuń materiał"
-            >
-              <Trash2 className="w-4 h-4 text-red-400 group-hover/delete:text-white group-hover/delete:scale-110 transition-all" />
-            </button>
-          </div>
-        )}
-
-        {/* Icon Container */}
-        <div className="mb-5">
+    <div className="panel-raised" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+      {/* Blue header bar with title */}
+      <div className="px-3 py-2 flex items-center justify-between" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
+        <div className="flex items-center gap-2">
           <div
-            className={`w-14 h-14 bg-gradient-to-br ${divisionConfig.color} rounded-2xl flex items-center justify-center shadow-lg transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}
+            className="w-6 h-6 flex items-center justify-center"
+            style={{ backgroundColor: divisionConfig.color }}
           >
             {getFileIcon(material.file_type)}
           </div>
+          <span className="font-[family-name:var(--font-vt323)] text-sm tracking-wide text-white truncate">
+            {material.title}
+          </span>
         </div>
 
-        {/* Content */}
-        <h3 className="text-xl font-bold text-white mb-2 group-hover:text-[#c9a227] transition-colors line-clamp-2">
-          {material.title}
-        </h3>
+        {/* Edit/Delete Buttons (Edit Mode Only) */}
+        {canManage && editMode && (
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => onEdit(material)}
+              className="btn-win95 p-1"
+              title="Edytuj materiał"
+            >
+              <Edit3 className="w-3 h-3" />
+            </button>
+            <button
+              onClick={() => onDelete(material.id, material.title)}
+              className="btn-win95 p-1"
+              style={{ backgroundColor: '#c41e1e', color: '#fff', borderColor: '#ff4444 #800000 #800000 #ff4444' }}
+              title="Usuń materiał"
+            >
+              <Trash2 className="w-3 h-3" />
+            </button>
+          </div>
+        )}
+      </div>
 
+      {/* Content */}
+      <div className="p-3">
         {material.description && (
           <div
-            className="text-[#8fb5a0] text-sm leading-relaxed line-clamp-3 mb-4 prose prose-sm prose-invert max-w-none prose-p:text-[#8fb5a0] prose-p:m-0 prose-headings:text-white prose-a:text-[#c9a227] prose-strong:text-white prose-li:text-[#8fb5a0]"
+            className="font-mono text-xs mb-3 panel-inset p-2"
+            style={{ backgroundColor: 'var(--mdt-input-bg)', color: 'var(--mdt-content-text)' }}
             dangerouslySetInnerHTML={{ __html: material.description }}
           />
         )}
 
         {/* Footer */}
-        <div className="mt-4 pt-4 border-t border-[#1a4d32]/50 flex items-center justify-between">
+        <div className="flex items-center justify-end">
           <a
             href={material.file_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-xs text-[#c9a227] hover:text-[#e6b830] transition-colors group/link"
+            className="btn-win95 flex items-center gap-1"
             onClick={(e) => e.stopPropagation()}
           >
-            <span>Otwórz materiał</span>
-            <ArrowRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
+            <span className="font-mono text-xs">Otworz material</span>
+            <ArrowRight className="w-3 h-3" />
           </a>
         </div>
       </div>

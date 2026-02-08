@@ -32,46 +32,57 @@ export default function MaterialForm({
   onCancel,
 }: MaterialFormProps) {
   return (
-    <div className="mb-6 glass-strong rounded-2xl border border-[#c9a227]/30 p-6 shadow-xl animate-border-glow">
-      <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-        <Plus className="w-5 h-5 text-[#c9a227]" />
-        {isEditing ? 'Edytuj Materiał' : 'Dodaj Nowy Materiał'}
-      </h3>
-
-      {/* Title */}
-      <input
-        type="text"
-        value={formTitle}
-        onChange={(e) => onTitleChange(e.target.value)}
-        placeholder="Tytuł materiału..."
-        className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-[#c9a227] transition-colors mb-4"
-      />
-
-      {/* Rich Text Description */}
-      <div className="mb-4">
-        <QuillEditor
-          value={formDescription}
-          onChange={onDescriptionChange}
-          placeholder="Opis materiału..."
-          minHeight="200px"
-        />
+    <div className="panel-raised mb-4" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+      {/* Blue title bar */}
+      <div className="px-4 py-2 flex items-center gap-2" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
+        <Plus className="w-4 h-4 text-white" />
+        <span className="font-[family-name:var(--font-vt323)] text-base tracking-widest uppercase text-white">
+          {isEditing ? 'Edytuj Materiał' : 'Dodaj Nowy Materiał'}
+        </span>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={onSubmit}
-          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#22c55e] to-[#16a34a] text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg"
-        >
-          <Save className="w-4 h-4" />
-          {isEditing ? 'Zapisz' : 'Dodaj'}
-        </button>
-        <button
-          onClick={onCancel}
-          className="px-6 py-3 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
-        >
-          Anuluj
-        </button>
+      <div className="p-4">
+        {/* Title */}
+        <div className="mb-3">
+          <label className="font-mono text-xs block mb-1" style={{ color: 'var(--mdt-muted-text)' }}>Tytuł materiału *</label>
+          <input
+            type="text"
+            value={formTitle}
+            onChange={(e) => onTitleChange(e.target.value)}
+            placeholder="Tytuł materiału..."
+            className="panel-inset w-full px-3 py-2 font-mono text-sm"
+            style={{ backgroundColor: 'var(--mdt-input-bg)', color: 'var(--mdt-content-text)', outline: 'none' }}
+          />
+        </div>
+
+        {/* Rich Text Description */}
+        <div className="mb-4">
+          <label className="font-mono text-xs block mb-1" style={{ color: 'var(--mdt-muted-text)' }}>Opis</label>
+          <QuillEditor
+            value={formDescription}
+            onChange={onDescriptionChange}
+            placeholder="Opis materiału..."
+            minHeight="200px"
+          />
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onSubmit}
+            className="btn-win95 flex items-center gap-1"
+            style={{ backgroundColor: '#3a6a3a', color: '#fff', borderColor: '#5a9a5a #1a3a1a #1a3a1a #5a9a5a' }}
+          >
+            <Save className="w-3 h-3" />
+            <span className="font-mono text-xs">{isEditing ? 'Zapisz' : 'Dodaj'}</span>
+          </button>
+          <button
+            onClick={onCancel}
+            className="btn-win95 font-mono text-xs"
+          >
+            Anuluj
+          </button>
+        </div>
       </div>
     </div>
   );

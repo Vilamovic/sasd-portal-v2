@@ -67,21 +67,29 @@ export default function RoleDropdown({
   return createPortal(
     <div
       ref={dropdownRef}
-      className="w-52 glass-strong rounded-xl shadow-2xl border border-[#1a4d32] py-2 z-[9999]"
+      className="panel-raised z-[9999]"
       style={{
         position: 'fixed',
         top: `${dropdownPosition.top}px`,
         right: `${dropdownPosition.right}px`,
+        width: '13rem',
+        backgroundColor: 'var(--mdt-btn-face)',
       }}
     >
       {/* Role change options based on hierarchy */}
-      <div className="px-3 py-1 text-xs text-[#8fb5a0] font-semibold">Zmień rolę:</div>
+      <div
+        className="px-2 py-1 font-mono text-xs font-semibold"
+        style={{ backgroundColor: 'var(--mdt-header)', color: '#ccc' }}
+      >
+        Zmień rolę:
+      </div>
 
       {/* Dev and HCS can set HCS role */}
       {(isDev || role === 'hcs') && (
         <button
           onClick={() => onUpdateRole(currentUser.id, 'hcs', userNick)}
-          className="w-full px-4 py-2 text-left hover:bg-red-600/10 transition-colors text-red-400 text-sm flex items-center gap-2"
+          className="btn-win95 w-full px-3 py-1.5 text-left font-mono text-sm flex items-center gap-2"
+          style={{ color: '#8b0000' }}
         >
           <ShieldCheck className="w-4 h-4" />
           HCS
@@ -92,7 +100,8 @@ export default function RoleDropdown({
       {(isDev || role === 'hcs' || (role === 'cs' && currentUser.role !== 'cs')) && (
         <button
           onClick={() => onUpdateRole(currentUser.id, 'cs', userNick)}
-          className="w-full px-4 py-2 text-left hover:bg-orange-600/10 transition-colors text-orange-400 text-sm flex items-center gap-2"
+          className="btn-win95 w-full px-3 py-1.5 text-left font-mono text-sm flex items-center gap-2"
+          style={{ color: '#a0522d' }}
         >
           <ShieldCheck className="w-4 h-4" />
           CS
@@ -102,7 +111,8 @@ export default function RoleDropdown({
       {/* Everyone (CS+) can set Deputy */}
       <button
         onClick={() => onUpdateRole(currentUser.id, 'deputy', userNick)}
-        className="w-full px-4 py-2 text-left hover:bg-blue-600/10 transition-colors text-blue-400 text-sm flex items-center gap-2"
+        className="btn-win95 w-full px-3 py-1.5 text-left font-mono text-sm flex items-center gap-2"
+        style={{ color: '#4a7abf' }}
       >
         <ShieldCheck className="w-4 h-4" />
         Deputy
@@ -111,13 +121,14 @@ export default function RoleDropdown({
       {/* Everyone (CS+) can set Trainee */}
       <button
         onClick={() => onUpdateRole(currentUser.id, 'trainee', userNick)}
-        className="w-full px-4 py-2 text-left hover:bg-gray-600/10 transition-colors text-gray-400 text-sm flex items-center gap-2"
+        className="btn-win95 w-full px-3 py-1.5 text-left font-mono text-sm flex items-center gap-2"
+        style={{ color: 'var(--mdt-content-text)' }}
       >
         <ShieldOff className="w-4 h-4" />
         Trainee
       </button>
 
-      <div className="border-t border-[#1a4d32] my-2" />
+      <hr style={{ borderColor: 'var(--mdt-border-mid)', margin: '2px 0' }} />
 
       {/* Kick options: Dev/HCS can kick anyone, CS can kick only trainee/deputy */}
       {(isDev ||
@@ -126,7 +137,8 @@ export default function RoleDropdown({
           (currentUser.role === 'trainee' || currentUser.role === 'deputy'))) && (
         <button
           onClick={() => onKickUser(currentUser.id, userNick)}
-          className="w-full px-4 py-3 text-left hover:bg-red-500/10 transition-colors text-red-400 text-sm flex items-center gap-2"
+          className="btn-win95 w-full px-3 py-1.5 text-left font-mono text-sm flex items-center gap-2"
+          style={{ backgroundColor: '#c41e1e', color: '#fff', borderColor: '#ff4444 #800000 #800000 #ff4444' }}
         >
           <UserMinus className="w-4 h-4" />
           Wyrzuć

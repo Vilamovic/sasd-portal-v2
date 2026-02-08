@@ -46,18 +46,17 @@ export default function PersonnelTable({
 }: PersonnelTableProps) {
   if (loadingUsers) {
     return (
-      <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 p-12 text-center shadow-xl">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#c9a227] mx-auto mb-4"></div>
-        <p className="text-[#8fb5a0] text-lg">Ładowanie użytkowników...</p>
+      <div className="panel-raised p-12 text-center" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+        <p className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>Ładowanie użytkowników...</p>
       </div>
     );
   }
 
   if (users.length === 0) {
     return (
-      <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 p-12 text-center shadow-xl">
-        <Users className="w-16 h-16 text-[#8fb5a0] mx-auto mb-4" />
-        <p className="text-[#8fb5a0] text-lg">
+      <div className="panel-raised p-12 text-center" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+        <Users className="w-16 h-16 mx-auto mb-4" style={{ color: 'var(--mdt-muted-text)' }} />
+        <p className="font-mono text-sm" style={{ color: 'var(--mdt-muted-text)' }}>
           {searchQuery || divisionFilter !== 'all' || roleFilter !== 'all'
             ? 'Brak użytkowników pasujących do filtrów.'
             : 'Brak użytkowników w systemie.'}
@@ -67,7 +66,7 @@ export default function PersonnelTable({
   }
 
   return (
-    <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 overflow-hidden shadow-xl">
+    <div className="panel-raised overflow-hidden" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
       <TableHeader
         selectedCount={selectedUsers.size}
         totalCount={users.length}
@@ -76,7 +75,7 @@ export default function PersonnelTable({
         sortOrder={sortOrder}
         handleSort={handleSort}
       />
-      <div className="divide-y divide-[#1a4d32]/30">
+      <div>
         {users.map((user, index) => (
           <TableRow
             key={user.id}

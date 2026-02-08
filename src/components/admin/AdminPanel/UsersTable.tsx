@@ -41,36 +41,41 @@ export default function UsersTable({
   buttonRefs,
 }: UsersTableProps) {
   return (
-    <div className="glass-strong rounded-2xl border border-[#1a4d32]/50 shadow-xl overflow-hidden">
+    <div className="panel-raised overflow-hidden" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-[#051a0f]/50 border-b border-[#1a4d32]/50">
-            <tr>
+          <thead>
+            <tr style={{ backgroundColor: 'var(--mdt-header)' }}>
               {/* Username Column */}
               <th
                 onClick={() => onSort('mta_nick')}
-                className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227] cursor-pointer hover:text-[#e6b830] transition-colors"
+                className="px-4 py-2 text-left cursor-pointer font-[family-name:var(--font-vt323)] text-base"
+                style={{ color: '#ccc' }}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   Użytkownik
-                  <ArrowUpDown className="w-4 h-4" />
+                  <ArrowUpDown className="w-3 h-3" />
                 </div>
               </th>
 
               {/* Badge Column */}
               <th
                 onClick={() => onSort('badge')}
-                className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227] cursor-pointer hover:text-[#e6b830] transition-colors"
+                className="px-4 py-2 text-left cursor-pointer font-[family-name:var(--font-vt323)] text-base"
+                style={{ color: '#ccc' }}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   Stopień
-                  <ArrowUpDown className="w-4 h-4" />
+                  <ArrowUpDown className="w-3 h-3" />
                 </div>
               </th>
 
               {/* Email Column (CS+ only) */}
               {isCS && (
-                <th className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227]">
+                <th
+                  className="px-4 py-2 text-left font-[family-name:var(--font-vt323)] text-base"
+                  style={{ color: '#ccc' }}
+                >
                   Email
                 </th>
               )}
@@ -78,38 +83,44 @@ export default function UsersTable({
               {/* Role Column */}
               <th
                 onClick={() => onSort('role')}
-                className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227] cursor-pointer hover:text-[#e6b830] transition-colors"
+                className="px-4 py-2 text-left cursor-pointer font-[family-name:var(--font-vt323)] text-base"
+                style={{ color: '#ccc' }}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   Rola
-                  <ArrowUpDown className="w-4 h-4" />
+                  <ArrowUpDown className="w-3 h-3" />
                 </div>
               </th>
 
               {/* Created At Column */}
               <th
                 onClick={() => onSort('created_at')}
-                className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227] cursor-pointer hover:text-[#e6b830] transition-colors"
+                className="px-4 py-2 text-left cursor-pointer font-[family-name:var(--font-vt323)] text-base"
+                style={{ color: '#ccc' }}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   Utworzono
-                  <ArrowUpDown className="w-4 h-4" />
+                  <ArrowUpDown className="w-3 h-3" />
                 </div>
               </th>
 
               {/* Last Seen Column */}
               <th
                 onClick={() => onSort('last_seen')}
-                className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227] cursor-pointer hover:text-[#e6b830] transition-colors"
+                className="px-4 py-2 text-left cursor-pointer font-[family-name:var(--font-vt323)] text-base"
+                style={{ color: '#ccc' }}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   Ostatnio Widziany
-                  <ArrowUpDown className="w-4 h-4" />
+                  <ArrowUpDown className="w-3 h-3" />
                 </div>
               </th>
 
               {/* Action Column */}
-              <th className="px-6 py-4 text-left text-sm font-semibold text-[#c9a227]">
+              <th
+                className="px-4 py-2 text-left font-[family-name:var(--font-vt323)] text-base"
+                style={{ color: '#ccc' }}
+              >
                 Akcja
               </th>
             </tr>
@@ -120,13 +131,14 @@ export default function UsersTable({
               <tr>
                 <td
                   colSpan={isCS ? 7 : 6}
-                  className="px-6 py-8 text-center text-[#8fb5a0]"
+                  className="px-4 py-6 text-center font-mono text-sm"
+                  style={{ color: 'var(--mdt-muted-text)' }}
                 >
                   Brak użytkowników do wyświetlenia
                 </td>
               </tr>
             ) : (
-              users.map((user) => (
+              users.map((user, index) => (
                 <UserRow
                   key={user.id}
                   user={user}
@@ -134,6 +146,7 @@ export default function UsersTable({
                   isCS={isCS}
                   onToggleDropdown={onToggleDropdown}
                   buttonRef={(el) => (buttonRefs.current[user.id] = el)}
+                  index={index}
                 />
               ))
             )}

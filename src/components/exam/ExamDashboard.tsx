@@ -6,7 +6,7 @@ import { useTranslation } from '@/src/contexts/TranslationContext';
 import { Target, BarChart3, Settings, Archive, ArrowRight, CheckCircle, Clock, ChevronLeft, Sparkles } from 'lucide-react';
 
 /**
- * ExamDashboard - Premium Sheriff-themed exam navigation
+ * ExamDashboard - MDT Terminal themed exam navigation
  * 4 tiles for admin, 1 centered card for users
  * Uses Next.js routing for stats/archive (fixes Invariants violations)
  */
@@ -28,10 +28,9 @@ export default function ExamDashboard({ onNavigate, onBack }: { onNavigate?: (vi
   // Guard: Wait for role to load
   if (!role) {
     return (
-      <div className="min-h-screen bg-[#020a06] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#c9a227]/30 border-t-[#c9a227] rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-[#8fb5a0] text-lg">Ładowanie...</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--mdt-content)' }}>
+        <div className="text-center panel-raised p-8" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+          <p className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>Ładowanie...</p>
         </div>
       </div>
     );
@@ -43,9 +42,6 @@ export default function ExamDashboard({ onNavigate, onBack }: { onNavigate?: (vi
       title: t('exams.startExam'),
       description: 'Wybierz typ egzaminu i rozpocznij test wiedzy. 7 dostępnych kategorii z automatyczną oceną.',
       icon: Target,
-      iconColor: 'from-[#22c55e] to-[#16a34a]',
-      glowColor: 'rgba(34, 197, 94, 0.3)',
-      borderHover: 'hover:border-[#22c55e]/50',
       stats: [
         { icon: CheckCircle, label: '7 typów egzaminów' },
         { icon: Clock, label: 'Auto-timer' }
@@ -57,9 +53,6 @@ export default function ExamDashboard({ onNavigate, onBack }: { onNavigate?: (vi
       title: t('exams.myStatistics'),
       description: 'Przeglądaj wszystkie wyniki egzaminów, filtruj po typie i analizuj szczegółowe odpowiedzi.',
       icon: BarChart3,
-      iconColor: 'from-[#14b8a6] to-[#0d9488]',
-      glowColor: 'rgba(20, 184, 166, 0.3)',
-      borderHover: 'hover:border-[#14b8a6]/50',
       stats: [
         { icon: BarChart3, label: 'Wyniki w czasie' },
         { icon: CheckCircle, label: 'Filtrowanie' }
@@ -71,9 +64,6 @@ export default function ExamDashboard({ onNavigate, onBack }: { onNavigate?: (vi
       title: t('exams.manageQuestions'),
       description: 'Dodawaj, edytuj i usuwaj pytania egzaminacyjne. Obsługa pytań wielokrotnego wyboru.',
       icon: Settings,
-      iconColor: 'from-purple-500 to-purple-600',
-      glowColor: 'rgba(168, 85, 247, 0.3)',
-      borderHover: 'hover:border-purple-500/50',
       stats: [
         { icon: Settings, label: 'CRUD pytań' },
         { icon: CheckCircle, label: 'Multi-choice' }
@@ -85,9 +75,6 @@ export default function ExamDashboard({ onNavigate, onBack }: { onNavigate?: (vi
       title: t('exams.archive'),
       description: 'Przeglądaj zarchiwizowane egzaminy i zarządzaj historycznymi wynikami.',
       icon: Archive,
-      iconColor: 'from-[#c9a227] to-[#e6b830]',
-      glowColor: 'rgba(201, 162, 39, 0.3)',
-      borderHover: 'hover:border-[#c9a227]/50',
       stats: [
         { icon: Archive, label: 'Historia' },
         { icon: CheckCircle, label: 'Wyszukiwanie' }
@@ -104,87 +91,64 @@ export default function ExamDashboard({ onNavigate, onBack }: { onNavigate?: (vi
     const Icon = startExamTile.icon;
 
     return (
-      <div className="min-h-screen bg-[#020a06] relative overflow-hidden">
-        {/* Background effects */}
-        <div className="fixed inset-0 pointer-events-none">
-          <div className="absolute top-1/4 -left-32 w-96 h-96 bg-[#22c55e]/10 rounded-full blur-[120px] animate-pulse-glow" />
-          <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-[#22693f]/20 rounded-full blur-[120px] animate-pulse-glow" style={{ animationDelay: '1.5s' }} />
-        </div>
-
-        <div className="relative z-10 max-w-2xl mx-auto px-6 py-12">
+      <div className="min-h-screen" style={{ backgroundColor: 'var(--mdt-content)' }}>
+        <div className="max-w-2xl mx-auto px-6 py-12">
           {/* Back Button */}
           {onBack && (
             <button
               onClick={onBack}
-              className="mb-8 flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200"
+              className="btn-win95 mb-8 flex items-center gap-2"
             >
-              <ChevronLeft className="w-5 h-5" />
-              <span className="text-sm font-medium">Powrót do dashboard</span>
+              <ChevronLeft className="w-4 h-4" />
+              <span className="font-mono text-sm">Powrót do dashboard</span>
             </button>
           )}
 
           {/* Main Card */}
-          <div className="relative">
-            <div
-              className="absolute -inset-4 rounded-3xl opacity-50 blur-2xl animate-pulse-glow"
-              style={{ background: startExamTile.glowColor }}
-            />
-
-            <button
-              onClick={() => handleTileClick(startExamTile.id)}
-              className="relative w-full glass-strong rounded-3xl border border-[#22c55e]/30 hover:border-[#22c55e]/60 shadow-2xl hover:shadow-[#22c55e]/20 transition-all duration-300 hover:scale-[1.01] overflow-hidden group"
-            >
-              {/* Decorative accents */}
-              <div className="absolute top-0 left-8 w-32 h-[2px] bg-gradient-to-r from-[#22c55e] to-transparent" />
-              <div className="absolute top-0 right-8 w-32 h-[2px] bg-gradient-to-l from-[#22c55e] to-transparent" />
-
-              {/* Header */}
-              <div className="bg-gradient-to-br from-[#051a0f] to-[#0a2818]/50 p-8 border-b border-[#1a4d32]/50">
-                <div className="flex items-center gap-6">
-                  <div className={`w-20 h-20 bg-gradient-to-br ${startExamTile.iconColor} rounded-3xl flex items-center justify-center shadow-xl transform group-hover:scale-105 transition-transform`}>
-                    <Icon className="w-10 h-10 text-white" strokeWidth={2.5} />
-                  </div>
-                  <div className="text-left">
-                    <h1 className="text-3xl font-bold text-white mb-2">
-                      {startExamTile.title}
-                    </h1>
-                    <span className="px-3 py-1 bg-[#22c55e]/20 border border-[#22c55e]/30 rounded-full text-[#22c55e] text-xs font-bold uppercase tracking-wide">
-                      Dostępne
-                    </span>
-                  </div>
+          <div className="panel-raised" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+            {/* Header */}
+            <div className="px-6 py-4" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
+              <div className="flex items-center gap-4">
+                <Icon className="w-8 h-8 text-white" strokeWidth={2.5} />
+                <div>
+                  <h1 className="text-xl font-[family-name:var(--font-vt323)] text-white">
+                    {startExamTile.title}
+                  </h1>
+                  <span className="font-mono text-xs text-white/80">Dostępne</span>
                 </div>
               </div>
+            </div>
 
-              {/* Content */}
-              <div className="p-8">
-                <p className="text-[#8fb5a0] text-lg leading-relaxed mb-8">
-                  {startExamTile.description}
-                </p>
+            {/* Content */}
+            <div className="p-6">
+              <p className="font-mono text-sm mb-6" style={{ color: 'var(--mdt-content-text)' }}>
+                {startExamTile.description}
+              </p>
 
-                {/* Stats */}
-                <div className="grid grid-cols-2 gap-4 mb-8">
-                  {startExamTile.stats.map((stat, idx) => {
-                    const StatIcon = stat.icon;
-                    return (
-                      <div key={idx} className="bg-[#051a0f]/50 rounded-2xl p-4 border border-[#1a4d32]/50">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-[#22c55e]/20 rounded-xl flex items-center justify-center">
-                            <StatIcon className="w-5 h-5 text-[#22c55e]" />
-                          </div>
-                          <span className="text-sm text-[#8fb5a0]">{stat.label}</span>
-                        </div>
+              {/* Stats */}
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                {startExamTile.stats.map((stat, idx) => {
+                  const StatIcon = stat.icon;
+                  return (
+                    <div key={idx} className="panel-inset p-3" style={{ backgroundColor: 'var(--mdt-panel-alt)' }}>
+                      <div className="flex items-center gap-2">
+                        <StatIcon className="w-4 h-4" style={{ color: 'var(--mdt-content-text)' }} />
+                        <span className="font-mono text-xs" style={{ color: 'var(--mdt-content-text)' }}>{stat.label}</span>
                       </div>
-                    );
-                  })}
-                </div>
-
-                {/* CTA */}
-                <div className={`w-full py-4 px-6 bg-gradient-to-r ${startExamTile.iconColor} rounded-2xl text-white font-bold text-lg flex items-center justify-center gap-3 transition-all duration-300 group-hover:shadow-lg shadow-[#22c55e]/30`}>
-                  ROZPOCZNIJ EGZAMIN
-                  <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-                </div>
+                    </div>
+                  );
+                })}
               </div>
-            </button>
+
+              {/* CTA */}
+              <button
+                onClick={() => handleTileClick(startExamTile.id)}
+                className="btn-win95 w-full flex items-center justify-center gap-2"
+              >
+                <span className="font-mono text-sm font-bold">ROZPOCZNIJ EGZAMIN</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -193,108 +157,74 @@ export default function ExamDashboard({ onNavigate, onBack }: { onNavigate?: (vi
 
   // Admin/Dev view - grid of 4 tiles
   return (
-    <div className="min-h-screen bg-[#020a06] relative overflow-hidden">
-      {/* Background effects */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-[#c9a227]/10 rounded-full blur-[120px] animate-pulse-glow" />
-        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-[#22693f]/20 rounded-full blur-[120px] animate-pulse-glow" style={{ animationDelay: '1.5s' }} />
-        <div
-          className="absolute inset-0 opacity-[0.02]"
-          style={{
-            backgroundImage: `linear-gradient(rgba(201, 162, 39, 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(201, 162, 39, 0.5) 1px, transparent 1px)`,
-            backgroundSize: '60px 60px',
-          }}
-        />
-      </div>
-
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--mdt-content)' }}>
+      <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Back Button */}
         {onBack && (
           <button
             onClick={onBack}
-            className="mb-8 flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200"
+            className="btn-win95 mb-6 flex items-center gap-2"
           >
-            <ChevronLeft className="w-5 h-5" />
-            <span className="text-sm font-medium">Powrót do dashboard</span>
+            <ChevronLeft className="w-4 h-4" />
+            <span className="font-mono text-sm">Powrót do dashboard</span>
           </button>
         )}
 
         {/* Page Header */}
-        <div className="mb-12 text-center lg:text-left">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#c9a227]/10 border border-[#c9a227]/20 text-[#c9a227] text-sm font-medium mb-6">
-            <Sparkles className="w-4 h-4" />
-            <span>System egzaminacyjny</span>
+        <div className="mb-8 panel-raised p-4" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+          <div style={{ backgroundColor: 'var(--mdt-blue-bar)' }} className="px-4 py-2 mb-3">
+            <h1 className="text-2xl font-[family-name:var(--font-vt323)] text-white">
+              System Egzaminacyjny
+            </h1>
           </div>
-
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            System <span className="text-gold-gradient">Egzaminacyjny</span>
-          </h1>
-          <div className="w-24 h-1 bg-gradient-to-r from-[#c9a227] to-[#e6b830] rounded-full mb-4 mx-auto lg:mx-0" />
-          <p className="text-[#8fb5a0] text-lg max-w-xl mx-auto lg:mx-0">
+          <p className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>
             Zarządzaj egzaminami, pytaniami i wynikami
           </p>
         </div>
 
         {/* Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {visibleTiles.map((tile, index) => {
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {visibleTiles.map((tile) => {
             const Icon = tile.icon;
             return (
-              <div
+              <button
                 key={tile.id}
-                className="group relative"
-                style={{ animationDelay: `${index * 100}ms` }}
+                onClick={() => handleTileClick(tile.id)}
+                className="panel-raised text-left w-full"
+                style={{ backgroundColor: 'var(--mdt-btn-face)' }}
               >
-                {/* Glow effect */}
-                <div
-                  className="absolute -inset-2 rounded-3xl opacity-0 group-hover:opacity-100 blur-xl transition-all duration-500"
-                  style={{ background: tile.glowColor }}
-                />
+                {/* Tile Header */}
+                <div className="px-4 py-2 flex items-center gap-3" style={{ backgroundColor: 'var(--mdt-header)' }}>
+                  <Icon className="w-5 h-5" style={{ color: '#ccc' }} />
+                  <span className="font-[family-name:var(--font-vt323)] text-base" style={{ color: '#ccc' }}>{tile.title}</span>
+                </div>
 
-                {/* Main Card */}
-                <button
-                  onClick={() => handleTileClick(tile.id)}
-                  className={`relative w-full glass-strong rounded-2xl p-6 border border-[#1a4d32]/50 ${tile.borderHover} transition-all duration-300 hover:scale-[1.02] shadow-xl hover:shadow-2xl text-left overflow-hidden`}
-                >
-                  {/* Corner accents */}
-                  <div className="absolute top-0 left-6 w-16 h-[2px] bg-gradient-to-r from-[#c9a227]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="absolute top-6 left-0 w-[2px] h-16 bg-gradient-to-b from-[#c9a227]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                  {/* Icon Container */}
-                  <div className="mb-5">
-                    <div className={`w-14 h-14 bg-gradient-to-br ${tile.iconColor} rounded-2xl flex items-center justify-center shadow-lg transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
-                      <Icon className="w-7 h-7 text-white" strokeWidth={2} />
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <h3 className="text-xl font-bold text-white mb-2 group-hover:text-[#c9a227] transition-colors">
-                    {tile.title}
-                  </h3>
-                  <p className="text-[#8fb5a0] text-sm mb-6 leading-relaxed">
+                {/* Tile Content */}
+                <div className="p-4">
+                  <p className="font-mono text-xs mb-4" style={{ color: 'var(--mdt-content-text)' }}>
                     {tile.description}
                   </p>
 
                   {/* Stats */}
-                  <div className="flex flex-wrap items-center gap-3 mb-6 pb-6 border-b border-[#1a4d32]/50">
+                  <div className="flex flex-wrap gap-2 mb-4">
                     {tile.stats.map((stat, idx) => {
                       const StatIcon = stat.icon;
                       return (
-                        <div key={idx} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0a2818]/50">
-                          <StatIcon className="w-4 h-4 text-[#c9a227]" />
-                          <span className="text-xs text-[#8fb5a0]">{stat.label}</span>
+                        <div key={idx} className="panel-inset px-2 py-1 flex items-center gap-1" style={{ backgroundColor: 'var(--mdt-panel-alt)' }}>
+                          <StatIcon className="w-3 h-3" style={{ color: 'var(--mdt-muted-text)' }} />
+                          <span className="font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>{stat.label}</span>
                         </div>
                       );
                     })}
                   </div>
 
-                  {/* Action Button */}
-                  <div className={`w-full py-3.5 px-4 bg-gradient-to-r ${tile.iconColor} hover:opacity-90 rounded-xl text-white font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 shadow-lg group-hover:shadow-xl`}>
+                  {/* Action */}
+                  <div className="flex items-center gap-1 font-mono text-xs" style={{ color: 'var(--mdt-content-text)' }}>
                     <span>Otwórz</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-3 h-3" />
                   </div>
-                </button>
-              </div>
+                </div>
+              </button>
             );
           })}
         </div>

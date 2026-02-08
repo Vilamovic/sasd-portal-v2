@@ -193,10 +193,9 @@ export default function UserProfilePage({ username }: UserProfilePageProps) {
   // Loading state
   if (loading || !currentUser) {
     return (
-      <div className="min-h-screen bg-[#020a06] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#c9a227]/30 border-t-[#c9a227] rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-[#8fb5a0] text-lg">Ładowanie...</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--mdt-content)' }}>
+        <div className="panel-raised p-8 text-center" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+          <p className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>Ładowanie...</p>
         </div>
       </div>
     );
@@ -208,30 +207,24 @@ export default function UserProfilePage({ username }: UserProfilePageProps) {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#020a06] flex items-center justify-center">
-        <div className="text-center">
-          <User className="w-16 h-16 text-[#8fb5a0] mx-auto mb-4" />
-          <p className="text-[#8fb5a0] text-lg">Użytkownik nie znaleziony.</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--mdt-content)' }}>
+        <div className="panel-raised p-8 text-center" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+          <User className="w-16 h-16 mx-auto mb-4" style={{ color: 'var(--mdt-muted-text)' }} />
+          <p className="font-mono text-sm" style={{ color: 'var(--mdt-muted-text)' }}>Użytkownik nie znaleziony.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#020a06] relative overflow-hidden">
-      {/* Background effects */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-[#c9a227]/10 rounded-full blur-[120px] animate-pulse-glow" />
-        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-[#22693f]/20 rounded-full blur-[120px] animate-pulse-glow" style={{ animationDelay: '1.5s' }} />
-      </div>
-
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--mdt-content)' }}>
       <Navbar />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
         {/* Back Button */}
         <button
           onClick={() => router.push('/personnel')}
-          className="mb-6 flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200"
+          className="btn-win95 mb-6 flex items-center gap-2"
         >
           <ChevronLeft className="w-5 h-5" />
           <span className="text-sm font-medium">Powrót do Kartoteki</span>
@@ -270,7 +263,7 @@ export default function UserProfilePage({ username }: UserProfilePageProps) {
           <div />
           <button
             onClick={() => setShowAddPlusMinusModal(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#c9a227] to-[#e6b830] text-[#020a06] font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
+            className="btn-win95 flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
             Dodaj PLUS/MINUS
@@ -293,7 +286,8 @@ export default function UserProfilePage({ username }: UserProfilePageProps) {
           <div />
           <button
             onClick={() => setShowAddPenaltyModal(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
+            className="btn-win95 flex items-center gap-2"
+            style={{ backgroundColor: '#c41e1e', color: '#fff', borderColor: '#ff4444 #800000 #800000 #ff4444' }}
           >
             <AlertTriangle className="w-4 h-4" />
             Nadaj Karę
@@ -316,7 +310,7 @@ export default function UserProfilePage({ username }: UserProfilePageProps) {
           <div />
           <button
             onClick={() => setShowAddWrittenWarningModal(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg"
+            className="btn-win95 flex items-center gap-2"
           >
             <FileText className="w-4 h-4" />
             Nadaj Upomnienie
