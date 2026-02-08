@@ -336,6 +336,19 @@
   background: var(--mdt-content);
 }
 
+/* Placeholder text styling - visible in dark mode */
+input::placeholder,
+textarea::placeholder {
+  color: var(--mdt-muted-text) !important;
+  opacity: 0.7;
+}
+
+/* Date input placeholder/empty state */
+input[type="date"]:invalid,
+input[type="week"]:invalid {
+  color: var(--mdt-muted-text);
+}
+
 /* ============================================ */
 /* React Quill Overrides (MDT Theme)            */
 /* ============================================ */

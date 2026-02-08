@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useTranslation } from '@/src/contexts/TranslationContext';
-import { BookOpen, FileText, Users, CheckCircle, Shield, Briefcase, UserCog } from 'lucide-react';
+import { BookOpen, FileText, Users, CheckCircle, Shield, Briefcase, UserCog, ClipboardList } from 'lucide-react';
 import Navbar from './Navbar';
 import MtaNickModal from './MtaNickModal';
 
@@ -39,6 +39,16 @@ export default function Dashboard() {
       icon: Briefcase,
       stats: [
         { icon: Shield, label: '5 dywizji' },
+      ],
+      roles: ['trainee', 'deputy', 'cs', 'hcs', 'dev'],
+    },
+    {
+      id: 'zgloszenia',
+      title: 'Zgłoszenia',
+      description: 'Składaj wnioski, zgłaszaj błędy i propozycje. System wniosków SASD.',
+      icon: ClipboardList,
+      stats: [
+        { icon: FileText, label: '7 typów zgłoszeń' },
       ],
       roles: ['trainee', 'deputy', 'cs', 'hcs', 'dev'],
     },
