@@ -23,10 +23,13 @@
     2. Zaczynasz "zapominać" o zasadach Sheriff Theme.
     3. Zakończono Milestone i zaktualizowano dokumentację.
 
-### 4. Logic & Sheriff Theme (🚨 NIETYKALNY 🚨)
+### 4. Logic & MDT Terminal Theme (🚨 ACTIVE THEME 🚨)
 * **PRESERVE LOGIC**: Nigdy nie zmieniaj logiki biznesowej (`useEffect`, handlery, async). Zmieniaj tylko UI.
-* **SHERIFF THEME**: Absolutny zakaz zmian kolorów: `#020a06` (BG), `#c9a227` (Gold), `#051a0f` (Card), `#1a4d32` (Border).
-* **PATTERNS**: Kopiuj style z `ExamDashboard.jsx` dla nowych komponentów.
+* **MDT THEME**: Retro 90s Win95/MDT Terminal aesthetic. CSS variables in `globals.css`. Key classes: `btn-win95`, `panel-inset`, `panel-raised`, `pulse-dot`, `cursor-blink`.
+* **FONTS**: VT323 (headers/labels) + Space_Mono (body/mono). Both with `latin-ext` for Polish diacritics.
+* **DARK MODE**: `[data-theme="dark"]` CSS selector. All colors via CSS variables - NEVER hardcode hex colors.
+* **BACKUP**: Old Sheriff Theme preserved at commit `c2c6500` on master. Revert with `git checkout c2c6500 -- .` if needed.
+* **PATTERNS**: Kopiuj style z `Dashboard.tsx` lub `AdminPanelPage.tsx` dla nowych komponentów.
 
 ---
 
@@ -42,15 +45,19 @@
 ---
 
 ## 🚀 Troubleshooting History
-* **Z-Index**: Navbar `z-[60]`, Dropdown `z-[9999]`.
+* **Z-Index**: Navbar `z-[60]`, Dropdown `z-[9999]`, Fullscreen modal `z-[70]`.
 * **Tailwind v4**: Zakaz `@apply` dla custom hexów w CSS.
 * **Vercel**: Dummy commit triggeruje deploy (`git commit --allow-empty`).
 * **Navbar Sync**: Po operacjach CRUD wywołaj `refreshUserData()` z AuthContext dla natychmiastowej aktualizacji (zamiast czekać 30s na polling).
 * **Timer Countdown**: RPC function `get_active_penalties()` oblicza `remaining_seconds` server-side. Navbar korzysta z tego do countdown timerów.
-* **Button Positioning**: WSZYSTKIE przyciski "Powrót" ZAWSZE WEWNĄTRZ kontenera `max-w-7xl mx-auto px-6 py-8` jako pierwszy element z `mb-6` - jednolity standard dla obecnych i przyszłych stron (wzorzec z `/exams`, `/materials`, `/personnel`, `/divisions`, `/tokens`).
-* **Shared Components**: ZAWSZE używaj komponentów z `/src/components/shared/` dla BackButton, LoadingState, AccessDenied zamiast tworzyć nowe kopie. Importuj: `@/src/components/shared/ComponentName`.
+* **Button Positioning**: WSZYSTKIE przyciski "Powrót" (btn-win95) WEWNĄTRZ kontenera `max-w-7xl mx-auto px-6 py-8` jako pierwszy element z `mb-6`. Wyjątek: MDT Terminal page (`/divisions/dtu/mdt`) - brak przycisku Powrót, nawigacja przez X w MdtHeader.
+* **Shared Components**: ZAWSZE używaj komponentów z `/src/components/shared/` dla BackButton, LoadingState, AccessDenied, QuillEditor zamiast tworzyć nowe kopie. Importuj: `@/src/components/shared/ComponentName`.
+* **QuillEditor**: Shared rich text editor (`src/components/shared/QuillEditor.tsx`). Używany w MaterialForm (dywizje) i MaterialModal (materiały). Features: full toolbar, custom blots (hr), emoji picker, undo, tooltips PL. Dynamic import z `ssr: false`.
 * **PostgreSQL ENUM Cast**: RPC functions comparing ENUM with TEXT require explicit `::text` cast. Example: `WHERE division::text = p_division` (fixes "operator does not exist: division_type = text").
 * **Next.js Routing vs State**: State-based routing with conditional components causes React Invariants violations. Use dedicated Next.js routes instead (`router.push('/path')` + separate page.jsx files).
+* **MDT CSS Variables**: All MDT colors use CSS vars (--mdt-header, --mdt-sidebar, --mdt-content, --mdt-btn-face, --mdt-blue-bar, --mdt-input-bg, --mdt-content-text, --mdt-muted-text, --mdt-panel-content, --mdt-surface-light). NEVER hardcode hex in components.
+* **MDT Dark Mode**: `[data-theme="dark"]` in globals.css remaps all --mdt-* vars. Toggle stored in localStorage. Navbar has theme toggle button.
+* **Polish Diacritics**: Fonts must have `subsets: ['latin', 'latin-ext']`. All UI text uses proper Polish characters (ą, ć, ę, ł, ń, ó, ś, ź, ż).
 
 ---
 
@@ -168,21 +175,43 @@ Zmienione pliki: [ścieżki]
 
 ---
 
-Last Updated: 2026-02-08 - 🔥 PRODUCTION BUGFIXES COMPLETE! (6/6 critical bugs resolved) 🚀
+### 🎨 MDT Terminal Theme Migration (2026-02-08)
 
-**Previous Session (2026-02-07):**
-- Refactoring: 13/13 etapów ✅
-- Code Cleanup: -1,132L martwy kod + shared components ✅
-- Bundle: -4% size reduction ✅
-- Commit: efd1cb0 ✅
+**Status:** ✅ COMPLETED - Full visual migration from Sheriff Dark Green to MDT Terminal/Win95
 
-**Current Session (2026-02-08):**
-- Production Bugfixes: 6/6 critical bugs ✅
-- Constraint violation fixed (commit: f0bcb5a) ✅
-- HCS/CS permissions equalized to Dev ✅
-- Division materials + RPC function with ENUM cast ✅
-- MaterialForm simplified (5 → 2 fields) ✅
-- Exam stats/archive Next.js routing ✅
-- RLS policies updated for cs/hcs/dev hierarchy ✅
+**Backup:** Commit `c2c6500` = last Sheriff Theme commit. Revert: `git checkout c2c6500 -- .`
+
+**Scope:**
+- 77+ files modified/created
+- 11 new MDT Terminal page components
+- ~2700 lines added, ~3300 lines removed (net -600L theme cleanup)
+- Polish diacritics fixed across all components
+
+**Commits:**
+1. `ebcae6d` - MDT Theme Foundation (globals.css, layout.tsx, shared components, routing wrappers)
+2. `cffa824` - MDT Theme All Components + Polish diacritics (62 files)
+3. `6d374c5` - New MDT Terminal page /divisions/dtu/mdt (11 files)
+
+**Key Changes:**
+- globals.css: All Sheriff colors → MDT CSS variables, Win95 utility classes
+- layout.tsx: VT323 + Space_Mono fonts (latin-ext), dark mode support
+- All components: Removed glassmorphism, rounded corners → flat Win95 bevels
+- New page: `/divisions/dtu/mdt` - MDT Terminal with criminal records
+- Dark mode: `[data-theme="dark"]` with localStorage persistence
+- Polish diacritics: Fixed across entire codebase
+
+**New Routes:**
+- `/divisions/dtu/mdt` → MdtPage (fullscreen terminal)
+- `/divisions/[divisionId]/materials` → Division materials sub-route
+
+---
+
+Last Updated: 2026-02-08 - MDT Terminal Theme Migration COMPLETE + Polish Diacritics
+
+**Session History (2026-02-08):**
+- Production Bugfixes: 6/6 critical bugs ✅ (commits: f0bcb5a → c2c6500)
+- MDT Terminal Theme Migration: 3 commits ✅ (ebcae6d → 6d374c5)
+- Polish diacritics: Fixed across all components ✅
+- New MDT Terminal page: /divisions/dtu/mdt ✅
+- Dark mode: CSS variables + localStorage toggle ✅
 - Build: ✅ SUCCESS
-- Git push: ✅ Pushed to origin/master
