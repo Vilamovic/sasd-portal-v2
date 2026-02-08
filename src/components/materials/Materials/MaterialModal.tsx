@@ -50,7 +50,7 @@ export default function MaterialModal({
   // Fullscreen Mode
   if (fullscreen && editing) {
     return (
-      <div className="fixed inset-0 bg-[#020a06] z-50 overflow-hidden flex flex-col">
+      <div className="fixed inset-0 bg-[#020a06] z-[70] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 bg-[#051a0f] border-b border-[#1a4d32]">
           <input

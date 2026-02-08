@@ -126,6 +126,44 @@ export default function QuillEditor({
     setShowEmojiPicker(false);
   };
 
+  // Add tooltips to toolbar buttons after mount
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+
+    const timeout = setTimeout(() => {
+      const toolbar = wrapper.querySelector('.ql-toolbar');
+      if (!toolbar) return;
+
+      const tooltips: Record<string, string> = {
+        '.ql-bold': 'Pogrubienie',
+        '.ql-italic': 'Kursywa',
+        '.ql-underline': 'Podkreślenie',
+        '.ql-strike': 'Przekreślenie',
+        '.ql-blockquote': 'Cytat',
+        '.ql-code-block': 'Blok kodu',
+        '.ql-link': 'Wstaw link',
+        '.ql-clean': 'Usuń formatowanie',
+        '.ql-divider': 'Linia pozioma',
+        '.ql-emoji': 'Emoji',
+        '.ql-undo': 'Cofnij',
+        'button.ql-list[value="ordered"]': 'Lista numerowana',
+        'button.ql-list[value="bullet"]': 'Lista punktowana',
+        'button.ql-script[value="super"]': 'Indeks górny',
+        'button.ql-script[value="sub"]': 'Indeks dolny',
+        '.ql-align .ql-picker-label': 'Wyrównanie tekstu',
+        '.ql-font .ql-picker-label': 'Czcionka',
+      };
+
+      for (const [selector, title] of Object.entries(tooltips)) {
+        const el = toolbar.querySelector(selector);
+        if (el) (el as HTMLElement).title = title;
+      }
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, []);
+
   // Close emoji picker on outside click
   useEffect(() => {
     if (!showEmojiPicker) return;
