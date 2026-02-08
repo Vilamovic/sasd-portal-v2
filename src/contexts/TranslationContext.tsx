@@ -1,16 +1,20 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { translations } from '@/src/data/translations';
 
-const TranslationContext = createContext();
+interface TranslationContextType {
+  language: string;
+  t: (key: string, variables?: Record<string, string>) => string;
+  changeLanguage: (newLanguage: string) => void;
+}
+
+const TranslationContext = createContext<TranslationContextType | null>(null);
 
 /**
  * TranslationProvider - Provider dla systemu wielojęzyczności
- * @param {object} props - Props
- * @param {React.ReactNode} props.children - Komponenty potomne
  */
-export function TranslationProvider({ children }) {
+export function TranslationProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguage] = useState('pl'); // Domyślnie polski
 
   /**
@@ -25,16 +29,16 @@ export function TranslationProvider({ children }) {
    * t('exams.examTypes.trainee') → 'Egzamin Trainee'
    */
   const t = useCallback(
-    (key, variables = {}) => {
+    (key: string, variables: Record<string, string> = {}) => {
       // Rozdziel klucz na segmenty (np. 'auth.loginTitle' → ['auth', 'loginTitle'])
       const keys = key.split('.');
 
       // Nawiguj przez obiekt translations
-      let value = translations[language];
+      let value: any = (translations as any)[language];
 
       for (const k of keys) {
         if (value && typeof value === 'object' && k in value) {
-          value = value[k];
+          value = (value as any)[k];
         } else {
           // Jeśli klucz nie istnieje, zwróć sam klucz jako fallback
           console.warn(`Translation key "${key}" not found for language "${language}"`);
@@ -61,8 +65,8 @@ export function TranslationProvider({ children }) {
    * Zmiana języka aplikacji
    * @param {string} newLanguage - Kod języka ('pl' | 'en')
    */
-  const changeLanguage = useCallback((newLanguage) => {
-    if (translations[newLanguage]) {
+  const changeLanguage = useCallback((newLanguage: string) => {
+    if ((translations as any)[newLanguage]) {
       setLanguage(newLanguage);
       // Opcjonalnie: zapisz w localStorage
       if (typeof window !== 'undefined') {
@@ -74,10 +78,10 @@ export function TranslationProvider({ children }) {
   }, []);
 
   // Załaduj język z localStorage przy pierwszym renderze (jeśli dostępny)
-  useState(() => {
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedLanguage = localStorage.getItem('sasd-portal-language');
-      if (savedLanguage && translations[savedLanguage]) {
+      if (savedLanguage && (translations as any)[savedLanguage]) {
         setLanguage(savedLanguage);
       }
     }

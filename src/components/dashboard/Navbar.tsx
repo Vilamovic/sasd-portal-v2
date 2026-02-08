@@ -29,14 +29,14 @@ export default function Navbar() {
   const { t } = useTranslation();
   const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Countdown timer state for penalties
-  const [penaltyTimers, setPenaltyTimers] = useState({});
+  const [penaltyTimers, setPenaltyTimers] = useState<Record<string, number>>({});
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setDropdownOpen(false);
       }
     };
@@ -53,8 +53,8 @@ export default function Navbar() {
     }
 
     const updateTimers = () => {
-      const newTimers = {};
-      activePenalties.forEach((penalty) => {
+      const newTimers: Record<string, number> = {};
+      activePenalties.forEach((penalty: any) => {
         if (penalty.remaining_seconds && penalty.remaining_seconds > 0) {
           newTimers[penalty.id] = penalty.remaining_seconds;
         }
@@ -68,8 +68,8 @@ export default function Navbar() {
     // Update every second
     const interval = setInterval(() => {
       setPenaltyTimers((prev) => {
-        const updated = {};
-        Object.keys(prev).forEach((id) => {
+        const updated: Record<string, number> = {};
+        Object.keys(prev).forEach((id: string) => {
           const remaining = prev[id] - 1;
           if (remaining > 0) {
             updated[id] = remaining;
@@ -83,7 +83,7 @@ export default function Navbar() {
   }, [activePenalties]);
 
   // Format seconds to HH:MM:SS
-  const formatTime = (seconds) => {
+  const formatTime = (seconds: number | null | undefined) => {
     if (!seconds || seconds <= 0) return '00:00:00';
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -105,12 +105,12 @@ export default function Navbar() {
       DTU: 'text-[#60a5fa]', // Light blue (better contrast)
       GU: 'text-[#10b981]', // Green
     };
-    return colors[division] || 'text-white';
+    return colors[division as keyof typeof colors] || 'text-white';
   };
 
   // Get penalty type display name
-  const getPenaltyDisplayName = (type) => {
-    const names = {
+  const getPenaltyDisplayName = (type: string) => {
+    const names: Record<string, string> = {
       zawieszenie_sluzba: 'Zawieszenie: Frakcyjne',
       zawieszenie_dywizja: 'Zawieszenie: Dywizyjne',
       zawieszenie_uprawnienia: 'Zawieszenie: Uprawnieniowe',
@@ -174,7 +174,7 @@ export default function Navbar() {
             <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl">
               <Clock className="w-4 h-4 text-red-400" />
               <div className="flex flex-col">
-                {activePenalties.map((penalty) => (
+                {activePenalties.map((penalty: any) => (
                   <span key={penalty.id} className="text-red-400 text-xs font-mono font-bold">
                     {formatTime(penaltyTimers[penalty.id] || penalty.remaining_seconds)}
                   </span>
@@ -270,7 +270,7 @@ export default function Navbar() {
                         {permissions && permissions.length > 0 && (
                           <>
                             {division && <span className="text-white/50 text-xs">|</span>}
-                            {permissions.map((perm, idx) => (
+                            {permissions.map((perm: string, idx: number) => (
                               <span
                                 key={idx}
                                 className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white bg-white/10"
@@ -309,7 +309,7 @@ export default function Navbar() {
                         Aktywne Zawieszenia
                       </span>
                     </div>
-                    {activePenalties.map((penalty) => (
+                    {activePenalties.map((penalty: any) => (
                       <div key={penalty.id} className="flex flex-col gap-1 pl-6">
                         <span className="text-white text-xs font-medium">
                           {getPenaltyDisplayName(penalty.type)}

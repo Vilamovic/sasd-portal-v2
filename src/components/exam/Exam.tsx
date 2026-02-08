@@ -15,10 +15,10 @@ import ExamQuestions from './ExamQuestions';
  * - ExamQuestions (zarządzanie pytaniami)
  * - ExamResultsViewer mode="archived" (archiwum)
  */
-export default function Exam({ onBack }) {
+export default function Exam({ onBack }: { onBack?: () => void }) {
   const [activeView, setActiveView] = useState('dashboard');
 
-  const handleNavigate = (view) => {
+  const handleNavigate = (view: string) => {
     setActiveView(view);
   };
 

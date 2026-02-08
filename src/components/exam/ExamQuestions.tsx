@@ -7,6 +7,6 @@ import ExamQuestionsPage from './ExamQuestions/ExamQuestionsPage';
  * Original: 570L → 11L (-559L, -98%)
  * Refactored: 2026-02-07 (ETAP 2.5)
  */
-export default function ExamQuestions({ onBack }) {
+export default function ExamQuestions({ onBack }: { onBack?: () => void }) {
   return <ExamQuestionsPage onBack={onBack} />;
 }

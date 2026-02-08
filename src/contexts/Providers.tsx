@@ -11,7 +11,7 @@ import { AuthProvider } from './AuthContext';
  * 1. TranslationProvider (może być używany w AuthContext)
  * 2. AuthProvider (wymaga tłumaczeń)
  */
-export function Providers({ children }) {
+export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <TranslationProvider>
       <AuthProvider>

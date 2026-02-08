@@ -1,21 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
-import { Search, Filter, Archive, Trash2, X, Calendar, Clock, FileText, ChevronLeft } from 'lucide-react';
+import { Search, Filter, Archive, Trash2, X, Calendar, Clock, FileText } from 'lucide-react';
 import { getAllExamResultsNonArchived, getAllExamResultsArchived, archiveExamResult, deleteExamResult } from '@/src/lib/db/exams';
+import BackButton from '@/src/components/shared/BackButton';
 
 /**
  * ExamResultsViewer - Unified component for active and archived exam results
  * @param {string} mode - 'active' or 'archived'
  */
-export default function ExamResultsViewer({ mode = 'active' }) {
+export default function ExamResultsViewer({ mode = 'active' }: { mode?: 'active' | 'archived' }) {
   const { user, loading: authLoading, isCS } = useAuth();
-  const [results, setResults] = useState([]);
+  const router = useRouter();
+  const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterExamType, setFilterExamType] = useState('all');
-  const [selectedResult, setSelectedResult] = useState(null);
+  const [selectedResult, setSelectedResult] = useState<any>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   const isArchiveMode = mode === 'archived';
@@ -44,7 +47,7 @@ export default function ExamResultsViewer({ mode = 'active' }) {
     }
   };
 
-  const handleArchive = async (resultId, userName) => {
+  const handleArchive = async (resultId: string, userName: string) => {
     if (!confirm(`Czy na pewno chcesz zarchiwizować wynik egzaminu użytkownika "${userName}"?`)) return;
 
     try {
@@ -59,7 +62,7 @@ export default function ExamResultsViewer({ mode = 'active' }) {
     }
   };
 
-  const handleDelete = async (resultId, userName) => {
+  const handleDelete = async (resultId: string, userName: string) => {
     if (!confirm(`Czy na pewno chcesz USUNĄĆ wynik egzaminu użytkownika "${userName}"? Tej operacji nie można cofnąć.`)) return;
 
     try {
@@ -76,7 +79,7 @@ export default function ExamResultsViewer({ mode = 'active' }) {
     }
   };
 
-  const openDetailsModal = (result) => {
+  const openDetailsModal = (result: any) => {
     setSelectedResult(result);
     setShowDetailsModal(true);
   };
@@ -119,11 +122,11 @@ export default function ExamResultsViewer({ mode = 'active' }) {
   }
 
   // Helper: get display name and exam type from joined data
-  const getUserName = (result) => result.users?.mta_nick || result.users?.username || 'Nieznany';
-  const getExamType = (result) => result.exam_types?.name || 'Nieznany';
+  const getUserName = (result: any) => result.users?.mta_nick || result.users?.username || 'Nieznany';
+  const getExamType = (result: any) => result.exam_types?.name || 'Nieznany';
 
   // Filtering
-  const examTypes = [...new Set(results.map((r) => getExamType(r)))];
+  const examTypes = useMemo(() => [...new Set(results.map((r) => getExamType(r)))], [results]);
   const filteredResults = results.filter((result) => {
     const userName = getUserName(result);
     const examType = getExamType(result);
@@ -136,11 +139,11 @@ export default function ExamResultsViewer({ mode = 'active' }) {
   });
 
   // Helper: reconstruct per-question details from questions + answers
-  const getQuestionDetails = (result) => {
+  const getQuestionDetails = (result: any) => {
     const questions = Array.isArray(result.questions) ? result.questions : [];
     const answers = result.answers && typeof result.answers === 'object' ? result.answers : {};
 
-    return questions.map((q) => {
+    return questions.map((q: any) => {
       const userAnswer = answers[q.id];
       let isCorrect = false;
 
@@ -159,7 +162,7 @@ export default function ExamResultsViewer({ mode = 'active' }) {
       if (userAnswer === -1) {
         answerText = 'Timeout';
       } else if (Array.isArray(userAnswer)) {
-        answerText = userAnswer.map((i) => options[i] || `Opcja ${i + 1}`).join(', ');
+        answerText = userAnswer.map((i: number) => options[i] || `Opcja ${i + 1}`).join(', ');
       } else if (typeof userAnswer === 'number' && options[userAnswer]) {
         answerText = options[userAnswer];
       }
@@ -279,7 +282,7 @@ export default function ExamResultsViewer({ mode = 'active' }) {
                 Lista Pytań
               </h3>
               <div className="space-y-3">
-                {questionDetails.map((detail, index) => (
+                {questionDetails.map((detail: any, index: number) => (
                   <div
                     key={index}
                     className={`glass-strong rounded-xl p-4 border transition-all duration-200 ${
@@ -358,13 +361,7 @@ export default function ExamResultsViewer({ mode = 'active' }) {
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
         {/* Back Button */}
-        <button
-          onClick={() => window.history.back()}
-          className="mb-6 flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200"
-        >
-          <ChevronLeft className="w-5 h-5" />
-          <span className="text-sm font-medium">Powrót do Dashboard</span>
-        </button>
+        <BackButton onClick={() => router.push('/exams')} destination="Egzaminów" />
 
         {/* Header */}
         <div className="mb-8">

@@ -10,13 +10,13 @@ import { Target, BarChart3, Settings, Archive, ArrowRight, CheckCircle, Clock, C
  * 4 tiles for admin, 1 centered card for users
  * Uses Next.js routing for stats/archive (fixes Invariants violations)
  */
-export default function ExamDashboard({ onNavigate, onBack }) {
+export default function ExamDashboard({ onNavigate, onBack }: { onNavigate?: (view: string) => void; onBack?: () => void }) {
   const router = useRouter();
   const { role, isAdmin } = useAuth();
   const { t } = useTranslation();
 
   // Navigation handler - uses Next.js router for stats/archive
-  const handleTileClick = (tileId) => {
+  const handleTileClick = (tileId: string) => {
     if (tileId === 'statistics') {
       router.push('/exams/stats');
     } else if (tileId === 'archive') {

@@ -24,17 +24,17 @@ export default function Login() {
 
   // Throttled mouse tracking (~30fps) - no requestAnimationFrame to prevent lag
   useEffect(() => {
-    const handleMouseMove = (e) => {
+    const handleMouseMove = (e: MouseEvent) => {
       const now = Date.now();
-      if (now - (handleMouseMove.lastCall || 0) < 33) return; // ~30fps throttle
-      handleMouseMove.lastCall = now;
+      if (now - ((handleMouseMove as any).lastCall || 0) < 33) return; // ~30fps throttle
+      (handleMouseMove as any).lastCall = now;
 
       setMousePosition({
         x: (e.clientX / window.innerWidth) * 100,
         y: (e.clientY / window.innerHeight) * 100,
       });
     };
-    handleMouseMove.lastCall = 0;
+    (handleMouseMove as any).lastCall = 0;
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => window.removeEventListener('mousemove', handleMouseMove);

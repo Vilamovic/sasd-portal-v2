@@ -8,12 +8,12 @@ import { Gamepad2, AlertCircle, Sparkles } from 'lucide-react';
  * MtaNickModal - Modal for setting MTA nickname on first login
  * Sheriff Dark Green theme
  */
-export default function MtaNickModal({ user, onComplete }) {
+export default function MtaNickModal({ user, onComplete }: { user: any; onComplete: (nick: string) => void }) {
   const [mtaNick, setMtaNick] = useState('');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!mtaNick.trim()) {
