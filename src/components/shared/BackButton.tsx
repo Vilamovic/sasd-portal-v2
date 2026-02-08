@@ -5,19 +5,14 @@ interface BackButtonProps {
   destination: string;
 }
 
-/**
- * BackButton - Standard back button (Sheriff Theme pattern)
- *
- * Shared component used across AdminPanel, TokenManagement, DivisionPage
- */
 export default function BackButton({ onClick, destination }: BackButtonProps) {
   return (
     <button
       onClick={onClick}
-      className="mb-6 flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200"
+      className="btn-win95 mb-6 flex items-center gap-2 text-sm"
     >
-      <ChevronLeft className="w-5 h-5" />
-      <span className="text-sm font-medium">Powrót do {destination}</span>
+      <ChevronLeft className="w-4 h-4" />
+      <span>Powrót do {destination}</span>
     </button>
   );
 }

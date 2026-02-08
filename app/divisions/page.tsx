@@ -22,8 +22,10 @@ export default function DivisionsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#020a06] flex items-center justify-center">
-        <div className="text-[#c9a227]">Ładowanie...</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--mdt-content)' }}>
+        <div className="font-[family-name:var(--font-vt323)] text-2xl tracking-widest cursor-blink inline-block px-1" style={{ color: 'var(--mdt-content-text)' }}>
+          ŁADOWANIE_
+        </div>
       </div>
     );
   }
@@ -35,110 +37,106 @@ export default function DivisionsPage() {
       id: 'SWAT',
       name: 'Special Weapon And Tactics (SWAT)',
       description: 'Jednostka specjalna do zadań wysokiego ryzyka. Materiały dostępne dla wszystkich.',
-      color: 'from-red-500 to-red-600',
-      textColor: 'text-red-400',
+      color: '#c41e1e',
       accessible: true, // SWAT zawsze dostępny
     },
     {
       id: 'SS',
       name: 'Supervisory Staff (SS)',
       description: 'Kadra nadzorcza odpowiedzialna za koordynację operacji i szkolenia.',
-      color: 'from-[#ff8c00] to-[#ff7700]',
-      textColor: 'text-[#ff8c00]',
+      color: '#ff8c00',
       accessible: division === 'SS' || isAdmin || isDev,
     },
     {
       id: 'DTU',
       name: 'Detective Task Unit (DTU)',
       description: 'Jednostka detektywów prowadząca śledztwa i operacje wywiadowcze.',
-      color: 'from-[#1e3a8a] to-[#1e40af]',
-      textColor: 'text-[#1e3a8a]',
+      color: '#60a5fa',
       accessible: division === 'DTU' || isAdmin || isDev,
     },
     {
       id: 'GU',
       name: 'Gang Unit (GU)',
       description: 'Oddział do walki z przestępczością zorganizowaną i gangami.',
-      color: 'from-[#10b981] to-[#059669]',
-      textColor: 'text-[#10b981]',
+      color: '#10b981',
       accessible: division === 'GU' || isAdmin || isDev,
     },
     {
       id: 'FTO',
       name: 'Training Staff (FTO)',
       description: 'Kadra szkoleniowa odpowiedzialna za przygotowanie nowych rekrutów.',
-      color: 'from-[#c9a227] to-[#e6b830]',
-      textColor: 'text-[#c9a227]',
+      color: '#c9a227',
       accessible: division === 'FTO' || isAdmin || isDev,
     },
   ];
 
   return (
-    <div className="min-h-screen bg-[#020a06] relative overflow-hidden">
-      {/* Background effects */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-[#c9a227]/10 rounded-full blur-[120px] animate-pulse-glow" />
-        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-[#22693f]/20 rounded-full blur-[120px] animate-pulse-glow" style={{ animationDelay: '1.5s' }} />
-      </div>
-
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--mdt-content)' }}>
       <Navbar />
 
-      <div className="relative z-10 max-w-5xl mx-auto px-6 py-12">
+      <div className="relative z-10 max-w-5xl mx-auto px-6 py-8">
         {/* Back Button */}
         <button
           onClick={() => router.push('/dashboard')}
-          className="mb-6 flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200"
+          className="btn-win95 mb-6 flex items-center gap-2"
         >
-          <ChevronLeft className="w-5 h-5" />
-          <span className="text-sm font-medium">Powrót do Dashboard</span>
+          <ChevronLeft className="w-4 h-4" />
+          <span className="font-mono text-sm">Powrót do Dashboard</span>
         </button>
 
         {/* Header */}
-        <div className="mb-12 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            <span className="text-gold-gradient">Dywizje</span> SASD
-          </h1>
-          <div className="w-24 h-1 bg-gradient-to-r from-[#c9a227] to-[#e6b830] rounded-full mb-4 mx-auto" />
-          <p className="text-[#8fb5a0] text-lg">
-            Materiały specjalistyczne dla jednostek SASD
-          </p>
+        <div className="panel-raised mb-6" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+          <div className="px-4 py-2" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
+            <span className="font-[family-name:var(--font-vt323)] text-base tracking-widest uppercase text-white">
+              DYWIZJE SASD
+            </span>
+          </div>
+          <div className="p-4">
+            <p className="font-mono text-sm" style={{ color: 'var(--mdt-muted-text)' }}>
+              Materiały specjalistyczne dla jednostek SASD
+            </p>
+          </div>
         </div>
 
         {/* Divisions List */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           {divisions.map((div) => (
             <div
               key={div.id}
-              className={`group relative glass-strong rounded-2xl p-6 border border-[#1a4d32]/50 transition-all duration-300 ${
-                div.accessible
-                  ? 'hover:scale-[1.02] hover:border-[#c9a227]/50 cursor-pointer'
-                  : 'opacity-50 cursor-not-allowed'
-              }`}
+              className="panel-raised"
+              style={{
+                backgroundColor: 'var(--mdt-btn-face)',
+                opacity: div.accessible ? 1 : 0.5,
+                cursor: div.accessible ? 'pointer' : 'not-allowed',
+              }}
               onClick={() => {
                 if (div.accessible) {
                   router.push(`/divisions/${div.id}`);
                 }
               }}
             >
-              <div className="flex items-center justify-between">
+              <div className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 bg-gradient-to-br ${div.color} rounded-xl flex items-center justify-center shadow-lg`}>
-                    <Shield className="w-6 h-6 text-white" />
+                  <div
+                    className="w-10 h-10 flex items-center justify-center"
+                    style={{ backgroundColor: div.color }}
+                  >
+                    <Shield className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h3 className={`text-xl font-bold ${div.accessible ? 'text-white' : 'text-gray-500'}`}>
+                    <h3 className="font-mono text-sm font-bold" style={{ color: div.accessible ? 'var(--mdt-content-text)' : 'var(--mdt-subtle-text)' }}>
                       {div.name}
                     </h3>
-                    <p className={`text-sm ${div.accessible ? 'text-[#8fb5a0]' : 'text-gray-600'}`}>
+                    <p className="font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>
                       {div.description}
                     </p>
                   </div>
                 </div>
 
                 {div.accessible ? (
-                  <ArrowRight className="w-6 h-6 text-[#c9a227] group-hover:translate-x-2 transition-transform" />
+                  <ArrowRight className="w-5 h-5" style={{ color: 'var(--mdt-content-text)' }} />
                 ) : (
-                  <div className="text-gray-600 text-sm font-medium">Brak dostępu</div>
+                  <span className="font-mono text-xs" style={{ color: 'var(--mdt-subtle-text)' }}>Brak dostępu</span>
                 )}
               </div>
             </div>
@@ -147,8 +145,8 @@ export default function DivisionsPage() {
 
         {/* Info message */}
         {!division && !isAdmin && !isDev && (
-          <div className="mt-8 p-4 rounded-xl bg-[#c9a227]/10 border border-[#c9a227]/20 text-center">
-            <p className="text-[#c9a227] text-sm">
+          <div className="mt-6 panel-inset p-4" style={{ backgroundColor: 'var(--mdt-input-bg)' }}>
+            <p className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>
               Materiały SWAT są dostępne dla wszystkich. Inne dywizje wymagają przypisania przez administratora.
             </p>
           </div>

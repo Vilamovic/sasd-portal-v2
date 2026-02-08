@@ -5,24 +5,20 @@ interface AccessDeniedProps {
   message: string;
 }
 
-/**
- * AccessDenied - Universal unauthorized access view (Sheriff Theme pattern)
- *
- * Shared component used across AdminPanel, TokenManagement
- */
 export default function AccessDenied({ onBack, message }: AccessDeniedProps) {
   return (
-    <div className="min-h-screen bg-[#020a06] flex items-center justify-center p-8">
-      <div className="text-center">
-        <Shield className="w-16 h-16 text-red-400 mx-auto mb-4" />
-        <h2 className="text-2xl font-bold text-white mb-2">Brak dostępu</h2>
-        <p className="text-[#8fb5a0] mb-6">{message}</p>
-        <button
-          onClick={onBack}
-          className="px-6 py-3 bg-gradient-to-r from-[#c9a227] to-[#e6b830] text-[#020a06] font-bold rounded-xl hover:opacity-90 transition-all duration-300 hover:scale-[1.02] shadow-lg"
-        >
-          Powrót
-        </button>
+    <div className="min-h-screen flex items-center justify-center p-8" style={{ backgroundColor: 'var(--mdt-content)' }}>
+      <div className="panel-raised p-0 max-w-md w-full" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+        <div className="flex items-center justify-between px-3 py-1.5" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
+          <span className="font-[family-name:var(--font-vt323)] text-base tracking-wider uppercase text-white">BRAK DOSTĘPU</span>
+        </div>
+        <div className="p-6 text-center">
+          <Shield className="w-12 h-12 mx-auto mb-4 text-red-600" />
+          <p className="font-mono text-sm mb-6" style={{ color: 'var(--mdt-muted-text)' }}>{message}</p>
+          <button onClick={onBack} className="btn-win95 text-sm">
+            POWROT
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -2,88 +2,164 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* SASD Portal - Sheriff Dark Green Theme with Gold Accents */
+/* SASD Portal - MDT Terminal Theme (Win95 / Retro 90s) */
 :root {
-  /* Deep sheriff forest background */
-  --background: #020a06;
-  --foreground: #f8faf9;
+  /* MDT Terminal base colors */
+  --background: #c8c8c8;
+  --foreground: #1a1a1a;
 
-  /* Card surfaces - dark forest green */
-  --card: #051a0f;
-  --card-foreground: #f8faf9;
+  /* Card surfaces - Win95 gray */
+  --card: #c0c0c0;
+  --card-foreground: #1a1a1a;
 
   /* Popover */
-  --popover: #072213;
-  --popover-foreground: #f8faf9;
+  --popover: #c0c0c0;
+  --popover-foreground: #1a1a1a;
 
-  /* Gold primary accent - Sheriff badge gold */
-  --primary: #c9a227;
-  --primary-foreground: #020a06;
+  /* Primary accent - MDT blue bar */
+  --primary: #1a3a6a;
+  --primary-foreground: #ffffff;
 
-  /* Secondary surfaces - forest green */
-  --secondary: #0a2818;
-  --secondary-foreground: #f8faf9;
+  /* Secondary surfaces - dark gray */
+  --secondary: #3a3a3a;
+  --secondary-foreground: #d4d4d4;
 
   /* Muted elements */
-  --muted: #133524;
-  --muted-foreground: #8fb5a0;
+  --muted: #a0a0a0;
+  --muted-foreground: #555555;
 
-  /* Gold accent - bright badge */
-  --accent: #e6b830;
-  --accent-foreground: #020a06;
+  /* Accent */
+  --accent: #1a3a6a;
+  --accent-foreground: #ffffff;
 
   /* Status colors */
-  --destructive: #dc2626;
-  --destructive-foreground: #fef2f2;
-  --success: #16a34a;
-  --success-foreground: #f0fdf4;
+  --destructive: #c41e1e;
+  --destructive-foreground: #ffffff;
+  --success: #2a6a2a;
+  --success-foreground: #ffffff;
 
-  /* Borders - forest accent */
-  --border: #1a4d32;
-  --input: #133524;
-  --ring: #c9a227;
+  /* Borders - Win95 gray */
+  --border: #808080;
+  --input: #d0d0d0;
+  --ring: #1a3a6a;
 
   /* Charts */
-  --chart-1: #c9a227;
-  --chart-2: #22c55e;
-  --chart-3: #14b8a6;
-  --chart-4: #e6b830;
-  --chart-5: #84cc16;
+  --chart-1: #1a3a6a;
+  --chart-2: #2a6a2a;
+  --chart-3: #6a3a1a;
+  --chart-4: #4a2a6a;
+  --chart-5: #1a6a6a;
 
-  --radius: 0.75rem;
+  --radius: 0px;
 
   /* Sidebar */
-  --sidebar: #051a0f;
-  --sidebar-foreground: #f8faf9;
-  --sidebar-primary: #c9a227;
-  --sidebar-primary-foreground: #020a06;
-  --sidebar-accent: #133524;
-  --sidebar-accent-foreground: #f8faf9;
-  --sidebar-border: #1a4d32;
-  --sidebar-ring: #c9a227;
+  --sidebar: #2a2a2a;
+  --sidebar-foreground: #d4d4d4;
+  --sidebar-primary: #1a3a6a;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #505050;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #555555;
+  --sidebar-ring: #1a3a6a;
 
-  /* Custom SASD Sheriff colors */
-  --gold: #c9a227;
-  --gold-light: #e6b830;
-  --gold-dark: #a68b1f;
+  /* MDT Terminal specific colors */
+  --mdt-header: #3a3a3a;
+  --mdt-header-text: #d4d4d4;
+  --mdt-sidebar: #2a2a2a;
+  --mdt-content: #c8c8c8;
+  --mdt-content-text: #1a1a1a;
+  --mdt-row-even: #b8b8b8;
+  --mdt-row-odd: #c8c8c8;
+  --mdt-btn-face: #c0c0c0;
+  --mdt-btn-highlight: #e0e0e0;
+  --mdt-btn-shadow: #808080;
+  --mdt-btn-dark-shadow: #404040;
+  --mdt-btn-text: #1a1a1a;
+  --mdt-active-btn: #505050;
+  --mdt-active-btn-text: #ffffff;
+  --mdt-blue-bar: #1a3a6a;
+  --mdt-btn-hover: #d0d0d0;
+  --mdt-input-bg: #d0d0d0;
+  --mdt-panel-alt: #b8b8b8;
+  --mdt-panel-content: #b0b0b0;
+  --mdt-surface-light: #a0a0a0;
+  --mdt-muted-text: #555555;
+  --mdt-subtle-text: #888888;
+  --mdt-border-mid: #999999;
+  --mdt-icon-muted: #555555;
+
+  /* Legacy color aliases (for any remaining references) */
+  --gold: #1a3a6a;
+  --gold-light: #2a4a7a;
+  --gold-dark: #0a2a5a;
   --discord: #5865F2;
   --discord-hover: #4752c4;
-  --sheriff-900: #020a06;
-  --sheriff-800: #051a0f;
-  --sheriff-700: #072213;
-  --sheriff-600: #0a2818;
-  --sheriff-500: #133524;
-  --sheriff-400: #1a4d32;
-  --sheriff-300: #22693f;
-  --tan: #d4a574;
-  --tan-light: #e8c9a8;
-  --brown: #8b4513;
-  --brown-dark: #5c3a21;
+}
+
+/* ============================================ */
+/* Dark Mode - MDT Terminal                     */
+/* ============================================ */
+[data-theme="dark"] {
+  --background: #121212;
+  --foreground: #d4d4d4;
+
+  --card: #1a1a1a;
+  --card-foreground: #d4d4d4;
+
+  --popover: #1a1a1a;
+  --popover-foreground: #d4d4d4;
+
+  --primary: #1a3a6a;
+  --primary-foreground: #ffffff;
+
+  --secondary: #2a2a2a;
+  --secondary-foreground: #d4d4d4;
+
+  --muted: #333333;
+  --muted-foreground: #888888;
+
+  --accent: #1a3a6a;
+  --accent-foreground: #ffffff;
+
+  --border: #444444;
+  --input: #2a2a2a;
+  --ring: #1a3a6a;
+
+  --sidebar: #0e0e0e;
+  --sidebar-foreground: #d4d4d4;
+  --sidebar-border: #333333;
+
+  /* MDT Terminal dark overrides */
+  --mdt-header: #1a1a1a;
+  --mdt-header-text: #d4d4d4;
+  --mdt-sidebar: #111111;
+  --mdt-content: #1e1e1e;
+  --mdt-content-text: #d4d4d4;
+  --mdt-row-even: #222222;
+  --mdt-row-odd: #1a1a1a;
+  --mdt-btn-face: #2a2a2a;
+  --mdt-btn-highlight: #444444;
+  --mdt-btn-shadow: #111111;
+  --mdt-btn-dark-shadow: #000000;
+  --mdt-btn-text: #d4d4d4;
+  --mdt-active-btn: #1a3a6a;
+  --mdt-active-btn-text: #ffffff;
+  --mdt-blue-bar: #1a3a6a;
+  --mdt-btn-hover: #333333;
+  --mdt-input-bg: #2a2a2a;
+  --mdt-panel-alt: #252525;
+  --mdt-panel-content: #1e1e1e;
+  --mdt-surface-light: #333333;
+  --mdt-muted-text: #999999;
+  --mdt-subtle-text: #777777;
+  --mdt-border-mid: #555555;
+  --mdt-icon-muted: #888888;
 }
 
 @theme inline {
-  --font-sans: 'Inter', 'Geist', 'Geist Fallback', system-ui, sans-serif;
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback', monospace;
+  --font-sans: var(--font-space-mono), 'Courier New', monospace;
+  --font-mono: var(--font-space-mono), 'Courier New', monospace;
+  --font-family-vt: var(--font-vt323), monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -108,10 +184,10 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius));
+  --radius-md: calc(var(--radius));
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius));
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -121,23 +197,12 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Custom SASD Sheriff colors */
+  /* MDT color tokens */
   --color-gold: var(--gold);
   --color-gold-light: var(--gold-light);
   --color-gold-dark: var(--gold-dark);
   --color-discord: var(--discord);
   --color-discord-hover: var(--discord-hover);
-  --color-sheriff-900: var(--sheriff-900);
-  --color-sheriff-800: var(--sheriff-800);
-  --color-sheriff-700: var(--sheriff-700);
-  --color-sheriff-600: var(--sheriff-600);
-  --color-sheriff-500: var(--sheriff-500);
-  --color-sheriff-400: var(--sheriff-400);
-  --color-sheriff-300: var(--sheriff-300);
-  --color-tan: var(--tan);
-  --color-tan-light: var(--tan-light);
-  --color-brown: var(--brown);
-  --color-brown-dark: var(--brown-dark);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
 }
@@ -151,210 +216,178 @@
   }
 }
 
-/* Custom animations for SASD Portal */
-@keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(2deg); }
+/* ============================================ */
+/* Win95 / MDT Terminal Utility Classes         */
+/* ============================================ */
+
+/* Win95 beveled button */
+.btn-win95 {
+  background-color: var(--mdt-btn-face);
+  color: var(--mdt-btn-text);
+  border: 2px solid;
+  border-color: var(--mdt-btn-highlight) var(--mdt-btn-dark-shadow) var(--mdt-btn-dark-shadow) var(--mdt-btn-highlight);
+  padding: 8px 18px;
+  font-family: var(--font-space-mono), 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.4;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  user-select: none;
+  transition: none;
+}
+.btn-win95:hover { background-color: var(--mdt-btn-hover, #d0d0d0); }
+.btn-win95:active {
+  border-color: var(--mdt-btn-dark-shadow) var(--mdt-btn-highlight) var(--mdt-btn-highlight) var(--mdt-btn-dark-shadow);
+  padding: 9px 17px 7px 19px;
+}
+.btn-win95:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-win95-active {
+  background-color: var(--mdt-active-btn);
+  color: var(--mdt-active-btn-text);
+  border-color: var(--mdt-btn-dark-shadow) var(--mdt-btn-highlight) var(--mdt-btn-highlight) var(--mdt-btn-dark-shadow);
 }
 
-@keyframes pulse-glow {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.05); }
+/* Panel inset (sunken border) */
+.panel-inset {
+  border: 2px solid;
+  border-color: var(--mdt-btn-dark-shadow) var(--mdt-btn-highlight) var(--mdt-btn-highlight) var(--mdt-btn-dark-shadow);
 }
 
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+/* Panel raised (raised border) */
+.panel-raised {
+  border: 2px solid;
+  border-color: var(--mdt-btn-highlight) var(--mdt-btn-dark-shadow) var(--mdt-btn-dark-shadow) var(--mdt-btn-highlight);
 }
 
-@keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+/* Pulsing status dot */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.pulse-dot { animation: pulse-dot 1.5s ease-in-out infinite; }
+
+/* Blinking cursor */
+@keyframes blink-cursor {
+  0%, 100% { border-color: transparent; }
+  50% { border-color: var(--mdt-content-text); }
+}
+.cursor-blink {
+  border-right: 2px solid var(--mdt-content-text);
+  animation: blink-cursor 1s step-end infinite;
 }
 
-@keyframes badge-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+/* Glowing alerts */
+@keyframes glow-red {
+  0%, 100% { box-shadow: 0 0 6px 2px rgba(220, 38, 38, 0.5), inset 0 0 4px rgba(220, 38, 38, 0.15); }
+  50% { box-shadow: 0 0 14px 5px rgba(220, 38, 38, 0.8), inset 0 0 8px rgba(220, 38, 38, 0.3); }
 }
-
-@keyframes text-glow {
-  0%, 100% { text-shadow: 0 0 20px rgba(201, 162, 39, 0.3); }
-  50% { text-shadow: 0 0 40px rgba(201, 162, 39, 0.6), 0 0 60px rgba(201, 162, 39, 0.3); }
+@keyframes glow-amber {
+  0%, 100% { box-shadow: 0 0 6px 2px rgba(245, 158, 11, 0.4), inset 0 0 4px rgba(245, 158, 11, 0.1); }
+  50% { box-shadow: 0 0 14px 5px rgba(245, 158, 11, 0.7), inset 0 0 8px rgba(245, 158, 11, 0.25); }
 }
+.glow-red { animation: glow-red 1.8s ease-in-out infinite; }
+.glow-amber { animation: glow-amber 1.8s ease-in-out infinite; }
 
-@keyframes border-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(201, 162, 39, 0.1); }
-  50% { box-shadow: 0 0 40px rgba(201, 162, 39, 0.3), 0 0 60px rgba(201, 162, 39, 0.1); }
-}
-
-@keyframes particle-float {
-  0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { transform: translateY(-100vh) translateX(50px) rotate(360deg); opacity: 0; }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 3s ease-in-out infinite;
-}
-
-.animate-shimmer {
-  animation: shimmer 2s infinite;
-}
-
-.animate-gradient-shift {
-  animation: gradient-shift 8s ease infinite;
-  background-size: 200% 200%;
-}
-
-.animate-text-glow {
-  animation: text-glow 3s ease-in-out infinite;
-}
-
-.animate-border-glow {
-  animation: border-glow 3s ease-in-out infinite;
-}
-
-/* Glass morphism utility - Sheriff green */
+/* Legacy class compatibility - map to MDT equivalents */
 .glass {
-  background: rgba(5, 26, 15, 0.7);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(201, 162, 39, 0.1);
+  background-color: var(--mdt-btn-face);
+  border: 2px solid;
+  border-color: var(--mdt-btn-highlight) var(--mdt-btn-dark-shadow) var(--mdt-btn-dark-shadow) var(--mdt-btn-highlight);
 }
 
 .glass-strong {
-  background: rgba(5, 26, 15, 0.85);
-  backdrop-filter: blur(30px);
-  border: 1px solid rgba(201, 162, 39, 0.2);
+  background-color: var(--mdt-btn-face);
+  border: 2px solid;
+  border-color: var(--mdt-btn-highlight) var(--mdt-btn-dark-shadow) var(--mdt-btn-dark-shadow) var(--mdt-btn-highlight);
 }
 
-/* Gold gradient text - Sheriff badge gold */
+/* Text gradient - now solid MDT blue */
 .text-gold-gradient {
-  background: linear-gradient(135deg, #c9a227 0%, #e6b830 50%, #c9a227 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--mdt-blue-bar);
+  background: none;
+  -webkit-text-fill-color: currentColor;
 }
 
-/* Sheriff green gradient text */
-.text-sheriff-gradient {
-  background: linear-gradient(135deg, #133524 0%, #22693f 50%, #133524 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Scrollbar styling - Sheriff theme */
+/* Scrollbar styling - MDT theme */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 16px;
+  height: 16px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--sheriff-900);
+  background: var(--mdt-content);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--sheriff-500);
-  border-radius: 4px;
+  background: var(--mdt-btn-face);
+  border: 2px solid;
+  border-color: var(--mdt-btn-highlight) var(--mdt-btn-dark-shadow) var(--mdt-btn-dark-shadow) var(--mdt-btn-highlight);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--gold);
+  background: var(--mdt-btn-hover);
 }
 
-/* Card hover effects */
-.card-hover {
-  transition: all 0.3s ease;
+::-webkit-scrollbar-corner {
+  background: var(--mdt-content);
 }
 
-.card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(201, 162, 39, 0.1);
-}
-
-/* Button glow effect */
-.btn-glow {
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-glow::before {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  background: linear-gradient(45deg, transparent, rgba(201, 162, 39, 0.3), transparent);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.btn-glow:hover::before {
-  opacity: 1;
-}
-
-/* Focus ring styling */
-.focus-gold:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px var(--sheriff-800), 0 0 0 4px var(--gold);
-}
-
-/* === REACT QUILL OVERRIDES (Sheriff Theme) === */
+/* ============================================ */
+/* React Quill Overrides (MDT Theme)            */
+/* ============================================ */
 .ql-toolbar {
-  background-color: rgba(19, 53, 36, 0.5);
-  border-color: rgba(201, 162, 39, 0.3);
-  border-radius: 0.75rem 0.75rem 0 0;
+  background-color: var(--mdt-header);
+  border-color: var(--border);
+  border-radius: 0;
 }
 
 .ql-container {
-  background-color: rgba(5, 26, 15, 0.3);
-  border-color: rgba(201, 162, 39, 0.3);
-  border-radius: 0 0 0.75rem 0.75rem;
-  color: #f8faf9;
+  background-color: var(--mdt-input-bg);
+  border-color: var(--border);
+  border-radius: 0;
+  color: var(--mdt-content-text);
 }
 
-/* Dynamic min-height via CSS variable (default 450px) */
 .quill-editor-wrapper .ql-container {
   min-height: var(--quill-min-height, 450px);
 }
 
 .ql-editor {
-  color: #f8faf9;
-  font-family: 'Inter', sans-serif;
+  color: var(--mdt-content-text);
+  font-family: var(--font-space-mono), 'Courier New', monospace;
 }
 
 .ql-editor.ql-blank::before {
-  color: #8fb5a0;
+  color: #888;
 }
 
-/* Quill button/picker hover states */
 .ql-toolbar button:hover,
 .ql-toolbar button.ql-active,
 .ql-toolbar .ql-picker-label:hover,
 .ql-toolbar .ql-picker-item:hover {
-  color: #e6b830;
+  color: var(--mdt-blue-bar);
 }
 
 .ql-toolbar button:hover .ql-stroke,
 .ql-toolbar button.ql-active .ql-stroke {
-  stroke: #e6b830;
+  stroke: var(--mdt-blue-bar);
 }
 
 .ql-toolbar button:hover .ql-fill,
 .ql-toolbar button.ql-active .ql-fill {
-  fill: #e6b830;
+  fill: var(--mdt-blue-bar);
 }
 
-/* Quill picker dropdown styling */
 .ql-toolbar .ql-picker-options {
-  background-color: #051a0f;
-  border-color: rgba(201, 162, 39, 0.3);
+  background-color: var(--mdt-btn-face);
+  border-color: var(--border);
 }
 
-/* Custom toolbar buttons: Divider, Emoji, Undo */
+/* Custom toolbar buttons */
 .ql-toolbar .ql-divider::after {
   content: '—';
   font-size: 16px;
@@ -374,6 +407,19 @@
 /* Horizontal rule styling in editor */
 .ql-editor hr {
   border: none;
-  border-top: 2px solid rgba(201, 162, 39, 0.3);
+  border-top: 2px solid #808080;
   margin: 1rem 0;
+}
+
+/* Quill toolbar icon colors for MDT */
+.ql-toolbar .ql-stroke {
+  stroke: var(--mdt-header-text);
+}
+
+.ql-toolbar .ql-fill {
+  fill: var(--mdt-header-text);
+}
+
+.ql-toolbar .ql-picker-label {
+  color: var(--mdt-header-text);
 }
