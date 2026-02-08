@@ -228,3 +228,28 @@ export async function updateIsCommander(userId: string | null, isCommander: bool
     return { data: null, error };
   }
 }
+
+export async function updateIsSwatCommander(userId: string, isSwatCommander: boolean) {
+  try {
+    // If setting to true, first remove from any existing SWAT Commander (max 1)
+    if (isSwatCommander) {
+      await supabase
+        .from('users')
+        .update({ is_swat_commander: false })
+        .eq('is_swat_commander', true);
+    }
+
+    const { data, error } = await supabase
+      .from('users')
+      .update({ is_swat_commander: isSwatCommander })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('updateIsSwatCommander error:', error);
+    return { data: null, error };
+  }
+}

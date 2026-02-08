@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { Shield, Edit3, Save, X } from 'lucide-react';
-import { updateUserDivision, updateIsCommander } from '@/src/lib/db/users';
+import { updateUserDivision, updateIsCommander, updateIsSwatCommander } from '@/src/lib/db/users';
 import { notifyDivisionChange } from '@/src/lib/webhooks/personnel';
 import { getDivisionColor } from '@/src/components/shared/constants';
 
@@ -34,6 +34,7 @@ export default function DivisionEditor({ user, currentUser, userId, isHCS, isCS,
 
     try {
       const oldDivision = user.division;
+      const isSwat = tempDivision === 'SWAT';
 
       // Update division
       const { error: divError } = await updateUserDivision(userId, tempDivision || null);
@@ -43,22 +44,27 @@ export default function DivisionEditor({ user, currentUser, userId, isHCS, isCS,
       const { error: cmdError } = await updateIsCommander(userId, tempIsCommander);
       if (cmdError) throw cmdError;
 
+      // Update SWAT Commander status
+      const oldIsSwat = oldDivision === 'SWAT';
+      if (isSwat !== oldIsSwat) {
+        const { error: swatError } = await updateIsSwatCommander(userId, isSwat);
+        if (swatError) throw swatError;
+      }
+
       // Discord webhook
       if (oldDivision !== tempDivision) {
         if (tempDivision) {
-          // Nadanie dywizji
           await notifyDivisionChange({
             user: { username: user.username, mta_nick: user.mta_nick },
-            division: tempDivision,
+            division: tempDivision === 'SWAT' ? 'SWAT CMD' : tempDivision,
             isGranted: true,
             isCommander: tempIsCommander,
             createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: undefined },
           });
         } else if (oldDivision) {
-          // Odebranie dywizji
           await notifyDivisionChange({
             user: { username: user.username, mta_nick: user.mta_nick },
-            division: oldDivision,
+            division: oldDivision === 'SWAT' ? 'SWAT CMD' : oldDivision,
             isGranted: false,
             isCommander: false,
             createdBy: { username: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Admin', mta_nick: undefined },
@@ -104,7 +110,7 @@ export default function DivisionEditor({ user, currentUser, userId, isHCS, isCS,
         <div className="space-y-1">
           <div className="flex flex-wrap gap-1">
             <button
-              onClick={() => setTempDivision('')}
+              onClick={() => { setTempDivision(''); setTempIsCommander(false); }}
               className="btn-win95 text-xs py-0.5 px-2"
               style={tempDivision === '' ? { backgroundColor: 'var(--mdt-subtle-text)', color: '#fff', borderColor: 'var(--mdt-muted-text) #fff #fff var(--mdt-muted-text)' } : {}}
             >
@@ -138,8 +144,15 @@ export default function DivisionEditor({ user, currentUser, userId, isHCS, isCS,
             >
               GU
             </button>
+            <button
+              onClick={() => { setTempDivision('SWAT'); setTempIsCommander(true); }}
+              className="btn-win95 text-xs py-0.5 px-2 font-bold"
+              style={tempDivision === 'SWAT' ? { backgroundColor: '#2d5a2d', color: '#fff', borderColor: '#555 #fff #fff #555' } : {}}
+            >
+              SWAT CMD
+            </button>
           </div>
-          {tempDivision && (
+          {tempDivision && tempDivision !== 'SWAT' && (
             <label className="flex items-center gap-2 font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>
               <input
                 type="checkbox"

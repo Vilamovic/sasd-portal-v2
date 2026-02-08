@@ -24,7 +24,7 @@ export const BADGES = [
   'Sheriff',
 ] as const;
 
-export const DIVISIONS = ['FTO', 'SS', 'DTU', 'GU'] as const;
+export const DIVISIONS = ['FTO', 'SS', 'DTU', 'GU', 'SWAT'] as const;
 
 export const PERMISSIONS = ['SWAT', 'SEU', 'AIR', 'Press Desk', 'Dispatch', 'Pościgowe'] as const;
 
@@ -38,6 +38,8 @@ export function getDivisionColor(division: string | null): string {
       return 'bg-[#60a5fa] text-[#020a06]';
     case 'GU':
       return 'bg-[#10b981] text-white';
+    case 'SWAT':
+      return 'bg-[#2d5a2d] text-white';
     default:
       return 'bg-gray-600 text-white';
   }

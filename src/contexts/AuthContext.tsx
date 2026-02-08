@@ -35,6 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [plusCount, setPlusCount] = useState(0);
   const [minusCount, setMinusCount] = useState(0);
   const [isCommander, setIsCommander] = useState(false);
+  const [isSwatCommander, setIsSwatCommander] = useState(false);
 
   // ==================== CALLBACKS (stable references) ====================
 
@@ -48,6 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setPlusCount(userData.plus_count || 0);
     setMinusCount(userData.minus_count || 0);
     setIsCommander(userData.is_commander || false);
+    setIsSwatCommander(userData.is_swat_commander || false);
   }, []);
 
   const handleStartRolePolling = useCallback((userId: string) => {
@@ -112,6 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setPlusCount(0);
       setMinusCount(0);
       setIsCommander(false);
+      setIsSwatCommander(false);
       userRef.current = null;
       loginTimestampRef.current = null;
     } catch (error) {
@@ -130,6 +133,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setPlusCount(userData.plus_count || 0);
       setMinusCount(userData.minus_count || 0);
       setIsCommander(userData.is_commander || false);
+      setIsSwatCommander(userData.is_swat_commander || false);
     },
     onForceLogout: signOut,
   });
@@ -176,6 +180,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setDivision(userData.division || null);
         setPermissions(userData.permissions || []);
         setIsCommander(userData.is_commander || false);
+        setIsSwatCommander(userData.is_swat_commander || false);
       }
 
       // Odśwież aktywne kary
@@ -208,6 +213,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     minusCount,
     activePenalties,
     isCommander,
+    isSwatCommander,
     // Role helpers (spread)
     ...roleHelpers,
     // Dodatkowo dla kompatybilności

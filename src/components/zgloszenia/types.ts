@@ -87,7 +87,7 @@ export const SUBMISSION_TYPES: SubmissionTypeConfig[] = [
     description: 'Zarezerwuj termin egzaminu praktycznego',
     icon: 'Target',
     roles: ['trainee', 'deputy', 'cs', 'hcs', 'dev'],
-    enabled: false, // Faza 3
+    enabled: true,
   },
   {
     type: 'plus_exchange',
@@ -98,6 +98,81 @@ export const SUBMISSION_TYPES: SubmissionTypeConfig[] = [
     enabled: true,
   },
 ];
+
+// ==================== Practical Exam Types ====================
+
+export type PracticalExamType = 'trainee' | 'poscigowy' | 'swat' | 'seu';
+
+export interface ExamSlot {
+  id: string;
+  exam_type: PracticalExamType;
+  slot_date: string;
+  time_start: string;
+  time_end: string;
+  status: 'available' | 'booked' | 'completed' | 'cancelled';
+  booked_by: string | null;
+  booked_at: string | null;
+  created_by: string;
+  created_at: string;
+  booker?: { username: string; mta_nick: string | null } | null;
+  creator?: { username: string; mta_nick: string | null } | null;
+}
+
+export interface PracticalExamResult {
+  id: string;
+  slot_id: string | null;
+  exam_type: string;
+  examinee_id: string;
+  examiner_id: string;
+  score: number;
+  max_score: number;
+  passed: boolean;
+  checklist: { item: string; checked: boolean }[];
+  notes: string | null;
+  created_at: string;
+  examinee?: { username: string; mta_nick: string | null } | null;
+  examiner?: { username: string; mta_nick: string | null } | null;
+}
+
+export const PRACTICAL_EXAM_TYPES: Record<PracticalExamType, { label: string; color: string }> = {
+  trainee: { label: 'Egzamin Trainee', color: '#c9a227' },
+  poscigowy: { label: 'Egzamin Pościgowy', color: '#ff8c00' },
+  swat: { label: 'Egzamin SWAT', color: '#dc2626' },
+  seu: { label: 'Egzamin SEU', color: '#60a5fa' },
+};
+
+export const EXAM_CHECKLISTS: Record<PracticalExamType, string[]> = {
+  trainee: [
+    'Znajomość regulaminu',
+    'Obsługa radia',
+    'Procedury zatrzymania',
+    'Kontrola pojazdu',
+    'Zachowanie na służbie',
+  ],
+  poscigowy: [
+    'Technika jazdy',
+    'PIT maneuver',
+    'Blokada drogi',
+    'Komunikacja radiowa',
+    'Bezpieczeństwo pościgu',
+  ],
+  swat: [
+    'Taktyka wejścia',
+    'Komunikacja zespołowa',
+    'Obsługa broni specjalnej',
+    'Negocjacje',
+    'Pierwsza pomoc taktyczna',
+  ],
+  seu: [
+    'Rozpoznanie zagrożenia',
+    'Procedury SEU',
+    'Koordynacja z SS',
+    'Raportowanie',
+    'Obsługa sprzętu specjalnego',
+  ],
+};
+
+// ==================== Submission Status/Type Labels ====================
 
 export const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   pending: { label: 'Oczekujące', color: '#c9a227' },

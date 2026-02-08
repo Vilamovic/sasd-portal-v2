@@ -59,7 +59,13 @@ export default function ZgloszeniaPage() {
             <SubmissionTypeCard
               key={typeConfig.type}
               config={typeConfig}
-              onClick={() => router.push(`/zgloszenia/${typeConfig.type}`)}
+              onClick={() => {
+                if (typeConfig.type === 'exam_booking') {
+                  router.push('/zgloszenia/egzamin');
+                } else {
+                  router.push(`/zgloszenia/${typeConfig.type}`);
+                }
+              }}
             />
           ))}
         </div>
@@ -97,7 +103,7 @@ function SubmissionTypeCard({ config, onClick }: { config: SubmissionTypeConfig;
         </p>
 
         <div className="btn-win95 w-full text-sm text-center">
-          {isDisabled ? 'NIEDOSTĘPNE' : 'ZŁÓŻ WNIOSEK'}
+          {isDisabled ? 'NIEDOSTĘPNE' : config.type === 'exam_booking' ? 'OTWÓRZ KALENDARZ' : 'ZŁÓŻ WNIOSEK'}
         </div>
       </div>
     </button>
