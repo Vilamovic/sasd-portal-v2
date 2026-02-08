@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
-import Navbar from '@/src/components/dashboard/Navbar';
 import PersonnelPage from '@/src/components/personnel/PersonnelList/PersonnelPage';
 
 export default function Page() {
@@ -29,10 +28,5 @@ export default function Page() {
 
   if (!user) return null;
 
-  return (
-    <>
-      <Navbar />
-      <PersonnelPage />
-    </>
-  );
+  return <PersonnelPage />;
 }
