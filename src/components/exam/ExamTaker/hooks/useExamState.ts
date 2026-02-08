@@ -61,7 +61,6 @@ export function useExamState({ userId, examTypes }: UseExamStateProps) {
       setAnswers(examState.answers);
       setTimeLeft(examState.timeLeft);
 
-      console.log('✅ Exam state recovered from localStorage');
     } catch (error) {
       console.error('Error recovering exam state:', error);
       if (userId) {
@@ -91,9 +90,6 @@ export function useExamState({ userId, examTypes }: UseExamStateProps) {
         alert('Brak pytań dla tego typu egzaminu.');
         return false;
       }
-
-      console.log('📝 Questions from database:', questions);
-      console.log('📝 First question structure:', questions[0]);
 
       // Wygeneruj egzamin (losowanie i shuffle)
       const generatedExam = generateExam(questions, 10) as unknown as { questions: any[] };

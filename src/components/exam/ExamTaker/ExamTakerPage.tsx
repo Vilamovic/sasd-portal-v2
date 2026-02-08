@@ -118,16 +118,20 @@ export default function ExamTakerPage({ onBack }: { onBack?: () => void }) {
           failedAnswers[q.id] = -1;
         });
 
-        await notifyCheat({
-          username: user?.user_metadata?.username || 'Unknown',
-          mtaNick: mtaNick || 'Brak',
-          email: user?.email || 'N/A',
-          examType: selectedType?.name || 'Unknown',
-          cheatType: 'tab_switch',
-          timestamp: new Date().toISOString(),
-        });
+        try {
+          await notifyCheat({
+            username: user?.user_metadata?.username || 'Unknown',
+            mtaNick: mtaNick || 'Brak',
+            email: user?.email || 'N/A',
+            examType: selectedType?.name || 'Unknown',
+            cheatType: 'tab_switch',
+            timestamp: new Date().toISOString(),
+          });
+        } catch (e) {
+          console.warn('Cheat webhook failed:', e);
+        }
 
-        alert('🚨 UWAGA: Wykryto przełączenie karty. Egzamin zostaje zakończony ze skutkiem negatywnym.');
+        alert('UWAGA: Wykryto przełączenie karty. Egzamin zostaje zakończony ze skutkiem negatywnym.');
         await finishExam(failedAnswers);
       }
     };
@@ -144,16 +148,20 @@ export default function ExamTakerPage({ onBack }: { onBack?: () => void }) {
         failedAnswers[q.id] = -1;
       });
 
-      await notifyCheat({
-        username: user?.user_metadata?.username || 'Unknown',
-        mtaNick: mtaNick || 'Brak',
-        email: user?.email || 'N/A',
-        examType: selectedType?.name || 'Unknown',
-        cheatType: 'window_blur',
-        timestamp: new Date().toISOString(),
-      });
+      try {
+        await notifyCheat({
+          username: user?.user_metadata?.username || 'Unknown',
+          mtaNick: mtaNick || 'Brak',
+          email: user?.email || 'N/A',
+          examType: selectedType?.name || 'Unknown',
+          cheatType: 'window_blur',
+          timestamp: new Date().toISOString(),
+        });
+      } catch (e) {
+        console.warn('Cheat webhook failed:', e);
+      }
 
-      alert('🚨 UWAGA: Wykryto wyjście z okna egzaminu. Egzamin zostaje zakończony ze skutkiem negatywnym.');
+      alert('UWAGA: Wykryto wyjście z okna egzaminu. Egzamin zostaje zakończony ze skutkiem negatywnym.');
       await finishExam(failedAnswers);
     };
 
@@ -230,16 +238,20 @@ export default function ExamTakerPage({ onBack }: { onBack?: () => void }) {
         const { data: savedExam, error } = await saveExamResult(examData);
         if (error) throw error;
 
-        notifyExamSubmission({
-          username: mtaNick || user.email,
-          examType: selectedType.name,
-          score: result.score,
-          total: result.total,
-          percentage: result.percentage,
-          passed,
-          passingThreshold,
-          examId: savedExam.exam_id,
-        });
+        try {
+          notifyExamSubmission({
+            username: mtaNick || user.email,
+            examType: selectedType.name,
+            score: result.score,
+            total: result.total,
+            percentage: result.percentage,
+            passed,
+            passingThreshold,
+            examId: savedExam.exam_id,
+          });
+        } catch (e) {
+          console.warn('Exam submission webhook failed:', e);
+        }
 
         clearExamState();
 

@@ -340,10 +340,6 @@ export default function ExamQuestionsPage({ onBack }: { onBack?: () => void }) {
             </div>
           ))}
 
-          {/* Loading/Empty state when no question selected */}
-          {editingQuestionId === null && questions.length > 0 && (
-            <div style={{ display: 'none' }} />
-          )}
           {questions.length === 0 && (
             <QuestionList
               questions={[]}

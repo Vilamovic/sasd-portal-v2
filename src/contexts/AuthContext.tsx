@@ -91,13 +91,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    */
   const signOut = useCallback(async () => {
     try {
-      // Wyczyść localStorage
+      // Wyczyść localStorage (selective - zachowaj preferencje użytkownika)
       if (typeof window !== 'undefined') {
         const userId = userRef.current?.id;
         if (userId) {
           localStorage.removeItem(`login_timestamp_${userId}`);
+          localStorage.removeItem(`exam_state_${userId}`);
         }
-        localStorage.clear();
+        localStorage.removeItem('materials_cache');
       }
 
       // Wyloguj z Supabase
@@ -138,8 +139,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    */
   const forceRelogin = useCallback(async () => {
     try {
-      console.log('🔄 Forcing re-login...');
-
       // Wyloguj i wyczyść wszystko
       await signOut();
 
@@ -150,13 +149,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Przeładuj stronę
         window.location.href = '/';
       }
-
-      console.log('✅ Re-login forced successfully');
     } catch (error) {
-      console.error('❌ Force re-login error:', error);
-      // Nawet jeśli wystąpił błąd, wyczyść i przeładuj
+      console.error('Force re-login error:', error);
+      // Nawet jeśli wystąpił błąd, wyczyść session-related keys i przeładuj
       if (typeof window !== 'undefined') {
-        localStorage.clear();
+        localStorage.removeItem('materials_cache');
         sessionStorage.clear();
         window.location.href = '/';
       }

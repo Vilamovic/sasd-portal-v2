@@ -32,7 +32,7 @@ export function useMaterials(userId: string | undefined) {
       if (error) throw error;
 
       const materialsData = (data || []).sort((a: any, b: any) =>
-        a.title.localeCompare(b.title, 'pl', { sensitivity: 'base' })
+        (a.title || '').localeCompare(b.title || '', 'pl', { sensitivity: 'base' })
       );
       setMaterials(materialsData);
 

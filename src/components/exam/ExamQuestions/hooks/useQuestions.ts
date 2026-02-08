@@ -77,13 +77,17 @@ export function useQuestions() {
         const { error } = await addExamQuestion(questionData);
         if (error) throw error;
 
-        // Discord webhook
-        notifyExamQuestionAction({
-          action: 'add',
-          actor,
-          examType: examTypeName,
-          question: data.question.trim(),
-        });
+        // Discord webhook (non-critical)
+        try {
+          notifyExamQuestionAction({
+            action: 'add',
+            actor,
+            examType: examTypeName,
+            question: data.question.trim(),
+          });
+        } catch (e) {
+          console.warn('Webhook failed:', e);
+        }
 
         // Reload questions
         await loadQuestions(examTypeId);
@@ -119,13 +123,17 @@ export function useQuestions() {
         const { error } = await updateExamQuestion(questionId, questionData);
         if (error) throw error;
 
-        // Discord webhook
-        notifyExamQuestionAction({
-          action: 'edit',
-          actor,
-          examType: examTypeName,
-          question: data.question.trim(),
-        });
+        // Discord webhook (non-critical)
+        try {
+          notifyExamQuestionAction({
+            action: 'edit',
+            actor,
+            examType: examTypeName,
+            question: data.question.trim(),
+          });
+        } catch (e) {
+          console.warn('Webhook failed:', e);
+        }
 
         // Reload questions
         await loadQuestions(examTypeId);
@@ -152,13 +160,17 @@ export function useQuestions() {
         const { error } = await deleteExamQuestion(questionId);
         if (error) throw error;
 
-        // Discord webhook
-        notifyExamQuestionAction({
-          action: 'delete',
-          actor,
-          examType: examTypeName,
-          question: questionText,
-        });
+        // Discord webhook (non-critical)
+        try {
+          notifyExamQuestionAction({
+            action: 'delete',
+            actor,
+            examType: examTypeName,
+            question: questionText,
+          });
+        } catch (e) {
+          console.warn('Webhook failed:', e);
+        }
 
         // Reload questions
         await loadQuestions(examTypeId);

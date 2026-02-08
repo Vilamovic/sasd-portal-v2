@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { Shield, Edit3, Save, X } from 'lucide-react';
 import { updateUserDivision, updateIsCommander } from '@/src/lib/db/users';
 import { notifyDivisionChange } from '@/src/lib/webhooks/personnel';
+import { getDivisionColor } from '@/src/components/shared/constants';
 
 interface DivisionEditorProps {
   user: any;
@@ -26,21 +27,6 @@ export default function DivisionEditor({ user, currentUser, userId, isHCS, isCS,
 
   // CS/HCS/Dev can edit all users (isCS includes cs/hcs/dev from role hierarchy)
   const canEdit = isCS;
-
-  const getDivisionColor = (division: string | null) => {
-    switch (division) {
-      case 'FTO':
-        return 'bg-[#c9a227] text-[#020a06]';
-      case 'SS':
-        return 'bg-[#ff8c00] text-white';
-      case 'DTU':
-        return 'bg-[#60a5fa] text-[#020a06]';
-      case 'GU':
-        return 'bg-[#10b981] text-white';
-      default:
-        return 'bg-gray-600 text-white';
-    }
-  };
 
   const handleSave = async () => {
     if (submittingRef.current || !user || !currentUser) return;

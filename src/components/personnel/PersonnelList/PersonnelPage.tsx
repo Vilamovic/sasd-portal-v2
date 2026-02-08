@@ -11,31 +11,11 @@ import PersonnelTable from './PersonnelTable/PersonnelTable';
 import BatchOperationsModal from './BatchOperationsModal';
 import { usePersonnelList } from './hooks/usePersonnelList';
 import { useBatchOperations } from './hooks/useBatchOperations';
+import { BADGES, DIVISIONS, PERMISSIONS, getDivisionColor, formatDate } from '@/src/components/shared/constants';
 
-const badges = [
-  'Trainee',
-  'Deputy Sheriff I',
-  'Deputy Sheriff II',
-  'Deputy Sheriff III',
-  'Senior Deputy Sheriff',
-  'Sergeant I',
-  'Sergeant II',
-  'Detective I',
-  'Detective II',
-  'Detective III',
-  'Lieutenant',
-  'Captain I',
-  'Captain II',
-  'Captain III',
-  'Area Commander',
-  'Division Chief',
-  'Assistant Sheriff',
-  'Undersheriff',
-  'Sheriff',
-];
-
-const divisions = ['FTO', 'SS', 'DTU', 'GU'];
-const permissions = ['SWAT', 'SEU', 'AIR', 'Press Desk', 'Dispatch', 'Pościgowe'];
+const badges = [...BADGES];
+const divisions = [...DIVISIONS];
+const permissions = [...PERMISSIONS];
 
 /**
  * PersonnelPage - Orchestrator dla kartoteki personelu
@@ -122,21 +102,6 @@ export default function PersonnelPage() {
   };
 
   // Helper Functions
-  const getDivisionColor = (division: string | null) => {
-    switch (division) {
-      case 'FTO':
-        return 'bg-[#c9a227] text-[#020a06]';
-      case 'SS':
-        return 'bg-[#ff8c00] text-white';
-      case 'DTU':
-        return 'bg-[#60a5fa] text-[#020a06]';
-      case 'GU':
-        return 'bg-[#10b981] text-white';
-      default:
-        return 'bg-gray-600 text-white';
-    }
-  };
-
   const getRoleColor = (role: string) => {
     switch (role) {
       case 'dev':
@@ -169,17 +134,6 @@ export default function PersonnelPage() {
       default:
         return role?.toUpperCase() || 'UNKNOWN';
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pl-PL', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
   };
 
   // Loading State

@@ -42,75 +42,32 @@ export async function createExamAccessToken(
 }
 
 /**
- * Pobiera wszystkie tokeny dla użytkownika
- */
-export async function getUserExamTokens(userId: string) {
-  try {
-    const { data, error } = await supabase
-      .from('exam_access_tokens')
-      .select(`
-        *,
-        exam_types(name),
-        created_by_user:users!exam_access_tokens_created_by_fkey(username, mta_nick)
-      `)
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('getUserExamTokens error:', error);
-    return { data: null, error };
-  }
-}
-
-/**
- * Pobiera wszystkie tokeny (Admin/Dev only)
+ * Pobiera wszystkie tokeny (Admin/Dev only) - single query with JOINs
  */
 export async function getAllExamTokens() {
   try {
     const { data, error } = await supabase
       .from('exam_access_tokens')
-      .select('*')
+      .select(`
+        *,
+        users!exam_access_tokens_user_id_fkey(username, mta_nick, email),
+        exam_types(name),
+        created_by_user:users!exam_access_tokens_created_by_fkey(username, mta_nick)
+      `)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
 
-    // Load related data separately to avoid JOIN failures
-    const enrichedData = await Promise.all(
-      (data || []).map(async (token) => {
-        // Get user data
-        const { data: userData } = await supabase
-          .from('users')
-          .select('username, mta_nick, email')
-          .eq('id', token.user_id)
-          .single();
-
-        // Get exam type
-        const { data: examType } = await supabase
-          .from('exam_types')
-          .select('name')
-          .eq('id', token.exam_type_id)
-          .single();
-
-        // Get created by user
-        const { data: createdByUser } = await supabase
-          .from('users')
-          .select('username, mta_nick')
-          .eq('id', token.created_by)
-          .single();
-
-        return {
-          ...token,
-          user_username: userData?.username || null,
-          user_mta_nick: userData?.mta_nick || null,
-          user_email: userData?.email || null,
-          exam_type_name: examType?.name || 'Unknown',
-          created_by_username: createdByUser?.username || null,
-          created_by_mta_nick: createdByUser?.mta_nick || null,
-        };
-      })
-    );
+    // Map joined data to flat format expected by consumers
+    const enrichedData = (data || []).map((token: any) => ({
+      ...token,
+      user_username: token.users?.username || null,
+      user_mta_nick: token.users?.mta_nick || null,
+      user_email: token.users?.email || null,
+      exam_type_name: token.exam_types?.name || 'Unknown',
+      created_by_username: token.created_by_user?.username || null,
+      created_by_mta_nick: token.created_by_user?.mta_nick || null,
+    }));
 
     return { data: enrichedData, error: null };
   } catch (error) {
@@ -160,26 +117,3 @@ export async function deleteExamAccessToken(tokenId: number) {
   }
 }
 
-/**
- * Sprawdza czy użytkownik ma aktywny (nieużyty) token dla danego typu egzaminu
- */
-export async function hasActiveTokenForExam(userId: string, examTypeId: number) {
-  try {
-    const { data, error } = await supabase
-      .from('exam_access_tokens')
-      .select('id, token, expires_at')
-      .eq('user_id', userId)
-      .eq('exam_type_id', examTypeId)
-      .eq('used', false)
-      .gt('expires_at', new Date().toISOString())
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (error) throw error;
-    return { data, error: null, hasToken: !!data };
-  } catch (error) {
-    console.error('hasActiveTokenForExam error:', error);
-    return { data: null, error, hasToken: false };
-  }
-}

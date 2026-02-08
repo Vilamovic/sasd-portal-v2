@@ -58,9 +58,11 @@ export function useForceLogout(
 
             if (forceLogoutTime > loginTime) {
               // Wymuszono wylogowanie
-              alert('Zostałeś wylogowany przez administratora.');
-              await onForceLogout();
-              window.location.reload();
+              if (typeof window !== 'undefined') {
+                alert('Zostałeś wylogowany przez administratora.');
+                await onForceLogout();
+                window.location.reload();
+              }
               return;
             }
           }
@@ -109,8 +111,7 @@ export function useForceLogout(
             table: 'users',
             filter: `id=eq.${targetUserId}`,
           },
-          (payload) => {
-            console.log('🔔 Realtime update detected:', payload);
+          () => {
             checkUserData(targetUserId);
           }
         )

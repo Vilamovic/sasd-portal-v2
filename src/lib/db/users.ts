@@ -62,44 +62,6 @@ export async function upsertUser(userData: any) {
 }
 
 /**
- * Aktualizuje MTA nick użytkownika
- */
-export async function updateMtaNick(userId: string, mtaNick: string) {
-  try {
-    const { data, error } = await supabase
-      .from('users')
-      .update({ mta_nick: mtaNick })
-      .eq('id', userId)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('updateMtaNick error:', error);
-    return { data: null, error };
-  }
-}
-
-/**
- * Aktualizuje rolę użytkownika (RPC)
- */
-export async function updateUserRole(userId: string, role: string) {
-  try {
-    const { data, error } = await supabase.rpc('update_user_role', {
-      target_user_id: userId,
-      new_role: role,
-    });
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('updateUserRole error:', error);
-    return { data: null, error };
-  }
-}
-
-/**
  * Usuwa użytkownika z bazy
  */
 export async function deleteUser(userId: string) {

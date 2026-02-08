@@ -1,3 +1,5 @@
+'use client';
+
 import { createPortal } from 'react-dom';
 import { ShieldCheck, ShieldOff, UserMinus } from 'lucide-react';
 import { useEffect } from 'react';

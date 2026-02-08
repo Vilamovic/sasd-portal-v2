@@ -33,7 +33,7 @@ export default function ExamQuestion({
     if (currentQuestion.is_multiple_choice) {
       return !currentAnswer || currentAnswer.length === 0;
     } else {
-      return currentAnswer === undefined && currentAnswer !== 0;
+      return currentAnswer === undefined || currentAnswer === -1;
     }
   })();
 

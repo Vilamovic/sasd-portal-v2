@@ -5,7 +5,6 @@ import { useAuth } from '@/src/contexts/AuthContext';
 import 'react-quill-new/dist/quill.snow.css';
 import { upsertMaterial, deleteMaterialFromDb } from '@/src/lib/db/materials';
 import {
-  ChevronLeft,
   Sparkles,
   Edit3,
   Plus,
@@ -16,6 +15,7 @@ import {
 // Components
 import MaterialsList from './MaterialsList';
 import MaterialModal from './MaterialModal';
+import BackButton from '@/src/components/shared/BackButton';
 
 // Hooks
 import { useMaterials } from './hooks/useMaterials';
@@ -192,13 +192,7 @@ export default function MaterialsPage({ onBack }: { onBack?: () => void }) {
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
         {/* Back Button */}
-        <button
-          onClick={onBack}
-          className="mb-6 flex items-center gap-2 px-5 py-3 rounded-xl bg-[#051a0f]/80 hover:bg-[#0a2818] border border-[#1a4d32]/50 hover:border-[#c9a227]/30 text-[#8fb5a0] hover:text-white transition-all duration-200"
-        >
-          <ChevronLeft className="w-5 h-5" />
-          <span className="text-sm font-medium">Powrót do Dashboard</span>
-        </button>
+        <BackButton onClick={onBack || (() => {})} destination="Dashboard" />
 
         {/* Header */}
         <div className="mb-8 flex flex-col md:flex-row md:items-start justify-between gap-4">

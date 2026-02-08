@@ -99,28 +99,6 @@ export async function deleteExamQuestion(questionId: number) {
 }
 
 /**
- * Pobiera wszystkie wyniki egzaminów
- */
-export async function getAllExamResults() {
-  try {
-    const { data, error } = await supabase
-      .from('exam_results')
-      .select(`
-        *,
-        exam_types (name),
-        users (username, mta_nick, badge)
-      `)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('getAllExamResults error:', error);
-    return { data: null, error };
-  }
-}
-
-/**
  * Pobiera niezarchiwizowane wyniki egzaminów
  */
 export async function getAllExamResultsNonArchived() {

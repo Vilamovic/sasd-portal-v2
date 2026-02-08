@@ -132,7 +132,7 @@ export function useTokenManagement(): UseTokenManagementReturn {
 
       if (error) throw error;
 
-      alert(`✅ Token wygenerowany!\n\nToken: ${data.token}\n\nToken został skopiowany do schowka.`);
+      alert(`Token wygenerowany!\n\nToken: ${data.token}\n\nToken został skopiowany do schowka.`);
 
       // Copy to clipboard
       navigator.clipboard.writeText(data.token);

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
 import Navbar from '@/src/components/dashboard/Navbar';
+import { formatDate } from '@/src/components/shared/constants';
 import { deletePenalty, clearUserPlusMinusPenalties, clearUserSuspensions, clearUserWrittenWarnings } from '@/src/lib/db/penalties';
 import { deleteUserNote, clearUserNotes } from '@/src/lib/db/notes';
 import AddNoteModal from './Modals/AddNoteModal';
@@ -68,16 +69,6 @@ export default function UserProfilePage({ username }: UserProfilePageProps) {
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pl-PL', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
 
   // Clear functions
   const handleClearPlusMinusPenalties = async () => {

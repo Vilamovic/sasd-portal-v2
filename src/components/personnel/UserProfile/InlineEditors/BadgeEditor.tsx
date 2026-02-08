@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { Award, Edit3, Save, X } from 'lucide-react';
 import { updateUserBadge, updateIsCommander } from '@/src/lib/db/users';
 import { notifyBadgeChange } from '@/src/lib/webhooks/personnel';
+import { BADGES } from '@/src/components/shared/constants';
 
 interface BadgeEditorProps {
   user: any;
@@ -14,27 +15,7 @@ interface BadgeEditorProps {
   onUpdate: () => void;
 }
 
-const badges = [
-  'Trainee',
-  'Deputy Sheriff I',
-  'Deputy Sheriff II',
-  'Deputy Sheriff III',
-  'Senior Deputy Sheriff',
-  'Sergeant I',
-  'Sergeant II',
-  'Detective I',
-  'Detective II',
-  'Detective III',
-  'Lieutenant',
-  'Captain I',
-  'Captain II',
-  'Captain III',
-  'Area Commander',
-  'Division Chief',
-  'Assistant Sheriff',
-  'Undersheriff',
-  'Sheriff'
-];
+const badges = [...BADGES];
 
 /**
  * Badge Inline Editor - Edycja stopnia z dropdown
