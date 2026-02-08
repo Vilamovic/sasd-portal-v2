@@ -1,4 +1,5 @@
 import { Plus, Save } from 'lucide-react';
+import QuillEditor from '@/src/components/shared/QuillEditor';
 
 interface MaterialFormProps {
   isEditing: boolean;
@@ -17,23 +18,16 @@ interface MaterialFormProps {
 }
 
 /**
- * MaterialForm - Add/Edit material form (minimal version)
+ * MaterialForm - Add/Edit material form with rich text editor
  * - Title (required)
- * - Description (wyświetlany na karcie)
- * - URL opcjonalny (można dodać przez edit później)
+ * - Description with Quill editor (rich text)
  */
 export default function MaterialForm({
   isEditing,
   formTitle,
   formDescription,
-  formFileUrl,
-  formFileType,
-  formThumbnailUrl,
   onTitleChange,
   onDescriptionChange,
-  onFileUrlChange,
-  onFileTypeChange,
-  onThumbnailUrlChange,
   onSubmit,
   onCancel,
 }: MaterialFormProps) {
@@ -53,14 +47,15 @@ export default function MaterialForm({
         className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-[#c9a227] transition-colors mb-4"
       />
 
-      {/* Description */}
-      <textarea
-        value={formDescription}
-        onChange={(e) => onDescriptionChange(e.target.value)}
-        placeholder="Opis materiału..."
-        rows={3}
-        className="w-full px-4 py-3 bg-[#0a2818]/50 border border-[#1a4d32] rounded-xl text-white placeholder-[#8fb5a0] focus:outline-none focus:border-[#c9a227] transition-colors resize-none mb-4"
-      />
+      {/* Rich Text Description */}
+      <div className="mb-4">
+        <QuillEditor
+          value={formDescription}
+          onChange={onDescriptionChange}
+          placeholder="Opis materiału..."
+          minHeight="200px"
+        />
+      </div>
 
       {/* Action Buttons */}
       <div className="flex items-center gap-3">

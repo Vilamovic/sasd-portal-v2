@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
-import 'react-quill-new/dist/quill.snow.css';
 import { upsertMaterial, deleteMaterialFromDb } from '@/src/lib/db/materials';
 import {
   Sparkles,
@@ -59,19 +58,6 @@ export default function MaterialsPage({ onBack }: { onBack?: () => void }) {
   }, []);
 
   // ==================== BUSINESS LOGIC ====================
-
-  // Quill modules configuration
-  const modules = {
-    toolbar: [
-      [{ header: [1, 2, 3, 4, 5, 6, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ list: 'ordered' }, { list: 'bullet' }],
-      [{ color: [] }, { background: [] }],
-      [{ align: [] }],
-      ['link', 'image'],
-      ['clean'],
-    ],
-  };
 
   // Start editing
   const startEdit = () => {
@@ -334,7 +320,6 @@ export default function MaterialsPage({ onBack }: { onBack?: () => void }) {
             setSelectedMaterial(null);
             setEditing(false);
           }}
-          modules={modules}
         />
       </div>
     </div>

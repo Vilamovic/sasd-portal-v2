@@ -302,7 +302,7 @@
   box-shadow: 0 0 0 2px var(--sheriff-800), 0 0 0 4px var(--gold);
 }
 
-/* === REACT QUILL OVERRIDES (for Materials.jsx) === */
+/* === REACT QUILL OVERRIDES (Sheriff Theme) === */
 .ql-toolbar {
   background-color: rgba(19, 53, 36, 0.5);
   border-color: rgba(201, 162, 39, 0.3);
@@ -314,7 +314,11 @@
   border-color: rgba(201, 162, 39, 0.3);
   border-radius: 0 0 0.75rem 0.75rem;
   color: #f8faf9;
-  min-height: 450px;
+}
+
+/* Dynamic min-height via CSS variable (default 450px) */
+.quill-editor-wrapper .ql-container {
+  min-height: var(--quill-min-height, 450px);
 }
 
 .ql-editor {
@@ -326,8 +330,50 @@
   color: #8fb5a0;
 }
 
-/* Quill button hover states */
+/* Quill button/picker hover states */
 .ql-toolbar button:hover,
-.ql-toolbar button.ql-active {
+.ql-toolbar button.ql-active,
+.ql-toolbar .ql-picker-label:hover,
+.ql-toolbar .ql-picker-item:hover {
   color: #e6b830;
+}
+
+.ql-toolbar button:hover .ql-stroke,
+.ql-toolbar button.ql-active .ql-stroke {
+  stroke: #e6b830;
+}
+
+.ql-toolbar button:hover .ql-fill,
+.ql-toolbar button.ql-active .ql-fill {
+  fill: #e6b830;
+}
+
+/* Quill picker dropdown styling */
+.ql-toolbar .ql-picker-options {
+  background-color: #051a0f;
+  border-color: rgba(201, 162, 39, 0.3);
+}
+
+/* Custom toolbar buttons: Divider, Emoji, Undo */
+.ql-toolbar .ql-divider::after {
+  content: '—';
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.ql-toolbar .ql-emoji::after {
+  content: '😊';
+  font-size: 14px;
+}
+
+.ql-toolbar .ql-undo::after {
+  content: '↩';
+  font-size: 16px;
+}
+
+/* Horizontal rule styling in editor */
+.ql-editor hr {
+  border: none;
+  border-top: 2px solid rgba(201, 162, 39, 0.3);
+  margin: 1rem 0;
 }

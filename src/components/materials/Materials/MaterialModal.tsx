@@ -1,8 +1,5 @@
-import dynamic from 'next/dynamic';
 import { Edit3, Save, X, Maximize2, Minimize2 } from 'lucide-react';
-
-// Dynamic import React-Quill (client-side only)
-const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
+import QuillEditor from '@/src/components/shared/QuillEditor';
 
 interface MaterialModalProps {
   selectedMaterial: any | null;
@@ -18,7 +15,6 @@ interface MaterialModalProps {
   onSave: () => void;
   onCancel: () => void;
   onClose: () => void;
-  modules: any;
 }
 
 /**
@@ -30,7 +26,7 @@ interface MaterialModalProps {
  * 3. Fullscreen Mode - WYSIWYG editor fullscreen
  *
  * Features:
- * - ReactQuill integration
+ * - Shared QuillEditor integration
  * - Fullscreen toggle
  * - Sheriff Theme styling
  */
@@ -48,67 +44,56 @@ export default function MaterialModal({
   onSave,
   onCancel,
   onClose,
-  modules,
 }: MaterialModalProps) {
   if (!selectedMaterial) return null;
 
   // Fullscreen Mode
   if (fullscreen && editing) {
     return (
-      <>
-        <div className="fixed inset-0 bg-[#020a06] z-50 overflow-hidden flex flex-col">
-          {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 bg-[#051a0f] border-b border-[#1a4d32]">
-            <input
-              type="text"
-              value={editTitle}
-              onChange={(e) => setEditTitle(e.target.value)}
-              className="text-2xl font-bold bg-transparent text-white border-none focus:outline-none flex-grow"
-              placeholder="Tytuł materiału..."
-            />
-            <div className="flex items-center gap-2 ml-4">
-              <button
-                onClick={() => setFullscreen(false)}
-                className="p-2.5 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
-                title="Wyjdź z pełnego ekranu"
-              >
-                <Minimize2 className="w-5 h-5" />
-              </button>
-              <button
-                onClick={onSave}
-                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#22c55e] to-[#16a34a] text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg"
-              >
-                <Save className="w-4 h-4" />
-                Zapisz
-              </button>
-              <button
-                onClick={onCancel}
-                className="p-2.5 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Editor */}
-          <div className="flex-grow overflow-hidden p-6">
-            <ReactQuill
-              theme="snow"
-              value={editContent}
-              onChange={setEditContent}
-              modules={modules}
-              className="h-full quill-fullscreen"
-            />
+      <div className="fixed inset-0 bg-[#020a06] z-50 overflow-hidden flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 bg-[#051a0f] border-b border-[#1a4d32]">
+          <input
+            type="text"
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            className="text-2xl font-bold bg-transparent text-white border-none focus:outline-none flex-grow"
+            placeholder="Tytuł materiału..."
+          />
+          <div className="flex items-center gap-2 ml-4">
+            <button
+              onClick={() => setFullscreen(false)}
+              className="p-2.5 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
+              title="Wyjdź z pełnego ekranu"
+            >
+              <Minimize2 className="w-5 h-5" />
+            </button>
+            <button
+              onClick={onSave}
+              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#22c55e] to-[#16a34a] text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg"
+            >
+              <Save className="w-4 h-4" />
+              Zapisz
+            </button>
+            <button
+              onClick={onCancel}
+              className="p-2.5 bg-[#0a2818] text-white rounded-xl hover:bg-[#133524] transition-colors border border-[#1a4d32]"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
         </div>
 
-        {/* Fullscreen Styles */}
-        <style jsx global>{`
-          .quill-fullscreen .ql-container {
-            height: calc(100vh - 140px) !important;
-          }
-        `}</style>
-      </>
+        {/* Editor */}
+        <div className="flex-grow overflow-hidden p-6">
+          <QuillEditor
+            value={editContent}
+            onChange={setEditContent}
+            className="quill-fullscreen"
+            minHeight="calc(100vh - 200px)"
+          />
+        </div>
+      </div>
     );
   }
 
@@ -155,15 +140,11 @@ export default function MaterialModal({
 
               {/* Editor */}
               <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-                <div className="quill-wrapper">
-                  <ReactQuill
-                    theme="snow"
-                    value={editContent}
-                    onChange={setEditContent}
-                    modules={modules}
-                    className="quill-editor"
-                  />
-                </div>
+                <QuillEditor
+                  value={editContent}
+                  onChange={setEditContent}
+                  minHeight="450px"
+                />
               </div>
             </div>
           ) : (
@@ -208,19 +189,6 @@ export default function MaterialModal({
 
       {/* Modal Styles */}
       <style jsx global>{`
-        .quill-wrapper {
-          height: 500px;
-        }
-
-        .quill-editor .ql-container {
-          height: 450px;
-        }
-
-        .quill-editor .ql-toolbar {
-          border-top-left-radius: 0.75rem;
-          border-top-right-radius: 0.75rem;
-        }
-
         @keyframes fadeIn {
           from {
             opacity: 0;

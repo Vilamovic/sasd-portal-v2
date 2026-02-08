@@ -111,9 +111,10 @@ export default function MaterialCard({
         </h3>
 
         {material.description && (
-          <p className="text-[#8fb5a0] text-sm leading-relaxed line-clamp-3 mb-4">
-            {material.description}
-          </p>
+          <div
+            className="text-[#8fb5a0] text-sm leading-relaxed line-clamp-3 mb-4 prose prose-sm prose-invert max-w-none prose-p:text-[#8fb5a0] prose-p:m-0 prose-headings:text-white prose-a:text-[#c9a227] prose-strong:text-white prose-li:text-[#8fb5a0]"
+            dangerouslySetInnerHTML={{ __html: material.description }}
+          />
         )}
 
         {/* Footer */}
