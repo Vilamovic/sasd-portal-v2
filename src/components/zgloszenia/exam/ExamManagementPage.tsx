@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ClipboardCheck, Trash2 } from 'lucide-react';
+import { ClipboardCheck, Trash2, Archive } from 'lucide-react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import BackButton from '@/src/components/shared/BackButton';
-import { createExamSlot, getBookedSlots, deleteExamSlot, completeSlot } from '@/src/lib/db/examSlots';
+import { createExamSlot, getActiveSlots, deleteExamSlot, completeSlot } from '@/src/lib/db/examSlots';
 import { createPracticalExamResult } from '@/src/lib/db/practicalExamResults';
+import { notifyExamSlotDeletion } from '@/src/lib/webhooks/examBooking';
 import CreateSlotForm from './components/CreateSlotForm';
 import ExamResultForm from './components/ExamResultForm';
 import type { ExamSlot, PracticalExamType } from '../types';
@@ -14,21 +15,24 @@ import { PRACTICAL_EXAM_TYPES } from '../types';
 
 export default function ExamManagementPage() {
   const router = useRouter();
-  const { user } = useAuth();
-  const [bookedSlots, setBookedSlots] = useState<ExamSlot[]>([]);
+  const { user, mtaNick, isDev } = useAuth();
+  const [allSlots, setAllSlots] = useState<ExamSlot[]>([]);
   const [loading, setLoading] = useState(true);
   const [recordingSlot, setRecordingSlot] = useState<ExamSlot | null>(null);
 
   const loadData = async () => {
     setLoading(true);
-    const { data } = await getBookedSlots();
-    if (data) setBookedSlots(data as ExamSlot[]);
+    const { data } = await getActiveSlots();
+    if (data) setAllSlots(data as ExamSlot[]);
     setLoading(false);
   };
 
   useEffect(() => {
     loadData();
   }, []);
+
+  const bookedSlots = allSlots.filter(s => s.status === 'booked');
+  const availableSlots = allSlots.filter(s => s.status === 'available');
 
   const handleCreateSlot = async (data: { exam_type: string; slot_date: string; time_start: string; time_end: string }) => {
     if (!user) return;
@@ -42,9 +46,38 @@ export default function ExamManagementPage() {
   };
 
   const handleDeleteSlot = async (slotId: string) => {
+    if (!user) return;
     if (!confirm('Usunąć ten slot?')) return;
+
+    const slot = allSlots.find(s => s.id === slotId);
+    if (!slot) return;
+
+    if (slot.created_by !== user.id && !isDev) {
+      alert('Brak uprawnień do usunięcia tego slotu.');
+      return;
+    }
+
     const { error } = await deleteExamSlot(slotId);
-    if (!error) loadData();
+    if (!error) {
+      const examConfig = PRACTICAL_EXAM_TYPES[slot.exam_type as PracticalExamType];
+      await notifyExamSlotDeletion({
+        examType: examConfig?.label || slot.exam_type,
+        date: slot.slot_date,
+        timeStart: slot.time_start,
+        timeEnd: slot.time_end,
+        deletedBy: {
+          username: user.user_metadata?.full_name || user.user_metadata?.name || 'Unknown',
+          mta_nick: mtaNick || null,
+        },
+        wasBooked: slot.status === 'booked',
+        booker: slot.booker ? {
+          username: slot.booker.username,
+          mta_nick: slot.booker.mta_nick || null,
+        } : undefined,
+      });
+
+      loadData();
+    }
   };
 
   const handleRecordResult = async (result: {
@@ -60,7 +93,6 @@ export default function ExamManagementPage() {
   }) => {
     const { error } = await createPracticalExamResult(result);
     if (!error) {
-      // Mark slot as completed
       await completeSlot(result.slot_id);
       setRecordingSlot(null);
       alert('Wynik zapisany pomyślnie.');
@@ -76,6 +108,79 @@ export default function ExamManagementPage() {
     });
   };
 
+  const renderSlotRow = (slot: ExamSlot, index: number, showResultBtn: boolean) => {
+    const config = PRACTICAL_EXAM_TYPES[slot.exam_type as PracticalExamType];
+    return (
+      <div
+        key={slot.id}
+        className="px-4 py-3 flex items-center gap-3"
+        style={{ backgroundColor: index % 2 === 0 ? 'var(--mdt-row-even)' : 'var(--mdt-row-odd)' }}
+      >
+        {/* Type badge */}
+        <div className="shrink-0">
+          <span
+            className="px-2 py-0.5 font-mono text-[10px] font-bold text-white"
+            style={{ backgroundColor: config?.color || 'var(--mdt-muted-text)' }}
+          >
+            {config?.label.replace('Egzamin ', '') || slot.exam_type}
+          </span>
+        </div>
+
+        {/* Date + time */}
+        <div className="w-32 shrink-0">
+          <span className="font-mono text-xs" style={{ color: 'var(--mdt-content-text)' }}>
+            {formatDate(slot.slot_date)} {slot.time_start.slice(0, 5)}–{slot.time_end.slice(0, 5)}
+          </span>
+        </div>
+
+        {/* Booker or status */}
+        <div className="w-32 shrink-0">
+          {slot.status === 'booked' ? (
+            <span className="font-mono text-xs" style={{ color: 'var(--mdt-content-text)' }}>
+              Zdający: <strong>{slot.booker?.mta_nick || slot.booker?.username || '—'}</strong>
+            </span>
+          ) : (
+            <span className="font-mono text-xs" style={{ color: '#4a9a4a' }}>
+              Wolny
+            </span>
+          )}
+        </div>
+
+        {/* Examiner (creator) */}
+        <div className="flex-1 min-w-0">
+          <span className="font-mono text-[10px]" style={{ color: 'var(--mdt-muted-text)' }}>
+            Egz: {slot.creator?.mta_nick || slot.creator?.username || '—'}
+          </span>
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-1 shrink-0">
+          {showResultBtn && (
+            <button
+              onClick={() => setRecordingSlot(slot)}
+              className="btn-win95 p-1 flex items-center gap-1 font-mono text-[10px]"
+              style={{ backgroundColor: '#3a6a3a', color: '#fff', borderColor: '#5a9a5a #1a3a1a #1a3a1a #5a9a5a' }}
+              title="Zapisz wynik"
+            >
+              <ClipboardCheck className="w-3 h-3" />
+              WYNIK
+            </button>
+          )}
+          {(slot.created_by === user?.id || isDev) && (
+            <button
+              onClick={() => handleDeleteSlot(slot.id)}
+              className="btn-win95 p-1"
+              style={{ backgroundColor: '#8b1a1a', borderColor: '#b03a3a #4a0a0a #4a0a0a #b03a3a' }}
+              title="Usuń slot"
+            >
+              <Trash2 className="w-3 h-3 text-white" />
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--mdt-content)' }}>
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -86,6 +191,17 @@ export default function ExamManagementPage() {
           <span className="font-[family-name:var(--font-vt323)] text-xl tracking-widest uppercase text-white">
             ZARZĄDZANIE EGZAMINAMI PRAKTYCZNYMI
           </span>
+        </div>
+
+        {/* Action buttons */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          <button
+            onClick={() => router.push('/zgloszenia/egzamin/management/archived')}
+            className="btn-win95 font-mono text-xs flex items-center gap-1"
+          >
+            <Archive className="w-3 h-3" />
+            ARCHIWUM WYNIKÓW
+          </button>
         </div>
 
         {/* Create slot form */}
@@ -105,8 +221,8 @@ export default function ExamManagementPage() {
           </div>
         )}
 
-        {/* Booked slots list */}
-        <div className="panel-raised" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+        {/* Booked slots */}
+        <div className="panel-raised mb-6" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
           <div className="px-3 py-1.5" style={{ backgroundColor: 'var(--mdt-header)' }}>
             <span className="font-[family-name:var(--font-vt323)] text-sm tracking-wider uppercase" style={{ color: 'var(--mdt-header-text)' }}>
               ZAREZERWOWANE EGZAMINY ({bookedSlots.length})
@@ -123,68 +239,30 @@ export default function ExamManagementPage() {
             </div>
           ) : (
             <div>
-              {bookedSlots.map((slot, index) => {
-                const config = PRACTICAL_EXAM_TYPES[slot.exam_type as PracticalExamType];
-                return (
-                  <div
-                    key={slot.id}
-                    className="px-4 py-3 flex items-center gap-3"
-                    style={{ backgroundColor: index % 2 === 0 ? 'var(--mdt-row-even)' : 'var(--mdt-row-odd)' }}
-                  >
-                    {/* Type badge */}
-                    <div className="shrink-0">
-                      <span
-                        className="px-2 py-0.5 font-mono text-[10px] font-bold text-white"
-                        style={{ backgroundColor: config?.color || 'var(--mdt-muted-text)' }}
-                      >
-                        {config?.label.replace('Egzamin ', '') || slot.exam_type}
-                      </span>
-                    </div>
+              {bookedSlots.map((slot, index) => renderSlotRow(slot, index, true))}
+            </div>
+          )}
+        </div>
 
-                    {/* Date + time */}
-                    <div className="w-32 shrink-0">
-                      <span className="font-mono text-xs" style={{ color: 'var(--mdt-content-text)' }}>
-                        {formatDate(slot.slot_date)} {slot.time_start.slice(0, 5)}–{slot.time_end.slice(0, 5)}
-                      </span>
-                    </div>
+        {/* Available (free) slots */}
+        <div className="panel-raised" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+          <div className="px-3 py-1.5" style={{ backgroundColor: 'var(--mdt-header)' }}>
+            <span className="font-[family-name:var(--font-vt323)] text-sm tracking-wider uppercase" style={{ color: 'var(--mdt-header-text)' }}>
+              WOLNE SLOTY ({availableSlots.length})
+            </span>
+          </div>
 
-                    {/* Booker */}
-                    <div className="w-32 shrink-0">
-                      <span className="font-mono text-xs" style={{ color: 'var(--mdt-content-text)' }}>
-                        Zdający: <strong>{slot.booker?.mta_nick || slot.booker?.username || '—'}</strong>
-                      </span>
-                    </div>
-
-                    {/* Examiner (creator) */}
-                    <div className="flex-1 min-w-0">
-                      <span className="font-mono text-[10px]" style={{ color: 'var(--mdt-muted-text)' }}>
-                        Egz: {slot.creator?.mta_nick || slot.creator?.username || '—'}
-                      </span>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex gap-1 shrink-0">
-                      <button
-                        onClick={() => setRecordingSlot(slot)}
-                        className="btn-win95 p-1 flex items-center gap-1 font-mono text-[10px]"
-                        style={{ backgroundColor: '#3a6a3a', color: '#fff', borderColor: '#5a9a5a #1a3a1a #1a3a1a #5a9a5a' }}
-                        title="Zapisz wynik"
-                      >
-                        <ClipboardCheck className="w-3 h-3" />
-                        WYNIK
-                      </button>
-                      <button
-                        onClick={() => handleDeleteSlot(slot.id)}
-                        className="btn-win95 p-1"
-                        style={{ backgroundColor: '#8b1a1a', borderColor: '#b03a3a #4a0a0a #4a0a0a #b03a3a' }}
-                        title="Usuń slot"
-                      >
-                        <Trash2 className="w-3 h-3 text-white" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+          {loading ? (
+            <div className="p-6 text-center">
+              <span className="font-mono text-sm cursor-blink" style={{ color: 'var(--mdt-muted-text)' }}>ŁADOWANIE_</span>
+            </div>
+          ) : availableSlots.length === 0 ? (
+            <div className="p-6 text-center">
+              <p className="font-mono text-sm" style={{ color: 'var(--mdt-muted-text)' }}>Brak wolnych slotów.</p>
+            </div>
+          ) : (
+            <div>
+              {availableSlots.map((slot, index) => renderSlotRow(slot, index, false))}
             </div>
           )}
         </div>

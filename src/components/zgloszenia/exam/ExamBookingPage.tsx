@@ -9,6 +9,7 @@ import { getExamSlots, bookExamSlot, cancelBooking } from '@/src/lib/db/examSlot
 import { notifyExamBooking, notifyExamCancellation } from '@/src/lib/webhooks/examBooking';
 import WeeklyCalendar from './components/WeeklyCalendar';
 import SlotDetailModal from './components/SlotDetailModal';
+import SlotClusterPopup from './components/SlotClusterPopup';
 import type { ExamSlot, PracticalExamType } from '../types';
 import { PRACTICAL_EXAM_TYPES } from '../types';
 
@@ -44,8 +45,11 @@ export default function ExamBookingPage() {
   const [loading, setLoading] = useState(true);
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
   const [selectedType, setSelectedType] = useState<PracticalExamType | null>(null);
+  const [showCompleted, setShowCompleted] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<ExamSlot | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [clusterSlots, setClusterSlots] = useState<ExamSlot[]>([]);
+  const [clusterOpen, setClusterOpen] = useState(false);
 
   const loadSlots = useCallback(async () => {
     setLoading(true);
@@ -71,6 +75,18 @@ export default function ExamBookingPage() {
   };
 
   const handleSlotClick = (slot: ExamSlot) => {
+    setClusterOpen(false);
+    setSelectedSlot(slot);
+    setModalOpen(true);
+  };
+
+  const handleClusterClick = (clusterSlots: ExamSlot[]) => {
+    setClusterSlots(clusterSlots);
+    setClusterOpen(true);
+  };
+
+  const handleClusterSelectSlot = (slot: ExamSlot) => {
+    setClusterOpen(false);
     setSelectedSlot(slot);
     setModalOpen(true);
   };
@@ -176,7 +192,7 @@ export default function ExamBookingPage() {
           >
             WSZYSTKIE
           </button>
-          {(Object.entries(PRACTICAL_EXAM_TYPES) as [PracticalExamType, { label: string; color: string }][]).map(([key, config]) => (
+          {(Object.entries(PRACTICAL_EXAM_TYPES) as [PracticalExamType, { label: string; color: string; duration: number }][]).map(([key, config]) => (
             <button
               key={key}
               onClick={() => setSelectedType(key)}
@@ -186,6 +202,14 @@ export default function ExamBookingPage() {
               {config.label.replace('Egzamin ', '').toUpperCase()}
             </button>
           ))}
+          <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--mdt-muted-text)', opacity: 0.3, margin: '0 4px' }} />
+          <button
+            onClick={() => setShowCompleted(!showCompleted)}
+            className={`btn-win95 font-mono text-xs ${showCompleted ? 'btn-win95-active' : ''}`}
+            style={showCompleted ? { backgroundColor: '#555', color: '#fff' } : {}}
+          >
+            {showCompleted ? '✓ ZAKOŃCZONE' : 'ZAKOŃCZONE'}
+          </button>
         </div>
 
         {/* Week navigation */}
@@ -218,7 +242,9 @@ export default function ExamBookingPage() {
             slots={slots}
             currentUserId={user?.id || ''}
             selectedType={selectedType}
+            showCompleted={showCompleted}
             onSlotClick={handleSlotClick}
+            onClusterClick={handleClusterClick}
             weekStart={weekStart}
           />
         )}
@@ -237,8 +263,21 @@ export default function ExamBookingPage() {
             <div className="w-3 h-3" style={{ backgroundColor: 'var(--mdt-muted-text)' }} />
             <span className="font-mono text-[10px]" style={{ color: 'var(--mdt-muted-text)' }}>Zajęty</span>
           </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3" style={{ backgroundColor: '#4a4a4a', opacity: 0.6 }} />
+            <span className="font-mono text-[10px]" style={{ color: 'var(--mdt-muted-text)' }}>Zakończony</span>
+          </div>
         </div>
       </div>
+
+      {/* Cluster popup (multiple slots) */}
+      <SlotClusterPopup
+        slots={clusterSlots}
+        isOpen={clusterOpen}
+        onClose={() => setClusterOpen(false)}
+        onSelectSlot={handleClusterSelectSlot}
+        currentUserId={user?.id || ''}
+      />
 
       {/* Slot detail modal */}
       <SlotDetailModal

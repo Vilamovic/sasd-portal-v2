@@ -119,7 +119,7 @@ export async function completeSlot(slotId: string) {
   }
 }
 
-export async function getBookedSlots() {
+export async function getActiveSlots() {
   try {
     const { data, error } = await supabase
       .from('exam_slots')
@@ -128,13 +128,14 @@ export async function getBookedSlots() {
         booker:users!exam_slots_booked_by_fkey(username, mta_nick),
         creator:users!exam_slots_created_by_fkey(username, mta_nick)
       `)
-      .eq('status', 'booked')
-      .order('slot_date', { ascending: true });
+      .in('status', ['available', 'booked'])
+      .order('slot_date', { ascending: true })
+      .order('time_start', { ascending: true });
 
     if (error) throw error;
     return { data, error: null };
   } catch (error) {
-    console.error('getBookedSlots error:', error);
+    console.error('getActiveSlots error:', error);
     return { data: null, error };
   }
 }

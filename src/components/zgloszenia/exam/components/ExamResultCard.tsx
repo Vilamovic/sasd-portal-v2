@@ -1,16 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, CheckCircle, XCircle } from 'lucide-react';
+import { ChevronDown, ChevronRight, CheckCircle, XCircle, Archive } from 'lucide-react';
 import type { PracticalExamResult, PracticalExamType } from '../../types';
 import { PRACTICAL_EXAM_TYPES } from '../../types';
 
 interface ExamResultCardProps {
   result: PracticalExamResult;
   index: number;
+  isCS?: boolean;
+  onArchive?: (id: string) => void;
 }
 
-export default function ExamResultCard({ result, index }: ExamResultCardProps) {
+export default function ExamResultCard({ result, index, isCS, onArchive }: ExamResultCardProps) {
   const [expanded, setExpanded] = useState(false);
   const config = PRACTICAL_EXAM_TYPES[result.exam_type as PracticalExamType];
 
@@ -87,6 +89,20 @@ export default function ExamResultCard({ result, index }: ExamResultCardProps) {
             {formatDate(result.created_at)}
           </span>
         </div>
+
+        {/* Archive button (CS+ only) */}
+        {isCS && onArchive && (
+          <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => onArchive(result.id)}
+              className="btn-win95 p-1"
+              title="Archiwizuj wynik"
+              style={{ backgroundColor: '#555555', borderColor: '#777 #333 #333 #777' }}
+            >
+              <Archive className="w-3 h-3 text-white" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Expanded details */}

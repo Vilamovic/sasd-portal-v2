@@ -80,6 +80,7 @@ export default function MySubmissionsPage() {
             <option value="pending">Oczekujące</option>
             <option value="approved">Zaakceptowane</option>
             <option value="rejected">Odrzucone</option>
+            <option value="archived">Zarchiwizowane</option>
           </select>
 
           <span className="font-mono text-xs self-center" style={{ color: 'var(--mdt-muted-text)' }}>

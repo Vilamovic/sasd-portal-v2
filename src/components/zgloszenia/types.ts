@@ -4,7 +4,7 @@ export interface Submission {
   type: SubmissionType;
   title: string | null;
   description: string | null;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'archived';
   metadata: Record<string, any>;
   admin_response: string | null;
   reviewed_by: string | null;
@@ -130,15 +130,19 @@ export interface PracticalExamResult {
   checklist: { item: string; checked: boolean }[];
   notes: string | null;
   created_at: string;
+  is_archived?: boolean;
+  archived_at?: string | null;
+  archived_by?: string | null;
   examinee?: { username: string; mta_nick: string | null } | null;
   examiner?: { username: string; mta_nick: string | null } | null;
+  archived_by_user?: { username: string; mta_nick: string | null } | null;
 }
 
-export const PRACTICAL_EXAM_TYPES: Record<PracticalExamType, { label: string; color: string }> = {
-  trainee: { label: 'Egzamin Trainee', color: '#c9a227' },
-  poscigowy: { label: 'Egzamin Pościgowy', color: '#ff8c00' },
-  swat: { label: 'Egzamin SWAT', color: '#dc2626' },
-  seu: { label: 'Egzamin SEU', color: '#60a5fa' },
+export const PRACTICAL_EXAM_TYPES: Record<PracticalExamType, { label: string; color: string; duration: number }> = {
+  trainee: { label: 'Egzamin Trainee', color: '#c9a227', duration: 60 },
+  poscigowy: { label: 'Egzamin Pościgowy', color: '#ff8c00', duration: 60 },
+  swat: { label: 'Egzamin SWAT', color: '#dc2626', duration: 15 },
+  seu: { label: 'Egzamin SEU', color: '#60a5fa', duration: 60 },
 };
 
 export const EXAM_CHECKLISTS: Record<PracticalExamType, string[]> = {
@@ -178,6 +182,7 @@ export const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   pending: { label: 'Oczekujące', color: '#c9a227' },
   approved: { label: 'Zaakceptowane', color: '#3a6a3a' },
   rejected: { label: 'Odrzucone', color: '#8b1a1a' },
+  archived: { label: 'Zarchiwizowane', color: '#555555' },
 };
 
 export const TYPE_LABELS: Record<string, string> = {

@@ -77,3 +77,48 @@ export async function notifyExamCancellation(params: ExamBookingNotifyParams) {
 
   return sendWebhook(WEBHOOK_URL, payload);
 }
+
+export async function notifyExamSlotDeletion(params: {
+  examType: string;
+  date: string;
+  timeStart: string;
+  timeEnd: string;
+  deletedBy: { username: string; mta_nick: string | null };
+  wasBooked: boolean;
+  booker?: { username: string; mta_nick: string | null };
+}) {
+  const { examType, date, timeStart, timeEnd, deletedBy, wasBooked, booker } = params;
+
+  const deleterName = deletedBy.mta_nick || deletedBy.username;
+
+  const formattedDate = new Date(date).toLocaleDateString('pl-PL', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  });
+
+  const fields = [
+    { name: 'Typ egzaminu', value: examType, inline: true },
+    { name: 'Termin', value: `${formattedDate}\n${timeStart.slice(0, 5)} — ${timeEnd.slice(0, 5)}`, inline: true },
+    { name: 'Usunął', value: deleterName, inline: true },
+  ];
+
+  if (wasBooked && booker) {
+    const bookerName = booker.mta_nick || booker.username;
+    fields.push({ name: 'Zdający (anulowany)', value: bookerName, inline: true });
+  }
+
+  const payload = {
+    embeds: [
+      {
+        title: '🗑️ Usunięcie slotu egzaminowego',
+        color: 0x555555,
+        fields,
+        timestamp: new Date().toISOString(),
+      },
+    ],
+  };
+
+  return sendWebhook(WEBHOOK_URL, payload);
+}

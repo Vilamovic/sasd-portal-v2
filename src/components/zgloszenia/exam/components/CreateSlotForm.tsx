@@ -14,6 +14,14 @@ for (let h = 8; h <= 22; h++) {
   }
 }
 
+function addMinutesToTime(time: string, minutes: number): string {
+  const [h, m] = time.split(':').map(Number);
+  const totalMinutes = h * 60 + m + minutes;
+  const newH = Math.floor(totalMinutes / 60);
+  const newM = totalMinutes % 60;
+  return `${String(newH).padStart(2, '0')}:${String(newM).padStart(2, '0')}`;
+}
+
 interface CreateSlotFormProps {
   onSubmit: (data: { exam_type: string; slot_date: string; time_start: string; time_end: string }) => void;
 }
@@ -22,15 +30,17 @@ export default function CreateSlotForm({ onSubmit }: CreateSlotFormProps) {
   const [examType, setExamType] = useState<PracticalExamType>('trainee');
   const [slotDate, setSlotDate] = useState('');
   const [timeStart, setTimeStart] = useState('16:00');
-  const [timeEnd, setTimeEnd] = useState('17:00');
+
+  const duration = PRACTICAL_EXAM_TYPES[examType].duration;
+  const timeEnd = addMinutesToTime(timeStart, duration);
 
   const handleSubmit = () => {
-    if (!slotDate || !timeStart || !timeEnd) {
+    if (!slotDate || !timeStart) {
       alert('Wypełnij wszystkie pola');
       return;
     }
-    if (timeStart >= timeEnd) {
-      alert('Godzina końca musi być późniejsza niż początek');
+    if (timeEnd > '22:00') {
+      alert(`Egzamin kończyłby się o ${timeEnd}, co przekracza limit 22:00. Wybierz wcześniejszą godzinę.`);
       return;
     }
     onSubmit({ exam_type: examType, slot_date: slotDate, time_start: timeStart, time_end: timeEnd });
@@ -45,7 +55,7 @@ export default function CreateSlotForm({ onSubmit }: CreateSlotFormProps) {
         </span>
       </div>
       <div className="p-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {/* Exam type */}
           <div>
             <label className="font-mono text-[10px] block mb-1" style={{ color: 'var(--mdt-muted-text)' }}>
@@ -57,8 +67,8 @@ export default function CreateSlotForm({ onSubmit }: CreateSlotFormProps) {
               className="panel-inset w-full px-2 py-1.5 font-mono text-xs"
               style={{ backgroundColor: 'var(--mdt-input-bg)', color: 'var(--mdt-content-text)', outline: 'none' }}
             >
-              {(Object.entries(PRACTICAL_EXAM_TYPES) as [PracticalExamType, { label: string }][]).map(([key, config]) => (
-                <option key={key} value={key}>{config.label}</option>
+              {(Object.entries(PRACTICAL_EXAM_TYPES) as [PracticalExamType, { label: string; duration: number }][]).map(([key, config]) => (
+                <option key={key} value={key}>{config.label} ({config.duration} min)</option>
               ))}
             </select>
           </div>
@@ -80,7 +90,7 @@ export default function CreateSlotForm({ onSubmit }: CreateSlotFormProps) {
           {/* Time start */}
           <div>
             <label className="font-mono text-[10px] block mb-1" style={{ color: 'var(--mdt-muted-text)' }}>
-              Od
+              Godzina rozpoczęcia
             </label>
             <select
               value={timeStart}
@@ -93,23 +103,15 @@ export default function CreateSlotForm({ onSubmit }: CreateSlotFormProps) {
               ))}
             </select>
           </div>
+        </div>
 
-          {/* Time end */}
-          <div>
-            <label className="font-mono text-[10px] block mb-1" style={{ color: 'var(--mdt-muted-text)' }}>
-              Do
-            </label>
-            <select
-              value={timeEnd}
-              onChange={(e) => setTimeEnd(e.target.value)}
-              className="panel-inset w-full px-2 py-1.5 font-mono text-xs"
-              style={{ backgroundColor: 'var(--mdt-input-bg)', color: 'var(--mdt-content-text)', outline: 'none' }}
-            >
-              {TIME_OPTIONS.map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
-          </div>
+        {/* Duration info */}
+        <div className="mt-2 font-mono text-[10px]" style={{ color: 'var(--mdt-muted-text)' }}>
+          Czas trwania: <strong style={{ color: 'var(--mdt-content-text)' }}>{duration} min</strong>
+          {' '}({timeStart} — {timeEnd})
+          {timeEnd > '22:00' && (
+            <span style={{ color: '#dc2626' }}> — Przekracza limit 22:00!</span>
+          )}
         </div>
 
         <button

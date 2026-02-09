@@ -2,16 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Settings, Check, X, Eye, ChevronDown, ChevronRight } from 'lucide-react';
+import { Settings, Check, X, Eye, ChevronDown, ChevronRight, ChevronLeft, Archive } from 'lucide-react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import BackButton from '@/src/components/shared/BackButton';
-import { getAllSubmissions, updateSubmissionStatus } from '@/src/lib/db/submissions';
+import { getAllSubmissions, updateSubmissionStatus, archiveSubmission } from '@/src/lib/db/submissions';
 import { getRecruitmentStatus, updateRecruitmentStatus } from '@/src/lib/db/recruitment';
 import { notifySubmissionStatusChange } from '@/src/lib/webhooks/submissions';
 import { supabase } from '@/src/supabaseClient';
 import SubmissionStatusBadge from '../components/SubmissionStatusBadge';
 import { TYPE_LABELS } from '../types';
 import type { Submission, RecruitmentStatus } from '../types';
+
+const PER_PAGE = 30;
 
 export default function SubmissionsManagementPage() {
   const router = useRouter();
@@ -27,6 +29,7 @@ export default function SubmissionsManagementPage() {
   const [showRecruitment, setShowRecruitment] = useState(false);
   const [approvingId, setApprovingId] = useState<string | null>(null);
   const [deductVacation, setDeductVacation] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     loadData();
@@ -43,10 +46,16 @@ export default function SubmissionsManagementPage() {
   };
 
   const filtered = submissions.filter((s) => {
+    // Exclude archived submissions from main view
+    if (s.status === 'archived') return false;
     if (filterType && s.type !== filterType) return false;
     if (filterStatus && s.status !== filterStatus) return false;
     return true;
   });
+
+  // Pagination
+  const totalPages = Math.ceil(filtered.length / PER_PAGE);
+  const paginatedData = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
 
   const handleReview = async (submissionId: string, status: 'approved' | 'rejected') => {
     if (status === 'rejected' && !adminResponse.trim()) {
@@ -132,6 +141,18 @@ export default function SubmissionsManagementPage() {
     if (!error) loadData();
   };
 
+  const handleArchive = async (submissionId: string) => {
+    if (!confirm('Zarchiwizować to zgłoszenie?')) return;
+    const { error } = await archiveSubmission(submissionId);
+    if (!error) {
+      setExpandedId(null);
+      loadData();
+      alert('Zgłoszenie zarchiwizowane.');
+    } else {
+      alert('Błąd archiwizacji.');
+    }
+  };
+
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
   };
@@ -164,6 +185,13 @@ export default function SubmissionsManagementPage() {
             <Settings className="w-3 h-3" />
             REKRUTACJA DYWIZJI
           </button>
+          <button
+            onClick={() => router.push('/zgloszenia/management/archived')}
+            className="btn-win95 font-mono text-xs flex items-center gap-1"
+          >
+            <Archive className="w-3 h-3" />
+            ARCHIWUM
+          </button>
         </div>
 
         {/* Recruitment Settings */}
@@ -194,7 +222,7 @@ export default function SubmissionsManagementPage() {
         <div className="flex flex-wrap gap-2 mb-4">
           <select
             value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
+            onChange={(e) => { setFilterType(e.target.value); setCurrentPage(1); }}
             className="panel-inset px-3 py-1.5 font-mono text-xs"
             style={{ backgroundColor: 'var(--mdt-input-bg)', color: 'var(--mdt-content-text)', outline: 'none' }}
           >
@@ -206,7 +234,7 @@ export default function SubmissionsManagementPage() {
 
           <select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
+            onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
             className="panel-inset px-3 py-1.5 font-mono text-xs"
             style={{ backgroundColor: 'var(--mdt-input-bg)', color: 'var(--mdt-content-text)', outline: 'none' }}
           >
@@ -225,7 +253,7 @@ export default function SubmissionsManagementPage() {
         <div className="panel-raised" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
           <div className="px-3 py-1.5" style={{ backgroundColor: 'var(--mdt-header)' }}>
             <span className="font-[family-name:var(--font-vt323)] text-sm tracking-wider uppercase" style={{ color: 'var(--mdt-header-text)' }}>
-              ZGŁOSZENIA ({filtered.length})
+              ZGŁOSZENIA ({filtered.length}) - STRONA {currentPage}/{totalPages}
             </span>
           </div>
 
@@ -239,7 +267,7 @@ export default function SubmissionsManagementPage() {
             </div>
           ) : (
             <div>
-              {filtered.map((submission, index) => (
+              {paginatedData.map((submission, index) => (
                 <div key={submission.id}>
                   {/* Submission Row */}
                   <div
@@ -315,6 +343,20 @@ export default function SubmissionsManagementPage() {
                           style={{ backgroundColor: '#8b1a1a', borderColor: '#b03a3a #4a0a0a #4a0a0a #b03a3a' }}
                         >
                           <X className="w-3 h-3 text-white" />
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Archive button for reviewed submissions */}
+                    {(submission.status === 'approved' || submission.status === 'rejected') && (
+                      <div className="flex gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => handleArchive(submission.id)}
+                          className="btn-win95 p-1"
+                          title="Archiwizuj zgłoszenie"
+                          style={{ backgroundColor: '#555555', borderColor: '#777 #333 #333 #777' }}
+                        >
+                          <Archive className="w-3 h-3 text-white" />
                         </button>
                       </div>
                     )}
@@ -428,7 +470,13 @@ export default function SubmissionsManagementPage() {
                             <span className="font-mono text-[10px] block mb-1" style={{ color: 'var(--mdt-muted-text)' }}>Treść zgłoszenia</span>
                             <div
                               className="panel-inset p-3 font-mono text-xs prose prose-sm max-w-none"
-                              style={{ backgroundColor: 'var(--mdt-panel-content)', color: 'var(--mdt-content-text)' }}
+                              style={{
+                                backgroundColor: 'var(--mdt-panel-content)',
+                                color: 'var(--mdt-content-text)',
+                                maxHeight: '500px',
+                                overflowY: 'auto',
+                                wordBreak: 'break-word'
+                              }}
                               dangerouslySetInnerHTML={{ __html: submission.description }}
                             />
                           </div>
@@ -539,6 +587,33 @@ export default function SubmissionsManagementPage() {
             </div>
           )}
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-4">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="btn-win95 p-1"
+              style={{ opacity: currentPage === 1 ? 0.5 : 1 }}
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+
+            <span className="font-mono text-xs px-4" style={{ color: 'var(--mdt-content-text)' }}>
+              Strona {currentPage} / {totalPages}
+            </span>
+
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="btn-win95 p-1"
+              style={{ opacity: currentPage === totalPages ? 0.5 : 1 }}
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

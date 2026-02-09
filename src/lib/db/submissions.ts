@@ -136,3 +136,58 @@ export async function updateSubmissionStatus(
     return { data: null, error };
   }
 }
+
+/**
+ * Archiwizuje zgłoszenie (zachowuje oryginalny status w metadata)
+ */
+export async function archiveSubmission(id: string) {
+  try {
+    console.log('🔍 Archive attempt for ID:', id);
+
+    // Get current submission to preserve original status
+    const { data: submission, error: fetchError } = await supabase
+      .from('submissions')
+      .select('status, metadata')
+      .eq('id', id)
+      .single();
+
+    console.log('📥 Fetch result:', { submission, fetchError });
+
+    if (fetchError) {
+      console.error('❌ Fetch error:', JSON.stringify(fetchError, null, 2));
+      throw fetchError;
+    }
+    if (!submission) throw new Error('Submission not found');
+
+    // Save original status in metadata (handle null metadata)
+    const updatedMetadata = {
+      ...(submission.metadata || {}),
+      original_status: submission.status,
+    };
+
+    console.log('📝 Updating with metadata:', updatedMetadata);
+
+    // Update to archived
+    const { data, error } = await supabase
+      .from('submissions')
+      .update({
+        status: 'archived',
+        metadata: updatedMetadata,
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    console.log('📤 Update result:', { data, error });
+
+    if (error) {
+      console.error('❌ Update error:', JSON.stringify(error, null, 2));
+      throw error;
+    }
+    return { data, error: null };
+  } catch (error) {
+    console.error('💥 archiveSubmission error:', error);
+    console.error('💥 Error details:', JSON.stringify(error, null, 2));
+    return { data: null, error };
+  }
+}
