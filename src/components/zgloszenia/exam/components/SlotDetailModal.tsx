@@ -1,7 +1,7 @@
 'use client';
 
-import { X, Calendar, Clock, User } from 'lucide-react';
-import type { ExamSlot } from '../../types';
+import { X, Calendar, Clock, User, AlertTriangle } from 'lucide-react';
+import type { ExamSlot, PracticalExamType } from '../../types';
 import { PRACTICAL_EXAM_TYPES } from '../../types';
 
 interface SlotDetailModalProps {
@@ -11,6 +11,8 @@ interface SlotDetailModalProps {
   onBook: (slotId: string) => void;
   onCancel: (slotId: string) => void;
   currentUserId: string;
+  userRole: string | null;
+  userPermissions: string[];
 }
 
 const STATUS_MAP: Record<string, string> = {
@@ -20,6 +22,49 @@ const STATUS_MAP: Record<string, string> = {
   cancelled: 'Anulowany',
 };
 
+// Map exam types to required permission names
+const EXAM_PERMISSION_MAP: Record<string, string> = {
+  poscigowy: 'Pościgowe',
+  swat: 'SWAT',
+  seu: 'SEU',
+};
+
+const CS_ROLES = ['cs', 'hcs', 'dev'];
+
+function getEligibilityReason(
+  slot: ExamSlot,
+  currentUserId: string,
+  userRole: string | null,
+  userPermissions: string[]
+): string | null {
+  // CS/HCS/DEV bypass all restrictions
+  if (userRole && CS_ROLES.includes(userRole)) {
+    return null;
+  }
+
+  // Self-booking check: creator cannot book own slot
+  if (slot.created_by === currentUserId) {
+    return 'Nie możesz zapisać się na egzamin, który sam utworzyłeś.';
+  }
+
+  const examType = slot.exam_type as PracticalExamType;
+
+  // Trainee exam: only trainee rank
+  if (examType === 'trainee') {
+    if (userRole !== 'trainee') {
+      return 'Egzamin Trainee jest przeznaczony wyłącznie dla osób ze stopniem Trainee.';
+    }
+  }
+
+  // Permission exams: only for users WITHOUT that permission
+  const requiredPermission = EXAM_PERMISSION_MAP[examType];
+  if (requiredPermission && userPermissions.includes(requiredPermission)) {
+    return `Posiadasz już uprawnienie ${requiredPermission}. Ten egzamin jest dla osób bez tego uprawnienia.`;
+  }
+
+  return null;
+}
+
 export default function SlotDetailModal({
   slot,
   isOpen,
@@ -27,6 +72,8 @@ export default function SlotDetailModal({
   onBook,
   onCancel,
   currentUserId,
+  userRole,
+  userPermissions,
 }: SlotDetailModalProps) {
   if (!isOpen || !slot) return null;
 
@@ -34,6 +81,11 @@ export default function SlotDetailModal({
   const isBookedByMe = slot.booked_by === currentUserId;
   const isAvailable = slot.status === 'available';
   const isBooked = slot.status === 'booked';
+
+  const eligibilityReason = isAvailable
+    ? getEligibilityReason(slot, currentUserId, userRole, userPermissions)
+    : null;
+  const canBook = isAvailable && !eligibilityReason;
 
   const formattedDate = new Date(slot.slot_date).toLocaleDateString('pl-PL', {
     weekday: 'long',
@@ -156,9 +208,20 @@ export default function SlotDetailModal({
             )}
           </div>
 
+          {/* Eligibility warning */}
+          {eligibilityReason && (
+            <div
+              className="panel-inset flex items-start gap-2 p-3 font-mono text-xs"
+              style={{ backgroundColor: 'rgba(139, 26, 26, 0.15)', color: '#ff6b6b' }}
+            >
+              <AlertTriangle size={14} className="shrink-0 mt-0.5" />
+              <span>{eligibilityReason}</span>
+            </div>
+          )}
+
           {/* Actions */}
           <div className="flex justify-end gap-3 pt-1">
-            {isAvailable && (
+            {canBook && (
               <button
                 className="btn-win95 px-5 py-2 font-[family-name:var(--font-vt323)] text-sm tracking-wider text-white uppercase"
                 style={{ backgroundColor: '#3a6a3a' }}

@@ -40,7 +40,7 @@ function formatWeekRange(weekStart: Date): string {
 
 export default function ExamBookingPage() {
   const router = useRouter();
-  const { user, mtaNick, isCS } = useAuth();
+  const { user, mtaNick, isCS, role, permissions } = useAuth();
   const [slots, setSlots] = useState<ExamSlot[]>([]);
   const [loading, setLoading] = useState(true);
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
@@ -164,9 +164,9 @@ export default function ExamBookingPage() {
           </span>
         </div>
 
-        {/* Quick links */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {isCS && (
+        {/* Quick links (CS+ only) */}
+        {isCS && (
+          <div className="flex flex-wrap gap-2 mb-4">
             <button
               onClick={() => router.push('/zgloszenia/egzamin/management')}
               className="btn-win95 font-mono text-xs flex items-center gap-1"
@@ -174,15 +174,15 @@ export default function ExamBookingPage() {
               <Settings className="w-3 h-3" />
               ZARZĄDZANIE
             </button>
-          )}
-          <button
-            onClick={() => router.push('/zgloszenia/egzamin/history')}
-            className="btn-win95 font-mono text-xs flex items-center gap-1"
-          >
-            <History className="w-3 h-3" />
-            HISTORIA WYNIKÓW
-          </button>
-        </div>
+            <button
+              onClick={() => router.push('/zgloszenia/egzamin/history')}
+              className="btn-win95 font-mono text-xs flex items-center gap-1"
+            >
+              <History className="w-3 h-3" />
+              HISTORIA WYNIKÓW
+            </button>
+          </div>
+        )}
 
         {/* Exam type filter */}
         <div className="flex flex-wrap gap-2 mb-4">
@@ -287,6 +287,8 @@ export default function ExamBookingPage() {
         onBook={handleBook}
         onCancel={handleCancelBooking}
         currentUserId={user?.id || ''}
+        userRole={role}
+        userPermissions={permissions}
       />
     </div>
   );

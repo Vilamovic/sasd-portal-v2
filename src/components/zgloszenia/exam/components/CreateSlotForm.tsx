@@ -35,8 +35,12 @@ export default function CreateSlotForm({ onSubmit }: CreateSlotFormProps) {
   const timeEnd = addMinutesToTime(timeStart, duration);
 
   const handleSubmit = () => {
-    if (!slotDate || !timeStart) {
-      alert('Wypełnij wszystkie pola');
+    if (!slotDate) {
+      alert('Wybierz datę egzaminu.');
+      return;
+    }
+    if (!timeStart) {
+      alert('Wybierz godzinę rozpoczęcia.');
       return;
     }
     if (timeEnd > '22:00') {

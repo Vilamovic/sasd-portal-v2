@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
 import BackButton from '@/src/components/shared/BackButton';
+import AccessDenied from '@/src/components/shared/AccessDenied';
 import { getAllPracticalExamResults, archiveExamResult } from '@/src/lib/db/practicalExamResults';
 import ExamResultCard from './components/ExamResultCard';
 import type { PracticalExamResult, PracticalExamType } from '../types';
@@ -15,25 +16,19 @@ export default function ExamHistoryPage() {
   const [results, setResults] = useState<PracticalExamResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState('');
-  const [showOnlyMine, setShowOnlyMine] = useState(false);
 
   useEffect(() => {
+    if (!isCS) return;
     const load = async () => {
-      const filters: { exam_type?: string; examinee_id?: string } = {};
+      const filters: { exam_type?: string } = {};
       if (filterType) filters.exam_type = filterType;
-
-      // Trainee/deputy: always filter by own results
-      // CS/HCS/DEV: optional filter with checkbox
-      if (!isCS || showOnlyMine) {
-        if (user?.id) filters.examinee_id = user.id;
-      }
 
       const { data } = await getAllPracticalExamResults(filters);
       if (data) setResults(data as PracticalExamResult[]);
       setLoading(false);
     };
     load();
-  }, [filterType, showOnlyMine, user?.id, isCS]);
+  }, [filterType, isCS]);
 
   const handleArchive = async (resultId: string) => {
     if (!user || !confirm('Zarchiwizować ten wynik egzaminu?')) return;
@@ -41,18 +36,16 @@ export default function ExamHistoryPage() {
     const { error } = await archiveExamResult(resultId, user.id);
     if (!error) {
       alert('Wynik zarchiwizowany.');
-      // Reload results
-      const filters: { exam_type?: string; examinee_id?: string } = {};
+      const filters: { exam_type?: string } = {};
       if (filterType) filters.exam_type = filterType;
-      if (!isCS || showOnlyMine) {
-        if (user?.id) filters.examinee_id = user.id;
-      }
       const { data } = await getAllPracticalExamResults(filters);
       if (data) setResults(data as PracticalExamResult[]);
     } else {
       alert('Błąd archiwizacji.');
     }
   };
+
+  if (!isCS) return <AccessDenied onBack={() => router.push('/zgloszenia/egzamin')} message="Brak uprawnień. Wyniki egzaminów są dostępne tylko dla CS/HCS/DEV." />;
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--mdt-content)' }}>
@@ -79,20 +72,6 @@ export default function ExamHistoryPage() {
               <option key={key} value={key}>{config.label}</option>
             ))}
           </select>
-
-          {isCS && (
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={showOnlyMine}
-                onChange={(e) => setShowOnlyMine(e.target.checked)}
-                className="w-3.5 h-3.5"
-              />
-              <span className="font-mono text-xs" style={{ color: 'var(--mdt-content-text)' }}>
-                Tylko moje
-              </span>
-            </label>
-          )}
 
           <span className="font-mono text-xs self-center" style={{ color: 'var(--mdt-muted-text)' }}>
             Wyników: {results.length}
