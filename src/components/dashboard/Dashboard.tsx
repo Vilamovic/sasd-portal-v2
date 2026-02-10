@@ -74,8 +74,6 @@ export default function Dashboard() {
     },
   ];
 
-  const visibleTiles = tiles.filter((tile) => tile.roles.includes(role));
-
   return (
     <>
       {showMtaNickModal && (
@@ -99,17 +97,63 @@ export default function Dashboard() {
 
           {/* Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {visibleTiles.map((tile) => {
+            {tiles.map((tile) => {
               const Icon = tile.icon;
+              const hasAccess = tile.roles.includes(role);
+
+              if (hasAccess) {
+                return (
+                  <Link
+                    key={tile.id}
+                    href={`/${tile.id}`}
+                    className="block panel-raised p-0 hover:brightness-105 transition-all flex flex-col"
+                    style={{ backgroundColor: 'var(--mdt-btn-face)' }}
+                  >
+                    {/* Blue header */}
+                    <div className="px-3 py-1.5 flex items-center gap-2" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
+                      <Icon className="w-4 h-4 text-white" />
+                      <span className="font-[family-name:var(--font-vt323)] text-base tracking-wider uppercase text-white">
+                        {tile.title}
+                      </span>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-4 flex flex-col flex-grow">
+                      <p className="font-mono text-sm mb-4 flex-grow" style={{ color: 'var(--mdt-content-text)' }}>
+                        {tile.description}
+                      </p>
+
+                      {/* Stats */}
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {tile.stats.map((stat, idx) => {
+                          const StatIcon = stat.icon;
+                          return (
+                            <div key={idx} className="flex items-center gap-1 font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>
+                              <StatIcon className="w-3 h-3" />
+                              <span>{stat.label}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Action Button */}
+                      <button className="btn-win95 w-full text-sm">
+                        PRZEJDŹ
+                      </button>
+                    </div>
+                  </Link>
+                );
+              }
+
+              // Disabled tile (no access)
               return (
-                <Link
+                <div
                   key={tile.id}
-                  href={`/${tile.id}`}
-                  className="block panel-raised p-0 hover:brightness-105 transition-all"
-                  style={{ backgroundColor: 'var(--mdt-btn-face)' }}
+                  className="panel-raised p-0 flex flex-col opacity-50"
+                  style={{ backgroundColor: 'var(--mdt-btn-face)', cursor: 'not-allowed' }}
                 >
-                  {/* Blue header */}
-                  <div className="px-3 py-1.5 flex items-center gap-2" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
+                  {/* Gray header */}
+                  <div className="px-3 py-1.5 flex items-center gap-2" style={{ backgroundColor: 'var(--mdt-muted-text)' }}>
                     <Icon className="w-4 h-4 text-white" />
                     <span className="font-[family-name:var(--font-vt323)] text-base tracking-wider uppercase text-white">
                       {tile.title}
@@ -117,8 +161,8 @@ export default function Dashboard() {
                   </div>
 
                   {/* Content */}
-                  <div className="p-4">
-                    <p className="font-mono text-sm mb-4" style={{ color: 'var(--mdt-content-text)' }}>
+                  <div className="p-4 flex flex-col flex-grow">
+                    <p className="font-mono text-sm mb-4 flex-grow" style={{ color: 'var(--mdt-muted-text)' }}>
                       {tile.description}
                     </p>
 
@@ -135,12 +179,15 @@ export default function Dashboard() {
                       })}
                     </div>
 
-                    {/* Action Button */}
-                    <button className="btn-win95 w-full text-sm">
-                      PRZEJDŹ
-                    </button>
+                    {/* Disabled Button */}
+                    <div
+                      className="btn-win95 w-full text-sm text-center opacity-60"
+                      style={{ cursor: 'not-allowed' }}
+                    >
+                      BRAK DOSTĘPU
+                    </div>
                   </div>
-                </Link>
+                </div>
               );
             })}
           </div>

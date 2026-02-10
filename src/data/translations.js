@@ -7,7 +7,7 @@ export const translations = {
     nav: {
       materials: 'Materiały',
       exams: 'Egzaminy',
-      admin: 'Admin',
+      admin: 'Zarząd',
       logout: 'Wyloguj się',
     },
     exams: {
@@ -21,7 +21,7 @@ export const translations = {
     nav: {
       materials: 'Materials',
       exams: 'Exams',
-      admin: 'Admin',
+      admin: 'Zarząd',
       logout: 'Logout',
     },
     exams: {

@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
 import Navbar from '@/src/components/dashboard/Navbar';
-import { ChevronLeft, BookOpen, Monitor, ArrowRight } from 'lucide-react';
+import { ChevronLeft, BookOpen, Monitor, FileText, ArrowRight } from 'lucide-react';
 
 /**
  * Division Categories Page - shows category tiles for a division
@@ -62,7 +62,13 @@ export default function DivisionCategoriesPage() {
       description: 'Materiały szkoleniowe i dokumentacja dywizji.',
       icon: BookOpen,
       href: `/divisions/${divisionId}/materials`,
-      available: true,
+    },
+    {
+      id: 'raport',
+      name: 'Raport',
+      description: 'Składaj raporty z działań operacyjnych dywizji.',
+      icon: FileText,
+      href: `/divisions/${divisionId}/raport`,
     },
     ...(divisionId === 'DTU'
       ? [
@@ -72,7 +78,6 @@ export default function DivisionCategoriesPage() {
             description: 'System kartoteki kryminalnej i baza danych.',
             icon: Monitor,
             href: '/divisions/dtu/mdt',
-            available: true,
           },
         ]
       : []),
