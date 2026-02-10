@@ -1,18 +1,15 @@
 import { Plus, Save } from 'lucide-react';
 import QuillEditor from '@/src/components/shared/QuillEditor';
+import TemplatePresets from '@/src/components/shared/TemplatePresets';
 
 interface MaterialFormProps {
   isEditing: boolean;
   formTitle: string;
   formDescription: string;
-  formFileUrl: string;
-  formFileType: string;
-  formThumbnailUrl: string;
+  isMandatory: boolean;
   onTitleChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
-  onFileUrlChange: (value: string) => void;
-  onFileTypeChange: (value: string) => void;
-  onThumbnailUrlChange: (value: string) => void;
+  onMandatoryChange: (value: boolean) => void;
   onSubmit: () => void;
   onCancel: () => void;
 }
@@ -20,14 +17,18 @@ interface MaterialFormProps {
 /**
  * MaterialForm - Add/Edit material form with rich text editor
  * - Title (required)
+ * - Mandatory checkbox
  * - Description with Quill editor (rich text)
+ * - Template presets
  */
 export default function MaterialForm({
   isEditing,
   formTitle,
   formDescription,
+  isMandatory,
   onTitleChange,
   onDescriptionChange,
+  onMandatoryChange,
   onSubmit,
   onCancel,
 }: MaterialFormProps) {
@@ -55,9 +56,29 @@ export default function MaterialForm({
           />
         </div>
 
+        {/* Mandatory Checkbox */}
+        <div className="mb-3">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isMandatory}
+              onChange={(e) => onMandatoryChange(e.target.checked)}
+              className="cursor-pointer"
+            />
+            <span className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>
+              Materiał obowiązkowy
+            </span>
+          </label>
+        </div>
+
         {/* Rich Text Description */}
         <div className="mb-4">
-          <label className="font-mono text-xs block mb-1" style={{ color: 'var(--mdt-muted-text)' }}>Opis</label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>
+              Opis
+            </label>
+            <TemplatePresets onInsert={onDescriptionChange} />
+          </div>
           <QuillEditor
             value={formDescription}
             onChange={onDescriptionChange}

@@ -1,5 +1,8 @@
 import { Edit3, Save, X, Maximize2, Minimize2 } from 'lucide-react';
 import QuillEditor from '@/src/components/shared/QuillEditor';
+import ProtectedContent from '@/src/components/shared/ProtectedContent';
+import MandatoryBadge from '@/src/components/shared/MandatoryBadge';
+import TemplatePresets from '@/src/components/shared/TemplatePresets';
 
 interface MaterialModalProps {
   selectedMaterial: any | null;
@@ -8,9 +11,12 @@ interface MaterialModalProps {
   setEditTitle: (title: string) => void;
   editContent: string;
   setEditContent: (content: string) => void;
+  editMandatory: boolean;
+  setEditMandatory: (value: boolean) => void;
   fullscreen: boolean;
   setFullscreen: (fullscreen: boolean) => void;
   isAdmin: boolean;
+  username: string;
   onStartEdit: () => void;
   onSave: () => void;
   onCancel: () => void;
@@ -21,14 +27,9 @@ interface MaterialModalProps {
  * MaterialModal - Combined modal dla materiałów
  *
  * Modes:
- * 1. View Mode - read-only content display
+ * 1. View Mode - read-only content display (z ProtectedContent)
  * 2. Edit Mode - WYSIWYG editor in modal
  * 3. Fullscreen Mode - WYSIWYG editor fullscreen
- *
- * Features:
- * - Shared QuillEditor integration
- * - Fullscreen toggle
- * - MDT Terminal styling
  */
 export default function MaterialModal({
   selectedMaterial,
@@ -37,9 +38,12 @@ export default function MaterialModal({
   setEditTitle,
   editContent,
   setEditContent,
+  editMandatory,
+  setEditMandatory,
   fullscreen,
   setFullscreen,
   isAdmin,
+  username,
   onStartEdit,
   onSave,
   onCancel,
@@ -59,13 +63,24 @@ export default function MaterialModal({
             onChange={(e) => setEditTitle(e.target.value)}
             className="font-[family-name:var(--font-vt323)] text-xl tracking-widest uppercase text-white bg-transparent border-none flex-grow"
             style={{ outline: 'none' }}
-            placeholder="Tytul materialu..."
+            placeholder="Tytuł materiału..."
           />
           <div className="flex items-center gap-2 ml-4">
+            {/* Mandatory toggle */}
+            <label className="flex items-center gap-1 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={editMandatory}
+                onChange={(e) => setEditMandatory(e.target.checked)}
+                className="cursor-pointer"
+              />
+              <span className="font-mono text-xs text-white">Obowiązkowy</span>
+            </label>
+            <TemplatePresets onInsert={setEditContent} />
             <button
               onClick={() => setFullscreen(false)}
               className="btn-win95 p-1"
-              title="Wyjdz z pelnego ekranu"
+              title="Wyjdź z pełnego ekranu"
             >
               <Minimize2 className="w-4 h-4" />
             </button>
@@ -116,13 +131,24 @@ export default function MaterialModal({
                   onChange={(e) => setEditTitle(e.target.value)}
                   className="font-[family-name:var(--font-vt323)] text-xl tracking-widest uppercase text-white bg-transparent border-none flex-grow"
                   style={{ outline: 'none' }}
-                  placeholder="Tytul materialu..."
+                  placeholder="Tytuł materiału..."
                 />
                 <div className="flex items-center gap-2 ml-4">
+                  {/* Mandatory toggle */}
+                  <label className="flex items-center gap-1 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editMandatory}
+                      onChange={(e) => setEditMandatory(e.target.checked)}
+                      className="cursor-pointer"
+                    />
+                    <span className="font-mono text-xs text-white">Obowiązkowy</span>
+                  </label>
+                  <TemplatePresets onInsert={setEditContent} />
                   <button
                     onClick={() => setFullscreen(true)}
                     className="btn-win95 p-1"
-                    title="Pelny ekran"
+                    title="Pełny ekran"
                   >
                     <Maximize2 className="w-4 h-4" />
                   </button>
@@ -158,9 +184,12 @@ export default function MaterialModal({
             <>
               {/* View Header */}
               <div className="flex items-center justify-between px-3 py-1" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
-                <span className="font-[family-name:var(--font-vt323)] text-xl tracking-widest uppercase text-white truncate flex-1">
-                  {selectedMaterial.title}
-                </span>
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <span className="font-[family-name:var(--font-vt323)] text-xl tracking-widest uppercase text-white truncate">
+                    {selectedMaterial.title}
+                  </span>
+                  <MandatoryBadge isMandatory={selectedMaterial.is_mandatory || false} />
+                </div>
                 <div className="flex items-center gap-2 ml-4">
                   {isAdmin && (
                     <button
@@ -183,11 +212,13 @@ export default function MaterialModal({
 
               {/* Content */}
               <div className="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
-                <div
-                  className="prose max-w-none font-mono text-sm"
-                  style={{ color: 'var(--mdt-content-text)', wordWrap: 'break-word', overflowWrap: 'break-word' }}
-                  dangerouslySetInnerHTML={{ __html: selectedMaterial.content }}
-                />
+                <ProtectedContent username={username}>
+                  <div
+                    className="prose max-w-none font-mono text-sm material-content"
+                    style={{ color: 'var(--mdt-content-text)', wordWrap: 'break-word', overflowWrap: 'break-word' }}
+                    dangerouslySetInnerHTML={{ __html: selectedMaterial.content }}
+                  />
+                </ProtectedContent>
               </div>
             </>
           )}

@@ -45,7 +45,7 @@ export function MdtHeader({ currentSection, officerName, onClose }: MdtHeaderPro
         </span>
         <div className="flex gap-1">
           <button
-            className="flex h-7 w-7 items-center justify-center text-base font-bold"
+            className="flex h-7 w-7 items-center justify-center text-base font-bold cursor-pointer hover:brightness-110"
             style={{
               backgroundColor: "var(--mdt-blue-bar)",
               color: "#fff",
@@ -57,7 +57,7 @@ export function MdtHeader({ currentSection, officerName, onClose }: MdtHeaderPro
           </button>
           <button
             onClick={onClose}
-            className="flex h-7 w-7 items-center justify-center text-base font-bold"
+            className="flex h-7 w-7 items-center justify-center text-base font-bold cursor-pointer hover:brightness-110"
             style={{
               backgroundColor: "#c41e1e",
               color: "#fff",

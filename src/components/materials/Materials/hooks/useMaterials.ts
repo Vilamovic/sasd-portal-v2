@@ -6,8 +6,8 @@ import { getAllMaterials, upsertMaterial, deleteMaterialFromDb } from '@/src/lib
  *
  * Features:
  * - Load materials from Supabase (z localStorage cache)
- * - Add new material
- * - Edit existing material
+ * - Add new material (z is_mandatory)
+ * - Edit existing material (z is_mandatory)
  * - Delete material
  * - Auto-refresh after mutations
  */
@@ -46,7 +46,7 @@ export function useMaterials(userId: string | undefined) {
   }, []);
 
   // Add new material
-  const addMaterial = useCallback(async (title: string) => {
+  const addMaterial = useCallback(async (title: string, isMandatory: boolean = false) => {
     if (!title.trim()) {
       throw new Error('Tytuł nie może być pusty.');
     }
@@ -59,6 +59,7 @@ export function useMaterials(userId: string | undefined) {
       title: title.trim(),
       content: '<p>Treść materiału...</p>',
       author_id: userId,
+      is_mandatory: isMandatory,
     };
 
     const { error } = await upsertMaterial(materialData);
@@ -72,7 +73,8 @@ export function useMaterials(userId: string | undefined) {
   const editMaterial = useCallback(async (
     materialId: number,
     title: string,
-    content: string
+    content: string,
+    isMandatory: boolean = false
   ) => {
     if (!title.trim()) {
       throw new Error('Tytuł nie może być pusty.');
@@ -87,6 +89,7 @@ export function useMaterials(userId: string | undefined) {
       title: title.trim(),
       content,
       author_id: userId,
+      is_mandatory: isMandatory,
     };
 
     const { error } = await upsertMaterial(materialData);

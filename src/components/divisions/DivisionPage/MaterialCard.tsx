@@ -8,13 +8,15 @@ import {
   File,
   ArrowRight,
 } from 'lucide-react';
+import MandatoryBadge from '@/src/components/shared/MandatoryBadge';
 
 interface Material {
   id: string;
   title: string;
   description?: string;
-  file_url: string;
-  file_type: string;
+  file_url: string | null;
+  file_type: string | null;
+  is_mandatory?: boolean;
 }
 
 interface DivisionConfig {
@@ -46,7 +48,7 @@ export default function MaterialCard({
   onEdit,
   onDelete,
 }: MaterialCardProps) {
-  const getFileIcon = (fileType: string) => {
+  const getFileIcon = (fileType: string | null) => {
     switch (fileType) {
       case 'pdf':
         return <FileText className="w-6 h-6 text-white" />;
@@ -65,7 +67,7 @@ export default function MaterialCard({
     <div className="panel-raised" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
       {/* Blue header bar with title */}
       <div className="px-3 py-2 flex items-center justify-between" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
           <div
             className="w-6 h-6 flex items-center justify-center"
             style={{ backgroundColor: divisionConfig.color }}
@@ -75,6 +77,7 @@ export default function MaterialCard({
           <span className="font-[family-name:var(--font-vt323)] text-sm tracking-wide text-white truncate">
             {material.title}
           </span>
+          <MandatoryBadge isMandatory={material.is_mandatory || false} />
         </div>
 
         {/* Edit/Delete Buttons (Edit Mode Only) */}
@@ -110,18 +113,20 @@ export default function MaterialCard({
         )}
 
         {/* Footer */}
-        <div className="flex items-center justify-end">
-          <a
-            href={material.file_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-win95 flex items-center gap-1"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <span className="font-mono text-xs">Otworz material</span>
-            <ArrowRight className="w-3 h-3" />
-          </a>
-        </div>
+        {material.file_url && (
+          <div className="flex items-center justify-end">
+            <a
+              href={material.file_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-win95 flex items-center gap-1"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <span className="font-mono text-xs">Otwórz materiał</span>
+              <ArrowRight className="w-3 h-3" />
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );

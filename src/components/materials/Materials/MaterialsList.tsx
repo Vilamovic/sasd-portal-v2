@@ -1,4 +1,5 @@
 import { BookOpen, Trash2, FileText, ArrowRight } from 'lucide-react';
+import MandatoryBadge from '@/src/components/shared/MandatoryBadge';
 
 interface MaterialsListProps {
   materials: any[];
@@ -43,59 +44,58 @@ export default function MaterialsList({
       {materials.map((material) => (
         <div
           key={material.id}
-          className="relative"
+          className="relative panel-raised overflow-hidden"
+          style={{ backgroundColor: 'var(--mdt-btn-face)' }}
         >
-          {/* Main Card */}
-          <button
-            onClick={() => onSelectMaterial(material)}
-            className="relative w-full panel-raised text-left overflow-hidden"
-            style={{ backgroundColor: 'var(--mdt-btn-face)' }}
-          >
-            {/* Blue header with title */}
-            <div className="px-3 py-1 flex items-center justify-between" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
-              <span className="font-[family-name:var(--font-vt323)] text-base tracking-widest uppercase text-white truncate flex-1">
+          {/* Blue header with title + badge */}
+          <div className="px-3 py-1 flex items-center justify-between" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <span className="font-[family-name:var(--font-vt323)] text-base tracking-widest uppercase text-white truncate">
                 {material.title}
               </span>
-              {/* Delete Button (Edit Mode Only) */}
-              {isAdmin && editMode && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(material.id, material.title);
-                  }}
-                  className="btn-win95 ml-2 p-1"
-                  style={{ backgroundColor: '#c41e1e', color: '#fff', borderColor: '#ff4444 #800000 #800000 #ff4444' }}
-                  title="Usuń materiał"
-                >
-                  <Trash2 className="w-3 h-3" />
-                </button>
-              )}
+              <MandatoryBadge isMandatory={material.is_mandatory || false} />
             </div>
 
-            <div className="p-4">
-              {/* Icon + Content Preview */}
-              <div className="flex items-start gap-3 mb-3">
-                <div className="panel-inset p-2 flex-shrink-0" style={{ backgroundColor: 'var(--mdt-panel-alt)' }}>
-                  <FileText className="w-5 h-5" style={{ color: 'var(--mdt-content-text)' }} strokeWidth={2} />
-                </div>
-                <div
-                  className="font-mono text-xs leading-relaxed line-clamp-3"
-                  style={{ color: 'var(--mdt-muted-text)' }}
-                  dangerouslySetInnerHTML={{
-                    __html:
-                      material.content.replace(/<[^>]*>/g, ' ').substring(0, 150) +
-                      '...',
-                  }}
-                />
-              </div>
+            {/* Delete Button (Edit Mode Only) */}
+            {isAdmin && editMode && (
+              <button
+                onClick={() => onDelete(material.id, material.title)}
+                className="btn-win95 ml-2 p-1"
+                style={{ backgroundColor: '#c41e1e', color: '#fff', borderColor: '#ff4444 #800000 #800000 #ff4444' }}
+                title="Usuń materiał"
+              >
+                <Trash2 className="w-3 h-3" />
+              </button>
+            )}
+          </div>
 
-              {/* Footer */}
-              <div className="panel-inset flex items-center justify-between px-2 py-1" style={{ backgroundColor: 'var(--mdt-panel-alt)' }}>
-                <span className="font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>Kliknij aby otworzyc</span>
-                <ArrowRight className="w-3 h-3" style={{ color: 'var(--mdt-content-text)' }} />
+          {/* Clickable content area */}
+          <div
+            onClick={() => onSelectMaterial(material)}
+            className="p-4 cursor-pointer hover:bg-[var(--mdt-surface-light)] transition-colors"
+          >
+            {/* Icon + Content Preview */}
+            <div className="flex items-start gap-3 mb-3">
+              <div className="panel-inset p-2 flex-shrink-0" style={{ backgroundColor: 'var(--mdt-panel-alt)' }}>
+                <FileText className="w-5 h-5" style={{ color: 'var(--mdt-content-text)' }} strokeWidth={2} />
               </div>
+              <div
+                className="font-mono text-xs leading-relaxed line-clamp-3"
+                style={{ color: 'var(--mdt-muted-text)' }}
+                dangerouslySetInnerHTML={{
+                  __html:
+                    material.content.replace(/<[^>]*>/g, ' ').substring(0, 150) +
+                    '...',
+                }}
+              />
             </div>
-          </button>
+
+            {/* Footer */}
+            <div className="panel-inset flex items-center justify-between px-2 py-1" style={{ backgroundColor: 'var(--mdt-panel-alt)' }}>
+              <span className="font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>Kliknij aby otworzyć</span>
+              <ArrowRight className="w-3 h-3" style={{ color: 'var(--mdt-content-text)' }} />
+            </div>
+          </div>
         </div>
       ))}
     </div>

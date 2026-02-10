@@ -10,9 +10,10 @@ interface Material {
   id: string;
   title: string;
   description?: string;
-  file_url: string;
-  file_type: string;
+  file_url: string | null;
+  file_type: string | null;
   thumbnail_url?: string;
+  is_mandatory?: boolean;
 }
 
 interface UseDivisionMaterialsParams {
@@ -32,6 +33,7 @@ interface UseDivisionMaterialsReturn {
   formFileUrl: string;
   formFileType: string;
   formThumbnailUrl: string;
+  isMandatory: boolean;
   setEditMode: (value: boolean) => void;
   setShowAddForm: (value: boolean) => void;
   setFormTitle: (value: string) => void;
@@ -39,6 +41,7 @@ interface UseDivisionMaterialsReturn {
   setFormFileUrl: (value: string) => void;
   setFormFileType: (value: string) => void;
   setFormThumbnailUrl: (value: string) => void;
+  setIsMandatory: (value: boolean) => void;
   handleAddMaterial: () => Promise<void>;
   handleUpdateMaterial: () => Promise<void>;
   handleDeleteMaterial: (materialId: string, materialTitle: string) => Promise<void>;
@@ -72,6 +75,7 @@ export function useDivisionMaterials({
   const [formFileUrl, setFormFileUrl] = useState('');
   const [formFileType, setFormFileType] = useState('pdf');
   const [formThumbnailUrl, setFormThumbnailUrl] = useState('');
+  const [isMandatory, setIsMandatory] = useState(false);
 
   const submittingRef = useRef(false);
 
@@ -113,6 +117,7 @@ export function useDivisionMaterials({
         file_url: formFileUrl.trim() || null,
         file_type: formFileType || null,
         thumbnail_url: formThumbnailUrl.trim() || null,
+        is_mandatory: isMandatory,
         order_index: materials.length,
       };
 
@@ -146,6 +151,7 @@ export function useDivisionMaterials({
         file_url: formFileUrl.trim() || null,
         file_type: formFileType || null,
         thumbnail_url: formThumbnailUrl.trim() || null,
+        is_mandatory: isMandatory,
       };
 
       const { error } = await updateDivisionMaterial(selectedMaterial.id, materialData);
@@ -185,15 +191,20 @@ export function useDivisionMaterials({
     setFormFileUrl('');
     setFormFileType('pdf');
     setFormThumbnailUrl('');
+    setIsMandatory(false);
+    setShowAddForm(false);
+    setIsEditing(false);
+    setSelectedMaterial(null);
   };
 
   const openEditForm = (material: Material) => {
     setSelectedMaterial(material);
     setFormTitle(material.title);
     setFormDescription(material.description || '');
-    setFormFileUrl(material.file_url);
+    setFormFileUrl(material.file_url || '');
     setFormFileType(material.file_type || 'pdf');
     setFormThumbnailUrl(material.thumbnail_url || '');
+    setIsMandatory(material.is_mandatory || false);
     setIsEditing(true);
   };
 
@@ -220,6 +231,7 @@ export function useDivisionMaterials({
     formFileUrl,
     formFileType,
     formThumbnailUrl,
+    isMandatory,
     setEditMode,
     setShowAddForm,
     setFormTitle,
@@ -227,6 +239,7 @@ export function useDivisionMaterials({
     setFormFileUrl,
     setFormFileType,
     setFormThumbnailUrl,
+    setIsMandatory,
     handleAddMaterial,
     handleUpdateMaterial,
     handleDeleteMaterial,

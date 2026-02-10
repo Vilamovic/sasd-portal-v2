@@ -206,7 +206,105 @@ Zmienione pliki: [ścieżki]
 
 ---
 
-Last Updated: 2026-02-08 - MDT Terminal Theme Migration COMPLETE + Polish Diacritics
+### 📋 System Zgłoszeń - Faza 3: Egzaminy Praktyczne (2026-02-09)
+
+**Status:** ✅ COMPLETED - Commits: 4fcb559, 4dbbb96, 31cceb5
+
+**Key Features:**
+- WeeklyCalendar z clustering algorithm (Stash approach dla overlapping slotów)
+- SlotClusterPopup: Win95 modal z listą slotów w klastrze
+- 4 typy egzaminów: Trainee (1h), Pościgowy (1h), SWAT (15min), SEU (1h)
+- Fixed durations: auto-obliczanie time_end z typu (usunięto manual time_end)
+- ExamBookingPage: filtr typu, nawigacja tygodni, toggle ZAKOŃCZONE (domyślnie OFF)
+- ExamManagementPage (CS+): tworzenie slotów, lista zarezerwowanych + wolnych, zapis wyniku
+- ExamHistoryPage (CS+ only): historia wyników z filtrami i AccessDenied guard
+- Archive system: ArchivedSubmissionsPage + ArchivedExamResultsPage (30/page, sortowanie, filtry)
+- Exam eligibility:
+  - CS/HCS/DEV bypass ALL restrictions
+  - Self-booking blocked (nie można zapisać się na własny slot)
+  - Trainee exam: tylko rola trainee
+  - Permission exams (SWAT/SEU/Pościgowy): blokada jeśli user ma daną permisję
+- Discord webhook: rezerwacja + anulowanie + usunięcie slotu
+- Slot deletion: CS+ może usuwać wolne i zarezerwowane sloty (twórca lub dev)
+
+**Database:**
+- Tables: `exam_slots`, `practical_exam_results`
+- SQL 017: CHECK constraint fix for submissions 'archived' status
+- SQL 018: Archive columns for practical_exam_results (is_archived, archived_at, archived_by)
+- RLS: UPDATE policy for practical_exam_results (cs/hcs/dev)
+- ⚠️ SQL 017, 018, RLS fix need execution in Supabase if not done yet
+
+**New Routes:**
+- `/zgloszenia/egzamin` → ExamBookingPage (kalendarz)
+- `/zgloszenia/egzamin/management` → ExamManagementPage (CS+)
+- `/zgloszenia/egzamin/history` → ExamHistoryPage (CS+)
+- `/zgloszenia/egzamin/management/archived` → ArchivedExamResultsPage (CS+)
+- `/zgloszenia/management/archived` → ArchivedSubmissionsPage (CS+)
+
+**New Components:**
+- `src/components/zgloszenia/exam/components/SlotClusterPopup.tsx`
+- `src/components/zgloszenia/exam/ArchivedExamResultsPage.tsx`
+- `src/components/zgloszenia/admin/ArchivedSubmissionsPage.tsx`
+
+---
+
+### 📚 System Materiałów - Enhanced Formatting (2026-02-09)
+
+**Status:** ✅ COMPLETED - Migration 019 + 13 plików zmodyfikowanych
+
+**Cel:** Uporządkować wygląd materiałów poprzez lepsze formatowanie + zabezpieczenia copy protection
+
+**Key Features:**
+- **Enhanced QuillEditor**: Nagłówki (H1, H2, H3), kolory tekstu/tła, wklejanie obrazków
+- **Template Presets**: 5 gotowych szablonów HTML (Procedura, Regulamin, Materiał Dywizji, Lista kroków, Pusty)
+- **is_mandatory field**: Checkbox + badge (czerwony OBOWIĄZKOWY / szary DODATKOWY) + filtr
+- **Copy Protection**: Watermark z username, user-select: none, DevTools detection + blur
+- **MDT Theme fix**: QuillEditor emoji picker z CSS variables (usunięto hardcoded Sheriff colors)
+
+**Database:**
+- SQL 019: `is_mandatory BOOLEAN DEFAULT FALSE` dla `materials` + `division_materials`
+- Wszystkie istniejące materiały defaulted to FALSE (nieobowiązkowe)
+- No RLS changes (existing policies cs/hcs/dev already grant access)
+
+**New Shared Components** (4):
+- `src/components/shared/MandatoryBadge.tsx` - Badge obowiązkowy/dodatkowy
+- `src/components/shared/MaterialFilter.tsx` - Filtr (wszystkie/obowiązkowe/dodatkowe)
+- `src/components/shared/ProtectedContent.tsx` - Copy protection wrapper (watermark, DevTools blur)
+- `src/components/shared/TemplatePresets.tsx` - Dropdown z 5 szablonami HTML
+
+**Modified Components** (5):
+- `src/components/shared/QuillEditor.tsx` - +Headers, +Colors, +Image, MDT CSS variables fix
+- `src/components/divisions/DivisionPage/MaterialCard.tsx` - +MandatoryBadge
+- `src/components/materials/Materials/MaterialModal.tsx` - +ProtectedContent wrapper
+- `src/components/divisions/DivisionPage/MaterialForm.tsx` - +Checkbox is_mandatory, +TemplatePresets
+- `src/components/divisions/DivisionPage/DivisionPage.tsx` - Propagacja is_mandatory props
+
+**Modified Hooks** (1):
+- `src/components/divisions/DivisionPage/hooks/useDivisionMaterials.ts` - +isMandatory state + CRUD
+
+**QuillEditor Toolbar (Enhanced):**
+```
+[Header 1/2/3] [Font] [Bold/Italic/Underline/Strike]
+[Super/Sub] [Text Color/Background Color]
+[Blockquote/Code] [Lists] [Align]
+[Link/Image] [Divider/Emoji/Undo] [Clean]
+```
+
+**Copy Protection Details:**
+- `user-select: none` - blokuje zaznaczanie tekstu (CSS)
+- Watermark - semi-transparent username overlay (opacity 0.05, 45° rotation, VT323 font)
+- DevTools detection - sprawdza outerWidth/innerHeight diff co 1s, blur(10px) + warning overlay
+
+**Template Presets:**
+1. **Procedura (FTS/Pościg)**: I. INICJACJA, II. MELDUNEK, III. PROCEDURA KROK PO KROKU
+2. **Regulamin/Zasady**: I. DEFINICJA, II. SZYKI I STRUKTURA, III. PROCEDURA
+3. **Materiał Dywizji**: Charakterystyka (Definicja, Zakres, Obowiązki, Przywileje, Profil kandydata)
+4. **Lista kroków**: Numerowana lista z bold headers
+5. **Pusty**: Czyści editor
+
+---
+
+Last Updated: 2026-02-09 - Enhanced Materials + Copy Protection
 
 **Session History (2026-02-08):**
 - Production Bugfixes: 6/6 critical bugs ✅ (commits: f0bcb5a → c2c6500)
@@ -214,4 +312,23 @@ Last Updated: 2026-02-08 - MDT Terminal Theme Migration COMPLETE + Polish Diacri
 - Polish diacritics: Fixed across all components ✅
 - New MDT Terminal page: /divisions/dtu/mdt ✅
 - Dark mode: CSS variables + localStorage toggle ✅
+- Build: ✅ SUCCESS
+
+**Session History (2026-02-09 AM):**
+- Exam System Enhancements: 3 commits ✅ (4fcb559 → 31cceb5)
+- Fixed durations: Trainee=1h, Pościgowy=1h, SWAT=15min, SEU=1h ✅
+- Calendar: Stash clustering + toggle ZAKOŃCZONE ✅
+- Archive: Submissions + Exam Results (pagination, sorting) ✅
+- Eligibility: CS+ bypass, self-booking block, rank/permission checks ✅
+- Slot management: Available + booked slots visible, delete option ✅
+- ExamHistoryPage: CS+ only with AccessDenied guard ✅
+- Build: ✅ SUCCESS
+
+**Session History (2026-02-09 PM):**
+- Enhanced Materials System: 13 plików zmodyfikowanych ✅
+- QuillEditor: +Headers (H1/H2/H3), +Colors, +Image, MDT CSS fix ✅
+- Template Presets: 5 szablonów HTML (Procedura, Regulamin, Dywizja, Lista, Pusty) ✅
+- is_mandatory field: SQL 019 migration + checkbox + badge + filtr ✅
+- Copy Protection: watermark + user-select:none + DevTools blur ✅
+- 4 new shared components (MandatoryBadge, MaterialFilter, ProtectedContent, TemplatePresets) ✅
 - Build: ✅ SUCCESS

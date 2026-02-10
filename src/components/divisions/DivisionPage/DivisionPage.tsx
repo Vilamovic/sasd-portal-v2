@@ -1,8 +1,10 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useDivisionMaterials } from './hooks/useDivisionMaterials';
 import BackButton from '@/src/components/shared/BackButton';
+import MaterialFilter from '@/src/components/shared/MaterialFilter';
 import PageHeader from './PageHeader';
 import EditModeInfo from './EditModeInfo';
 import MaterialForm from './MaterialForm';
@@ -21,9 +23,32 @@ interface DivisionPageProps {
  * - Add/Edit/Delete materials (Commander/Admin only)
  * - Edit mode toggle
  * - Material cards grid
+ * - MaterialFilter (obowiązkowe/dodatkowe)
  */
 export default function DivisionPage({ divisionId, onBack }: DivisionPageProps) {
   const { user, loading, division, isAdmin, isDev, isCommander } = useAuth();
+  const [filter, setFilter] = useState<'all' | 'mandatory' | 'optional'>('all');
+  const [devToolsBlocked, setDevToolsBlocked] = useState(false);
+
+  // Block DevTools + right-click on division materials page
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'F12') { e.preventDefault(); setDevToolsBlocked(true); return; }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
+        const key = e.key.toLowerCase();
+        if (key === 'i' || key === 'j' || key === 'c') { e.preventDefault(); setDevToolsBlocked(true); return; }
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'u') { e.preventDefault(); setDevToolsBlocked(true); return; }
+    };
+    const handleContextMenu = (e: MouseEvent) => { e.preventDefault(); };
+
+    document.addEventListener('keydown', handleKeyDown, true);
+    document.addEventListener('contextmenu', handleContextMenu, true);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown, true);
+      document.removeEventListener('contextmenu', handleContextMenu, true);
+    };
+  }, []);
 
   // Division config
   const divisionConfig: Record<string, { name: string; color: string; textColor: string }> = {
@@ -68,14 +93,10 @@ export default function DivisionPage({ divisionId, onBack }: DivisionPageProps) 
     isEditing,
     formTitle,
     formDescription,
-    formFileUrl,
-    formFileType,
-    formThumbnailUrl,
+    isMandatory,
     setFormTitle,
     setFormDescription,
-    setFormFileUrl,
-    setFormFileType,
-    setFormThumbnailUrl,
+    setIsMandatory,
     handleAddMaterial,
     handleUpdateMaterial,
     handleDeleteMaterial,
@@ -84,6 +105,17 @@ export default function DivisionPage({ divisionId, onBack }: DivisionPageProps) 
     handleToggleEditMode,
     handleToggleAddForm,
   } = useDivisionMaterials({ divisionId, hasAccess });
+
+  // Computed: filtered materials
+  const filteredMaterials = materials.filter((m) => {
+    if (filter === 'all') return true;
+    if (filter === 'mandatory') return m.is_mandatory;
+    if (filter === 'optional') return !m.is_mandatory;
+    return true;
+  });
+
+  const mandatoryCount = materials.filter((m) => m.is_mandatory).length;
+  const optionalCount = materials.filter((m) => !m.is_mandatory).length;
 
   // Loading state
   if (loading || !user) {
@@ -94,15 +126,6 @@ export default function DivisionPage({ divisionId, onBack }: DivisionPageProps) 
   if (!hasAccess) {
     return null;
   }
-
-  const handleFormCancel = () => {
-    resetForm();
-    setFormTitle('');
-    setFormDescription('');
-    setFormFileUrl('');
-    setFormFileType('pdf');
-    setFormThumbnailUrl('');
-  };
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--mdt-content)' }}>
@@ -122,22 +145,31 @@ export default function DivisionPage({ divisionId, onBack }: DivisionPageProps) 
           onToggleAddForm={handleToggleAddForm}
         />
 
+        {/* Material Filter */}
+        {materials.length > 0 && (
+          <div className="mb-4">
+            <MaterialFilter
+              value={filter}
+              onChange={setFilter}
+              totalCount={materials.length}
+              mandatoryCount={mandatoryCount}
+              optionalCount={optionalCount}
+            />
+          </div>
+        )}
+
         {/* Add/Edit Form */}
         {(showAddForm || isEditing) && canManage && (
           <MaterialForm
             isEditing={isEditing}
             formTitle={formTitle}
             formDescription={formDescription}
-            formFileUrl={formFileUrl}
-            formFileType={formFileType}
-            formThumbnailUrl={formThumbnailUrl}
+            isMandatory={isMandatory}
             onTitleChange={setFormTitle}
             onDescriptionChange={setFormDescription}
-            onFileUrlChange={setFormFileUrl}
-            onFileTypeChange={setFormFileType}
-            onThumbnailUrlChange={setFormThumbnailUrl}
+            onMandatoryChange={setIsMandatory}
             onSubmit={isEditing ? handleUpdateMaterial : handleAddMaterial}
-            onCancel={handleFormCancel}
+            onCancel={resetForm}
           />
         )}
 
@@ -145,11 +177,11 @@ export default function DivisionPage({ divisionId, onBack }: DivisionPageProps) 
         {canManage && editMode && <EditModeInfo />}
 
         {/* Materials Grid or Empty State */}
-        {materials.length === 0 ? (
+        {filteredMaterials.length === 0 ? (
           <EmptyState canManage={canManage} loading={loadingMaterials} />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {materials.map((material, index) => (
+            {filteredMaterials.map((material, index) => (
               <MaterialCard
                 key={material.id}
                 material={material}
@@ -164,6 +196,23 @@ export default function DivisionPage({ divisionId, onBack }: DivisionPageProps) 
           </div>
         )}
       </div>
+
+      {/* DevTools blocked overlay */}
+      {devToolsBlocked && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.9)' }}>
+          <div className="panel-raised p-8 text-center max-w-md" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+            <p className="font-[family-name:var(--font-vt323)] text-xl tracking-widest uppercase mb-4" style={{ color: 'var(--mdt-content-text)' }}>
+              Dostęp zabroniony
+            </p>
+            <p className="font-mono text-sm mb-6" style={{ color: 'var(--mdt-muted-text)' }}>
+              Narzędzia deweloperskie są zablokowane na stronie materiałów.
+            </p>
+            <button onClick={() => setDevToolsBlocked(false)} className="btn-win95 font-mono text-sm">
+              Zamknij
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -350,34 +350,243 @@ input[type="week"]:invalid {
 }
 
 /* ============================================ */
+/* Print Protection                             */
+/* ============================================ */
+@media print {
+  .protected-content > *:not(.protected-print-block) {
+    display: none !important;
+  }
+  .protected-print-block {
+    display: block !important;
+  }
+}
+.protected-print-block {
+  display: none;
+}
+
+/* ============================================ */
 /* React Quill Overrides (MDT Theme)            */
 /* ============================================ */
 .ql-toolbar {
-  background-color: var(--mdt-header);
-  border-color: var(--border);
+  background-color: var(--mdt-btn-face);
+  border: 2px solid;
+  border-color: var(--mdt-btn-highlight) var(--mdt-btn-dark-shadow) var(--mdt-btn-dark-shadow) var(--mdt-btn-highlight);
   border-radius: 0;
+  padding: 6px 8px !important;
+}
+
+.ql-toolbar .ql-formats {
+  margin-right: 8px !important;
+  padding-right: 8px;
+  border-right: 1px solid var(--mdt-border-mid);
+}
+.ql-toolbar .ql-formats:last-child {
+  border-right: none;
+  margin-right: 0 !important;
+  padding-right: 0;
 }
 
 .ql-container {
-  background-color: var(--mdt-input-bg);
-  border-color: var(--border);
+  background-color: #ffffff;
+  border: 2px solid;
+  border-color: var(--mdt-btn-dark-shadow) var(--mdt-btn-highlight) var(--mdt-btn-highlight) var(--mdt-btn-dark-shadow);
   border-radius: 0;
-  color: var(--mdt-content-text);
+  color: #1a1a1a;
+}
+
+[data-theme="dark"] .ql-container {
+  background-color: #1e1e1e;
+  color: #d4d4d4;
 }
 
 .quill-editor-wrapper .ql-container {
   min-height: var(--quill-min-height, 450px);
 }
 
+.ql-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
 .ql-editor {
-  color: var(--mdt-content-text);
+  color: #1a1a1a;
   font-family: var(--font-space-mono), 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  padding: 16px 20px;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+[data-theme="dark"] .ql-editor {
+  color: #d4d4d4;
 }
 
 .ql-editor.ql-blank::before {
-  color: #888;
+  color: var(--mdt-muted-text);
+  font-style: normal;
 }
 
+/* Quill headings - consistent look */
+.ql-editor h1 {
+  font-family: var(--font-vt323), monospace;
+  font-size: 24px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  border-bottom: 2px solid var(--mdt-border-mid);
+  padding-bottom: 6px;
+  margin-bottom: 12px;
+  margin-top: 20px;
+  color: var(--mdt-blue-bar);
+}
+
+.ql-editor h2 {
+  font-family: var(--font-vt323), monospace;
+  font-size: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  margin-top: 16px;
+  color: var(--mdt-content-text);
+}
+
+.ql-editor h3 {
+  font-family: var(--font-vt323), monospace;
+  font-size: 17px;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  margin-top: 12px;
+  color: var(--mdt-content-text);
+}
+
+/* Material content headings (view mode) */
+.material-content h1 {
+  font-family: var(--font-vt323), monospace;
+  font-size: 24px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  border-bottom: 2px solid var(--mdt-border-mid);
+  padding-bottom: 6px;
+  margin-bottom: 12px;
+  margin-top: 20px;
+  color: var(--mdt-blue-bar);
+}
+
+.material-content h2 {
+  font-family: var(--font-vt323), monospace;
+  font-size: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  margin-top: 16px;
+}
+
+.material-content h3 {
+  font-family: var(--font-vt323), monospace;
+  font-size: 17px;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  margin-top: 12px;
+}
+
+.material-content ol,
+.material-content ul {
+  padding-left: 24px;
+  margin-bottom: 12px;
+}
+
+.material-content li {
+  margin-bottom: 4px;
+}
+
+.material-content p {
+  margin-bottom: 8px;
+}
+
+.material-content blockquote {
+  border-left: 3px solid var(--mdt-blue-bar);
+  padding-left: 12px;
+  margin: 12px 0;
+  color: var(--mdt-muted-text);
+}
+
+/* Material content - text alignment (Quill uses ql-align-* classes) */
+.material-content .ql-align-center { text-align: center; }
+.material-content .ql-align-right { text-align: right; }
+.material-content .ql-align-justify { text-align: justify; }
+
+/* Material content - word wrapping */
+.material-content {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Material content - link styling */
+.material-content a,
+.ql-editor a {
+  color: var(--mdt-blue-bar);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.material-content a:hover,
+.ql-editor a:hover {
+  opacity: 0.8;
+}
+
+/* Material content - image styling */
+.material-content img,
+.ql-editor img {
+  max-width: 100%;
+  height: auto;
+  margin: 8px 0;
+  border: 2px solid var(--mdt-border-mid);
+}
+
+/* Editor - image resize handles */
+.ql-editor img {
+  cursor: pointer;
+}
+.ql-editor img.ql-img-small { width: 200px; }
+.ql-editor img.ql-img-medium { width: 400px; }
+.ql-editor img.ql-img-large { width: 600px; }
+.ql-editor img.ql-img-full { width: 100%; }
+
+/* Video embed styling (YouTube/Vimeo) */
+.ql-editor .ql-video,
+.material-content iframe,
+.material-content .ql-video {
+  display: block;
+  max-width: 100%;
+  width: 640px;
+  height: 360px;
+  margin: 12px 0;
+  border: 2px solid var(--mdt-border-mid);
+  background: #000;
+}
+
+/* Toolbar video button tooltip */
+.ql-toolbar .ql-video::before {
+  content: none;
+}
+
+/* Editor lists */
+.ql-editor ol,
+.ql-editor ul {
+  padding-left: 24px;
+}
+
+.ql-editor li {
+  margin-bottom: 4px;
+}
+
+.ql-editor blockquote {
+  border-left: 3px solid var(--mdt-blue-bar);
+  padding-left: 12px;
+  color: var(--mdt-muted-text);
+}
+
+/* Toolbar button states */
 .ql-toolbar button:hover,
 .ql-toolbar button.ql-active,
 .ql-toolbar .ql-picker-label:hover,
@@ -400,6 +609,13 @@ input[type="week"]:invalid {
   border-color: var(--border);
 }
 
+/* Quill picker labels (header, font, etc.) */
+.ql-toolbar .ql-picker-label {
+  color: var(--mdt-btn-text);
+  border: 1px solid var(--mdt-border-mid);
+  padding: 2px 4px;
+}
+
 /* Custom toolbar buttons */
 .ql-toolbar .ql-divider::after {
   content: '—';
@@ -420,19 +636,30 @@ input[type="week"]:invalid {
 /* Horizontal rule styling in editor */
 .ql-editor hr {
   border: none;
-  border-top: 2px solid #808080;
-  margin: 1rem 0;
+  border-top: 2px solid var(--mdt-border-mid);
+  margin: 16px 0;
 }
 
 /* Quill toolbar icon colors for MDT */
 .ql-toolbar .ql-stroke {
-  stroke: var(--mdt-header-text);
+  stroke: var(--mdt-btn-text);
 }
 
 .ql-toolbar .ql-fill {
-  fill: var(--mdt-header-text);
+  fill: var(--mdt-btn-text);
 }
 
-.ql-toolbar .ql-picker-label {
-  color: var(--mdt-header-text);
+/* Header picker display */
+.ql-toolbar .ql-header .ql-picker-item[data-value="1"]::before {
+  content: 'Nagłówek 1';
+}
+.ql-toolbar .ql-header .ql-picker-item[data-value="2"]::before {
+  content: 'Nagłówek 2';
+}
+.ql-toolbar .ql-header .ql-picker-item[data-value="3"]::before {
+  content: 'Nagłówek 3';
+}
+.ql-toolbar .ql-header .ql-picker-item[data-value=""]::before,
+.ql-toolbar .ql-header .ql-picker-item:not([data-value])::before {
+  content: 'Normalny';
 }
