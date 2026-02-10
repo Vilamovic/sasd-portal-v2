@@ -1,5 +1,5 @@
-import ArchivedExamResultsPage from '@/src/components/zgloszenia/exam/ArchivedExamResultsPage';
+import { redirect } from 'next/navigation';
 
 export default function Page() {
-  return <ArchivedExamResultsPage />;
+  redirect('/exams/practical/management/archived');
 }

@@ -1,14 +1,14 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Bug, Shield, Lightbulb, Calendar, FileText, Target, ArrowLeftRight } from 'lucide-react';
+import { Bug, Shield, Lightbulb, Calendar, FileText, ArrowLeftRight } from 'lucide-react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import BackButton from '@/src/components/shared/BackButton';
 import { SUBMISSION_TYPES } from './types';
 import type { SubmissionTypeConfig } from './types';
 
 const ICON_MAP: Record<string, any> = {
-  Bug, Shield, Lightbulb, Calendar, FileText, Target, ArrowLeftRight,
+  Bug, Shield, Lightbulb, Calendar, FileText, ArrowLeftRight,
 };
 
 export default function ZgloszeniaPage() {
@@ -60,11 +60,7 @@ export default function ZgloszeniaPage() {
               key={typeConfig.type}
               config={typeConfig}
               onClick={() => {
-                if (typeConfig.type === 'exam_booking') {
-                  router.push('/zgloszenia/egzamin');
-                } else {
-                  router.push(`/zgloszenia/${typeConfig.type}`);
-                }
+                router.push(`/zgloszenia/${typeConfig.type}`);
               }}
             />
           ))}
@@ -103,7 +99,7 @@ function SubmissionTypeCard({ config, onClick }: { config: SubmissionTypeConfig;
         </p>
 
         <div className="btn-win95 w-full text-sm text-center">
-          {isDisabled ? 'NIEDOSTĘPNE' : config.type === 'exam_booking' ? 'OTWÓRZ KALENDARZ' : 'ZŁÓŻ WNIOSEK'}
+          {isDisabled ? 'NIEDOSTĘPNE' : 'ZŁÓŻ WNIOSEK'}
         </div>
       </div>
     </button>

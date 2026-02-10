@@ -155,7 +155,7 @@ export default function ExamBookingPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--mdt-content)' }}>
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <BackButton onClick={() => router.push('/zgloszenia')} destination="Zgłoszenia" />
+        <BackButton onClick={() => router.push('/exams')} destination="Egzaminy" />
 
         {/* Page Header */}
         <div className="px-4 py-2 mb-6" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
@@ -168,14 +168,14 @@ export default function ExamBookingPage() {
         {isCS && (
           <div className="flex flex-wrap gap-2 mb-4">
             <button
-              onClick={() => router.push('/zgloszenia/egzamin/management')}
+              onClick={() => router.push('/exams/practical/management')}
               className="btn-win95 font-mono text-xs flex items-center gap-1"
             >
               <Settings className="w-3 h-3" />
               ZARZĄDZANIE
             </button>
             <button
-              onClick={() => router.push('/zgloszenia/egzamin/history')}
+              onClick={() => router.push('/exams/practical/history')}
               className="btn-win95 font-mono text-xs flex items-center gap-1"
             >
               <History className="w-3 h-3" />

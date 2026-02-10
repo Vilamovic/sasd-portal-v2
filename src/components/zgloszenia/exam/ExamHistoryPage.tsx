@@ -45,12 +45,12 @@ export default function ExamHistoryPage() {
     }
   };
 
-  if (!isCS) return <AccessDenied onBack={() => router.push('/zgloszenia/egzamin')} message="Brak uprawnień. Wyniki egzaminów są dostępne tylko dla CS/HCS/DEV." />;
+  if (!isCS) return <AccessDenied onBack={() => router.push('/exams/practical')} message="Brak uprawnień. Wyniki egzaminów są dostępne tylko dla CS/HCS/DEV." />;
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--mdt-content)' }}>
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <BackButton onClick={() => router.push('/zgloszenia/egzamin')} destination="Kalendarz" />
+        <BackButton onClick={() => router.push('/exams/practical')} destination="Kalendarz" />
 
         {/* Page Header */}
         <div className="px-4 py-2 mb-6" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>

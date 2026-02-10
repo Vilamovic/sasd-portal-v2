@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { Search, Filter, Archive, Trash2, X, Calendar, Clock, FileText } from 'lucide-react';
-import { getAllExamResultsNonArchived, getAllExamResultsArchived, archiveExamResult, deleteExamResult } from '@/src/lib/db/exams';
+import { getAllExamResultsNonArchived, getAllExamResultsArchived, archiveExamResult, archiveBatchExamResults, deleteExamResult } from '@/src/lib/db/exams';
 import BackButton from '@/src/components/shared/BackButton';
 
 /**
@@ -20,6 +20,7 @@ export default function ExamResultsViewer({ mode = 'active' }: { mode?: 'active'
   const [filterExamType, setFilterExamType] = useState('all');
   const [selectedResult, setSelectedResult] = useState<any>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const isArchiveMode = mode === 'archived';
   const pageTitle = isArchiveMode ? 'Archiwum Egzaminów' : 'Statystyki Egzaminów';
@@ -34,6 +35,7 @@ export default function ExamResultsViewer({ mode = 'active' }: { mode?: 'active'
   const loadResults = async () => {
     try {
       setLoading(true);
+      setSelectedIds(new Set());
       const fetchFunction = isArchiveMode ? getAllExamResultsArchived : getAllExamResultsNonArchived;
       const { data, error } = await fetchFunction();
 
@@ -87,6 +89,38 @@ export default function ExamResultsViewer({ mode = 'active' }: { mode?: 'active'
   const closeDetailsModal = () => {
     setShowDetailsModal(false);
     setSelectedResult(null);
+  };
+
+  const handleBatchArchive = async () => {
+    if (selectedIds.size === 0) return;
+    if (!confirm(`Czy na pewno chcesz zarchiwizować ${selectedIds.size} wyników?`)) return;
+    try {
+      const { error } = await archiveBatchExamResults(Array.from(selectedIds));
+      if (error) throw error;
+      setSelectedIds(new Set());
+      await loadResults();
+      alert(`Zarchiwizowano ${selectedIds.size} wyników.`);
+    } catch (error) {
+      console.error('Batch archive error:', error);
+      alert('Błąd podczas archiwizacji.');
+    }
+  };
+
+  const toggleSelect = (examId: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(examId)) next.delete(examId);
+      else next.add(examId);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filteredResults.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredResults.map(r => r.exam_id)));
+    }
   };
 
   // Access control
@@ -173,6 +207,20 @@ export default function ExamResultsViewer({ mode = 'active' }: { mode?: 'active'
         answer: answerText,
         correct: isCorrect,
         isTimeout: userAnswer === -1,
+        options: options.map((optText: string, optIdx: number) => {
+          const isSelected = Array.isArray(userAnswer)
+            ? userAnswer.includes(optIdx)
+            : userAnswer === optIdx;
+          const isCorrectOption = Array.isArray(q.correct_answers)
+            ? q.correct_answers.includes(optIdx)
+            : false;
+          return {
+            text: optText,
+            label: String.fromCharCode(65 + optIdx),
+            isSelected,
+            isCorrectOption,
+          };
+        }),
       };
     });
   };
@@ -213,10 +261,10 @@ export default function ExamResultsViewer({ mode = 'active' }: { mode?: 'active'
                   <FileText className="w-4 h-4" style={{ color: 'var(--mdt-muted-text)' }} />
                   <span className="font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>WYNIK</span>
                 </div>
-                <p className="font-[family-name:var(--font-vt323)] text-2xl" style={{ color: passed ? '#006400' : '#8b0000' }}>
+                <p className="font-[family-name:var(--font-vt323)] text-2xl" style={{ color: passed ? 'var(--mdt-exam-correct-text)' : 'var(--mdt-exam-wrong-text)' }}>
                   {scorePercentage}%
                 </p>
-                <span className="font-mono text-xs font-bold" style={{ color: passed ? '#006400' : '#8b0000' }}>
+                <span className="font-mono text-xs font-bold" style={{ color: passed ? 'var(--mdt-exam-correct-text)' : 'var(--mdt-exam-wrong-text)' }}>
                   {passed ? 'Zdany' : 'Niezdany'}
                 </span>
               </div>
@@ -270,29 +318,68 @@ export default function ExamResultsViewer({ mode = 'active' }: { mode?: 'active'
                     key={index}
                     className="panel-inset p-3"
                     style={{
-                      backgroundColor: detail.correct ? '#d0e8d0' : '#e8d0d0',
+                      backgroundColor: detail.correct ? 'var(--mdt-exam-correct-bg)' : 'var(--mdt-exam-wrong-bg)',
                     }}
                   >
                     <div className="flex items-start gap-2">
                       <span
                         className="font-mono text-xs font-bold flex-shrink-0 w-5 h-5 flex items-center justify-center"
-                        style={{ color: detail.correct ? '#006400' : '#8b0000' }}
+                        style={{ color: detail.correct ? 'var(--mdt-exam-correct-text)' : 'var(--mdt-exam-wrong-text)' }}
                       >
                         {index + 1}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className="font-mono text-sm mb-1" style={{ color: 'var(--mdt-content-text)' }}>{detail.question}</p>
-                        <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-mono text-sm mb-2" style={{ color: 'var(--mdt-content-text)' }}>{detail.question}</p>
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
                           <span
                             className="font-mono text-xs font-bold"
-                            style={{ color: detail.correct ? '#006400' : '#8b0000' }}
+                            style={{ color: detail.correct ? 'var(--mdt-exam-correct-text)' : 'var(--mdt-exam-wrong-text)' }}
                           >
-                            {detail.correct ? '[OK]' : '[ERR]'}
-                          </span>
-                          <span className="font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>
-                            Odpowiedź: <span className="font-bold" style={{ color: 'var(--mdt-content-text)' }}>{detail.answer}</span>
+                            {detail.correct ? '[OK]' : detail.isTimeout ? '[TIMEOUT]' : '[ERR]'}
                           </span>
                         </div>
+                        {/* All answer options */}
+                        {detail.options && detail.options.length > 0 && (
+                          <div className="space-y-1">
+                            {detail.options.map((opt: any) => {
+                              let bgColor = 'var(--mdt-exam-option-neutral)';
+                              let textColor = 'var(--mdt-content-text)';
+                              let badge = '';
+                              if (opt.isSelected && opt.isCorrectOption) {
+                                bgColor = 'var(--mdt-exam-option-correct)';
+                                textColor = 'var(--mdt-exam-correct-text)';
+                                badge = 'TWOJA / POPRAWNA';
+                              } else if (opt.isCorrectOption) {
+                                bgColor = 'var(--mdt-exam-option-correct)';
+                                textColor = 'var(--mdt-exam-correct-text)';
+                                badge = 'POPRAWNA';
+                              } else if (opt.isSelected) {
+                                bgColor = 'var(--mdt-exam-option-wrong)';
+                                textColor = 'var(--mdt-exam-wrong-text)';
+                                badge = 'TWOJA';
+                              }
+                              return (
+                                <div
+                                  key={opt.label}
+                                  className="panel-inset px-2 py-1 flex items-center gap-2"
+                                  style={{ backgroundColor: bgColor }}
+                                >
+                                  <span className="font-mono text-xs font-bold flex-shrink-0" style={{ color: textColor }}>
+                                    {opt.label}.
+                                  </span>
+                                  <span className="font-mono text-xs flex-1" style={{ color: textColor }}>
+                                    {opt.text}
+                                  </span>
+                                  {badge && (
+                                    <span className="font-mono text-[10px] font-bold flex-shrink-0" style={{ color: textColor }}>
+                                      [{badge}]
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -396,6 +483,19 @@ export default function ExamResultsViewer({ mode = 'active' }: { mode?: 'active'
           </div>
         </div>
 
+        {/* Batch Action Bar */}
+        {!isArchiveMode && selectedIds.size > 0 && (
+          <div className="mb-4 panel-raised p-3 flex items-center justify-between" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+            <span className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>
+              Zaznaczono: <span className="font-bold">{selectedIds.size}</span>
+            </span>
+            <button onClick={handleBatchArchive} className="btn-win95 flex items-center gap-2">
+              <Archive className="w-4 h-4" />
+              <span className="font-mono text-sm">Archiwizuj zaznaczone ({selectedIds.size})</span>
+            </button>
+          </div>
+        )}
+
         {/* Results Table */}
         {loading ? (
           <div className="panel-raised p-8 text-center" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
@@ -416,6 +516,16 @@ export default function ExamResultsViewer({ mode = 'active' }: { mode?: 'active'
               <table className="w-full">
                 <thead>
                   <tr style={{ backgroundColor: 'var(--mdt-header)' }}>
+                    {!isArchiveMode && (
+                      <th className="px-2 py-2 text-center w-10">
+                        <input
+                          type="checkbox"
+                          checked={filteredResults.length > 0 && selectedIds.size === filteredResults.length}
+                          onChange={toggleSelectAll}
+                          className="cursor-pointer accent-[var(--mdt-blue-bar)]"
+                        />
+                      </th>
+                    )}
                     <th className="px-4 py-2 text-left font-[family-name:var(--font-vt323)] text-sm" style={{ color: '#ccc' }}>
                       Użytkownik
                     </th>
@@ -445,6 +555,16 @@ export default function ExamResultsViewer({ mode = 'active' }: { mode?: 'active'
                         key={result.id}
                         style={{ backgroundColor: index % 2 === 0 ? 'var(--mdt-row-even)' : 'var(--mdt-row-odd)' }}
                       >
+                        {!isArchiveMode && (
+                          <td className="px-2 py-2 text-center">
+                            <input
+                              type="checkbox"
+                              checked={selectedIds.has(result.exam_id)}
+                              onChange={() => toggleSelect(result.exam_id)}
+                              className="cursor-pointer accent-[var(--mdt-blue-bar)]"
+                            />
+                          </td>
+                        )}
                         <td className="px-4 py-2 whitespace-nowrap">
                           <span className="font-mono text-sm font-medium" style={{ color: 'var(--mdt-content-text)' }}>{getUserName(result)}</span>
                         </td>
@@ -459,7 +579,7 @@ export default function ExamResultsViewer({ mode = 'active' }: { mode?: 'active'
                         <td className="px-4 py-2 whitespace-nowrap">
                           <span
                             className="font-mono text-xs font-bold"
-                            style={{ color: result.passed ? '#006400' : '#8b0000' }}
+                            style={{ color: result.passed ? 'var(--mdt-exam-correct-text)' : 'var(--mdt-exam-wrong-text)' }}
                           >
                             {result.passed ? '[ZDANY]' : '[NIEZDANY]'}
                           </span>

@@ -187,6 +187,25 @@ export async function archiveExamResult(examId: string) {
 }
 
 /**
+ * Archiwizuje wiele wyników egzaminów naraz (batch)
+ */
+export async function archiveBatchExamResults(examIds: string[]) {
+  try {
+    const { data, error } = await supabase
+      .from('exam_results')
+      .update({ is_archived: true })
+      .in('exam_id', examIds)
+      .select();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('archiveBatchExamResults error:', error);
+    return { data: null, error };
+  }
+}
+
+/**
  * Usuwa wynik egzaminu (trwale)
  */
 export async function deleteExamResult(examId: string) {

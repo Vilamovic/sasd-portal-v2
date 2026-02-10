@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useTranslation } from '@/src/contexts/TranslationContext';
-import { Target, BarChart3, Settings, Archive, ArrowRight, CheckCircle, Clock, ChevronLeft, Sparkles } from 'lucide-react';
+import { Target, BarChart3, Settings, Archive, ArrowRight, CheckCircle, Clock, ChevronLeft, Sparkles, Calendar } from 'lucide-react';
 
 /**
  * ExamDashboard - MDT Terminal themed exam navigation
@@ -21,6 +21,8 @@ export default function ExamDashboard({ onNavigate, onBack }: { onNavigate?: (vi
       router.push('/exams/stats');
     } else if (tileId === 'archive') {
       router.push('/exams/archive');
+    } else if (tileId === 'practical') {
+      router.push('/exams/practical');
     } else if (onNavigate) {
       onNavigate(tileId);
     }
@@ -81,74 +83,87 @@ export default function ExamDashboard({ onNavigate, onBack }: { onNavigate?: (vi
       ],
       roles: ['cs', 'hcs', 'dev'],
     },
+    {
+      id: 'practical',
+      title: 'Egzaminy Praktyczne',
+      description: 'Kalendarz egzaminów praktycznych. Rezerwuj termin lub zarządzaj slotami egzaminacyjnymi.',
+      icon: Calendar,
+      stats: [
+        { icon: Calendar, label: 'Kalendarz' },
+        { icon: Target, label: 'Rezerwacja' }
+      ],
+      roles: ['trainee', 'deputy', 'cs', 'hcs', 'dev'],
+    },
   ];
 
   const visibleTiles = tiles.filter((tile) => tile.roles.includes(role));
 
-  // Trainee/Deputy view - single centered card (only "Take Exam")
+  // Trainee/Deputy view - 2 tiles (Start Exam + Practical)
   if (role === 'trainee' || role === 'deputy') {
-    const startExamTile = tiles[0];
-    const Icon = startExamTile.icon;
-
     return (
       <div className="min-h-screen" style={{ backgroundColor: 'var(--mdt-content)' }}>
-        <div className="max-w-2xl mx-auto px-6 py-12">
+        <div className="max-w-4xl mx-auto px-6 py-8">
           {/* Back Button */}
           {onBack && (
             <button
               onClick={onBack}
-              className="btn-win95 mb-8 flex items-center gap-2"
+              className="btn-win95 mb-6 flex items-center gap-2"
             >
               <ChevronLeft className="w-4 h-4" />
               <span className="font-mono text-sm">Powrót do dashboard</span>
             </button>
           )}
 
-          {/* Main Card */}
-          <div className="panel-raised" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
-            {/* Header */}
-            <div className="px-6 py-4" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
-              <div className="flex items-center gap-4">
-                <Icon className="w-8 h-8 text-white" strokeWidth={2.5} />
-                <div>
-                  <h1 className="text-xl font-[family-name:var(--font-vt323)] text-white">
-                    {startExamTile.title}
-                  </h1>
-                  <span className="font-mono text-xs text-white/80">Dostępne</span>
-                </div>
-              </div>
+          {/* Page Header */}
+          <div className="mb-8 panel-raised p-4" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+            <div style={{ backgroundColor: 'var(--mdt-blue-bar)' }} className="px-4 py-2 mb-3">
+              <h1 className="text-2xl font-[family-name:var(--font-vt323)] text-white">
+                System Egzaminacyjny
+              </h1>
             </div>
+            <p className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>
+              Wybierz typ egzaminu
+            </p>
+          </div>
 
-            {/* Content */}
-            <div className="p-6">
-              <p className="font-mono text-sm mb-6" style={{ color: 'var(--mdt-content-text)' }}>
-                {startExamTile.description}
-              </p>
-
-              {/* Stats */}
-              <div className="grid grid-cols-2 gap-3 mb-6">
-                {startExamTile.stats.map((stat, idx) => {
-                  const StatIcon = stat.icon;
-                  return (
-                    <div key={idx} className="panel-inset p-3" style={{ backgroundColor: 'var(--mdt-panel-alt)' }}>
-                      <div className="flex items-center gap-2">
-                        <StatIcon className="w-4 h-4" style={{ color: 'var(--mdt-content-text)' }} />
-                        <span className="font-mono text-xs" style={{ color: 'var(--mdt-content-text)' }}>{stat.label}</span>
-                      </div>
+          {/* Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {visibleTiles.map((tile) => {
+              const Icon = tile.icon;
+              return (
+                <button
+                  key={tile.id}
+                  onClick={() => handleTileClick(tile.id)}
+                  className="panel-raised text-left w-full"
+                  style={{ backgroundColor: 'var(--mdt-btn-face)' }}
+                >
+                  <div className="px-4 py-2 flex items-center gap-3" style={{ backgroundColor: 'var(--mdt-header)' }}>
+                    <Icon className="w-5 h-5" style={{ color: '#ccc' }} />
+                    <span className="font-[family-name:var(--font-vt323)] text-base" style={{ color: '#ccc' }}>{tile.title}</span>
+                  </div>
+                  <div className="p-4">
+                    <p className="font-mono text-xs mb-4" style={{ color: 'var(--mdt-content-text)' }}>
+                      {tile.description}
+                    </p>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {tile.stats.map((stat, idx) => {
+                        const StatIcon = stat.icon;
+                        return (
+                          <div key={idx} className="panel-inset px-2 py-1 flex items-center gap-1" style={{ backgroundColor: 'var(--mdt-panel-alt)' }}>
+                            <StatIcon className="w-3 h-3" style={{ color: 'var(--mdt-muted-text)' }} />
+                            <span className="font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>{stat.label}</span>
+                          </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
-              </div>
-
-              {/* CTA */}
-              <button
-                onClick={() => handleTileClick(startExamTile.id)}
-                className="btn-win95 w-full flex items-center justify-center gap-2"
-              >
-                <span className="font-mono text-sm font-bold">ROZPOCZNIJ EGZAMIN</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
+                    <div className="flex items-center gap-1 font-mono text-xs" style={{ color: 'var(--mdt-content-text)' }}>
+                      <span>Otwórz</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>

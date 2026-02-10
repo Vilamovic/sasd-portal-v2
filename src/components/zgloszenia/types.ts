@@ -82,14 +82,6 @@ export const SUBMISSION_TYPES: SubmissionTypeConfig[] = [
     enabled: true,
   },
   {
-    type: 'exam_booking',
-    label: 'Egzamin Praktyczny',
-    description: 'Zarezerwuj termin egzaminu praktycznego',
-    icon: 'Target',
-    roles: ['trainee', 'deputy', 'cs', 'hcs', 'dev'],
-    enabled: true,
-  },
-  {
     type: 'plus_exchange',
     label: 'Wymiana Plusów',
     description: 'Wymień zebrane plusy na benefity',

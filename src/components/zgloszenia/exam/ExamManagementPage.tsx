@@ -184,7 +184,7 @@ export default function ExamManagementPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--mdt-content)' }}>
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <BackButton onClick={() => router.push('/zgloszenia/egzamin')} destination="Kalendarz" />
+        <BackButton onClick={() => router.push('/exams/practical')} destination="Kalendarz" />
 
         {/* Page Header */}
         <div className="px-4 py-2 mb-6" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
@@ -196,7 +196,7 @@ export default function ExamManagementPage() {
         {/* Action buttons */}
         <div className="flex flex-wrap gap-2 mb-6">
           <button
-            onClick={() => router.push('/zgloszenia/egzamin/management/archived')}
+            onClick={() => router.push('/exams/practical/management/archived')}
             className="btn-win95 font-mono text-xs flex items-center gap-1"
           >
             <Archive className="w-3 h-3" />

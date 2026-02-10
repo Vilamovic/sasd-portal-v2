@@ -88,6 +88,15 @@
   --mdt-border-mid: #999999;
   --mdt-icon-muted: #555555;
 
+  /* Exam result colors */
+  --mdt-exam-correct-bg: #d0e8d0;
+  --mdt-exam-correct-text: #006400;
+  --mdt-exam-wrong-bg: #e8d0d0;
+  --mdt-exam-wrong-text: #8b0000;
+  --mdt-exam-option-correct: #e0f0e0;
+  --mdt-exam-option-wrong: #f0e0e0;
+  --mdt-exam-option-neutral: #d0d0d0;
+
   /* Legacy color aliases (for any remaining references) */
   --gold: #1a3a6a;
   --gold-light: #2a4a7a;
@@ -154,6 +163,15 @@
   --mdt-subtle-text: #777777;
   --mdt-border-mid: #555555;
   --mdt-icon-muted: #888888;
+
+  /* Exam result colors - dark mode */
+  --mdt-exam-correct-bg: #1a3a1a;
+  --mdt-exam-correct-text: #6abf6a;
+  --mdt-exam-wrong-bg: #3a1a1a;
+  --mdt-exam-wrong-text: #e06060;
+  --mdt-exam-option-correct: #1a3a1a;
+  --mdt-exam-option-wrong: #3a1a1a;
+  --mdt-exam-option-neutral: #2a2a2a;
 }
 
 @theme inline {
