@@ -348,7 +348,7 @@ export default function ExamResultsViewer({ mode = 'active' }: { mode?: 'active'
                               if (opt.isSelected && opt.isCorrectOption) {
                                 bgColor = 'var(--mdt-exam-option-correct)';
                                 textColor = 'var(--mdt-exam-correct-text)';
-                                badge = 'TWOJA / POPRAWNA';
+                                badge = 'WYBRANA / POPRAWNA';
                               } else if (opt.isCorrectOption) {
                                 bgColor = 'var(--mdt-exam-option-correct)';
                                 textColor = 'var(--mdt-exam-correct-text)';
@@ -356,7 +356,7 @@ export default function ExamResultsViewer({ mode = 'active' }: { mode?: 'active'
                               } else if (opt.isSelected) {
                                 bgColor = 'var(--mdt-exam-option-wrong)';
                                 textColor = 'var(--mdt-exam-wrong-text)';
-                                badge = 'TWOJA';
+                                badge = 'WYBRANA';
                               }
                               return (
                                 <div

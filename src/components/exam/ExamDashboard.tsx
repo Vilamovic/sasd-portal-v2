@@ -134,31 +134,30 @@ export default function ExamDashboard({ onNavigate, onBack }: { onNavigate?: (vi
                 <button
                   key={tile.id}
                   onClick={() => handleTileClick(tile.id)}
-                  className="panel-raised text-left w-full"
+                  className="panel-raised text-left w-full flex flex-col p-0 hover:brightness-105 transition-all"
                   style={{ backgroundColor: 'var(--mdt-btn-face)' }}
                 >
-                  <div className="px-4 py-2 flex items-center gap-3" style={{ backgroundColor: 'var(--mdt-header)' }}>
-                    <Icon className="w-5 h-5" style={{ color: '#ccc' }} />
-                    <span className="font-[family-name:var(--font-vt323)] text-base" style={{ color: '#ccc' }}>{tile.title}</span>
+                  <div className="px-3 py-1.5 flex items-center gap-2" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
+                    <Icon className="w-4 h-4 text-white" />
+                    <span className="font-[family-name:var(--font-vt323)] text-base tracking-wider uppercase text-white">{tile.title}</span>
                   </div>
-                  <div className="p-4">
-                    <p className="font-mono text-xs mb-4" style={{ color: 'var(--mdt-content-text)' }}>
+                  <div className="p-4 flex flex-col flex-grow">
+                    <p className="font-mono text-sm mb-4 flex-grow" style={{ color: 'var(--mdt-content-text)' }}>
                       {tile.description}
                     </p>
                     <div className="flex flex-wrap gap-2 mb-4">
                       {tile.stats.map((stat, idx) => {
                         const StatIcon = stat.icon;
                         return (
-                          <div key={idx} className="panel-inset px-2 py-1 flex items-center gap-1" style={{ backgroundColor: 'var(--mdt-panel-alt)' }}>
-                            <StatIcon className="w-3 h-3" style={{ color: 'var(--mdt-muted-text)' }} />
-                            <span className="font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>{stat.label}</span>
+                          <div key={idx} className="flex items-center gap-1 font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>
+                            <StatIcon className="w-3 h-3" />
+                            <span>{stat.label}</span>
                           </div>
                         );
                       })}
                     </div>
-                    <div className="flex items-center gap-1 font-mono text-xs" style={{ color: 'var(--mdt-content-text)' }}>
-                      <span>Otwórz</span>
-                      <ArrowRight className="w-3 h-3" />
+                    <div className="btn-win95 w-full text-sm text-center">
+                      PRZEJDŹ
                     </div>
                   </div>
                 </button>
@@ -197,26 +196,26 @@ export default function ExamDashboard({ onNavigate, onBack }: { onNavigate?: (vi
           </p>
         </div>
 
-        {/* Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Cards Grid - 3 cols, last row centered */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {visibleTiles.map((tile) => {
             const Icon = tile.icon;
             return (
               <button
                 key={tile.id}
                 onClick={() => handleTileClick(tile.id)}
-                className="panel-raised text-left w-full"
+                className="panel-raised text-left w-full flex flex-col p-0 hover:brightness-105 transition-all"
                 style={{ backgroundColor: 'var(--mdt-btn-face)' }}
               >
-                {/* Tile Header */}
-                <div className="px-4 py-2 flex items-center gap-3" style={{ backgroundColor: 'var(--mdt-header)' }}>
-                  <Icon className="w-5 h-5" style={{ color: '#ccc' }} />
-                  <span className="font-[family-name:var(--font-vt323)] text-base" style={{ color: '#ccc' }}>{tile.title}</span>
+                {/* Blue header - matching Dashboard */}
+                <div className="px-3 py-1.5 flex items-center gap-2" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
+                  <Icon className="w-4 h-4 text-white" />
+                  <span className="font-[family-name:var(--font-vt323)] text-base tracking-wider uppercase text-white">{tile.title}</span>
                 </div>
 
                 {/* Tile Content */}
-                <div className="p-4">
-                  <p className="font-mono text-xs mb-4" style={{ color: 'var(--mdt-content-text)' }}>
+                <div className="p-4 flex flex-col flex-grow">
+                  <p className="font-mono text-sm mb-4 flex-grow" style={{ color: 'var(--mdt-content-text)' }}>
                     {tile.description}
                   </p>
 
@@ -225,18 +224,17 @@ export default function ExamDashboard({ onNavigate, onBack }: { onNavigate?: (vi
                     {tile.stats.map((stat, idx) => {
                       const StatIcon = stat.icon;
                       return (
-                        <div key={idx} className="panel-inset px-2 py-1 flex items-center gap-1" style={{ backgroundColor: 'var(--mdt-panel-alt)' }}>
-                          <StatIcon className="w-3 h-3" style={{ color: 'var(--mdt-muted-text)' }} />
-                          <span className="font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>{stat.label}</span>
+                        <div key={idx} className="flex items-center gap-1 font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>
+                          <StatIcon className="w-3 h-3" />
+                          <span>{stat.label}</span>
                         </div>
                       );
                     })}
                   </div>
 
-                  {/* Action */}
-                  <div className="flex items-center gap-1 font-mono text-xs" style={{ color: 'var(--mdt-content-text)' }}>
-                    <span>Otwórz</span>
-                    <ArrowRight className="w-3 h-3" />
+                  {/* Action Button - matching Dashboard */}
+                  <div className="btn-win95 w-full text-sm text-center">
+                    PRZEJDŹ
                   </div>
                 </div>
               </button>
