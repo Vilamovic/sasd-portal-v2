@@ -52,6 +52,16 @@ const ReactQuill = dynamic(
       ResizableImage.blotName = 'image';
       ResizableImage.tagName = 'IMG';
       Quill.register(ResizableImage, true);
+
+      // Register custom font whitelist
+      const Font = Quill.import('formats/font') as any;
+      Font.whitelist = ['sans-serif', 'serif', 'monospace', 'arial', 'georgia', 'verdana', 'tahoma', 'trebuchet'];
+      Quill.register(Font, true);
+
+      // Register custom size whitelist
+      const Size = Quill.import('formats/size') as any;
+      Size.whitelist = ['10px', '12px', '14px', '16px', '18px', '20px', '24px', '28px', '32px'];
+      Quill.register(Size, true);
     }
 
     return mod;
@@ -126,7 +136,8 @@ export default function QuillEditor({
       toolbar: {
         container: [
           [{ header: [1, 2, 3, false] }],
-          [{ font: [] }],
+          [{ font: ['sans-serif', 'serif', 'monospace', 'arial', 'georgia', 'verdana', 'tahoma', 'trebuchet'] }],
+          [{ size: ['10px', '12px', '14px', '16px', '18px', '20px', '24px', '28px', '32px'] }],
           ['bold', 'italic', 'underline', 'strike'],
           [{ script: 'super' }, { script: 'sub' }],
           [{ color: [] }, { background: [] }],
@@ -247,6 +258,7 @@ export default function QuillEditor({
       const tooltips: Record<string, string> = {
         '.ql-header .ql-picker-label': 'Nagłówek',
         '.ql-font .ql-picker-label': 'Czcionka',
+        '.ql-size .ql-picker-label': 'Rozmiar czcionki',
         '.ql-bold': 'Pogrubienie',
         '.ql-italic': 'Kursywa',
         '.ql-underline': 'Podkreślenie',

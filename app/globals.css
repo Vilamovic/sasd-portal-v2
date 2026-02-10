@@ -415,7 +415,7 @@ input[type="week"]:invalid {
   font-size: 13px;
   line-height: 1.7;
   padding: 16px 20px;
-  word-break: break-word;
+  word-break: normal;
   overflow-wrap: break-word;
 }
 
@@ -460,55 +460,76 @@ input[type="week"]:invalid {
   color: var(--mdt-content-text);
 }
 
+/* Material content - base typography (view mode) */
+.material-content {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 14px;
+  line-height: 1.85;
+  letter-spacing: 0.01em;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
 /* Material content headings (view mode) */
 .material-content h1 {
   font-family: var(--font-vt323), monospace;
-  font-size: 24px;
+  font-size: 26px;
   text-transform: uppercase;
   letter-spacing: 2px;
-  border-bottom: 2px solid var(--mdt-border-mid);
-  padding-bottom: 6px;
-  margin-bottom: 12px;
-  margin-top: 20px;
+  border-bottom: 2px solid var(--mdt-blue-bar);
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+  margin-top: 28px;
   color: var(--mdt-blue-bar);
+}
+
+.material-content h1:first-child {
+  margin-top: 0;
 }
 
 .material-content h2 {
   font-family: var(--font-vt323), monospace;
-  font-size: 20px;
+  font-size: 22px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin-bottom: 8px;
-  margin-top: 16px;
+  margin-bottom: 10px;
+  margin-top: 24px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--mdt-border-mid);
 }
 
 .material-content h3 {
   font-family: var(--font-vt323), monospace;
-  font-size: 17px;
+  font-size: 18px;
   letter-spacing: 1px;
-  margin-bottom: 6px;
-  margin-top: 12px;
+  margin-bottom: 8px;
+  margin-top: 20px;
 }
 
 .material-content ol,
 .material-content ul {
-  padding-left: 24px;
-  margin-bottom: 12px;
+  padding-left: 28px;
+  margin-bottom: 16px;
 }
 
 .material-content li {
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .material-content p {
-  margin-bottom: 8px;
+  margin-bottom: 14px;
+}
+
+.material-content strong {
+  color: var(--mdt-content-text);
 }
 
 .material-content blockquote {
   border-left: 3px solid var(--mdt-blue-bar);
-  padding-left: 12px;
-  margin: 12px 0;
+  padding: 8px 16px;
+  margin: 16px 0;
   color: var(--mdt-muted-text);
+  background: rgba(0,0,0,0.1);
 }
 
 /* Material content - text alignment (Quill uses ql-align-* classes) */
@@ -516,10 +537,10 @@ input[type="week"]:invalid {
 .material-content .ql-align-right { text-align: right; }
 .material-content .ql-align-justify { text-align: justify; }
 
-/* Material content - word wrapping */
-.material-content {
-  word-break: break-word;
+/* Material content - links can break (for long URLs) */
+.material-content a {
   overflow-wrap: break-word;
+  word-break: break-all;
 }
 
 /* Material content - link styling */
@@ -569,6 +590,85 @@ input[type="week"]:invalid {
 .ql-toolbar .ql-video::before {
   content: none;
 }
+
+/* Custom font families (editor + view) */
+.ql-font-sans-serif, .ql-editor .ql-font-sans-serif, .material-content .ql-font-sans-serif { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+.ql-font-serif, .ql-editor .ql-font-serif, .material-content .ql-font-serif { font-family: Georgia, 'Times New Roman', Times, serif; }
+.ql-font-monospace, .ql-editor .ql-font-monospace, .material-content .ql-font-monospace { font-family: var(--font-space-mono), 'Courier New', monospace; }
+.ql-font-arial, .ql-editor .ql-font-arial, .material-content .ql-font-arial { font-family: Arial, Helvetica, sans-serif; }
+.ql-font-georgia, .ql-editor .ql-font-georgia, .material-content .ql-font-georgia { font-family: Georgia, serif; }
+.ql-font-verdana, .ql-editor .ql-font-verdana, .material-content .ql-font-verdana { font-family: Verdana, Geneva, sans-serif; }
+.ql-font-tahoma, .ql-editor .ql-font-tahoma, .material-content .ql-font-tahoma { font-family: Tahoma, Geneva, sans-serif; }
+.ql-font-trebuchet, .ql-editor .ql-font-trebuchet, .material-content .ql-font-trebuchet { font-family: 'Trebuchet MS', Helvetica, sans-serif; }
+
+/* Font picker - default (no font selected) */
+.ql-snow .ql-picker.ql-font .ql-picker-label::before { content: 'Czcionka' !important; }
+.ql-snow .ql-picker.ql-font .ql-picker-item:not([data-value])::before { content: 'Domyślna' !important; }
+
+/* Font picker - dropdown items (with font preview) */
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="sans-serif"] { font-family: 'Segoe UI', Tahoma, sans-serif !important; }
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="sans-serif"]::before { content: 'Sans Serif' !important; }
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="serif"] { font-family: Georgia, 'Times New Roman', serif !important; }
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="serif"]::before { content: 'Serif' !important; }
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="monospace"] { font-family: 'Courier New', monospace !important; }
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="monospace"]::before { content: 'Monospace' !important; }
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="arial"] { font-family: Arial, Helvetica, sans-serif !important; }
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="arial"]::before { content: 'Arial' !important; }
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="georgia"] { font-family: Georgia, serif !important; }
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="georgia"]::before { content: 'Georgia' !important; }
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="verdana"] { font-family: Verdana, Geneva, sans-serif !important; }
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="verdana"]::before { content: 'Verdana' !important; }
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="tahoma"] { font-family: Tahoma, Geneva, sans-serif !important; }
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="tahoma"]::before { content: 'Tahoma' !important; }
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="trebuchet"] { font-family: 'Trebuchet MS', Helvetica, sans-serif !important; }
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="trebuchet"]::before { content: 'Trebuchet' !important; }
+
+/* Font picker - selected label in toolbar */
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="sans-serif"]::before { content: 'Sans Serif' !important; }
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="serif"]::before { content: 'Serif' !important; }
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="monospace"]::before { content: 'Monospace' !important; }
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="arial"]::before { content: 'Arial' !important; }
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="georgia"]::before { content: 'Georgia' !important; }
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="verdana"]::before { content: 'Verdana' !important; }
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="tahoma"]::before { content: 'Tahoma' !important; }
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="trebuchet"]::before { content: 'Trebuchet' !important; }
+
+/* Custom font sizes (editor + view) */
+.ql-size-10px, .ql-editor .ql-size-10px, .material-content .ql-size-10px { font-size: 10px; }
+.ql-size-12px, .ql-editor .ql-size-12px, .material-content .ql-size-12px { font-size: 12px; }
+.ql-size-14px, .ql-editor .ql-size-14px, .material-content .ql-size-14px { font-size: 14px; }
+.ql-size-16px, .ql-editor .ql-size-16px, .material-content .ql-size-16px { font-size: 16px; }
+.ql-size-18px, .ql-editor .ql-size-18px, .material-content .ql-size-18px { font-size: 18px; }
+.ql-size-20px, .ql-editor .ql-size-20px, .material-content .ql-size-20px { font-size: 20px; }
+.ql-size-24px, .ql-editor .ql-size-24px, .material-content .ql-size-24px { font-size: 24px; }
+.ql-size-28px, .ql-editor .ql-size-28px, .material-content .ql-size-28px { font-size: 28px; }
+.ql-size-32px, .ql-editor .ql-size-32px, .material-content .ql-size-32px { font-size: 32px; }
+
+/* Size picker - default (no size selected) */
+.ql-snow .ql-picker.ql-size .ql-picker-label::before { content: '14px' !important; }
+.ql-snow .ql-picker.ql-size .ql-picker-item:not([data-value])::before { content: '14px (domyślny)' !important; }
+
+/* Size picker - dropdown items */
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="10px"]::before { content: '10px' !important; font-size: 10px; }
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="12px"]::before { content: '12px' !important; font-size: 12px; }
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="14px"]::before { content: '14px' !important; font-size: 14px; }
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="16px"]::before { content: '16px' !important; font-size: 14px; }
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="18px"]::before { content: '18px' !important; font-size: 14px; }
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="20px"]::before { content: '20px' !important; font-size: 14px; }
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="24px"]::before { content: '24px' !important; font-size: 14px; }
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="28px"]::before { content: '28px' !important; font-size: 14px; }
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="32px"]::before { content: '32px' !important; font-size: 14px; }
+
+/* Size picker - selected label in toolbar */
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="10px"]::before { content: '10px' !important; }
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="12px"]::before { content: '12px' !important; }
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="14px"]::before { content: '14px' !important; }
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="16px"]::before { content: '16px' !important; }
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="18px"]::before { content: '18px' !important; }
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="20px"]::before { content: '20px' !important; }
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="24px"]::before { content: '24px' !important; }
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="28px"]::before { content: '28px' !important; }
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="32px"]::before { content: '32px' !important; }
 
 /* Editor lists */
 .ql-editor ol,
