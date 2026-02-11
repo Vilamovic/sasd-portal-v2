@@ -2,28 +2,26 @@
 
 import React from "react"
 import { useState, useRef } from "react"
-import type { PlayerData } from "./types"
+import type { MdtRecord } from "./types"
 
 interface PlayerRecordProps {
-  player: PlayerData
-  mugshotUrl: string | null
-  onMugshotChange: (url: string | null) => void
+  record: MdtRecord
+  onMugshotChange: (url: string) => void
   isDeleteRecordMode: boolean
-  onDeleteRecord: (idx: number) => void
+  onDeleteRecord: (id: string) => void
   isDeleteNoteMode: boolean
-  onDeleteNote: (idx: number) => void
+  onDeleteNote: (id: string) => void
 }
 
 export function PlayerRecord({
-  player,
-  mugshotUrl,
+  record,
   onMugshotChange,
   isDeleteRecordMode,
   onDeleteRecord,
   isDeleteNoteMode,
   onDeleteNote,
 }: PlayerRecordProps) {
-  const [selectedRecord, setSelectedRecord] = useState<number | null>(null)
+  const [selectedRecordIdx, setSelectedRecordIdx] = useState<string | null>(null)
   const [accessTime, setAccessTime] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -41,6 +39,11 @@ export function PlayerRecord({
     }
   }
 
+  const criminalRecords = record.criminal_records || []
+  const notes = record.mdt_notes || []
+  const activeWarrant = (record.mdt_warrants || []).find((w) => w.is_active)
+  const licenseId = record.license_no ? record.license_no.split("-").pop() : "N/A"
+
   return (
     <div
       className="flex flex-1 flex-col overflow-hidden"
@@ -49,7 +52,7 @@ export function PlayerRecord({
       {/* Section title bar */}
       <div className="px-4 py-2" style={{ backgroundColor: "var(--mdt-blue-bar)" }}>
         <span className="font-[family-name:var(--font-vt323)] text-base tracking-widest uppercase text-white">
-          Kartoteka karna - {player.lastName}, {player.firstName}
+          Kartoteka karna - {record.last_name}, {record.first_name}
         </span>
       </div>
 
@@ -61,16 +64,16 @@ export function PlayerRecord({
             className="panel-inset mb-2 flex h-44 w-full items-center justify-center"
             style={{ backgroundColor: "var(--mdt-surface-light)" }}
           >
-            {mugshotUrl ? (
+            {record.mugshot_url ? (
               <div className="flex flex-col items-center gap-1">
                 <img
-                  src={mugshotUrl}
-                  alt={`Zdjęcie ${player.firstName} ${player.lastName}`}
+                  src={record.mugshot_url}
+                  alt={`Zdjęcie ${record.first_name} ${record.last_name}`}
                   className="h-32 w-28 object-cover"
                   style={{ border: "1px solid #555" }}
                 />
                 <span className="font-mono text-xs" style={{ color: "var(--mdt-content-text)" }}>
-                  SASD-{player.licenseNo.split("-").pop()}
+                  SASD-{licenseId}
                 </span>
               </div>
             ) : (
@@ -85,7 +88,7 @@ export function PlayerRecord({
                   </svg>
                 </div>
                 <span className="font-mono text-xs" style={{ color: "var(--mdt-content-text)" }}>
-                  SASD-{player.licenseNo.split("-").pop()}
+                  SASD-{licenseId}
                 </span>
               </div>
             )}
@@ -108,37 +111,34 @@ export function PlayerRecord({
 
           {/* Personal details */}
           <div className="flex flex-col gap-1">
-            <InfoRow label="NAZWISKO" value={`${player.lastName}, ${player.firstName}`} />
-            <InfoRow label="DATA UR." value={player.dob} />
-            <InfoRow label="PESEL" value={player.ssn} />
-            <InfoRow label="PŁEĆ" value={player.gender} />
-            <InfoRow label="RASA" value={player.race} />
-            <InfoRow label="WZROST" value={player.height} />
-            <InfoRow label="WAGA" value={player.weight} />
-            <InfoRow label="WŁOSY" value={player.hair} />
-            <InfoRow label="OCZY" value={player.eyes} />
+            <InfoRow label="NAZWISKO" value={`${record.last_name}, ${record.first_name}`} />
+            <InfoRow label="DATA UR." value={record.dob || "—"} />
+            <InfoRow label="PESEL" value={record.ssn || "—"} />
+            <InfoRow label="PŁEĆ" value={record.gender || "—"} />
+            <InfoRow label="RASA" value={record.race || "—"} />
+            <InfoRow label="WZROST" value={record.height || "—"} />
+            <InfoRow label="WAGA" value={record.weight || "—"} />
+            <InfoRow label="WŁOSY" value={record.hair || "—"} />
+            <InfoRow label="OCZY" value={record.eyes || "—"} />
 
             <div className="my-1 border-t border-[#999]" />
 
-            <InfoRow label="ADRES" value={player.address} />
-            <InfoRow label="TELEFON" value={player.phone} />
-            <InfoRow label="NR PRAWA" value={player.licenseNo} />
+            <InfoRow label="ADRES" value={record.address || "—"} />
+            <InfoRow label="TELEFON" value={record.phone || "—"} />
+            <InfoRow label="NR PRAWA" value={record.license_no || "—"} />
             <InfoRow
               label="ST. PRAWA"
-              value={player.licenseStatus}
-              valueColor={player.licenseStatus === "ZAWIESZONY" ? "#c41e1e" : "#1a6a1a"}
+              value={record.license_status || "—"}
+              valueColor={record.license_status === "ZAWIESZONY" || record.license_status === "COFNIĘTY" ? "#c41e1e" : "#1a6a1a"}
             />
-            <InfoRow label="GANG" value={player.gangAffiliation} />
-            <InfoRow label="WYROKI" value={String(player.priors)} />
+            <InfoRow label="GANG" value={record.gang_affiliation || "NIEZNANE"} />
+            <InfoRow label="WYROKI" value={String(record.priors)} />
 
             {/* Wanted status box */}
-            {player.wantedStatus !== "BRAK" && (
+            {record.wanted_status !== "BRAK" && (
               <>
                 <div className="my-1 border-t border-[#999]" />
-                <div
-                  className="glow-red panel-inset p-2"
-                  style={{ backgroundColor: "#4a1a1a" }}
-                >
+                <div className="glow-red panel-inset p-2" style={{ backgroundColor: "#4a1a1a" }}>
                   <div className="flex items-center gap-2">
                     <div className="h-2.5 w-2.5 rounded-full bg-red-500 pulse-dot" />
                     <span className="font-[family-name:var(--font-vt323)] text-sm tracking-wider text-red-400">
@@ -148,22 +148,18 @@ export function PlayerRecord({
                 </div>
               </>
             )}
-            {player.wantedStatus === "BRAK" && (
-              <InfoRow
-                label="POSZUK."
-                value="BRAK"
-                valueColor="#1a6a1a"
-              />
+            {record.wanted_status === "BRAK" && (
+              <InfoRow label="POSZUK." value="BRAK" valueColor="#1a6a1a" />
             )}
 
             {/* Warrant display */}
-            {player.warrant && (
+            {activeWarrant && (
               <>
                 <div className="my-1 border-t border-[#999]" />
                 <div
-                  className={`panel-inset p-2 ${player.warrant.type === "NO-KNOCK" ? "glow-red" : "glow-amber"}`}
+                  className={`panel-inset p-2 ${activeWarrant.type === "NO-KNOCK" ? "glow-red" : "glow-amber"}`}
                   style={{
-                    backgroundColor: player.warrant.type === "NO-KNOCK" ? "#5a1a1a" : "#4a3a1a",
+                    backgroundColor: activeWarrant.type === "NO-KNOCK" ? "#5a1a1a" : "#4a3a1a",
                   }}
                 >
                   <span className="font-[family-name:var(--font-vt323)] text-xs tracking-wider text-white">
@@ -172,21 +168,13 @@ export function PlayerRecord({
                   <div className="mt-1 flex flex-col gap-0.5">
                     <span
                       className="font-mono text-[10px] font-bold"
-                      style={{
-                        color: player.warrant.type === "NO-KNOCK" ? "#ff6b6b" : "#ffc107",
-                      }}
+                      style={{ color: activeWarrant.type === "NO-KNOCK" ? "#ff6b6b" : "#ffc107" }}
                     >
-                      TYP: NAKAZ {player.warrant.type}
+                      TYP: NAKAZ {activeWarrant.type}
                     </span>
-                    <span className="font-mono text-[10px] text-[#ccc]">
-                      POWÓD: {player.warrant.reason}
-                    </span>
-                    <span className="font-mono text-[10px] text-[#ccc]">
-                      DATA: {player.warrant.issuedDate}
-                    </span>
-                    <span className="font-mono text-[10px] text-[#ccc]">
-                      WYSTAWIŁ: {player.warrant.officer}
-                    </span>
+                    <span className="font-mono text-[10px] text-[#ccc]">POWÓD: {activeWarrant.reason}</span>
+                    <span className="font-mono text-[10px] text-[#ccc]">DATA: {activeWarrant.issued_date}</span>
+                    <span className="font-mono text-[10px] text-[#ccc]">WYSTAWIŁ: {activeWarrant.officer}</span>
                   </div>
                 </div>
               </>
@@ -203,9 +191,7 @@ export function PlayerRecord({
                 Historia karna
               </span>
               {isDeleteRecordMode && (
-                <span className="font-mono text-xs text-red-400">
-                  [TRYB USUWANIA]
-                </span>
+                <span className="font-mono text-xs text-red-400">[TRYB USUWANIA]</span>
               )}
             </div>
           </div>
@@ -220,55 +206,46 @@ export function PlayerRecord({
                   <th className="px-3 py-1.5 text-left font-[family-name:var(--font-vt323)] text-sm tracking-wider text-[#ccc]">KOD</th>
                   <th className="px-3 py-1.5 text-left font-[family-name:var(--font-vt323)] text-sm tracking-wider text-[#ccc]">STATUS</th>
                   <th className="px-3 py-1.5 text-left font-[family-name:var(--font-vt323)] text-sm tracking-wider text-[#ccc]">FUNKCJONARIUSZ</th>
-                  {isDeleteRecordMode && (
-                    <th className="w-8 px-1 py-1 text-center font-[family-name:var(--font-vt323)] text-xs tracking-wider text-[#ccc]" />
-                  )}
+                  {isDeleteRecordMode && <th className="w-8 px-1 py-1" />}
                 </tr>
               </thead>
               <tbody>
-                {player.records.map((record, idx) => (
+                {criminalRecords.map((cr, idx) => (
                   <tr
-                    key={`${record.date}-${record.code}-${idx}`}
-                    onClick={() => !isDeleteRecordMode && setSelectedRecord(selectedRecord === idx ? null : idx)}
+                    key={cr.id}
+                    onClick={() => !isDeleteRecordMode && setSelectedRecordIdx(selectedRecordIdx === cr.id ? null : cr.id)}
                     className="cursor-pointer"
                     style={{
                       backgroundColor:
-                        selectedRecord === idx
+                        selectedRecordIdx === cr.id
                           ? "var(--mdt-blue-bar)"
                           : idx % 2 === 0
                             ? "var(--mdt-row-even)"
                             : "var(--mdt-row-odd)",
-                      color: selectedRecord === idx ? "#fff" : "var(--mdt-content-text)",
+                      color: selectedRecordIdx === cr.id ? "#fff" : "var(--mdt-content-text)",
                     }}
                   >
-                    <td className="px-3 py-1.5 font-mono text-sm">{record.date}</td>
-                    <td className="px-3 py-1.5 font-mono text-sm">{record.offense}</td>
-                    <td className="px-3 py-1.5 font-mono text-sm">{record.code}</td>
+                    <td className="px-3 py-1.5 font-mono text-sm">{cr.date}</td>
+                    <td className="px-3 py-1.5 font-mono text-sm">{cr.offense}</td>
+                    <td className="px-3 py-1.5 font-mono text-sm">{cr.code}</td>
                     <td className="px-3 py-1.5 font-mono text-sm">
                       <span
                         style={{
-                          color:
-                            selectedRecord === idx
-                              ? "#fff"
-                              : record.status === "SKAZANY"
-                                ? "#c41e1e"
-                                : record.status === "ODDALONO"
-                                  ? "#555"
-                                  : "var(--mdt-content-text)",
-                          fontWeight: record.status === "SKAZANY" ? 700 : 400,
+                          color: selectedRecordIdx === cr.id ? "#fff"
+                            : cr.status === "SKAZANY" ? "#c41e1e"
+                            : cr.status === "ODDALONO" ? "#555"
+                            : "var(--mdt-content-text)",
+                          fontWeight: cr.status === "SKAZANY" ? 700 : 400,
                         }}
                       >
-                        {record.status}
+                        {cr.status}
                       </span>
                     </td>
-                    <td className="px-3 py-1.5 font-mono text-sm">{record.officer}</td>
+                    <td className="px-3 py-1.5 font-mono text-sm">{cr.officer}</td>
                     {isDeleteRecordMode && (
                       <td className="px-1 py-1 text-center">
                         <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onDeleteRecord(idx)
-                          }}
+                          onClick={(e) => { e.stopPropagation(); onDeleteRecord(cr.id) }}
                           className="inline-flex items-center justify-center hover:opacity-80"
                           title="Usuń wpis"
                         >
@@ -283,7 +260,7 @@ export function PlayerRecord({
                     )}
                   </tr>
                 ))}
-                {player.records.length === 0 && (
+                {criminalRecords.length === 0 && (
                   <tr style={{ backgroundColor: "var(--mdt-row-even)" }}>
                     <td colSpan={isDeleteRecordMode ? 6 : 5} className="px-2 py-3 text-center font-mono text-xs" style={{ color: "#888" }}>
                       BRAK WPISÓW W HISTORII KARNEJ
@@ -301,28 +278,24 @@ export function PlayerRecord({
                 Notatki funkcjonariuszy
               </span>
               {isDeleteNoteMode && (
-                <span className="font-mono text-xs text-red-400">
-                  [TRYB USUWANIA]
-                </span>
+                <span className="font-mono text-xs text-red-400">[TRYB USUWANIA]</span>
               )}
             </div>
           </div>
 
           <div className="panel-inset flex-1 overflow-auto p-3" style={{ backgroundColor: "var(--mdt-panel-content)" }}>
-            {player.notes.map((note, idx) => (
-              <div
-                key={`note-${idx}`}
-                className="flex items-start gap-2 border-b border-[#999] py-1.5"
-              >
+            {notes.map((note, idx) => (
+              <div key={note.id} className="flex items-start gap-2 border-b border-[#999] py-1.5">
                 <span className="font-mono text-sm" style={{ color: "var(--mdt-muted-text)" }}>
                   [{String(idx + 1).padStart(2, "0")}]
                 </span>
-                <span className="flex-1 font-mono text-sm" style={{ color: "var(--mdt-content-text)" }}>
-                  {note}
-                </span>
+                <div className="flex flex-1 flex-col">
+                  <span className="font-mono text-sm" style={{ color: "var(--mdt-content-text)" }}>{note.content}</span>
+                  <span className="font-mono text-[10px]" style={{ color: "var(--mdt-muted-text)" }}>— {note.officer}</span>
+                </div>
                 {isDeleteNoteMode && (
                   <button
-                    onClick={() => onDeleteNote(idx)}
+                    onClick={() => onDeleteNote(note.id)}
                     className="shrink-0 inline-flex items-center justify-center hover:opacity-80"
                     title="Usuń notatkę"
                   >
@@ -336,54 +309,31 @@ export function PlayerRecord({
                 )}
               </div>
             ))}
-            {player.notes.length === 0 && (
-              <div className="py-3 text-center font-mono text-xs" style={{ color: "#888" }}>
-                BRAK NOTATEK
-              </div>
+            {notes.length === 0 && (
+              <div className="py-3 text-center font-mono text-xs" style={{ color: "#888" }}>BRAK NOTATEK</div>
             )}
           </div>
         </div>
       </div>
 
       {/* Bottom status bar */}
-      <div
-        className="flex items-center justify-between border-t-2 border-t-[#555] px-4 py-2"
-        style={{ backgroundColor: "var(--mdt-header)" }}
-      >
+      <div className="flex items-center justify-between border-t-2 border-t-[#555] px-4 py-2" style={{ backgroundColor: "var(--mdt-header)" }}>
         <div className="flex items-center gap-2">
           <div className="pulse-dot h-2 w-2 rounded-full bg-green-500" />
-          <span className="font-mono text-sm" style={{ color: "#aaa" }}>
-            POŁĄCZONO Z BAZĄ SASD
-          </span>
+          <span className="font-mono text-sm" style={{ color: "#aaa" }}>POŁĄCZONO Z BAZĄ SASD</span>
         </div>
-        <span className="font-mono text-sm" style={{ color: "#888" }}>
-          DOSTĘP: {accessTime || "---"}
-        </span>
-        <span className="font-mono text-sm" style={{ color: "#888" }}>
-          POZIOM DOSTĘPU: 3
-        </span>
+        <span className="font-mono text-sm" style={{ color: "#888" }}>DOSTĘP: {accessTime || "---"}</span>
+        <span className="font-mono text-sm" style={{ color: "#888" }}>POZIOM DOSTĘPU: 3</span>
       </div>
     </div>
   )
 }
 
-function InfoRow({
-  label,
-  value,
-  valueColor,
-}: {
-  label: string
-  value: string
-  valueColor?: string
-}) {
+function InfoRow({ label, value, valueColor }: { label: string; value: string; valueColor?: string }) {
   return (
     <div className="flex gap-2">
-      <span className="w-24 shrink-0 font-mono text-sm font-bold" style={{ color: "var(--mdt-muted-text)" }}>
-        {label}:
-      </span>
-      <span className="font-mono text-sm" style={{ color: valueColor || "var(--mdt-content-text)" }}>
-        {value}
-      </span>
+      <span className="w-24 shrink-0 font-mono text-sm font-bold" style={{ color: "var(--mdt-muted-text)" }}>{label}:</span>
+      <span className="font-mono text-sm" style={{ color: valueColor || "var(--mdt-content-text)" }}>{value}</span>
     </div>
   )
 }

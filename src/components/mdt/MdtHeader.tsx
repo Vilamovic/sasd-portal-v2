@@ -1,14 +1,16 @@
 "use client"
 
-import { Shield } from "lucide-react"
+import { Shield, Maximize2, Minimize2 } from "lucide-react"
 
 interface MdtHeaderProps {
   currentSection: string
   officerName: string
+  isFullscreen?: boolean
+  onToggleFullscreen?: () => void
   onClose?: () => void
 }
 
-export function MdtHeader({ currentSection, officerName, onClose }: MdtHeaderProps) {
+export function MdtHeader({ currentSection, officerName, isFullscreen, onToggleFullscreen, onClose }: MdtHeaderProps) {
   return (
     <header
       className="flex items-center justify-between px-5 py-3"
@@ -45,15 +47,20 @@ export function MdtHeader({ currentSection, officerName, onClose }: MdtHeaderPro
         </span>
         <div className="flex gap-1">
           <button
-            className="flex h-7 w-7 items-center justify-center text-base font-bold cursor-pointer hover:brightness-110"
+            onClick={onToggleFullscreen}
+            className="flex h-7 w-7 items-center justify-center cursor-pointer hover:brightness-110"
             style={{
               backgroundColor: "var(--mdt-blue-bar)",
               color: "#fff",
               border: "1px solid #555",
             }}
-            aria-label="Minimize"
+            aria-label={isFullscreen ? "Wyjdź z pełnego ekranu" : "Pełny ekran"}
           >
-            -
+            {isFullscreen ? (
+              <Minimize2 className="h-4 w-4" />
+            ) : (
+              <Maximize2 className="h-4 w-4" />
+            )}
           </button>
           <button
             onClick={onClose}

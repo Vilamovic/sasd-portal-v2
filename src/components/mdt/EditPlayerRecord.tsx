@@ -2,21 +2,37 @@
 
 import React from "react"
 import { useState, useRef } from "react"
-import type { PlayerData } from "./types"
+import type { MdtRecord } from "./types"
 
 interface EditPlayerRecordProps {
-  player: PlayerData
-  mugshotUrl: string | null
-  onSave: (updated: PlayerData, newMugshotUrl: string | null) => void
+  record: MdtRecord
+  onSave: (updates: Partial<MdtRecord>, newMugshotUrl: string | null) => void
   onCancel: () => void
 }
 
-export function EditPlayerRecord({ player, mugshotUrl, onSave, onCancel }: EditPlayerRecordProps) {
-  const [form, setForm] = useState<PlayerData>({ ...player })
-  const [previewUrl, setPreviewUrl] = useState<string | null>(mugshotUrl)
+export function EditPlayerRecord({ record, onSave, onCancel }: EditPlayerRecordProps) {
+  const [form, setForm] = useState({
+    first_name: record.first_name,
+    last_name: record.last_name,
+    dob: record.dob || "",
+    ssn: record.ssn || "",
+    gender: record.gender || "Mężczyzna",
+    race: record.race || "",
+    height: record.height || "",
+    weight: record.weight || "",
+    hair: record.hair || "",
+    eyes: record.eyes || "",
+    address: record.address || "",
+    phone: record.phone || "",
+    license_no: record.license_no || "",
+    license_status: record.license_status || "AKTYWNY",
+    wanted_status: record.wanted_status || "BRAK",
+    gang_affiliation: record.gang_affiliation || "NIEZNANE",
+  })
+  const [previewUrl, setPreviewUrl] = useState<string | null>(record.mugshot_url)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  function handleChange(field: keyof PlayerData, value: string) {
+  function handleChange(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
@@ -32,9 +48,9 @@ export function EditPlayerRecord({ player, mugshotUrl, onSave, onCancel }: EditP
     onSave(form, previewUrl)
   }
 
-  const fields: { label: string; key: keyof PlayerData; type?: "select"; options?: string[] }[] = [
-    { label: "IMIĘ", key: "firstName" },
-    { label: "NAZWISKO", key: "lastName" },
+  const fields: { label: string; key: string; type?: "select"; options?: string[] }[] = [
+    { label: "IMIĘ", key: "first_name" },
+    { label: "NAZWISKO", key: "last_name" },
     { label: "DATA UR.", key: "dob" },
     { label: "PESEL", key: "ssn" },
     { label: "PŁEĆ", key: "gender", type: "select", options: ["Mężczyzna", "Kobieta"] },
@@ -45,11 +61,13 @@ export function EditPlayerRecord({ player, mugshotUrl, onSave, onCancel }: EditP
     { label: "OCZY", key: "eyes" },
     { label: "ADRES", key: "address" },
     { label: "TELEFON", key: "phone" },
-    { label: "NR PRAWA", key: "licenseNo" },
-    { label: "ST. PRAWA", key: "licenseStatus", type: "select", options: ["AKTYWNY", "ZAWIESZONY", "COFNIĘTY"] },
-    { label: "POSZUK.", key: "wantedStatus", type: "select", options: ["BRAK", "AKTYWNY", "POSZUKIWANY"] },
-    { label: "GANG", key: "gangAffiliation" },
+    { label: "NR PRAWA", key: "license_no" },
+    { label: "ST. PRAWA", key: "license_status", type: "select", options: ["AKTYWNY", "ZAWIESZONY", "COFNIĘTY"] },
+    { label: "POSZUK.", key: "wanted_status", type: "select", options: ["BRAK", "AKTYWNY", "POSZUKIWANY"] },
+    { label: "GANG", key: "gang_affiliation" },
   ]
+
+  const licenseId = form.license_no ? form.license_no.split("-").pop() : "N/A"
 
   return (
     <div
@@ -57,36 +75,29 @@ export function EditPlayerRecord({ player, mugshotUrl, onSave, onCancel }: EditP
       style={{ backgroundColor: "var(--mdt-content)" }}
     >
       {/* Section title bar */}
-      <div
-        className="px-3 py-1"
-        style={{ backgroundColor: "var(--mdt-blue-bar)" }}
-      >
+      <div className="px-3 py-1" style={{ backgroundColor: "var(--mdt-blue-bar)" }}>
         <span className="font-[family-name:var(--font-vt323)] text-sm tracking-widest uppercase text-white">
-          Edycja danych - {player.lastName}, {player.firstName}
+          Edycja danych - {record.last_name}, {record.first_name}
         </span>
       </div>
 
       <div className="flex flex-1 overflow-auto">
         {/* Left column - Photo */}
         <div className="flex w-64 flex-col border-r-2 border-r-[#808080] p-3">
-          {/* Mugshot area */}
           <div
             className="panel-inset mb-2 flex h-44 w-full items-center justify-center"
-            style={{ backgroundColor: "#a0a0a0" }}
+            style={{ backgroundColor: "var(--mdt-surface-light)" }}
           >
             {previewUrl ? (
               <div className="flex flex-col items-center gap-1">
                 <img
                   src={previewUrl}
-                  alt={`Zdjęcie ${form.firstName} ${form.lastName}`}
+                  alt={`Zdjęcie ${form.first_name} ${form.last_name}`}
                   className="h-32 w-28 object-cover"
                   style={{ border: "1px solid #555" }}
                 />
-                <span
-                  className="font-mono text-xs"
-                  style={{ color: "var(--mdt-content-text)" }}
-                >
-                  SASD-{form.licenseNo.split("-").pop()}
+                <span className="font-mono text-xs" style={{ color: "var(--mdt-content-text)" }}>
+                  SASD-{licenseId}
                 </span>
               </div>
             ) : (
@@ -100,31 +111,18 @@ export function EditPlayerRecord({ player, mugshotUrl, onSave, onCancel }: EditP
                     <ellipse cx="30" cy="58" rx="22" ry="16" fill="#555" />
                   </svg>
                 </div>
-                <span
-                  className="font-mono text-xs"
-                  style={{ color: "var(--mdt-content-text)" }}
-                >
-                  SASD-{form.licenseNo.split("-").pop()}
+                <span className="font-mono text-xs" style={{ color: "var(--mdt-content-text)" }}>
+                  SASD-{licenseId}
                 </span>
               </div>
             )}
           </div>
 
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleImportPhoto}
-          />
-          <button
-            className="btn-win95 mb-4 w-full text-xs"
-            onClick={() => fileInputRef.current?.click()}
-          >
+          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImportPhoto} />
+          <button className="btn-win95 mb-4 w-full text-xs" onClick={() => fileInputRef.current?.click()}>
             IMPORTUJ ZDJĘCIE
           </button>
 
-          {/* Action buttons */}
           <div className="mt-auto flex flex-col gap-1">
             <button
               className="btn-win95 w-full text-xs"
@@ -133,10 +131,7 @@ export function EditPlayerRecord({ player, mugshotUrl, onSave, onCancel }: EditP
             >
               ZAPISZ ZMIANY
             </button>
-            <button
-              className="btn-win95 w-full text-xs"
-              onClick={onCancel}
-            >
+            <button className="btn-win95 w-full text-xs" onClick={onCancel}>
               ANULUJ
             </button>
           </div>
@@ -144,41 +139,30 @@ export function EditPlayerRecord({ player, mugshotUrl, onSave, onCancel }: EditP
 
         {/* Right column - Editable fields */}
         <div className="flex flex-1 flex-col p-3">
-          <div
-            className="mb-3 px-2 py-1"
-            style={{ backgroundColor: "var(--mdt-header)" }}
-          >
-            <span
-              className="font-[family-name:var(--font-vt323)] text-sm tracking-wider uppercase"
-              style={{ color: "var(--mdt-header-text)" }}
-            >
+          <div className="mb-3 px-2 py-1" style={{ backgroundColor: "var(--mdt-header)" }}>
+            <span className="font-[family-name:var(--font-vt323)] text-sm tracking-wider uppercase" style={{ color: "var(--mdt-header-text)" }}>
               Dane osobowe
             </span>
           </div>
 
-          <div className="panel-inset flex-1 overflow-auto p-3" style={{ backgroundColor: "#b8b8b0" }}>
+          <div className="panel-inset flex-1 overflow-auto p-3" style={{ backgroundColor: "var(--mdt-surface-light)" }}>
             <div className="flex flex-col gap-2">
               {fields.map((field) => (
                 <div key={field.key} className="flex items-center gap-2">
                   <label
                     htmlFor={`edit-${field.key}`}
                     className="w-24 shrink-0 font-mono text-xs font-bold"
-                    style={{ color: "#555" }}
+                    style={{ color: "var(--mdt-muted-text)" }}
                   >
                     {field.label}:
                   </label>
                   {field.type === "select" ? (
                     <select
                       id={`edit-${field.key}`}
-                      value={String(form[field.key])}
+                      value={form[field.key as keyof typeof form]}
                       onChange={(e) => handleChange(field.key, e.target.value)}
                       className="panel-inset flex-1 px-2 py-1 font-mono text-xs"
-                      style={{
-                        backgroundColor: "#d0d0d0",
-                        color: "var(--mdt-content-text)",
-                        outline: "none",
-                        cursor: "pointer",
-                      }}
+                      style={{ backgroundColor: "var(--mdt-input-bg)", color: "var(--mdt-content-text)", outline: "none", cursor: "pointer" }}
                     >
                       {field.options?.map((opt) => (
                         <option key={opt} value={opt}>{opt}</option>
@@ -188,14 +172,10 @@ export function EditPlayerRecord({ player, mugshotUrl, onSave, onCancel }: EditP
                     <input
                       id={`edit-${field.key}`}
                       type="text"
-                      value={String(form[field.key])}
+                      value={form[field.key as keyof typeof form]}
                       onChange={(e) => handleChange(field.key, e.target.value)}
                       className="panel-inset flex-1 px-2 py-1 font-mono text-xs"
-                      style={{
-                        backgroundColor: "#d0d0d0",
-                        color: "var(--mdt-content-text)",
-                        outline: "none",
-                      }}
+                      style={{ backgroundColor: "var(--mdt-input-bg)", color: "var(--mdt-content-text)", outline: "none" }}
                     />
                   )}
                 </div>
@@ -206,15 +186,10 @@ export function EditPlayerRecord({ player, mugshotUrl, onSave, onCancel }: EditP
       </div>
 
       {/* Bottom status bar */}
-      <div
-        className="flex items-center justify-between border-t-2 border-t-[#555] px-3 py-1"
-        style={{ backgroundColor: "var(--mdt-header)" }}
-      >
+      <div className="flex items-center justify-between border-t-2 border-t-[#555] px-3 py-1" style={{ backgroundColor: "var(--mdt-header)" }}>
         <div className="flex items-center gap-2">
           <div className="h-2 w-2 rounded-full bg-amber-400" />
-          <span className="font-mono text-xs" style={{ color: "#aaa" }}>
-            TRYB EDYCJI - NIEZAPISANE ZMIANY
-          </span>
+          <span className="font-mono text-xs" style={{ color: "#aaa" }}>TRYB EDYCJI - NIEZAPISANE ZMIANY</span>
         </div>
         <span className="font-mono text-xs" style={{ color: "#888" }}>
           EDYCJA: {new Date().toLocaleDateString("pl-PL")} {new Date().toLocaleTimeString("pl-PL", { hour12: false })}

@@ -5,7 +5,7 @@
 ## ⚙️ AI Operational Rules (VS Code Edition)
 
 ### 1. Workflow & Verification
-* **WAIT FOR TASK**: Nigdy nie generuj kodu bez zadania. Zacznij od: "Co dzisiaj robimy?".
+* **WAIT FOR TASK**: Nigdy nie generuj kodu bez zadania. Zacznij od: "Jakie plany na dzisiaj?".
 * **PLANNING**: Każde zadanie zacznij od `TodoWrite`.
 * **LOCAL BUILD**: Po zmianach Claude **musi** odpalić `npm run build` w terminalu, aby wyłapać błędy.
 * **VISUAL CHECK**: Po pomyślnym buildzie zapytaj: *"Kod sprawdzony. Czy na localhost wszystko wygląda poprawnie? Czy mogę przygotować commit?"*.
@@ -58,6 +58,9 @@
 * **MDT CSS Variables**: All MDT colors use CSS vars (--mdt-header, --mdt-sidebar, --mdt-content, --mdt-btn-face, --mdt-blue-bar, --mdt-input-bg, --mdt-content-text, --mdt-muted-text, --mdt-panel-content, --mdt-surface-light). NEVER hardcode hex in components.
 * **MDT Dark Mode**: `[data-theme="dark"]` in globals.css remaps all --mdt-* vars. Toggle stored in localStorage. Navbar has theme toggle button.
 * **Polish Diacritics**: Fonts must have `subsets: ['latin', 'latin-ext']`. All UI text uses proper Polish characters (ą, ć, ę, ł, ń, ó, ś, ź, ż).
+* **Quill &nbsp; Sanitization**: Quill saves `&nbsp;` instead of regular spaces → text becomes one unbreakable "word". ALWAYS sanitize before rendering: `.replace(/&nbsp;/g, ' ').replace(/\u00A0/g, ' ')`. Applied in MaterialModal's MaterialContent.
+* **Quill CSS Specificity**: Custom font/size picker CSS MUST use `.ql-snow .ql-picker.ql-font` / `.ql-size` prefix + `!important`. Without `.ql-snow` prefix, Snow theme defaults override custom rules.
+* **MaterialModal z-index**: Uses `z-[70]` (above Navbar `z-[60]`). Has fullscreen view mode with flex constraints (`min-w-0`, `overflow-x-hidden`).
 
 ---
 
@@ -304,7 +307,58 @@ Zmienione pliki: [ścieżki]
 
 ---
 
-Last Updated: 2026-02-09 - Enhanced Materials + Copy Protection
+### 📋 System Raportów Dywizji (2026-02-11)
+
+**Status:** ✅ COMPLETED - Commit: fc50a07
+
+**Architecture:**
+- Config-driven: `src/components/divisions/Reports/reportConfig.ts` definiuje typy + pola per dywizja
+- JSONB `form_data`: elastyczne pola formularza w jednej tabeli `division_reports`
+- Dynamic form renderer: ReportForm.tsx renderuje inputy z config
+
+**Report Types (17 total):**
+- DTU (4): Obława, Morderstwo/Denat, Przeszukanie nieruchomości/pojazdu, Wykonanie nakazu
+- GU (5): Aresztowanie członka gangu, Gang suppression, Morderstwo/Denat, Przeszukanie, Nakaz
+- SWAT (5): Mobilizacja, Bomba, CQB, Riot Control, Napad
+- SS (2): Strzały, Akcja
+
+**Access Control (Reports):**
+- Write: członek dywizji / SWAT(permission+CMD+OP) / CS+
+- Edit: autor raportu OR CS+
+- Delete: CS+ only
+- Read: członek dywizji + CS+
+
+**SWAT Operator:**
+- Kolumna `is_swat_operator` w users (jak is_swat_commander)
+- Przycisk "SWAT OP" w DivisionEditor (zielony #1a7a3a, między GU #10b981 a SWAT CMD #2d5a2d)
+- AuthContext: `isSwatOperator` state
+
+**Gangi (GU):**
+- Kafelek w GU categories (obok Materiały, Raport)
+- Jak materiały ale bez mandatory/dodatkowy
+- CRUD: CS+ / GU Commander
+- Route: `/divisions/GU/gangs`
+
+**Database:**
+- SQL 020: `division_reports`, `gang_profiles`, `is_swat_operator`
+- RLS: `u.division::text` cast (ENUM fix)
+- Discord webhook: portal-report
+
+**New Routes:**
+- `/divisions/[divisionId]/raport` → ReportsPage (zastąpił placeholder)
+- `/divisions/[divisionId]/raport/archived` → ArchivedReportsPage (CS+ only)
+- `/divisions/[divisionId]/gangs` → GangsPage (GU only)
+
+**New Components (17 files):**
+- `src/components/divisions/Reports/` (8): ReportsPage, ReportForm, ReportCard, ReportDetailModal, ReportTypeSelector, UserMultiSelect, ArchivedReportsPage, reportConfig.ts, hooks/useDivisionReports
+- `src/components/divisions/GangsPage/` (4): GangsPage, GangCard, GangForm, hooks/useGangs
+- `src/lib/db/reports.ts`, `src/lib/db/gangs.ts`, `src/lib/webhooks/divisionReport.ts`
+
+**FTO:** Brak kafelka "Raport" (nie ma konfiguracji raportów)
+
+---
+
+Last Updated: 2026-02-11 - Archiwizacja raportów + FK fix + FTO ukryty
 
 **Session History (2026-02-08):**
 - Production Bugfixes: 6/6 critical bugs ✅ (commits: f0bcb5a → c2c6500)
@@ -332,3 +386,44 @@ Last Updated: 2026-02-09 - Enhanced Materials + Copy Protection
 - Copy Protection: watermark + user-select:none + DevTools blur ✅
 - 4 new shared components (MandatoryBadge, MaterialFilter, ProtectedContent, TemplatePresets) ✅
 - Build: ✅ SUCCESS
+
+**Session History (2026-02-10):**
+- MaterialModal z-index fix: z-50→z-[70] (modal nad navbar) ✅
+- QuillEditor font picker: 8 czcionek z podglądem + CSS specificity fix (.ql-snow prefix) ✅
+- QuillEditor size picker: 9 rozmiarów (10-32px) + CSS specificity fix ✅
+- &nbsp; sanitization: root cause mid-word text breaking (Quill saves &nbsp; not spaces) ✅
+- Material content: sans-serif font, fullscreen view mode, flex constraints (min-w-0) ✅
+- Dashboard: wyrównanie kafelków + Zarząd + Raport dywizji ✅
+- Commits: 06355a3, 6caf7ba
+- Build: ✅ SUCCESS
+
+**Session History (2026-02-11):**
+- Przebudowa systemu oceniania egzaminów praktycznych ✅
+  - 4 typy formularzy: Trainee (point selectors), SWAT (pass/fail), SEU (3 etapy), Pościgowy (3 etapy + weryfikacja)
+  - ExamResultForm → orchestrator z 3 sub-formularzami (forms/TraineeExamForm, SwatExamForm, StageExamForm)
+  - Trainee: ~37 scored items z przyciskami [0][1][2]...[N], auto-score, bonus/kara z plusów/minusów, próg 37pkt
+  - SWAT: prosty ZDANY/NIEZDANY + notatka
+  - SEU/Pościgowy: 3 etapy z pass/fail + notatki, Pościgowy ma 11 checkboxów weryfikacyjnych (Etap 2)
+  - ExamResultCard + ArchivedExamResultsPage: format-aware rendering (trainee/stages/swat/legacy)
+  - Backward compat: stary format { item, checked }[] nadal wyświetlany
+  - Commits: 3dc7cc1, a20de96
+  - Build: ✅ SUCCESS
+- System raportów dywizji + Gangi (GU) + SWAT Operator ✅
+  - 17 typów raportów: DTU(4), GU(5), SWAT(5), SS(2) — config-driven formularze
+  - Wspólne pola: data, godzina, lokalizacja, opis, uczestnicy (UserMultiSelect)
+  - CRUD: lista z filtrem, modal szczegółów, edycja (autor/CS+), usuwanie (CS+)
+  - Discord webhook portal-report z embed per raport
+  - Kafelek Gangi (GU): tytuł + opis QuillEditor, bez mandatory/dodatkowy
+  - SWAT Operator: is_swat_operator kolumna, przycisk DivisionEditor, AuthContext
+  - SQL 020: division_reports (JSONB), gang_profiles, is_swat_operator, RLS z ::text cast
+  - Nowe route'y: /divisions/[id]/raport (pełny system), /divisions/GU/gangs
+  - 22 plików, +2544 linii, commit: fc50a07
+  - Build: ✅ SUCCESS
+- Archiwizacja raportów + FK fix + FTO ukryty ✅
+  - FTO: ukryty kafelek Raport (brak konfiguracji)
+  - Archiwizacja: przycisk Archive w ReportDetailModal (CS+ only)
+  - ArchivedReportsPage: pagination 30/page, filtry (typ, autor), sortowanie, expand rows
+  - Nowa route: /divisions/[id]/raport/archived (CS+ only, AccessDenied guard)
+  - FK fix: division_reports.author_id → public.users (nie auth.users) + explicit FK name w query
+  - Commit: 557d1b0
+  - Build: ✅ SUCCESS

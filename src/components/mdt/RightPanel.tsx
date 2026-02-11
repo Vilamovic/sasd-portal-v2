@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react"
 
 interface RightPanelProps {
+  activeTab: string
+  hasSelectedRecord: boolean
+  // Kartoteka actions
   onEditData?: () => void
   isEditing?: boolean
   onAddRecord?: () => void
@@ -15,9 +18,15 @@ interface RightPanelProps {
   onRemoveWarrant?: () => void
   hasWarrant?: boolean
   onPrintFile?: () => void
+  // List actions
+  onCreatePerson?: () => void
+  // BOLO actions
+  onCreateBolo?: () => void
 }
 
 export function RightPanel({
+  activeTab,
+  hasSelectedRecord,
   onEditData,
   isEditing,
   onAddRecord,
@@ -30,6 +39,8 @@ export function RightPanel({
   onRemoveWarrant,
   hasWarrant,
   onPrintFile,
+  onCreatePerson,
+  onCreateBolo,
 }: RightPanelProps) {
   const [currentTime, setCurrentTime] = useState("")
   const [currentDate, setCurrentDate] = useState("")
@@ -50,6 +61,10 @@ export function RightPanel({
     const interval = setInterval(updateClock, 1000)
     return () => clearInterval(interval)
   }, [])
+
+  const showKartotekaActions = activeTab === "kartoteka" && hasSelectedRecord
+  const showKartotekaListActions = activeTab === "kartoteka" && !hasSelectedRecord
+  const showBoloActions = activeTab === "bolo"
 
   return (
     <aside
@@ -83,44 +98,60 @@ export function RightPanel({
           SZYBKIE AKCJE
         </span>
       </div>
+
       <div className="flex flex-col gap-1.5">
-        <button
-          className={`btn-win95 w-full text-sm ${isEditing ? "btn-win95-active" : ""}`}
-          onClick={onEditData}
-        >
-          EDYTUJ DANE
-        </button>
-        <button className="btn-win95 w-full text-sm" onClick={onAddRecord}>
-          DODAJ WPIS
-        </button>
-        <button
-          className={`btn-win95 w-full text-sm ${isDeleteRecordMode ? "btn-win95-active" : ""}`}
-          onClick={onDeleteRecordMode}
-        >
-          USUŃ WPIS
-        </button>
-        <button className="btn-win95 w-full text-sm" onClick={onAddNote}>
-          DODAJ NOTATKĘ
-        </button>
-        <button
-          className={`btn-win95 w-full text-sm ${isDeleteNoteMode ? "btn-win95-active" : ""}`}
-          onClick={onDeleteNoteMode}
-        >
-          USUŃ NOTATKĘ
-        </button>
-        <button className="btn-win95 w-full text-sm" onClick={onIssueWarrant}>
-          WYSTAW NAKAZ
-        </button>
-        <button
-          className={`btn-win95 w-full text-sm ${!hasWarrant ? "opacity-50" : ""}`}
-          onClick={onRemoveWarrant}
-          disabled={!hasWarrant}
-        >
-          ŚCIĄGNIJ NAKAZ
-        </button>
-        <button className="btn-win95 w-full text-sm" onClick={onPrintFile}>
-          DRUKUJ PLIK
-        </button>
+        {/* Kartoteka - record selected */}
+        {showKartotekaActions && (
+          <>
+            <button className={`btn-win95 w-full text-sm ${isEditing ? "btn-win95-active" : ""}`} onClick={onEditData}>
+              EDYTUJ DANE
+            </button>
+            <button className="btn-win95 w-full text-sm" onClick={onAddRecord}>DODAJ WPIS</button>
+            <button className={`btn-win95 w-full text-sm ${isDeleteRecordMode ? "btn-win95-active" : ""}`} onClick={onDeleteRecordMode}>
+              USUŃ WPIS
+            </button>
+            <button className="btn-win95 w-full text-sm" onClick={onAddNote}>DODAJ NOTATKĘ</button>
+            <button className={`btn-win95 w-full text-sm ${isDeleteNoteMode ? "btn-win95-active" : ""}`} onClick={onDeleteNoteMode}>
+              USUŃ NOTATKĘ
+            </button>
+            <button className="btn-win95 w-full text-sm" onClick={onIssueWarrant}>WYSTAW NAKAZ</button>
+            <button className={`btn-win95 w-full text-sm ${!hasWarrant ? "opacity-50" : ""}`} onClick={onRemoveWarrant} disabled={!hasWarrant}>
+              ŚCIĄGNIJ NAKAZ
+            </button>
+            <button className="btn-win95 w-full text-sm" onClick={onPrintFile}>DRUKUJ PLIK</button>
+          </>
+        )}
+
+        {/* Kartoteka - no selection (list view) */}
+        {showKartotekaListActions && (
+          <button
+            className="btn-win95 w-full text-sm"
+            style={{ backgroundColor: "#3a6a3a", color: "#fff", borderColor: "#5a9a5a #1a3a1a #1a3a1a #5a9a5a" }}
+            onClick={onCreatePerson}
+          >
+            + DODAJ OSOBĘ
+          </button>
+        )}
+
+        {/* BOLO */}
+        {showBoloActions && (
+          <button
+            className="btn-win95 w-full text-sm"
+            style={{ backgroundColor: "#3a6a3a", color: "#fff", borderColor: "#5a9a5a #1a3a1a #1a3a1a #5a9a5a" }}
+            onClick={onCreateBolo}
+          >
+            + DODAJ BOLO
+          </button>
+        )}
+
+        {/* Other tabs - no specific actions */}
+        {!showKartotekaActions && !showKartotekaListActions && !showBoloActions && (
+          <div className="panel-inset p-3 text-center" style={{ backgroundColor: "#1a1a1a" }}>
+            <span className="font-mono text-xs" style={{ color: "#555" }}>
+              BRAK DOSTĘPNYCH AKCJI
+            </span>
+          </div>
+        )}
       </div>
 
       {/* System info */}

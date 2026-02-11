@@ -1,17 +1,20 @@
 "use client"
 
 import { useRef } from "react"
-import type { PlayerData } from "./types"
+import type { MdtRecord } from "./types"
 
 interface WantedPosterProps {
-  player: PlayerData
+  record: MdtRecord
   mugshotUrl: string | null
   reason: string
   onClose: () => void
 }
 
-export function WantedPoster({ player, mugshotUrl, reason, onClose }: WantedPosterProps) {
+export function WantedPoster({ record, mugshotUrl, reason, onClose }: WantedPosterProps) {
   const posterRef = useRef<HTMLDivElement>(null)
+
+  const activeWarrant = record.mdt_warrants?.find((w) => w.is_active)
+  const licenseId = record.license_no ? record.license_no.split("-").pop() : "N/A"
 
   function handlePrint() {
     const content = posterRef.current
@@ -23,7 +26,7 @@ export function WantedPoster({ player, mugshotUrl, reason, onClose }: WantedPost
     printWindow.document.write(`
       <html>
         <head>
-          <title>List Gończy - ${player.lastName}, ${player.firstName}</title>
+          <title>List Gończy - ${record.last_name}, ${record.first_name}</title>
           <style>
             @import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap');
             * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -125,7 +128,7 @@ export function WantedPoster({ player, mugshotUrl, reason, onClose }: WantedPost
           <div class="poster">
             <div class="header">
               <h1>POSZUKIWANY</h1>
-              <h2>${player.lastName.toUpperCase()}, ${player.firstName.toUpperCase()}</h2>
+              <h2>${record.last_name.toUpperCase()}, ${record.first_name.toUpperCase()}</h2>
               <div class="sasd-line">SAN ANDREAS SHERIFF'S DEPARTMENT</div>
             </div>
             <div class="mugshot-area">
@@ -134,17 +137,17 @@ export function WantedPoster({ player, mugshotUrl, reason, onClose }: WantedPost
                 : '<div class="mugshot-placeholder">BRAK ZDJĘCIA</div>'
               }
             </div>
-            ${player.warrant ? `<div class="warning">POZIOM NAKAZU: ${player.warrant.type}</div>` : ""}
+            ${activeWarrant ? `<div class="warning">POZIOM NAKAZU: ${activeWarrant.type}</div>` : ""}
             <div class="info-section">
-              <div class="info-row"><span class="info-label">NAZWISKO:</span><span class="info-value">${player.lastName}, ${player.firstName}</span></div>
-              <div class="info-row"><span class="info-label">DATA UR.:</span><span class="info-value">${player.dob}</span></div>
-              <div class="info-row"><span class="info-label">PŁEĆ:</span><span class="info-value">${player.gender}</span></div>
-              <div class="info-row"><span class="info-label">RASA:</span><span class="info-value">${player.race}</span></div>
-              <div class="info-row"><span class="info-label">WZROST:</span><span class="info-value">${player.height}</span></div>
-              <div class="info-row"><span class="info-label">WAGA:</span><span class="info-value">${player.weight}</span></div>
-              <div class="info-row"><span class="info-label">WŁOSY:</span><span class="info-value">${player.hair}</span></div>
-              <div class="info-row"><span class="info-label">OCZY:</span><span class="info-value">${player.eyes}</span></div>
-              <div class="info-row"><span class="info-label">OSTATNI ADRES:</span><span class="info-value">${player.address}</span></div>
+              <div class="info-row"><span class="info-label">NAZWISKO:</span><span class="info-value">${record.last_name}, ${record.first_name}</span></div>
+              <div class="info-row"><span class="info-label">DATA UR.:</span><span class="info-value">${record.dob || "—"}</span></div>
+              <div class="info-row"><span class="info-label">PŁEĆ:</span><span class="info-value">${record.gender || "—"}</span></div>
+              <div class="info-row"><span class="info-label">RASA:</span><span class="info-value">${record.race || "—"}</span></div>
+              <div class="info-row"><span class="info-label">WZROST:</span><span class="info-value">${record.height || "—"}</span></div>
+              <div class="info-row"><span class="info-label">WAGA:</span><span class="info-value">${record.weight || "—"}</span></div>
+              <div class="info-row"><span class="info-label">WŁOSY:</span><span class="info-value">${record.hair || "—"}</span></div>
+              <div class="info-row"><span class="info-label">OCZY:</span><span class="info-value">${record.eyes || "—"}</span></div>
+              <div class="info-row"><span class="info-label">OSTATNI ADRES:</span><span class="info-value">${record.address || "—"}</span></div>
             </div>
             <div class="reason-box">
               <h3>POWÓD POSZUKIWANIA:</h3>
@@ -153,7 +156,7 @@ export function WantedPoster({ player, mugshotUrl, reason, onClose }: WantedPost
             <div class="footer">
               JEŚLI POSIADASZ INFORMACJE O MIEJSCU POBYTU TEJ OSOBY,<br/>
               SKONTAKTUJ SIĘ Z SAN ANDREAS SHERIFF'S DEPARTMENT<br/>
-              TELEFON: (555) 911-SASD | PRZYPADEK NR: SASD-${player.licenseNo.split("-").pop()}<br/>
+              TELEFON: (555) 911-SASD | PRZYPADEK NR: SASD-${licenseId}<br/>
               <br/>
               DATA WYSTAWIENIA: ${new Date().toLocaleDateString("pl-PL")}
             </div>
@@ -203,7 +206,7 @@ export function WantedPoster({ player, mugshotUrl, reason, onClose }: WantedPost
               POSZUKIWANY
             </span>
             <span className="mt-1 font-[family-name:var(--font-vt323)] text-xl tracking-widest" style={{ color: "#333" }}>
-              {player.lastName.toUpperCase()}, {player.firstName.toUpperCase()}
+              {record.last_name.toUpperCase()}, {record.first_name.toUpperCase()}
             </span>
             <span className="mt-1 font-mono text-[9px] tracking-widest" style={{ color: "#555" }}>
               {"SAN ANDREAS SHERIFF'S DEPARTMENT"}
@@ -220,23 +223,23 @@ export function WantedPoster({ player, mugshotUrl, reason, onClose }: WantedPost
               )}
             </div>
 
-            {player.warrant && (
+            {activeWarrant && (
               <span className="font-[family-name:var(--font-vt323)] text-sm tracking-widest" style={{ color: "#c41e1e" }}>
-                POZIOM NAKAZU: {player.warrant.type}
+                POZIOM NAKAZU: {activeWarrant.type}
               </span>
             )}
 
             {/* Info */}
             <div className="mt-2 w-full space-y-0.5 px-2">
               {[
-                ["NAZWISKO", `${player.lastName}, ${player.firstName}`],
-                ["DATA UR.", player.dob],
-                ["PŁEĆ", player.gender],
-                ["RASA", player.race],
-                ["WZROST", player.height],
-                ["WAGA", player.weight],
-                ["WŁOSY", player.hair],
-                ["OCZY", player.eyes],
+                ["NAZWISKO", `${record.last_name}, ${record.first_name}`],
+                ["DATA UR.", record.dob || "—"],
+                ["PŁEĆ", record.gender || "—"],
+                ["RASA", record.race || "—"],
+                ["WZROST", record.height || "—"],
+                ["WAGA", record.weight || "—"],
+                ["WŁOSY", record.hair || "—"],
+                ["OCZY", record.eyes || "—"],
               ].map(([label, val]) => (
                 <div key={label} className="flex border-b border-[#ccc] py-0.5">
                   <span className="w-24 shrink-0 font-mono text-[10px] font-bold" style={{ color: "#333" }}>{label}:</span>
@@ -254,7 +257,7 @@ export function WantedPoster({ player, mugshotUrl, reason, onClose }: WantedPost
             <div className="mt-3 text-center">
               <p className="font-mono text-[8px] leading-relaxed" style={{ color: "#555" }}>
                 JEŚLI POSIADASZ INFORMACJE SKONTAKTUJ SIĘ Z SASD<br />
-                TEL: (555) 911-SASD | NR: SASD-{player.licenseNo.split("-").pop()}<br />
+                TEL: (555) 911-SASD | NR: SASD-{licenseId}<br />
                 DATA: {new Date().toLocaleDateString("pl-PL")}
               </p>
             </div>

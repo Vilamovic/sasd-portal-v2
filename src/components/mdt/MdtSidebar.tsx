@@ -7,13 +7,12 @@ interface MdtSidebarProps {
 
 const navItems = [
   { id: "main", label: "EKRAN GŁÓWNY" },
-  { id: "lookup", label: "WYSZUKAJ" },
-  { id: "emergency", label: "ALARMOWE" },
-  { id: "separator1", label: "" },
-  { id: "kartoteka", label: "KARTOTEKA" },
-  { id: "roster", label: "JEDNOSTKI" },
-  { id: "cctv", label: "MONITORING" },
+  { id: "kartoteka", label: "KARTOTEKI" },
   { id: "bolo", label: "POJAZDY BOLO" },
+  { id: "separator1", label: "" },
+  { id: "cctv", label: "MONITORING" },
+  { id: "roster", label: "JEDNOSTKI" },
+  { id: "emergency", label: "ALARMOWE" },
 ]
 
 export function MdtSidebar({ activeTab, onTabChange }: MdtSidebarProps) {
