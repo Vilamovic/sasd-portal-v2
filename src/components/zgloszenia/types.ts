@@ -112,10 +112,16 @@ export interface ExamSlot {
 
 // ==================== Practical Exam Checklist Types ====================
 
+export interface TraineeScoreItem {
+  label: string;
+  maxPoints: number;
+  score: number;
+}
+
 export interface TraineeChecklistSection {
   name: string;
   maxPoints: number;
-  items: { label: string; points: number; checked: boolean; group?: string }[];
+  items: TraineeScoreItem[];
 }
 
 export interface TraineeChecklistData {
@@ -179,81 +185,67 @@ export const TRAINEE_CHECKLIST_TEMPLATE: TraineeChecklistSection[] = [
     name: 'Lokalizacje',
     maxPoints: 10,
     items: [
-      { label: 'Lokalizacja 1: Orientacyjne wskazanie rejonu', points: 1, checked: false },
-      { label: 'Lokalizacja 1: Dojazd pod same drzwi/punkt', points: 1, checked: false },
-      { label: 'Lokalizacja 2: Orientacyjne wskazanie rejonu', points: 1, checked: false },
-      { label: 'Lokalizacja 2: Dojazd pod same drzwi/punkt', points: 1, checked: false },
-      { label: 'Lokalizacja 3: Orientacyjne wskazanie rejonu', points: 1, checked: false },
-      { label: 'Lokalizacja 3: Dojazd pod same drzwi/punkt', points: 1, checked: false },
-      { label: 'Lokalizacja 4: Orientacyjne wskazanie rejonu', points: 1, checked: false },
-      { label: 'Lokalizacja 4: Dojazd pod same drzwi/punkt', points: 1, checked: false },
-      { label: 'Lokalizacja 5: Orientacyjne wskazanie rejonu', points: 1, checked: false },
-      { label: 'Lokalizacja 5: Dojazd pod same drzwi/punkt', points: 1, checked: false },
+      { label: 'Lokalizacja 1', maxPoints: 2, score: 0 },
+      { label: 'Lokalizacja 2', maxPoints: 2, score: 0 },
+      { label: 'Lokalizacja 3', maxPoints: 2, score: 0 },
+      { label: 'Lokalizacja 4', maxPoints: 2, score: 0 },
+      { label: 'Lokalizacja 5', maxPoints: 2, score: 0 },
     ],
   },
   {
     name: 'Pytania Otwarte',
     maxPoints: 5,
     items: [
-      { label: 'Pytanie 1: Odpowiedź poprawna', points: 1, checked: false },
-      { label: 'Pytanie 2: Odpowiedź częściowo poprawna', points: 1, checked: false },
-      { label: 'Pytanie 2: Uzupełnienie do pełnej odpowiedzi', points: 1, checked: false },
-      { label: 'Pytanie 3: Odpowiedź częściowo poprawna', points: 1, checked: false },
-      { label: 'Pytanie 3: Uzupełnienie do pełnej odpowiedzi', points: 1, checked: false },
+      { label: 'Pytanie 1', maxPoints: 1, score: 0 },
+      { label: 'Pytanie 2', maxPoints: 2, score: 0 },
+      { label: 'Pytanie 3', maxPoints: 2, score: 0 },
     ],
   },
   {
     name: 'Zatrzymanie Drogowe',
     maxPoints: 10,
     items: [
-      { label: 'Informacja o nakazie zatrzymania (ALT)', points: 1, checked: false },
-      { label: 'Użycie sygnałów świetlnych i dźwiękowych', points: 1, checked: false },
-      { label: 'Prawidłowe użycie megafonu', points: 1, checked: false },
-      { label: 'Zatrzymanie się w bezpiecznym, wyznaczonym miejscu', points: 1, checked: false },
-      { label: 'Ustawienie radiowozu (odpowiedni kąt/odległość)', points: 1, checked: false },
-      { label: 'Przedstawienie się i podanie stopnia', points: 1, checked: false },
-      { label: 'Podanie powodu zatrzymania', points: 1, checked: false },
-      { label: 'Prośba o okazanie prawa jazdy', points: 1, checked: false },
-      { label: 'Weryfikacja osoby i pojazdu w MDT', points: 1, checked: false },
-      { label: 'Symulacja mandatu/pouczenia i zwrot dokumentów', points: 1, checked: false },
+      { label: 'Informacja o nakazie zatrzymania (ALT)', maxPoints: 1, score: 0 },
+      { label: 'Użycie sygnałów świetlnych i dźwiękowych', maxPoints: 1, score: 0 },
+      { label: 'Prawidłowe użycie megafonu', maxPoints: 1, score: 0 },
+      { label: 'Zatrzymanie w bezpiecznym miejscu', maxPoints: 1, score: 0 },
+      { label: 'Ustawienie radiowozu (kąt/odległość)', maxPoints: 1, score: 0 },
+      { label: 'Przedstawienie się i podanie stopnia', maxPoints: 1, score: 0 },
+      { label: 'Podanie powodu zatrzymania', maxPoints: 1, score: 0 },
+      { label: 'Prośba o okazanie prawa jazdy', maxPoints: 1, score: 0 },
+      { label: 'Weryfikacja osoby/pojazdu w MDT', maxPoints: 1, score: 0 },
+      { label: 'Symulacja mandatu i zwrot dokumentów', maxPoints: 1, score: 0 },
     ],
   },
   {
     name: 'Zabezpieczenie Terenu',
     maxPoints: 11,
     items: [
-      { label: 'Odpowiednia wielkość strefy', points: 1, checked: false, group: 'Ocena wielkości strefy zagrożenia' },
-      { label: 'Zapewnienie miejsca dla pojazdów ratowniczych', points: 1, checked: false, group: 'Ocena wielkości strefy zagrożenia' },
-      { label: 'Użycie radiowozu jako zabezpieczenie', points: 1, checked: false, group: 'Ustawienie radiowozu jako bariery' },
-      { label: 'Poprawne ustawienie kierunkowe radiowozu', points: 1, checked: false, group: 'Ustawienie radiowozu jako bariery' },
-      { label: 'Użycie barierek', points: 1, checked: false, group: 'Zabezpieczenie zgodnie z normami' },
-      { label: 'Użycie pachołków', points: 1, checked: false, group: 'Zabezpieczenie zgodnie z normami' },
-      { label: 'Użycie znaków drogowych', points: 1, checked: false, group: 'Zabezpieczenie zgodnie z normami' },
-      { label: 'Zachowanie estetyki i równej linii barierek/pachołków', points: 1, checked: false },
-      { label: 'Brak utrudniania przejazdu w miejscach nieobjętych zdarzeniem', points: 1, checked: false },
-      { label: 'Oznaczenie miejsca kolizji/zdarzenia na drodze', points: 1, checked: false },
-      { label: 'Utrzymanie widoczności (świetlne)', points: 1, checked: false },
+      { label: 'Ocena wielkości strefy zagrożenia', maxPoints: 2, score: 0 },
+      { label: 'Ustawienie radiowozu jako bariery', maxPoints: 2, score: 0 },
+      { label: 'Zabezpieczenie zgodnie z normami', maxPoints: 3, score: 0 },
+      { label: 'Estetyka i równa linia barierek', maxPoints: 1, score: 0 },
+      { label: 'Brak utrudniania przejazdu', maxPoints: 1, score: 0 },
+      { label: 'Oznaczenie miejsca zdarzenia', maxPoints: 1, score: 0 },
+      { label: 'Utrzymanie widoczności (świetlne)', maxPoints: 1, score: 0 },
     ],
   },
   {
     name: 'Pierwsza Pomoc (PPP)',
     maxPoints: 15,
     items: [
-      { label: 'Sprawdzenie bezpieczeństwa własnego i otoczenia', points: 1, checked: false },
-      { label: 'Założenie rękawiczek', points: 1, checked: false },
-      { label: 'Sprawdzenie przytomności poszkodowanego', points: 1, checked: false },
-      { label: 'Weryfikacja stanu przez komendę /do', points: 1, checked: false },
-      { label: 'Ułożenie poszkodowanego w pozycji bezpiecznej', points: 1, checked: false },
-      { label: 'Prawidłowe powiadomienie EMS', points: 1, checked: false },
-      { label: 'Udrożnienie dróg oddechowych', points: 1, checked: false },
-      { label: 'Sprawdzenie tętna/oddechu', points: 1, checked: false },
-      { label: 'Rana cięta lub kłuta — opatrunek', points: 1, checked: false, group: 'Zastosowanie środka opatrunkowego' },
-      { label: 'Złamanie/ciało obce — Stabilizacja (unieruchomienie)', points: 1, checked: false, group: 'Zastosowanie środka opatrunkowego' },
-      { label: 'Złamanie/ciało obce — Ochrona (jałowe osłonięcie, okład)', points: 1, checked: false, group: 'Zastosowanie środka opatrunkowego' },
-      { label: 'Złamanie/ciało obce — Kontrola krążenia (tętno palce/stopa)', points: 1, checked: false, group: 'Zastosowanie środka opatrunkowego' },
-      { label: 'Wykonanie RKO (jeśli wymagane przez /do)', points: 1, checked: false },
-      { label: 'Zabezpieczenie termiczne poszkodowanego', points: 1, checked: false },
-      { label: 'Przekazanie raportu medycznego po przyjeździe EMS', points: 1, checked: false },
+      { label: 'Bezpieczeństwo własne i otoczenia', maxPoints: 1, score: 0 },
+      { label: 'Założenie rękawiczek', maxPoints: 1, score: 0 },
+      { label: 'Sprawdzenie przytomności', maxPoints: 1, score: 0 },
+      { label: 'Weryfikacja stanu (/do)', maxPoints: 1, score: 0 },
+      { label: 'Pozycja bezpieczna', maxPoints: 1, score: 0 },
+      { label: 'Powiadomienie EMS', maxPoints: 1, score: 0 },
+      { label: 'Udrożnienie dróg oddechowych', maxPoints: 1, score: 0 },
+      { label: 'Sprawdzenie tętna/oddechu', maxPoints: 1, score: 0 },
+      { label: 'Środek opatrunkowy (dobór/założenie/skuteczność/zabezp.)', maxPoints: 4, score: 0 },
+      { label: 'Wykonanie RKO (jeśli wymagane)', maxPoints: 1, score: 0 },
+      { label: 'Zabezpieczenie termiczne', maxPoints: 1, score: 0 },
+      { label: 'Raport medyczny dla EMS', maxPoints: 1, score: 0 },
     ],
   },
 ];

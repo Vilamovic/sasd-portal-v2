@@ -173,8 +173,8 @@ function TraineeDetails({ checklist }: { checklist: TraineeChecklistData }) {
   return (
     <div className="space-y-2">
       {checklist.sections.map((section, sIdx) => {
-        const sectionScore = section.items.reduce((sum, item) => sum + (item.checked ? item.points : 0), 0);
-        const sectionMax = section.items.reduce((sum, item) => sum + item.points, 0);
+        const sectionScore = section.items.reduce((sum, item) => sum + (item.score ?? 0), 0);
+        const sectionMax = section.items.reduce((sum, item) => sum + item.maxPoints, 0);
         return (
           <div key={sIdx}>
             <div className="flex items-center justify-between mb-1">
@@ -188,14 +188,16 @@ function TraineeDetails({ checklist }: { checklist: TraineeChecklistData }) {
             <div className="space-y-0.5 ml-2">
               {section.items.map((item, iIdx) => (
                 <div key={iIdx} className="flex items-center gap-2">
-                  <span className="font-mono text-xs" style={{ color: item.checked ? '#4a9a4a' : '#cc4444' }}>
-                    {item.checked ? '■' : '□'}
+                  <span
+                    className="font-mono text-[10px] w-8 text-center shrink-0"
+                    style={{
+                      color: item.score === item.maxPoints ? '#4a9a4a' : item.score === 0 ? '#cc4444' : 'var(--mdt-content-text)',
+                    }}
+                  >
+                    {item.score}/{item.maxPoints}
                   </span>
                   <span className="font-mono text-xs flex-1" style={{ color: 'var(--mdt-content-text)' }}>
                     {item.label}
-                  </span>
-                  <span className="font-mono text-[10px]" style={{ color: 'var(--mdt-muted-text)' }}>
-                    {item.points}p
                   </span>
                 </div>
               ))}

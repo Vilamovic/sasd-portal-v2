@@ -105,17 +105,23 @@ export default function ArchivedExamResultsPage() {
           <span className="font-mono text-[10px] block mb-1" style={{ color: 'var(--mdt-muted-text)' }}>Checklist</span>
           <div className="panel-inset p-2 space-y-2" style={{ backgroundColor: 'var(--mdt-panel-content)' }}>
             {tc.sections.map((section, sIdx) => {
-              const sectionScore = section.items.reduce((sum, i) => sum + (i.checked ? i.points : 0), 0);
+              const sectionScore = section.items.reduce((sum, i) => sum + (i.score ?? 0), 0);
+              const sectionMax = section.items.reduce((sum, i) => sum + i.maxPoints, 0);
               return (
                 <div key={sIdx}>
                   <div className="flex justify-between font-mono text-[10px] font-bold mb-0.5" style={{ color: 'var(--mdt-muted-text)' }}>
                     <span>{section.name}</span>
-                    <span>{sectionScore}/{section.maxPoints}</span>
+                    <span>{sectionScore}/{sectionMax}</span>
                   </div>
                   {section.items.map((item, iIdx) => (
                     <div key={iIdx} className="flex items-center gap-2 py-0.5 ml-2">
-                      <span className="font-mono text-xs" style={{ color: item.checked ? '#3a6a3a' : '#8b1a1a' }}>
-                        {item.checked ? '✓' : '✗'}
+                      <span
+                        className="font-mono text-[10px] w-8 text-center shrink-0"
+                        style={{
+                          color: item.score === item.maxPoints ? '#3a6a3a' : item.score === 0 ? '#8b1a1a' : 'var(--mdt-content-text)',
+                        }}
+                      >
+                        {item.score}/{item.maxPoints}
                       </span>
                       <span className="font-mono text-xs" style={{ color: 'var(--mdt-content-text)' }}>
                         {item.label}

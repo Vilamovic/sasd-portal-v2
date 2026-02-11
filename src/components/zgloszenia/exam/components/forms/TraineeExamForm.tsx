@@ -20,7 +20,7 @@ export default function TraineeExamForm({ examineePlusCount, examineeMinusCount,
   const [sections, setSections] = useState<TraineeChecklistSection[]>(
     () => TRAINEE_CHECKLIST_TEMPLATE.map(s => ({
       ...s,
-      items: s.items.map(item => ({ ...item, checked: false })),
+      items: s.items.map(item => ({ ...item, score: 0 })),
     }))
   );
   const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set([0]));
@@ -36,8 +36,8 @@ export default function TraineeExamForm({ examineePlusCount, examineeMinusCount,
     let max = 0;
     for (const section of sections) {
       for (const item of section.items) {
-        max += item.points;
-        if (item.checked) score += item.points;
+        max += item.maxPoints;
+        score += item.score;
       }
     }
     const total = Math.max(0, score + bonusPoints);
@@ -49,7 +49,6 @@ export default function TraineeExamForm({ examineePlusCount, examineeMinusCount,
     };
   }, [sections, bonusPoints]);
 
-  // Notify parent of changes
   useEffect(() => {
     onDataChange({
       checklist: { type: 'trainee', sections, bonusPoints },
@@ -59,20 +58,17 @@ export default function TraineeExamForm({ examineePlusCount, examineeMinusCount,
     });
   }, [sections, bonusPoints, totalScore, maxScore, passed, onDataChange]);
 
-  const toggleItem = (sectionIdx: number, itemIdx: number) => {
-    setSections(prev => {
-      const updated = prev.map((s, si) => {
-        if (si !== sectionIdx) return s;
-        return {
-          ...s,
-          items: s.items.map((item, ii) => {
-            if (ii !== itemIdx) return item;
-            return { ...item, checked: !item.checked };
-          }),
-        };
-      });
-      return updated;
-    });
+  const setItemScore = (sectionIdx: number, itemIdx: number, score: number) => {
+    setSections(prev => prev.map((s, si) => {
+      if (si !== sectionIdx) return s;
+      return {
+        ...s,
+        items: s.items.map((item, ii) => {
+          if (ii !== itemIdx) return item;
+          return { ...item, score };
+        }),
+      };
+    }));
   };
 
   const toggleSection = (idx: number) => {
@@ -85,25 +81,20 @@ export default function TraineeExamForm({ examineePlusCount, examineeMinusCount,
   };
 
   const getSectionScore = (section: TraineeChecklistSection) =>
-    section.items.reduce((sum, item) => sum + (item.checked ? item.points : 0), 0);
+    section.items.reduce((sum, item) => sum + item.score, 0);
 
   const getSectionMax = (section: TraineeChecklistSection) =>
-    section.items.reduce((sum, item) => sum + item.points, 0);
+    section.items.reduce((sum, item) => sum + item.maxPoints, 0);
 
   return (
     <div className="space-y-3">
-      {/* Sections */}
       {sections.map((section, sIdx) => {
         const sectionScore = getSectionScore(section);
         const sectionMax = getSectionMax(section);
         const isExpanded = expandedSections.has(sIdx);
 
-        // Group items by group name
-        let currentGroup: string | undefined;
-
         return (
           <div key={sIdx} className="panel-raised" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
-            {/* Section header */}
             <button
               onClick={() => toggleSection(sIdx)}
               className="w-full px-3 py-2 flex items-center justify-between text-left"
@@ -124,44 +115,36 @@ export default function TraineeExamForm({ examineePlusCount, examineeMinusCount,
               </span>
             </button>
 
-            {/* Section items */}
             {isExpanded && (
-              <div className="panel-inset m-2 p-2 space-y-1" style={{ backgroundColor: 'var(--mdt-input-bg)' }}>
-                {section.items.map((item, iIdx) => {
-                  const showGroupHeader = item.group && item.group !== currentGroup;
-                  if (item.group) currentGroup = item.group;
-                  else currentGroup = undefined;
-
-                  return (
-                    <div key={iIdx}>
-                      {showGroupHeader && (
-                        <div
-                          className="font-mono text-[10px] font-bold mt-2 mb-1 px-1 py-0.5"
-                          style={{ color: 'var(--mdt-muted-text)', borderBottom: '1px solid var(--mdt-muted-text)' }}
+              <div className="panel-inset m-2 p-2 space-y-1.5" style={{ backgroundColor: 'var(--mdt-input-bg)' }}>
+                {section.items.map((item, iIdx) => (
+                  <div key={iIdx} className="flex items-center gap-2 py-0.5">
+                    <span className="font-mono text-xs flex-1 min-w-0" style={{ color: 'var(--mdt-content-text)' }}>
+                      {item.label}
+                    </span>
+                    <div className="flex gap-0.5 shrink-0">
+                      {Array.from({ length: item.maxPoints + 1 }, (_, pt) => (
+                        <button
+                          key={pt}
+                          onClick={() => setItemScore(sIdx, iIdx, pt)}
+                          className="font-mono text-[10px] w-6 h-6 flex items-center justify-center"
+                          style={{
+                            backgroundColor: item.score === pt
+                              ? (pt === 0 ? '#8b1a1a' : '#3a6a3a')
+                              : 'var(--mdt-btn-face)',
+                            color: item.score === pt ? '#fff' : 'var(--mdt-content-text)',
+                            border: '1px solid',
+                            borderColor: item.score === pt
+                              ? (pt === 0 ? '#b03a3a #4a0a0a #4a0a0a #b03a3a' : '#5a9a5a #1a3a1a #1a3a1a #5a9a5a')
+                              : 'var(--mdt-muted-text)',
+                          }}
                         >
-                          {item.group}
-                        </div>
-                      )}
-                      <label
-                        className="flex items-center gap-2 cursor-pointer py-0.5"
-                        style={{ paddingLeft: item.group ? '12px' : '0' }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={item.checked}
-                          onChange={() => toggleItem(sIdx, iIdx)}
-                          className="w-3.5 h-3.5 shrink-0"
-                        />
-                        <span className="font-mono text-xs flex-1" style={{ color: 'var(--mdt-content-text)' }}>
-                          {item.label}
-                        </span>
-                        <span className="font-mono text-[10px] shrink-0" style={{ color: 'var(--mdt-muted-text)' }}>
-                          {item.points} pkt
-                        </span>
-                      </label>
+                          {pt}
+                        </button>
+                      ))}
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -171,7 +154,6 @@ export default function TraineeExamForm({ examineePlusCount, examineeMinusCount,
       {/* Summary bar */}
       <div className="panel-raised p-3" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
         <div className="grid grid-cols-2 gap-2">
-          {/* Checklist score */}
           <div className="panel-inset px-3 py-2" style={{ backgroundColor: 'var(--mdt-input-bg)' }}>
             <div className="font-mono text-[10px]" style={{ color: 'var(--mdt-muted-text)' }}>PUNKTY Z EGZAMINU</div>
             <div className="font-[family-name:var(--font-vt323)] text-xl" style={{ color: 'var(--mdt-content-text)' }}>
@@ -179,7 +161,6 @@ export default function TraineeExamForm({ examineePlusCount, examineeMinusCount,
             </div>
           </div>
 
-          {/* Bonus/Penalty */}
           <div className="panel-inset px-3 py-2" style={{ backgroundColor: 'var(--mdt-input-bg)' }}>
             <div className="font-mono text-[10px]" style={{ color: 'var(--mdt-muted-text)' }}>
               {bonusPoints >= 0 ? 'BONUS Z AKTYWNOŚCI' : 'KARA Z AKTYWNOŚCI'}
@@ -195,7 +176,6 @@ export default function TraineeExamForm({ examineePlusCount, examineeMinusCount,
             </div>
           </div>
 
-          {/* Total */}
           <div className="panel-inset px-3 py-2" style={{ backgroundColor: 'var(--mdt-input-bg)' }}>
             <div className="font-mono text-[10px]" style={{ color: 'var(--mdt-muted-text)' }}>RAZEM</div>
             <div className="font-[family-name:var(--font-vt323)] text-2xl" style={{ color: 'var(--mdt-content-text)' }}>
@@ -206,7 +186,6 @@ export default function TraineeExamForm({ examineePlusCount, examineeMinusCount,
             </div>
           </div>
 
-          {/* Pass/Fail */}
           <div
             className="panel-inset px-3 py-2 flex items-center justify-center"
             style={{
