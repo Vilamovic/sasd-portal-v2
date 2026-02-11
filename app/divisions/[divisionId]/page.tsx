@@ -63,13 +63,17 @@ export default function DivisionCategoriesPage() {
       icon: BookOpen,
       href: `/divisions/${divisionId}/materials`,
     },
-    {
-      id: 'raport',
-      name: 'Raport',
-      description: 'Składaj raporty z działań operacyjnych dywizji.',
-      icon: FileText,
-      href: `/divisions/${divisionId}/raport`,
-    },
+    ...(divisionId !== 'FTO'
+      ? [
+          {
+            id: 'raport',
+            name: 'Raport',
+            description: 'Składaj raporty z działań operacyjnych dywizji.',
+            icon: FileText,
+            href: `/divisions/${divisionId}/raport`,
+          },
+        ]
+      : []),
     ...(divisionId === 'GU'
       ? [
           {

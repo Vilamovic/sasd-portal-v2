@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { getDivisionReports, createDivisionReport, updateDivisionReport, deleteDivisionReport } from '@/src/lib/db/reports';
+import { getDivisionReports, createDivisionReport, updateDivisionReport, deleteDivisionReport, archiveDivisionReport } from '@/src/lib/db/reports';
 import { getReportConfig } from '../reportConfig';
 
 interface Report {
@@ -41,6 +41,8 @@ interface UseDivisionReportsReturn {
   }) => Promise<boolean>;
   // Delete
   handleDeleteReport: (reportId: string) => Promise<boolean>;
+  // Archive
+  handleArchiveReport: (reportId: string) => Promise<boolean>;
   // Reload
   reloadReports: () => Promise<void>;
 }
@@ -136,6 +138,22 @@ export function useDivisionReports(divisionId: string, userId: string | undefine
     }
   };
 
+  const handleArchiveReport = async (reportId: string): Promise<boolean> => {
+    if (!confirm('Czy na pewno chcesz zarchiwizować ten raport?')) return false;
+    if (!userId) return false;
+
+    try {
+      const { error } = await archiveDivisionReport(reportId, userId);
+      if (error) throw error;
+      await loadReports();
+      return true;
+    } catch (error) {
+      console.error('Error archiving report:', error);
+      alert('Błąd podczas archiwizacji raportu.');
+      return false;
+    }
+  };
+
   return {
     reports,
     loading,
@@ -144,6 +162,7 @@ export function useDivisionReports(divisionId: string, userId: string | undefine
     handleCreateReport,
     handleUpdateReport,
     handleDeleteReport,
+    handleArchiveReport,
     reloadReports: loadReports,
   };
 }

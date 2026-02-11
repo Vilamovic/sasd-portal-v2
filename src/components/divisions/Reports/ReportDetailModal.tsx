@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Edit3, Trash2, User, Clock, MapPin, Users } from 'lucide-react';
+import { X, Edit3, Trash2, Archive, User, Clock, MapPin, Users } from 'lucide-react';
 import { getReportTypeDefinition } from './reportConfig';
 import { getAllUsersWithDetails } from '@/src/lib/db/users';
 
@@ -24,9 +24,11 @@ interface ReportDetailModalProps {
   divisionColor: string;
   canEdit: boolean;
   canDelete: boolean;
+  canArchive: boolean;
   onClose: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onArchive: () => void;
 }
 
 export default function ReportDetailModal({
@@ -34,9 +36,11 @@ export default function ReportDetailModal({
   divisionColor,
   canEdit,
   canDelete,
+  canArchive,
   onClose,
   onEdit,
   onDelete,
+  onArchive,
 }: ReportDetailModalProps) {
   const [participantNames, setParticipantNames] = useState<string[]>([]);
   const typeDef = getReportTypeDefinition(report.division, report.report_type);
@@ -100,13 +104,18 @@ export default function ReportDetailModal({
             {typeDef?.icon} {typeDef?.label || report.report_type}
           </span>
           <div className="flex items-center gap-1">
+            {canArchive && (
+              <button onClick={onArchive} className="text-white hover:opacity-70 p-0.5" title="Archiwizuj">
+                <Archive className="w-4 h-4" />
+              </button>
+            )}
             {canEdit && (
-              <button onClick={onEdit} className="text-white hover:opacity-70 p-0.5">
+              <button onClick={onEdit} className="text-white hover:opacity-70 p-0.5" title="Edytuj">
                 <Edit3 className="w-4 h-4" />
               </button>
             )}
             {canDelete && (
-              <button onClick={onDelete} className="text-white hover:opacity-70 p-0.5">
+              <button onClick={onDelete} className="text-white hover:opacity-70 p-0.5" title="Usuń">
                 <Trash2 className="w-4 h-4" />
               </button>
             )}

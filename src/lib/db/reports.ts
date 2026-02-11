@@ -11,7 +11,7 @@ export async function getDivisionReports(division: string, filters?: { reportTyp
   try {
     let query = supabase
       .from('division_reports')
-      .select('*, author:users!author_id(id, username, mta_nick, avatar_url, badge)')
+      .select('*, author:users!division_reports_author_id_fkey(id, username, mta_nick, avatar_url, badge)')
       .eq('division', division)
       .order('created_at', { ascending: false });
 

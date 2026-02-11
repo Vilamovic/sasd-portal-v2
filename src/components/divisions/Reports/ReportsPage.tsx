@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
-import { Plus, Filter, FileText } from 'lucide-react';
+import { Plus, Filter, FileText, Archive } from 'lucide-react';
 import { useDivisionReports } from './hooks/useDivisionReports';
 import { getReportConfig, getReportTypeDefinition, type ReportTypeDefinition } from './reportConfig';
 import ReportTypeSelector from './ReportTypeSelector';
@@ -26,6 +27,7 @@ interface ReportsPageProps {
 }
 
 export default function ReportsPage({ divisionId, onBack }: ReportsPageProps) {
+  const router = useRouter();
   const { user, isCS, isDev, division, permissions, isSwatCommander, isSwatOperator } = useAuth();
   const userId = user?.id;
 
@@ -37,6 +39,7 @@ export default function ReportsPage({ divisionId, onBack }: ReportsPageProps) {
     handleCreateReport,
     handleUpdateReport,
     handleDeleteReport,
+    handleArchiveReport,
     reloadReports,
   } = useDivisionReports(divisionId, userId);
 
@@ -142,6 +145,14 @@ export default function ReportsPage({ divisionId, onBack }: ReportsPageProps) {
     }
   };
 
+  const handleArchiveReportFromModal = async () => {
+    if (!selectedReport) return;
+    const success = await handleArchiveReport(selectedReport.id);
+    if (success) {
+      setSelectedReport(null);
+    }
+  };
+
   if (loading) {
     return <LoadingState message="Ładowanie raportów..." />;
   }
@@ -193,6 +204,17 @@ export default function ReportsPage({ divisionId, onBack }: ReportsPageProps) {
                 ))}
               </select>
             </div>
+          )}
+
+          {/* Archive link (CS+ only) */}
+          {(isCS || isDev) && view === 'list' && (
+            <button
+              onClick={() => router.push(`/divisions/${divisionId}/raport/archived`)}
+              className="btn-win95 flex items-center gap-1 text-xs py-0.5 px-2"
+            >
+              <Archive className="w-3 h-3" />
+              Archiwum
+            </button>
           )}
 
           {/* Back to list from form */}
@@ -258,9 +280,11 @@ export default function ReportsPage({ divisionId, onBack }: ReportsPageProps) {
           divisionColor={color}
           canEdit={selectedReport.author_id === userId || isCS || isDev}
           canDelete={isCS || isDev}
+          canArchive={isCS || isDev}
           onClose={() => setSelectedReport(null)}
           onEdit={handleEditReport}
           onDelete={handleDeleteReportFromModal}
+          onArchive={handleArchiveReportFromModal}
         />
       )}
     </div>
