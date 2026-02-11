@@ -78,7 +78,7 @@ function SubmissionTypeCard({ config, onClick }: { config: SubmissionTypeConfig;
     <button
       onClick={onClick}
       disabled={isDisabled}
-      className={`block w-full text-left panel-raised p-0 transition-all ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:brightness-105'}`}
+      className={`flex flex-col w-full h-full text-left panel-raised p-0 transition-all ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:brightness-105'}`}
       style={{ backgroundColor: 'var(--mdt-btn-face)' }}
     >
       {/* Blue header */}
@@ -93,8 +93,8 @@ function SubmissionTypeCard({ config, onClick }: { config: SubmissionTypeConfig;
       </div>
 
       {/* Content */}
-      <div className="p-4">
-        <p className="font-mono text-sm mb-4" style={{ color: 'var(--mdt-content-text)' }}>
+      <div className="p-4 flex flex-col flex-1">
+        <p className="font-mono text-sm mb-4 flex-1" style={{ color: 'var(--mdt-content-text)' }}>
           {config.description}
         </p>
 
