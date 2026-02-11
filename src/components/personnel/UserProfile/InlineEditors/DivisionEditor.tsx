@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { Shield, Edit3, Save, X } from 'lucide-react';
-import { updateUserDivision, updateIsCommander, updateIsSwatCommander } from '@/src/lib/db/users';
+import { updateUserDivision, updateIsCommander, updateIsSwatCommander, updateIsSwatOperator } from '@/src/lib/db/users';
 import { notifyDivisionChange } from '@/src/lib/webhooks/personnel';
 import { getDivisionColor } from '@/src/components/shared/constants';
 
@@ -23,6 +23,7 @@ export default function DivisionEditor({ user, currentUser, userId, isHCS, isCS,
   const [editing, setEditing] = useState(false);
   const [tempDivision, setTempDivision] = useState(user?.division || '');
   const [tempIsCommander, setTempIsCommander] = useState(user?.is_commander || false);
+  const [tempIsSwatOperator, setTempIsSwatOperator] = useState(user?.is_swat_operator || false);
   const submittingRef = useRef(false);
 
   // CS/HCS/Dev can edit all users (isCS includes cs/hcs/dev from role hierarchy)
@@ -44,11 +45,19 @@ export default function DivisionEditor({ user, currentUser, userId, isHCS, isCS,
       const { error: cmdError } = await updateIsCommander(userId, tempIsCommander);
       if (cmdError) throw cmdError;
 
-      // Update SWAT Commander status
-      const oldIsSwat = oldDivision === 'SWAT';
-      if (isSwat !== oldIsSwat) {
-        const { error: swatError } = await updateIsSwatCommander(userId, isSwat);
+      // Update SWAT Commander / Operator status
+      const oldIsSwatCmd = user.is_swat_commander || false;
+      const oldIsSwatOp = user.is_swat_operator || false;
+      const newIsSwatCmd = isSwat && tempIsCommander;
+      const newIsSwatOp = isSwat && tempIsSwatOperator;
+
+      if (newIsSwatCmd !== oldIsSwatCmd) {
+        const { error: swatError } = await updateIsSwatCommander(userId, newIsSwatCmd);
         if (swatError) throw swatError;
+      }
+      if (newIsSwatOp !== oldIsSwatOp) {
+        const { error: swatOpError } = await updateIsSwatOperator(userId, newIsSwatOp);
+        if (swatOpError) throw swatOpError;
       }
 
       // Discord webhook
@@ -87,6 +96,7 @@ export default function DivisionEditor({ user, currentUser, userId, isHCS, isCS,
     setEditing(false);
     setTempDivision(user?.division || '');
     setTempIsCommander(user?.is_commander || false);
+    setTempIsSwatOperator(user?.is_swat_operator || false);
   };
 
   return (
@@ -145,11 +155,18 @@ export default function DivisionEditor({ user, currentUser, userId, isHCS, isCS,
               GU
             </button>
             <button
-              onClick={() => { setTempDivision('SWAT'); setTempIsCommander(true); }}
+              onClick={() => { setTempDivision('SWAT'); setTempIsCommander(true); setTempIsSwatOperator(false); }}
               className="btn-win95 text-xs py-0.5 px-2 font-bold"
-              style={tempDivision === 'SWAT' ? { backgroundColor: '#2d5a2d', color: '#fff', borderColor: '#555 #fff #fff #555' } : {}}
+              style={tempDivision === 'SWAT' && tempIsCommander ? { backgroundColor: '#2d5a2d', color: '#fff', borderColor: '#555 #fff #fff #555' } : {}}
             >
               SWAT CMD
+            </button>
+            <button
+              onClick={() => { setTempDivision('SWAT'); setTempIsCommander(false); setTempIsSwatOperator(true); }}
+              className="btn-win95 text-xs py-0.5 px-2 font-bold"
+              style={tempDivision === 'SWAT' && tempIsSwatOperator ? { backgroundColor: '#1a7a3a', color: '#fff', borderColor: '#555 #fff #fff #555' } : {}}
+            >
+              SWAT OP
             </button>
           </div>
           {tempDivision && tempDivision !== 'SWAT' && (
@@ -184,7 +201,7 @@ export default function DivisionEditor({ user, currentUser, userId, isHCS, isCS,
         <div className="flex flex-wrap gap-1">
           {user?.division ? (
             <span className={`px-1 py-0.5 text-xs font-bold font-mono ${getDivisionColor(user.division)}`}>
-              {user.division}{user.is_commander ? ' CMD' : ''}
+              {user.division}{user.is_swat_commander ? ' CMD' : user.is_swat_operator ? ' OP' : user.is_commander ? ' CMD' : ''}
             </span>
           ) : (
             <span className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>Brak</span>

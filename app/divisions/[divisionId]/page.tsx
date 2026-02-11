@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
 import Navbar from '@/src/components/dashboard/Navbar';
-import { ChevronLeft, BookOpen, Monitor, FileText, ArrowRight } from 'lucide-react';
+import { ChevronLeft, BookOpen, Monitor, FileText, ArrowRight, Users } from 'lucide-react';
 
 /**
  * Division Categories Page - shows category tiles for a division
@@ -70,6 +70,17 @@ export default function DivisionCategoriesPage() {
       icon: FileText,
       href: `/divisions/${divisionId}/raport`,
     },
+    ...(divisionId === 'GU'
+      ? [
+          {
+            id: 'gangs',
+            name: 'Gangi',
+            description: 'Baza danych gangów i organizacji przestępczych.',
+            icon: Users,
+            href: `/divisions/GU/gangs`,
+          },
+        ]
+      : []),
     ...(divisionId === 'DTU'
       ? [
           {

@@ -5,23 +5,19 @@ import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
 import Navbar from '@/src/components/dashboard/Navbar';
 import BackButton from '@/src/components/shared/BackButton';
-import ReportsPage from '@/src/components/divisions/Reports/ReportsPage';
+import GangsPage from '@/src/components/divisions/GangsPage/GangsPage';
 
 /**
- * Division Raport Page
- * /divisions/[divisionId]/raport
+ * Division Gangs Page (GU only)
+ * /divisions/[divisionId]/gangs
  */
-export default function DivisionRaportRoute() {
-  const { user, loading, division, permissions, isAdmin, isDev, isSwatCommander, isSwatOperator } = useAuth();
+export default function DivisionGangsRoute() {
+  const { user, loading, division, isAdmin, isDev } = useAuth();
   const router = useRouter();
   const params = useParams();
   const divisionId = params.divisionId as string;
 
-  const hasAccess = isAdmin || isDev ||
-    division === divisionId ||
-    (divisionId === 'SWAT' && (
-      permissions?.includes('SWAT') || isSwatCommander || isSwatOperator
-    ));
+  const hasAccess = division === 'GU' || isAdmin || isDev;
 
   useEffect(() => {
     if (!loading && !user) {
@@ -30,10 +26,10 @@ export default function DivisionRaportRoute() {
   }, [user, loading, router]);
 
   useEffect(() => {
-    if (!loading && user && !hasAccess) {
+    if (!loading && user && (!hasAccess || divisionId !== 'GU')) {
       router.push('/divisions');
     }
-  }, [hasAccess, loading, user, router]);
+  }, [hasAccess, loading, user, divisionId, router]);
 
   if (loading || !user) {
     return (
@@ -45,15 +41,15 @@ export default function DivisionRaportRoute() {
     );
   }
 
-  if (!hasAccess) return null;
+  if (!hasAccess || divisionId !== 'GU') return null;
 
   return (
     <>
       <Navbar />
       <div className="min-h-screen" style={{ backgroundColor: 'var(--mdt-content)' }}>
         <div className="max-w-7xl mx-auto px-6 py-8">
-          <BackButton onClick={() => router.push(`/divisions/${divisionId}`)} destination="Dywizji" />
-          <ReportsPage divisionId={divisionId} onBack={() => router.push(`/divisions/${divisionId}`)} />
+          <BackButton onClick={() => router.push(`/divisions/GU`)} destination="Gang Unit" />
+          <GangsPage onBack={() => router.push('/divisions/GU')} />
         </div>
       </div>
     </>

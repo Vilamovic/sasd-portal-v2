@@ -36,6 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [minusCount, setMinusCount] = useState(0);
   const [isCommander, setIsCommander] = useState(false);
   const [isSwatCommander, setIsSwatCommander] = useState(false);
+  const [isSwatOperator, setIsSwatOperator] = useState(false);
 
   // ==================== CALLBACKS (stable references) ====================
 
@@ -50,6 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setMinusCount(userData.minus_count || 0);
     setIsCommander(userData.is_commander || false);
     setIsSwatCommander(userData.is_swat_commander || false);
+    setIsSwatOperator(userData.is_swat_operator || false);
   }, []);
 
   const handleStartRolePolling = useCallback((userId: string) => {
@@ -115,6 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setMinusCount(0);
       setIsCommander(false);
       setIsSwatCommander(false);
+      setIsSwatOperator(false);
       userRef.current = null;
       loginTimestampRef.current = null;
     } catch (error) {
@@ -134,6 +137,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setMinusCount(userData.minus_count || 0);
       setIsCommander(userData.is_commander || false);
       setIsSwatCommander(userData.is_swat_commander || false);
+      setIsSwatOperator(userData.is_swat_operator || false);
     },
     onForceLogout: signOut,
   });
@@ -181,6 +185,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setPermissions(userData.permissions || []);
         setIsCommander(userData.is_commander || false);
         setIsSwatCommander(userData.is_swat_commander || false);
+        setIsSwatOperator(userData.is_swat_operator || false);
       }
 
       // Odśwież aktywne kary
@@ -214,6 +219,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     activePenalties,
     isCommander,
     isSwatCommander,
+    isSwatOperator,
     // Role helpers (spread)
     ...roleHelpers,
     // Dodatkowo dla kompatybilności
