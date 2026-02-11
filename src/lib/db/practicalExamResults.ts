@@ -1,4 +1,5 @@
 import { supabase } from '@/src/supabaseClient';
+import type { PracticalExamChecklist, LegacyChecklist } from '@/src/components/zgloszenia/types';
 
 export async function createPracticalExamResult(data: {
   slot_id?: string | null;
@@ -8,7 +9,7 @@ export async function createPracticalExamResult(data: {
   score: number;
   max_score: number;
   passed: boolean;
-  checklist: { item: string; checked: boolean }[];
+  checklist: PracticalExamChecklist | LegacyChecklist;
   notes?: string;
 }) {
   try {

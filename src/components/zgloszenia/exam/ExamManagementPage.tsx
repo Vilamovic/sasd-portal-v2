@@ -10,7 +10,7 @@ import { createPracticalExamResult } from '@/src/lib/db/practicalExamResults';
 import { notifyExamSlotDeletion } from '@/src/lib/webhooks/examBooking';
 import CreateSlotForm from './components/CreateSlotForm';
 import ExamResultForm from './components/ExamResultForm';
-import type { ExamSlot, PracticalExamType } from '../types';
+import type { ExamSlot, PracticalExamType, PracticalExamChecklist } from '../types';
 import { PRACTICAL_EXAM_TYPES } from '../types';
 
 export default function ExamManagementPage() {
@@ -88,7 +88,7 @@ export default function ExamManagementPage() {
     score: number;
     max_score: number;
     passed: boolean;
-    checklist: { item: string; checked: boolean }[];
+    checklist: PracticalExamChecklist;
     notes: string;
   }) => {
     const { error } = await createPracticalExamResult(result);

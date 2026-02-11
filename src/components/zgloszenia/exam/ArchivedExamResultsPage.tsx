@@ -6,7 +6,7 @@ import { ChevronDown, ChevronRight, ChevronLeft, ChevronUp } from 'lucide-react'
 import { useAuth } from '@/src/contexts/AuthContext';
 import BackButton from '@/src/components/shared/BackButton';
 import { getArchivedExamResults } from '@/src/lib/db/practicalExamResults';
-import type { PracticalExamResult, PracticalExamType } from '../types';
+import type { PracticalExamResult, PracticalExamType, PracticalExamChecklist, LegacyChecklist, TraineeChecklistData, StageChecklistData } from '../types';
 import { PRACTICAL_EXAM_TYPES } from '../types';
 
 const PER_PAGE = 30;
@@ -94,6 +94,103 @@ export default function ArchivedExamResultsPage() {
       setSortBy(field);
       setSortOrder('desc');
     }
+  };
+
+  const renderArchivedChecklist = (checklist: PracticalExamChecklist | LegacyChecklist) => {
+    // Trainee checklist
+    if (checklist && typeof checklist === 'object' && 'type' in checklist && checklist.type === 'trainee') {
+      const tc = checklist as TraineeChecklistData;
+      return (
+        <div className="mb-3">
+          <span className="font-mono text-[10px] block mb-1" style={{ color: 'var(--mdt-muted-text)' }}>Checklist</span>
+          <div className="panel-inset p-2 space-y-2" style={{ backgroundColor: 'var(--mdt-panel-content)' }}>
+            {tc.sections.map((section, sIdx) => {
+              const sectionScore = section.items.reduce((sum, i) => sum + (i.checked ? i.points : 0), 0);
+              return (
+                <div key={sIdx}>
+                  <div className="flex justify-between font-mono text-[10px] font-bold mb-0.5" style={{ color: 'var(--mdt-muted-text)' }}>
+                    <span>{section.name}</span>
+                    <span>{sectionScore}/{section.maxPoints}</span>
+                  </div>
+                  {section.items.map((item, iIdx) => (
+                    <div key={iIdx} className="flex items-center gap-2 py-0.5 ml-2">
+                      <span className="font-mono text-xs" style={{ color: item.checked ? '#3a6a3a' : '#8b1a1a' }}>
+                        {item.checked ? '✓' : '✗'}
+                      </span>
+                      <span className="font-mono text-xs" style={{ color: 'var(--mdt-content-text)' }}>
+                        {item.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+            {tc.bonusPoints !== 0 && (
+              <div className="pt-1" style={{ borderTop: '1px solid var(--mdt-muted-text)' }}>
+                <span className="font-mono text-[10px]" style={{ color: 'var(--mdt-muted-text)' }}>
+                  {tc.bonusPoints > 0 ? 'Bonus' : 'Kara'}: {tc.bonusPoints > 0 ? '+' : ''}{tc.bonusPoints}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // Stage-based checklist (SEU / Pościgowy)
+    if (checklist && typeof checklist === 'object' && 'type' in checklist && (checklist.type === 'seu' || checklist.type === 'poscigowy')) {
+      const sc = checklist as StageChecklistData;
+      return (
+        <div className="mb-3">
+          <span className="font-mono text-[10px] block mb-1" style={{ color: 'var(--mdt-muted-text)' }}>Etapy</span>
+          <div className="panel-inset p-2 space-y-1" style={{ backgroundColor: 'var(--mdt-panel-content)' }}>
+            {sc.stages.map((stage, idx) => (
+              <div key={idx}>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-xs" style={{ color: stage.passed ? '#3a6a3a' : '#8b1a1a' }}>
+                    {stage.passed ? '✓' : '✗'}
+                  </span>
+                  <span className="font-mono text-xs font-bold" style={{ color: 'var(--mdt-content-text)' }}>
+                    {stage.name}
+                  </span>
+                </div>
+                {stage.notes && (
+                  <div className="ml-6 font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>{stage.notes}</div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // SWAT — no checklist to display
+    if (checklist && typeof checklist === 'object' && 'type' in checklist && checklist.type === 'swat') {
+      return null;
+    }
+
+    // Legacy format
+    if (Array.isArray(checklist) && checklist.length > 0) {
+      return (
+        <div className="mb-3">
+          <span className="font-mono text-[10px] block mb-1" style={{ color: 'var(--mdt-muted-text)' }}>Checklist</span>
+          <div className="panel-inset p-2" style={{ backgroundColor: 'var(--mdt-panel-content)' }}>
+            {checklist.map((item: { item: string; checked: boolean }, idx: number) => (
+              <div key={idx} className="flex items-center gap-2 py-1">
+                <span className="font-mono text-xs" style={{ color: item.checked ? '#3a6a3a' : '#8b1a1a' }}>
+                  {item.checked ? '✓' : '✗'}
+                </span>
+                <span className="font-mono text-xs" style={{ color: 'var(--mdt-content-text)' }}>
+                  {item.item}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    return null;
   };
 
   return (
@@ -224,9 +321,13 @@ export default function ArchivedExamResultsPage() {
 
                       {/* Score */}
                       <div className="w-20 shrink-0">
-                        <span className="font-mono text-xs" style={{ color: 'var(--mdt-content-text)' }}>
-                          {result.score}/{result.max_score}
-                        </span>
+                        {result.max_score > 0 ? (
+                          <span className="font-mono text-xs" style={{ color: 'var(--mdt-content-text)' }}>
+                            {result.score}/{result.max_score}
+                          </span>
+                        ) : (
+                          <span className="font-mono text-[10px]" style={{ color: 'var(--mdt-muted-text)' }}>—</span>
+                        )}
                       </div>
 
                       {/* Result Badge */}
@@ -285,7 +386,7 @@ export default function ArchivedExamResultsPage() {
                             <div>
                               <span className="font-mono text-[10px] block" style={{ color: 'var(--mdt-muted-text)' }}>Wynik</span>
                               <span className="font-mono text-xs" style={{ color: 'var(--mdt-content-text)' }}>
-                                {result.score}/{result.max_score} ({result.passed ? 'ZDANY' : 'NIEZDANY'})
+                                {result.max_score > 0 ? `${result.score}/${result.max_score} ` : ''}{result.passed ? 'ZDANY' : 'NIEZDANY'}
                               </span>
                             </div>
                             <div>
@@ -305,23 +406,7 @@ export default function ArchivedExamResultsPage() {
                           </div>
 
                           {/* Checklist */}
-                          {result.checklist && result.checklist.length > 0 && (
-                            <div className="mb-3">
-                              <span className="font-mono text-[10px] block mb-1" style={{ color: 'var(--mdt-muted-text)' }}>Checklist</span>
-                              <div className="panel-inset p-2" style={{ backgroundColor: 'var(--mdt-panel-content)' }}>
-                                {result.checklist.map((item, idx) => (
-                                  <div key={idx} className="flex items-center gap-2 py-1">
-                                    <span className="font-mono text-xs" style={{ color: item.checked ? '#3a6a3a' : '#8b1a1a' }}>
-                                      {item.checked ? '✓' : '✗'}
-                                    </span>
-                                    <span className="font-mono text-xs" style={{ color: 'var(--mdt-content-text)' }}>
-                                      {item.item}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
+                          {result.checklist && renderArchivedChecklist(result.checklist)}
 
                           {/* Notes */}
                           {result.notes && (
