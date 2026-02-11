@@ -95,9 +95,9 @@ export default function ExamQuestion({
                     onClick={() => onAnswerSelect(index)}
                     className="w-full text-left p-3 font-mono text-sm transition-all duration-100"
                     style={{
-                      backgroundColor: isSelected ? '#c0d8c0' : 'var(--mdt-btn-face)',
-                      border: isSelected ? '2px inset #006400' : '2px outset #ffffff',
-                      color: 'var(--mdt-content-text)',
+                      backgroundColor: isSelected ? '#1a3a1a' : 'var(--mdt-btn-face)',
+                      border: isSelected ? '2px inset #4ade80' : '2px outset var(--mdt-btn-highlight)',
+                      color: isSelected ? '#4ade80' : 'var(--mdt-content-text)',
                     }}
                   >
                     <div className="flex items-center gap-3">
