@@ -37,6 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isCommander, setIsCommander] = useState(false);
   const [isSwatCommander, setIsSwatCommander] = useState(false);
   const [isSwatOperator, setIsSwatOperator] = useState(false);
+  const [badge, setBadge] = useState<string | null>(null);
 
   // ==================== CALLBACKS (stable references) ====================
 
@@ -52,6 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsCommander(userData.is_commander || false);
     setIsSwatCommander(userData.is_swat_commander || false);
     setIsSwatOperator(userData.is_swat_operator || false);
+    setBadge(userData.badge || null);
   }, []);
 
   const handleStartRolePolling = useCallback((userId: string) => {
@@ -118,6 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsCommander(false);
       setIsSwatCommander(false);
       setIsSwatOperator(false);
+      setBadge(null);
       userRef.current = null;
       loginTimestampRef.current = null;
     } catch (error) {
@@ -138,6 +141,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsCommander(userData.is_commander || false);
       setIsSwatCommander(userData.is_swat_commander || false);
       setIsSwatOperator(userData.is_swat_operator || false);
+      setBadge(userData.badge || null);
     },
     onForceLogout: signOut,
   });
@@ -186,6 +190,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsCommander(userData.is_commander || false);
         setIsSwatCommander(userData.is_swat_commander || false);
         setIsSwatOperator(userData.is_swat_operator || false);
+        setBadge(userData.badge || null);
       }
 
       // Odśwież aktywne kary
@@ -220,6 +225,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isCommander,
     isSwatCommander,
     isSwatOperator,
+    badge,
     // Role helpers (spread)
     ...roleHelpers,
     // Dodatkowo dla kompatybilności
