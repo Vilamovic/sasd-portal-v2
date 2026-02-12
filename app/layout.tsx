@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { VT323, Space_Mono } from 'next/font/google';
+import { VT323, Space_Mono, Caveat } from 'next/font/google';
 import "./globals.css";
 import { Providers } from "@/src/contexts/Providers";
 
 const vt323 = VT323({ weight: '400', subsets: ['latin', 'latin-ext'], variable: '--font-vt323' });
 const spaceMono = Space_Mono({ weight: ['400', '700'], subsets: ['latin', 'latin-ext'], variable: '--font-space-mono' });
+const caveat = Caveat({ weight: ['400', '700'], subsets: ['latin', 'latin-ext'], variable: '--font-caveat' });
 
 export const metadata: Metadata = {
   title: "SASD MDT - San Andreas Sheriff's Department",
@@ -25,7 +26,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${vt323.variable} ${spaceMono.variable} font-mono antialiased`}>
+      <body className={`${vt323.variable} ${spaceMono.variable} ${caveat.variable} font-mono antialiased`}>
         <Providers>
           <main>
             {children}
