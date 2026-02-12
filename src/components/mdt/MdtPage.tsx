@@ -492,12 +492,18 @@ export default function MdtPage() {
             <label className="font-mono text-xs font-bold" style={{ color: "var(--mdt-muted-text)" }}>TREŚĆ NOTATKI:</label>
             <textarea
               value={newNote}
-              onChange={(e) => setNewNote(e.target.value)}
+              onChange={(e) => { if (e.target.value.length <= 500) setNewNote(e.target.value) }}
+              maxLength={500}
               rows={4}
               className="panel-inset w-full resize-none px-2 py-1 font-mono text-xs"
               style={{ backgroundColor: "var(--mdt-input-bg)", color: "var(--mdt-content-text)", outline: "none" }}
               placeholder="Wpisz treść notatki..."
             />
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-[10px]" style={{ color: newNote.length >= 450 ? "#c41e1e" : "var(--mdt-muted-text)" }}>
+                {newNote.length}/500
+              </span>
+            </div>
             <div className="flex justify-end gap-2 border-t border-[#999] pt-3">
               <button
                 className="btn-win95 text-xs"
@@ -731,12 +737,18 @@ export default function MdtPage() {
             <label className="font-mono text-xs font-bold" style={{ color: "var(--mdt-muted-text)" }}>TREŚĆ NOTATKI:</label>
             <textarea
               value={editNoteContent}
-              onChange={(e) => setEditNoteContent(e.target.value)}
+              onChange={(e) => { if (e.target.value.length <= 500) setEditNoteContent(e.target.value) }}
+              maxLength={500}
               rows={4}
               className="panel-inset w-full resize-none px-2 py-1 font-mono text-xs"
               style={{ backgroundColor: "var(--mdt-input-bg)", color: "var(--mdt-content-text)", outline: "none" }}
               placeholder="Wpisz treść notatki..."
             />
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-[10px]" style={{ color: editNoteContent.length >= 450 ? "#c41e1e" : "var(--mdt-muted-text)" }}>
+                {editNoteContent.length}/500
+              </span>
+            </div>
             <div className="flex justify-end gap-2 border-t border-[#999] pt-3">
               <button
                 className="btn-win95 text-xs"

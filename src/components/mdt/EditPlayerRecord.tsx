@@ -25,7 +25,6 @@ export function EditPlayerRecord({ record, onSave, onCancel }: EditPlayerRecordP
     hair: record.hair || "",
     eyes: record.eyes || "",
     address: record.address || "",
-    license_no: record.license_no || "",
     license_status: record.license_status || "BRAK",
     wanted_status: record.wanted_status || "NIE",
     gang_affiliation: record.gang_affiliation || "NIEZNANE",
@@ -45,12 +44,19 @@ export function EditPlayerRecord({ record, onSave, onCancel }: EditPlayerRecordP
     setUploading(true)
     try {
       const compressed = await compressToWebP(file, 600, 800, 0.8)
-      const { url } = await uploadMugshot(record.id, compressed)
+      const { url, error } = await uploadMugshot(record.id, compressed)
+      if (error) {
+        console.error('Photo upload failed:', error)
+        alert('Błąd przesyłania zdjęcia. Sprawdź uprawnienia Storage w Supabase.')
+        return
+      }
       if (url) setPreviewUrl(url)
     } catch (err) {
       console.error('Photo upload failed:', err)
+      alert('Błąd przesyłania zdjęcia.')
     } finally {
       setUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
 
@@ -71,7 +77,6 @@ export function EditPlayerRecord({ record, onSave, onCancel }: EditPlayerRecordP
     { label: "WŁOSY", key: "hair" },
     { label: "OCZY", key: "eyes" },
     { label: "ADRES", key: "address" },
-    { label: "NR PRAWA", key: "license_no" },
     { label: "STATUS PRAWA JAZDY", key: "license_status", type: "select", options: ["BRAK", "AKTYWNE", "COFNIĘTE"] },
     { label: "POSZUKIWANY", key: "wanted_status", type: "select", options: ["NIE", "POSZUKIWANY"] },
     { label: "GANG", key: "gang_affiliation" },

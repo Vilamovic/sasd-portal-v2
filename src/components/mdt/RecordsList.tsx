@@ -44,7 +44,7 @@ export function RecordsList({ records, loading, onSelectRecord, onCreateNew }: R
               <tr style={{ backgroundColor: "var(--mdt-header)" }}>
                 <th className="px-3 py-2 text-left font-[family-name:var(--font-vt323)] text-sm tracking-wider text-[#ccc]">NAZWISKO</th>
                 <th className="px-3 py-2 text-left font-[family-name:var(--font-vt323)] text-sm tracking-wider text-[#ccc]">IMIĘ</th>
-                <th className="px-3 py-2 text-left font-[family-name:var(--font-vt323)] text-sm tracking-wider text-[#ccc]">PESEL</th>
+                <th className="px-3 py-2 text-left font-[family-name:var(--font-vt323)] text-sm tracking-wider text-[#ccc]">NICK</th>
                 <th className="px-3 py-2 text-left font-[family-name:var(--font-vt323)] text-sm tracking-wider text-[#ccc]">STATUS</th>
                 <th className="px-3 py-2 text-left font-[family-name:var(--font-vt323)] text-sm tracking-wider text-[#ccc]">WYROKI</th>
               </tr>

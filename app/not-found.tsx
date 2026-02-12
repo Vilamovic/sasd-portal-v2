@@ -1,4 +1,4 @@
-import Link from 'next/link';
+'use client';
 
 export default function NotFound() {
   return (
@@ -17,12 +17,12 @@ export default function NotFound() {
             Sprawdź adres URL lub wróć do panelu głównego.
           </p>
         </div>
-        <Link
-          href="/dashboard"
+        <button
+          onClick={() => { window.location.href = '/dashboard'; }}
           className="btn-win95 inline-block font-mono text-sm px-6 py-2"
         >
           POWRÓT DO DASHBOARD
-        </Link>
+        </button>
       </div>
     </div>
   );

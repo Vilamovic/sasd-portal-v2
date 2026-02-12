@@ -45,12 +45,19 @@ export function PlayerRecord({
     setUploading(true)
     try {
       const compressed = await compressToWebP(file, 600, 800, 0.8)
-      const { url } = await uploadMugshot(record.id, compressed)
+      const { url, error } = await uploadMugshot(record.id, compressed)
+      if (error) {
+        console.error('Photo upload failed:', error)
+        alert('Błąd przesyłania zdjęcia. Sprawdź uprawnienia Storage w Supabase.')
+        return
+      }
       if (url) onMugshotChange(url)
     } catch (err) {
       console.error('Photo upload failed:', err)
+      alert('Błąd przesyłania zdjęcia.')
     } finally {
       setUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
 
@@ -165,7 +172,6 @@ export function PlayerRecord({
             <div className="my-1 border-t border-[#999]" />
 
             <InfoRow label="ADRES" value={record.address || "—"} />
-            <InfoRow label="NR PRAWA" value={record.license_no || "—"} />
             <InfoRow
               label="STATUS PRAWA JAZDY"
               value={record.license_status || "—"}
