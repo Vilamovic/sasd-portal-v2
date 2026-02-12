@@ -307,7 +307,7 @@ export default function MdtPage() {
             officerName={officerName}
             isFullscreen={isFullscreen}
             onToggleFullscreen={() => setIsFullscreen((p) => !p)}
-            onClose={() => router.push("/divisions/DTU")}
+            onClose={() => router.push(division === "GU" ? "/divisions/GU" : "/divisions/DTU")}
           />
 
           <SearchPanel
