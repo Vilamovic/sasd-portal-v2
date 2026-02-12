@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
 import Navbar from '@/src/components/dashboard/Navbar';
-import { ChevronLeft, BookOpen, Monitor, FileText, ArrowRight, Users } from 'lucide-react';
+import { ChevronLeft, BookOpen, Monitor, FileText, ArrowRight, Users, ClipboardList, Zap } from 'lucide-react';
 
 /**
  * Division Categories Page - shows category tiles for a division
@@ -17,7 +17,7 @@ const divisionConfig: Record<string, { name: string; fullName: string; color: st
   SWAT: { name: 'SWAT', fullName: 'Special Weapon And Tactics', color: '#c41e1e' },
   SS: { name: 'SS', fullName: 'Supervisory Staff', color: '#ff8c00' },
   DTU: { name: 'DTU', fullName: 'Detective Task Unit', color: '#60a5fa' },
-  GU: { name: 'GU', fullName: 'Gang Unit', color: '#10b981' },
+  GU: { name: 'GU', fullName: 'Gang Unit', color: '#059669' },
   FTO: { name: 'FTO', fullName: 'Training Staff', color: '#c9a227' },
 };
 
@@ -85,7 +85,29 @@ export default function DivisionCategoriesPage() {
           },
         ]
       : []),
-    ...(divisionId === 'DTU'
+    ...(divisionId === 'FTO'
+      ? [
+          {
+            id: 'attendance',
+            name: 'Obecność',
+            description: 'System obecności — grupy szkoleniowe i lista obecności.',
+            icon: ClipboardList,
+            href: '/divisions/FTO/attendance',
+          },
+        ]
+      : []),
+    ...(divisionId === 'SS'
+      ? [
+          {
+            id: 'chase-points',
+            name: 'Punkty Pościgowe',
+            description: 'System punktów za naruszenia procedur pościgowych.',
+            icon: Zap,
+            href: '/divisions/SS/chase-points',
+          },
+        ]
+      : []),
+    ...(divisionId === 'DTU' || divisionId === 'GU'
       ? [
           {
             id: 'mdt',

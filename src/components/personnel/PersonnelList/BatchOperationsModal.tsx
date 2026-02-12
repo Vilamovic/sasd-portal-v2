@@ -216,7 +216,7 @@ export default function BatchOperationsModal({
                     <button
                       onClick={() => setBatchDivision('GU')}
                       className="btn-win95 font-mono text-sm font-bold"
-                      style={batchDivision === 'GU' ? { backgroundColor: '#10b981', color: '#fff', borderColor: '#555 #fff #fff #555' } : {}}
+                      style={batchDivision === 'GU' ? { backgroundColor: '#059669', color: '#fff', borderColor: '#555 #fff #fff #555' } : {}}
                     >
                       GU
                     </button>

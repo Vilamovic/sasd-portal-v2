@@ -4,6 +4,19 @@ import { getUserById, upsertUser } from '@/src/lib/db/users';
 import { notifyUserAuth } from '@/src/lib/webhooks/auth';
 import { determineRole } from './useRoleCheck';
 
+/**
+ * Convert Discord avatar URL to webP format for smaller file size.
+ * Preserves GIF avatars (animated) by keeping .gif extension.
+ */
+function convertAvatarToWebP(url: string | undefined | null): string | null {
+  if (!url) return null;
+  // Discord CDN URLs: https://cdn.discordapp.com/avatars/{id}/{hash}.png
+  // If it's a GIF (animated avatar), keep it as GIF
+  if (url.includes('.gif')) return url;
+  // Convert .png/.jpg/.jpeg to .webp
+  return url.replace(/\.(png|jpg|jpeg)(\?.*)?$/, '.webp$2');
+}
+
 export interface AuthSessionCallbacks {
   onRoleChange: (role: string) => void;
   onUserDataLoaded: (userData: any) => void;
@@ -137,7 +150,7 @@ export function useAuthSession(callbacks: AuthSessionCallbacks) {
                 'Unknown',
               email:
                 currentSession.user.email || currentSession.user.user_metadata?.email || null,
-              avatar_url: currentSession.user.user_metadata?.avatar_url || null,
+              avatar_url: convertAvatarToWebP(currentSession.user.user_metadata?.avatar_url) || null,
               role: 'trainee', // Default role for new users
               last_seen: new Date().toISOString(),
             };
@@ -197,7 +210,7 @@ export function useAuthSession(callbacks: AuthSessionCallbacks) {
                 newSession.user.user_metadata?.name ||
                 'Unknown',
               email: newSession.user.email || newSession.user.user_metadata?.email || null,
-              avatar_url: newSession.user.user_metadata?.avatar_url || null,
+              avatar_url: convertAvatarToWebP(newSession.user.user_metadata?.avatar_url) || null,
               last_seen: new Date().toISOString(),
             };
 

@@ -26,7 +26,7 @@ export default function GangForm({
 }: GangFormProps) {
   return (
     <div className="panel-raised mb-4" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
-      <div className="px-3 py-1" style={{ backgroundColor: '#10b981' }}>
+      <div className="px-3 py-1" style={{ backgroundColor: '#059669' }}>
         <span className="font-[family-name:var(--font-vt323)] text-base tracking-widest uppercase text-white">
           {isEditing ? 'Edytuj gang' : 'Dodaj gang'}
         </span>

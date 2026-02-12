@@ -3,6 +3,8 @@
 import React from "react"
 import { useState, useRef } from "react"
 import type { MdtRecord } from "./types"
+import { compressToWebP } from "@/src/lib/imageUtils"
+import { uploadMugshot } from "@/src/lib/db/mdt"
 
 interface EditPlayerRecordProps {
   record: MdtRecord
@@ -23,36 +25,45 @@ export function EditPlayerRecord({ record, onSave, onCancel }: EditPlayerRecordP
     hair: record.hair || "",
     eyes: record.eyes || "",
     address: record.address || "",
-    phone: record.phone || "",
     license_no: record.license_no || "",
-    license_status: record.license_status || "AKTYWNY",
-    wanted_status: record.wanted_status || "BRAK",
+    license_status: record.license_status || "BRAK",
+    wanted_status: record.wanted_status || "NIE",
     gang_affiliation: record.gang_affiliation || "NIEZNANE",
+    record_level: String(record.record_level || 1),
   })
   const [previewUrl, setPreviewUrl] = useState<string | null>(record.mugshot_url)
+  const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   function handleChange(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  function handleImportPhoto(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleImportPhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (file) {
-      const url = URL.createObjectURL(file)
-      setPreviewUrl(url)
+    if (!file || !record.id) return
+    setUploading(true)
+    try {
+      const compressed = await compressToWebP(file, 600, 800, 0.8)
+      const { url } = await uploadMugshot(record.id, compressed)
+      if (url) setPreviewUrl(url)
+    } catch (err) {
+      console.error('Photo upload failed:', err)
+    } finally {
+      setUploading(false)
     }
   }
 
   function handleSave() {
-    onSave(form, previewUrl)
+    const { record_level, ...rest } = form
+    onSave({ ...rest, record_level: parseInt(record_level) }, previewUrl)
   }
 
   const fields: { label: string; key: string; type?: "select"; options?: string[] }[] = [
     { label: "IMIĘ", key: "first_name" },
     { label: "NAZWISKO", key: "last_name" },
     { label: "DATA UR.", key: "dob" },
-    { label: "PESEL", key: "ssn" },
+    { label: "NICK", key: "ssn" },
     { label: "PŁEĆ", key: "gender", type: "select", options: ["Mężczyzna", "Kobieta"] },
     { label: "RASA", key: "race" },
     { label: "WZROST", key: "height" },
@@ -60,14 +71,14 @@ export function EditPlayerRecord({ record, onSave, onCancel }: EditPlayerRecordP
     { label: "WŁOSY", key: "hair" },
     { label: "OCZY", key: "eyes" },
     { label: "ADRES", key: "address" },
-    { label: "TELEFON", key: "phone" },
     { label: "NR PRAWA", key: "license_no" },
-    { label: "ST. PRAWA", key: "license_status", type: "select", options: ["AKTYWNY", "ZAWIESZONY", "COFNIĘTY"] },
-    { label: "POSZUK.", key: "wanted_status", type: "select", options: ["BRAK", "AKTYWNY", "POSZUKIWANY"] },
+    { label: "STATUS PRAWA JAZDY", key: "license_status", type: "select", options: ["BRAK", "AKTYWNE", "COFNIĘTE"] },
+    { label: "POSZUKIWANY", key: "wanted_status", type: "select", options: ["NIE", "POSZUKIWANY"] },
     { label: "GANG", key: "gang_affiliation" },
+    { label: "POZIOM KARTOTEKI", key: "record_level", type: "select", options: ["1", "2"] },
   ]
 
-  const licenseId = form.license_no ? form.license_no.split("-").pop() : "N/A"
+  const sasdId = record.record_number ? `SASD-${String(record.record_number).padStart(6, '0')}` : 'SASD-N/A'
 
   return (
     <div
@@ -97,7 +108,7 @@ export function EditPlayerRecord({ record, onSave, onCancel }: EditPlayerRecordP
                   style={{ border: "1px solid #555" }}
                 />
                 <span className="font-mono text-xs" style={{ color: "var(--mdt-content-text)" }}>
-                  SASD-{licenseId}
+                  {sasdId}
                 </span>
               </div>
             ) : (
@@ -112,29 +123,17 @@ export function EditPlayerRecord({ record, onSave, onCancel }: EditPlayerRecordP
                   </svg>
                 </div>
                 <span className="font-mono text-xs" style={{ color: "var(--mdt-content-text)" }}>
-                  SASD-{licenseId}
+                  {sasdId}
                 </span>
               </div>
             )}
           </div>
 
           <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImportPhoto} />
-          <button className="btn-win95 mb-4 w-full text-xs" onClick={() => fileInputRef.current?.click()}>
-            IMPORTUJ ZDJĘCIE
+          <button className="btn-win95 mb-4 w-full text-xs" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+            {uploading ? 'PRZESYŁANIE...' : 'IMPORTUJ ZDJĘCIE'}
           </button>
 
-          <div className="mt-auto flex flex-col gap-1">
-            <button
-              className="btn-win95 w-full text-xs"
-              style={{ backgroundColor: "#3a6a3a", color: "#fff", borderColor: "#5a9a5a #1a3a1a #1a3a1a #5a9a5a" }}
-              onClick={handleSave}
-            >
-              ZAPISZ ZMIANY
-            </button>
-            <button className="btn-win95 w-full text-xs" onClick={onCancel}>
-              ANULUJ
-            </button>
-          </div>
         </div>
 
         {/* Right column - Editable fields */}
@@ -151,7 +150,7 @@ export function EditPlayerRecord({ record, onSave, onCancel }: EditPlayerRecordP
                 <div key={field.key} className="flex items-center gap-2">
                   <label
                     htmlFor={`edit-${field.key}`}
-                    className="w-24 shrink-0 font-mono text-xs font-bold"
+                    className="w-36 shrink-0 font-mono text-[11px] font-bold"
                     style={{ color: "var(--mdt-muted-text)" }}
                   >
                     {field.label}:
@@ -180,6 +179,19 @@ export function EditPlayerRecord({ record, onSave, onCancel }: EditPlayerRecordP
                   )}
                 </div>
               ))}
+            </div>
+
+            <div className="flex gap-2 mt-3">
+              <button
+                className="btn-win95 flex-1 text-xs"
+                style={{ backgroundColor: "#3a6a3a", color: "#fff", borderColor: "#5a9a5a #1a3a1a #1a3a1a #5a9a5a" }}
+                onClick={handleSave}
+              >
+                ZAPISZ ZMIANY
+              </button>
+              <button className="btn-win95 flex-1 text-xs" onClick={onCancel}>
+                ANULUJ
+              </button>
             </div>
           </div>
         </div>

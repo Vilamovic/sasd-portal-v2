@@ -14,7 +14,7 @@ export function WantedPoster({ record, mugshotUrl, reason, onClose }: WantedPost
   const posterRef = useRef<HTMLDivElement>(null)
 
   const activeWarrant = record.mdt_warrants?.find((w) => w.is_active)
-  const licenseId = record.license_no ? record.license_no.split("-").pop() : "N/A"
+  const sasdId = record.record_number ? `SASD-${String(record.record_number).padStart(6, '0')}` : 'SASD-N/A'
 
   function handlePrint() {
     const content = posterRef.current
@@ -156,7 +156,7 @@ export function WantedPoster({ record, mugshotUrl, reason, onClose }: WantedPost
             <div class="footer">
               JEŚLI POSIADASZ INFORMACJE O MIEJSCU POBYTU TEJ OSOBY,<br/>
               SKONTAKTUJ SIĘ Z SAN ANDREAS SHERIFF'S DEPARTMENT<br/>
-              TELEFON: (555) 911-SASD | PRZYPADEK NR: SASD-${licenseId}<br/>
+              TELEFON: (555) 911-SASD | PRZYPADEK NR: ${sasdId}<br/>
               <br/>
               DATA WYSTAWIENIA: ${new Date().toLocaleDateString("pl-PL")}
             </div>
@@ -257,7 +257,7 @@ export function WantedPoster({ record, mugshotUrl, reason, onClose }: WantedPost
             <div className="mt-3 text-center">
               <p className="font-mono text-[8px] leading-relaxed" style={{ color: "#555" }}>
                 JEŚLI POSIADASZ INFORMACJE SKONTAKTUJ SIĘ Z SASD<br />
-                TEL: (555) 911-SASD | NR: SASD-{licenseId}<br />
+                TEL: (555) 911-SASD | NR: {sasdId}<br />
                 DATA: {new Date().toLocaleDateString("pl-PL")}
               </p>
             </div>

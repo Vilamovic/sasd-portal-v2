@@ -27,6 +27,7 @@ export function BoloVehiclesPanel({
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState(emptyForm)
+  const [detailVehicle, setDetailVehicle] = useState<MdtBoloVehicle | null>(null)
 
   function openAdd() {
     setForm({ ...emptyForm, reported_by: officerName })
@@ -110,6 +111,8 @@ export function BoloVehiclesPanel({
               {vehicles.map((v, idx) => (
                 <tr
                   key={v.id}
+                  className="cursor-pointer hover:brightness-110"
+                  onClick={() => setDetailVehicle(v)}
                   style={{
                     backgroundColor: idx % 2 === 0 ? "var(--mdt-row-even)" : "var(--mdt-row-odd)",
                     color: "var(--mdt-content-text)",
@@ -128,7 +131,7 @@ export function BoloVehiclesPanel({
                     </span>
                   </td>
                   <td className="px-3 py-2 font-mono text-sm">{v.reported_by || "—"}</td>
-                  <td className="px-3 py-2 text-center">
+                  <td className="px-3 py-2 text-center" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center justify-center gap-1">
                       <button onClick={() => openEdit(v)} className="btn-win95 text-[10px] px-2 py-0.5">EDYTUJ</button>
                       {v.status === "ACTIVE" && (
@@ -167,6 +170,38 @@ export function BoloVehiclesPanel({
         </div>
         <span className="font-mono text-sm" style={{ color: "#888" }}>POJAZDY: {vehicles.length}</span>
       </div>
+
+      {/* Detail Modal */}
+      {detailVehicle && (
+        <MdtModal title={`BOLO: ${detailVehicle.plate}`} onClose={() => setDetailVehicle(null)}>
+          <div className="flex flex-col gap-3">
+            {[
+              { label: "TABLICA", value: detailVehicle.plate },
+              { label: "MARKA", value: detailVehicle.make || "—" },
+              { label: "MODEL", value: detailVehicle.model || "—" },
+              { label: "KOLOR", value: detailVehicle.color || "—" },
+              { label: "ZGŁOSIŁ", value: detailVehicle.reported_by || "—" },
+              { label: "STATUS", value: detailVehicle.status === "ACTIVE" ? "AKTYWNY" : "ZAKOŃCZONY" },
+              { label: "DATA ZGŁOSZENIA", value: new Date(detailVehicle.created_at).toLocaleString("pl-PL") },
+            ].map((row) => (
+              <div key={row.label} className="flex gap-2">
+                <span className="w-36 shrink-0 font-mono text-xs font-bold" style={{ color: "var(--mdt-muted-text)" }}>{row.label}:</span>
+                <span className="font-mono text-xs" style={{ color: "var(--mdt-content-text)" }}>{row.value}</span>
+              </div>
+            ))}
+            <div className="border-t border-[#999] pt-2">
+              <span className="font-mono text-xs font-bold" style={{ color: "var(--mdt-muted-text)" }}>POWÓD:</span>
+              <p className="mt-1 font-mono text-xs break-words whitespace-pre-wrap" style={{ color: "var(--mdt-content-text)" }}>
+                {detailVehicle.reason || "Brak podanego powodu"}
+              </p>
+            </div>
+            <div className="flex justify-end gap-2 border-t border-[#999] pt-3">
+              <button className="btn-win95 text-xs" onClick={() => { setDetailVehicle(null); openEdit(detailVehicle) }}>EDYTUJ</button>
+              <button className="btn-win95 text-xs" onClick={() => setDetailVehicle(null)}>ZAMKNIJ</button>
+            </div>
+          </div>
+        </MdtModal>
+      )}
 
       {/* Add/Edit Modal */}
       {showAddModal && (

@@ -55,7 +55,11 @@ export function usePersonnelList({
 
     // Division filter
     if (divisionFilter !== 'all') {
-      result = result.filter((u) => u.division === divisionFilter);
+      if (divisionFilter === 'none') {
+        result = result.filter((u) => !u.division);
+      } else {
+        result = result.filter((u) => u.division === divisionFilter);
+      }
     }
 
     // Role filter

@@ -48,6 +48,14 @@ export default function MdtPage() {
   const [showPrintModal, setShowPrintModal] = useState(false)
   const [showPoster, setShowPoster] = useState(false)
   const [showCreatePerson, setShowCreatePerson] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState("")
+  const [showEditCriminalRecord, setShowEditCriminalRecord] = useState(false)
+  const [editCrRecordId, setEditCrRecordId] = useState<string | null>(null)
+  const [editCrForm, setEditCrForm] = useState({ date: "", offense: "", code: "", status: "W TOKU", officer: "" })
+  const [showEditNote, setShowEditNote] = useState(false)
+  const [editNoteId, setEditNoteId] = useState<string | null>(null)
+  const [editNoteContent, setEditNoteContent] = useState("")
 
   // Form states
   const [newRecordForm, setNewRecordForm] = useState({ date: "", offense: "", code: "", status: "W TOKU", officer: "" })
@@ -62,8 +70,8 @@ export default function MdtPage() {
     records, selectedRecord, loading: recordsLoading,
     loadRecords, selectRecord, clearSelection, handleSearch,
     handleCreateRecord, handleUpdateRecord, handleDeleteRecord,
-    handleAddCriminalRecord, handleDeleteCriminalRecord,
-    handleAddNote, handleDeleteNote,
+    handleAddCriminalRecord, handleUpdateCriminalRecord, handleDeleteCriminalRecord,
+    handleAddNote, handleUpdateNote, handleDeleteNote,
     handleIssueWarrant, handleRemoveWarrant,
   } = useMdtRecords()
 
@@ -209,6 +217,48 @@ export default function MdtPage() {
     setShowPoster(true)
   }
 
+  // Delete kartoteka with confirmation
+  async function onDeleteKartoteka() {
+    if (!selectedRecord || deleteConfirmText !== "potwierdzam") return
+    await handleDeleteRecord(selectedRecord.id)
+    setShowDeleteConfirm(false)
+    setDeleteConfirmText("")
+  }
+
+  // Edit criminal record
+  function openEditCriminalRecord(crId: string) {
+    if (!selectedRecord) return
+    const cr = selectedRecord.criminal_records?.find((c) => c.id === crId)
+    if (!cr) return
+    setEditCrRecordId(crId)
+    setEditCrForm({ date: cr.date, offense: cr.offense, code: cr.code, status: cr.status, officer: cr.officer })
+    setShowEditCriminalRecord(true)
+  }
+
+  async function onSaveEditCriminalRecord() {
+    if (!selectedRecord || !editCrRecordId) return
+    await handleUpdateCriminalRecord(editCrRecordId, editCrForm, selectedRecord.id)
+    setShowEditCriminalRecord(false)
+    setEditCrRecordId(null)
+  }
+
+  // Edit note
+  function openEditNote(noteId: string) {
+    if (!selectedRecord) return
+    const note = selectedRecord.mdt_notes?.find((n) => n.id === noteId)
+    if (!note) return
+    setEditNoteId(noteId)
+    setEditNoteContent(note.content)
+    setShowEditNote(true)
+  }
+
+  async function onSaveEditNote() {
+    if (!selectedRecord || !editNoteId) return
+    await handleUpdateNote(editNoteId, editNoteContent, selectedRecord.id)
+    setShowEditNote(false)
+    setEditNoteId(null)
+  }
+
   // Mugshot change handler
   function handleMugshotChange(url: string) {
     if (selectedRecord) {
@@ -233,11 +283,11 @@ export default function MdtPage() {
     )
   }
 
-  if (!user || (!isCS && division !== "DTU")) {
+  if (!user || (!isCS && division !== "DTU" && division !== "GU")) {
     return (
       <>
         <Navbar />
-        <AccessDenied onBack={() => router.push("/divisions/DTU")} message="Brak uprawnień do MDT. Wymagany: DTU lub CS+." />
+        <AccessDenied onBack={() => router.push("/divisions")} message="Brak uprawnień do MDT. Wymagany: DTU, GU lub CS+." />
       </>
     )
   }
@@ -300,6 +350,8 @@ export default function MdtPage() {
                     onDeleteRecord={onDeleteCriminalRecord}
                     isDeleteNoteMode={isDeleteNoteMode}
                     onDeleteNote={onDeleteNote}
+                    onEditCriminalRecord={openEditCriminalRecord}
+                    onEditNote={openEditNote}
                   />
                 )
               ) : (
@@ -366,6 +418,12 @@ export default function MdtPage() {
                 if (selectedRecord) {
                   setPrintReason("")
                   setShowPrintModal(true)
+                }
+              }}
+              onDeleteKartoteka={() => {
+                if (selectedRecord) {
+                  setDeleteConfirmText("")
+                  setShowDeleteConfirm(true)
                 }
               }}
               onCreatePerson={() => setShowCreatePerson(true)}
@@ -567,6 +625,127 @@ export default function MdtPage() {
                 UTWÓRZ KARTOTEKĘ
               </button>
               <button className="btn-win95 text-xs" onClick={() => setShowCreatePerson(false)}>ANULUJ</button>
+            </div>
+          </div>
+        </MdtModal>
+      )}
+
+      {/* MODAL: Delete Confirmation */}
+      {showDeleteConfirm && selectedRecord && (
+        <MdtModal title="Usuwanie kartoteki" onClose={() => setShowDeleteConfirm(false)}>
+          <div className="flex flex-col gap-3">
+            <div className="panel-inset p-3" style={{ backgroundColor: "#4a1a1a" }}>
+              <span className="font-mono text-xs text-red-400">
+                UWAGA: Ta operacja jest nieodwracalna. Wszystkie dane kartoteki, wpisy karne, notatki i nakazy zostaną trwale usunięte.
+              </span>
+            </div>
+            <span className="font-mono text-xs" style={{ color: "var(--mdt-muted-text)" }}>
+              Kartoteka: <strong>{selectedRecord.last_name}, {selectedRecord.first_name}</strong>
+            </span>
+            <label className="font-mono text-xs font-bold" style={{ color: "var(--mdt-muted-text)" }}>
+              Wpisz &quot;potwierdzam&quot; aby usunąć:
+            </label>
+            <input
+              type="text"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              className="panel-inset px-2 py-1 font-mono text-xs"
+              style={{ backgroundColor: "var(--mdt-input-bg)", color: "var(--mdt-content-text)", outline: "none" }}
+              placeholder="potwierdzam"
+            />
+            <div className="flex justify-end gap-2 border-t border-[#999] pt-3">
+              <button
+                className="btn-win95 text-xs"
+                style={{
+                  backgroundColor: deleteConfirmText === "potwierdzam" ? "#c41e1e" : "#555",
+                  color: "#fff",
+                  borderColor: deleteConfirmText === "potwierdzam" ? "#ff6b6b #8a1a1a #8a1a1a #ff6b6b" : "#777 #333 #333 #777",
+                }}
+                onClick={onDeleteKartoteka}
+                disabled={deleteConfirmText !== "potwierdzam"}
+              >
+                USUŃ KARTOTEKĘ
+              </button>
+              <button className="btn-win95 text-xs" onClick={() => setShowDeleteConfirm(false)}>ANULUJ</button>
+            </div>
+          </div>
+        </MdtModal>
+      )}
+
+      {/* MODAL: Edit Criminal Record */}
+      {showEditCriminalRecord && selectedRecord && (
+        <MdtModal title="Edytuj wpis karny" onClose={() => setShowEditCriminalRecord(false)}>
+          <div className="flex flex-col gap-3">
+            {[
+              { label: "DATA", key: "date", placeholder: "" },
+              { label: "PRZESTĘPSTWO", key: "offense", placeholder: "np. Kradzież pojazdu" },
+              { label: "KOD", key: "code", placeholder: "np. PC 487(d)(1)" },
+              { label: "FUNKCJONARIUSZ", key: "officer", placeholder: "np. Dep. Kowalski" },
+            ].map((f) => (
+              <div key={f.key} className="flex items-center gap-2">
+                <label className="w-32 shrink-0 font-mono text-xs font-bold" style={{ color: "var(--mdt-muted-text)" }}>
+                  {f.label}:
+                </label>
+                <input
+                  type="text"
+                  value={editCrForm[f.key as keyof typeof editCrForm]}
+                  onChange={(e) => setEditCrForm((p) => ({ ...p, [f.key]: e.target.value }))}
+                  className="panel-inset flex-1 px-2 py-1 font-mono text-xs"
+                  style={{ backgroundColor: "var(--mdt-input-bg)", color: "var(--mdt-content-text)", outline: "none" }}
+                  placeholder={f.placeholder}
+                />
+              </div>
+            ))}
+            <div className="flex items-center gap-2">
+              <label className="w-32 shrink-0 font-mono text-xs font-bold" style={{ color: "var(--mdt-muted-text)" }}>STATUS:</label>
+              <select
+                value={editCrForm.status}
+                onChange={(e) => setEditCrForm((p) => ({ ...p, status: e.target.value }))}
+                className="panel-inset flex-1 px-2 py-1 font-mono text-xs"
+                style={{ backgroundColor: "var(--mdt-input-bg)", color: "var(--mdt-content-text)", outline: "none", cursor: "pointer" }}
+              >
+                <option value="W TOKU">W TOKU</option>
+                <option value="SKAZANY">SKAZANY</option>
+                <option value="ODDALONO">ODDALONO</option>
+                <option value="OCZEKUJE">OCZEKUJE</option>
+              </select>
+            </div>
+            <div className="flex justify-end gap-2 border-t border-[#999] pt-3">
+              <button
+                className="btn-win95 text-xs"
+                style={{ backgroundColor: "#3a6a3a", color: "#fff", borderColor: "#5a9a5a #1a3a1a #1a3a1a #5a9a5a" }}
+                onClick={onSaveEditCriminalRecord}
+              >
+                ZAPISZ ZMIANY
+              </button>
+              <button className="btn-win95 text-xs" onClick={() => setShowEditCriminalRecord(false)}>ANULUJ</button>
+            </div>
+          </div>
+        </MdtModal>
+      )}
+
+      {/* MODAL: Edit Note */}
+      {showEditNote && selectedRecord && (
+        <MdtModal title="Edytuj notatkę" onClose={() => setShowEditNote(false)}>
+          <div className="flex flex-col gap-3">
+            <label className="font-mono text-xs font-bold" style={{ color: "var(--mdt-muted-text)" }}>TREŚĆ NOTATKI:</label>
+            <textarea
+              value={editNoteContent}
+              onChange={(e) => setEditNoteContent(e.target.value)}
+              rows={4}
+              className="panel-inset w-full resize-none px-2 py-1 font-mono text-xs"
+              style={{ backgroundColor: "var(--mdt-input-bg)", color: "var(--mdt-content-text)", outline: "none" }}
+              placeholder="Wpisz treść notatki..."
+            />
+            <div className="flex justify-end gap-2 border-t border-[#999] pt-3">
+              <button
+                className="btn-win95 text-xs"
+                style={{ backgroundColor: "#3a6a3a", color: "#fff", borderColor: "#5a9a5a #1a3a1a #1a3a1a #5a9a5a" }}
+                onClick={onSaveEditNote}
+              >
+                ZAPISZ ZMIANY
+              </button>
+              <button className="btn-win95 text-xs" onClick={() => setShowEditNote(false)}>ANULUJ</button>
             </div>
           </div>
         </MdtModal>

@@ -13,7 +13,7 @@ const DIVISION_COLORS: Record<string, string> = {
   FTO: '#c9a227',
   SS: '#ff8c00',
   DTU: '#60a5fa',
-  GU: '#10b981',
+  GU: '#059669',
 };
 
 const DIVISION_NAMES: Record<string, string> = {

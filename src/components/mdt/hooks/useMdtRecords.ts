@@ -10,8 +10,10 @@ import {
   updateMdtRecord,
   deleteMdtRecord,
   addCriminalRecord,
+  updateCriminalRecord,
   deleteCriminalRecord,
   addMdtNote,
+  updateMdtNote,
   deleteMdtNote,
   issueWarrant,
   removeWarrant,
@@ -109,6 +111,14 @@ export function useMdtRecords() {
     await selectRecord(data.record_id)
   }, [selectRecord])
 
+  const handleUpdateCriminalRecord = useCallback(async (id: string, updates: { date?: string; offense?: string; code?: string; status?: string; officer?: string }, recordId: string) => {
+    if (submittingRef.current) return
+    submittingRef.current = true
+    await updateCriminalRecord(id, updates)
+    submittingRef.current = false
+    await selectRecord(recordId)
+  }, [selectRecord])
+
   const handleDeleteCriminalRecord = useCallback(async (id: string, recordId: string) => {
     if (submittingRef.current) return
     submittingRef.current = true
@@ -124,6 +134,14 @@ export function useMdtRecords() {
     await addMdtNote(data)
     submittingRef.current = false
     await selectRecord(data.record_id)
+  }, [selectRecord])
+
+  const handleUpdateNote = useCallback(async (id: string, content: string, recordId: string) => {
+    if (submittingRef.current) return
+    submittingRef.current = true
+    await updateMdtNote(id, { content })
+    submittingRef.current = false
+    await selectRecord(recordId)
   }, [selectRecord])
 
   const handleDeleteNote = useCallback(async (id: string, recordId: string) => {
@@ -169,8 +187,10 @@ export function useMdtRecords() {
     handleUpdateRecord,
     handleDeleteRecord,
     handleAddCriminalRecord,
+    handleUpdateCriminalRecord,
     handleDeleteCriminalRecord,
     handleAddNote,
+    handleUpdateNote,
     handleDeleteNote,
     handleIssueWarrant,
     handleRemoveWarrant,

@@ -3,6 +3,8 @@
 import React from "react"
 import { useState, useRef } from "react"
 import type { MdtRecord } from "./types"
+import { compressToWebP } from "@/src/lib/imageUtils"
+import { uploadMugshot } from "@/src/lib/db/mdt"
 
 interface PlayerRecordProps {
   record: MdtRecord
@@ -11,6 +13,8 @@ interface PlayerRecordProps {
   onDeleteRecord: (id: string) => void
   isDeleteNoteMode: boolean
   onDeleteNote: (id: string) => void
+  onEditCriminalRecord?: (id: string) => void
+  onEditNote?: (id: string) => void
 }
 
 export function PlayerRecord({
@@ -20,6 +24,8 @@ export function PlayerRecord({
   onDeleteRecord,
   isDeleteNoteMode,
   onDeleteNote,
+  onEditCriminalRecord,
+  onEditNote,
 }: PlayerRecordProps) {
   const [selectedRecordIdx, setSelectedRecordIdx] = useState<string | null>(null)
   const [accessTime, setAccessTime] = useState("")
@@ -31,29 +37,63 @@ export function PlayerRecord({
     )
   }, [])
 
-  function handleImportPhoto(e: React.ChangeEvent<HTMLInputElement>) {
+  const [uploading, setUploading] = useState(false)
+
+  async function handleImportPhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (file) {
-      const url = URL.createObjectURL(file)
-      onMugshotChange(url)
+    if (!file || !record.id) return
+    setUploading(true)
+    try {
+      const compressed = await compressToWebP(file, 600, 800, 0.8)
+      const { url } = await uploadMugshot(record.id, compressed)
+      if (url) onMugshotChange(url)
+    } catch (err) {
+      console.error('Photo upload failed:', err)
+    } finally {
+      setUploading(false)
     }
   }
 
   const criminalRecords = record.criminal_records || []
   const notes = record.mdt_notes || []
   const activeWarrant = (record.mdt_warrants || []).find((w) => w.is_active)
-  const licenseId = record.license_no ? record.license_no.split("-").pop() : "N/A"
+  const sasdId = record.record_number ? `SASD-${String(record.record_number).padStart(6, '0')}` : 'SASD-N/A'
+  const recordLevel = record.record_level === 2 ? 'II' : 'I'
+  const isWanted = record.wanted_status !== 'BRAK' && record.wanted_status !== 'NIE'
 
   return (
     <div
       className="flex flex-1 flex-col overflow-hidden"
       style={{ backgroundColor: "var(--mdt-content)" }}
     >
+      {/* Warning banner for wanted / active warrant */}
+      {(isWanted || activeWarrant) && (
+        <div
+          className="flex items-center gap-3 px-4 py-2"
+          style={{ backgroundColor: "#5a1a1a", borderBottom: "2px solid #c41e1e" }}
+        >
+          <div className="pulse-dot h-3 w-3 rounded-full bg-red-500" />
+          <span className="font-[family-name:var(--font-vt323)] text-base tracking-widest text-red-400">
+            UWAGA: OSOBA {isWanted ? 'POSZUKIWANA' : ''}{isWanted && activeWarrant ? ' — ' : ''}{activeWarrant ? `AKTYWNY NAKAZ ${activeWarrant.type}` : ''}
+          </span>
+        </div>
+      )}
+
       {/* Section title bar */}
-      <div className="px-4 py-2" style={{ backgroundColor: "var(--mdt-blue-bar)" }}>
+      <div className="flex items-center justify-between px-4 py-2" style={{ backgroundColor: "var(--mdt-blue-bar)" }}>
         <span className="font-[family-name:var(--font-vt323)] text-base tracking-widest uppercase text-white">
           Kartoteka karna - {record.last_name}, {record.first_name}
         </span>
+        <div className="flex items-center gap-3">
+          <span className="font-mono text-xs text-white/80">{sasdId}</span>
+          <span className="font-mono text-xs px-2 py-0.5" style={{
+            backgroundColor: record.record_level === 2 ? '#5a1a1a' : '#1a3a5c',
+            color: record.record_level === 2 ? '#ff6b6b' : '#60a5fa',
+            border: `1px solid ${record.record_level === 2 ? '#c41e1e' : '#3b82f6'}`,
+          }}>
+            POZIOM {recordLevel}
+          </span>
+        </div>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
@@ -73,7 +113,7 @@ export function PlayerRecord({
                   style={{ border: "1px solid #555" }}
                 />
                 <span className="font-mono text-xs" style={{ color: "var(--mdt-content-text)" }}>
-                  SASD-{licenseId}
+                  {sasdId}
                 </span>
               </div>
             ) : (
@@ -88,7 +128,7 @@ export function PlayerRecord({
                   </svg>
                 </div>
                 <span className="font-mono text-xs" style={{ color: "var(--mdt-content-text)" }}>
-                  SASD-{licenseId}
+                  {sasdId}
                 </span>
               </div>
             )}
@@ -105,15 +145,16 @@ export function PlayerRecord({
           <button
             className="btn-win95 mb-3 w-full text-xs"
             onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
           >
-            IMPORTUJ ZDJĘCIE
+            {uploading ? 'PRZESYŁANIE...' : 'IMPORTUJ ZDJĘCIE'}
           </button>
 
           {/* Personal details */}
           <div className="flex flex-col gap-1">
-            <InfoRow label="NAZWISKO" value={`${record.last_name}, ${record.first_name}`} />
+            <InfoRow label="NAZWISKO, IMIĘ" value={`${record.last_name}, ${record.first_name}`} />
             <InfoRow label="DATA UR." value={record.dob || "—"} />
-            <InfoRow label="PESEL" value={record.ssn || "—"} />
+            <InfoRow label="NICK" value={record.ssn || "—"} />
             <InfoRow label="PŁEĆ" value={record.gender || "—"} />
             <InfoRow label="RASA" value={record.race || "—"} />
             <InfoRow label="WZROST" value={record.height || "—"} />
@@ -124,18 +165,17 @@ export function PlayerRecord({
             <div className="my-1 border-t border-[#999]" />
 
             <InfoRow label="ADRES" value={record.address || "—"} />
-            <InfoRow label="TELEFON" value={record.phone || "—"} />
             <InfoRow label="NR PRAWA" value={record.license_no || "—"} />
             <InfoRow
-              label="ST. PRAWA"
+              label="STATUS PRAWA JAZDY"
               value={record.license_status || "—"}
-              valueColor={record.license_status === "ZAWIESZONY" || record.license_status === "COFNIĘTY" ? "#c41e1e" : "#1a6a1a"}
+              valueColor={record.license_status === "COFNIĘTE" || record.license_status === "COFNIĘTY" || record.license_status === "ZAWIESZONY" ? "#c41e1e" : "#1a6a1a"}
             />
             <InfoRow label="GANG" value={record.gang_affiliation || "NIEZNANE"} />
             <InfoRow label="WYROKI" value={String(record.priors)} />
 
             {/* Wanted status box */}
-            {record.wanted_status !== "BRAK" && (
+            {record.wanted_status !== "BRAK" && record.wanted_status !== "NIE" && (
               <>
                 <div className="my-1 border-t border-[#999]" />
                 <div className="glow-red panel-inset p-2" style={{ backgroundColor: "#4a1a1a" }}>
@@ -148,8 +188,8 @@ export function PlayerRecord({
                 </div>
               </>
             )}
-            {record.wanted_status === "BRAK" && (
-              <InfoRow label="POSZUK." value="BRAK" valueColor="#1a6a1a" />
+            {(record.wanted_status === "BRAK" || record.wanted_status === "NIE") && (
+              <InfoRow label="POSZUKIWANY" value="NIE" valueColor="#1a6a1a" />
             )}
 
             {/* Warrant display */}
@@ -206,7 +246,7 @@ export function PlayerRecord({
                   <th className="px-3 py-1.5 text-left font-[family-name:var(--font-vt323)] text-sm tracking-wider text-[#ccc]">KOD</th>
                   <th className="px-3 py-1.5 text-left font-[family-name:var(--font-vt323)] text-sm tracking-wider text-[#ccc]">STATUS</th>
                   <th className="px-3 py-1.5 text-left font-[family-name:var(--font-vt323)] text-sm tracking-wider text-[#ccc]">FUNKCJONARIUSZ</th>
-                  {isDeleteRecordMode && <th className="w-8 px-1 py-1" />}
+                  <th className="w-8 px-1 py-1" />
                 </tr>
               </thead>
               <tbody>
@@ -258,11 +298,25 @@ export function PlayerRecord({
                         </button>
                       </td>
                     )}
+                    {!isDeleteRecordMode && (
+                      <td className="px-1 py-1 text-center">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onEditCriminalRecord?.(cr.id) }}
+                          className="inline-flex items-center justify-center hover:opacity-80"
+                          title="Edytuj wpis"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <path d="M2 10.5V12h1.5l6-6L8 4.5l-6 6z" fill="#4ade80" />
+                            <path d="M9.5 3l1.5 1.5-1 1L8.5 4l1-1z" fill="#4ade80" />
+                          </svg>
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))}
                 {criminalRecords.length === 0 && (
                   <tr style={{ backgroundColor: "var(--mdt-row-even)" }}>
-                    <td colSpan={isDeleteRecordMode ? 6 : 5} className="px-2 py-3 text-center font-mono text-xs" style={{ color: "#888" }}>
+                    <td colSpan={6} className="px-2 py-3 text-center font-mono text-xs" style={{ color: "#888" }}>
                       BRAK WPISÓW W HISTORII KARNEJ
                     </td>
                   </tr>
@@ -290,10 +344,10 @@ export function PlayerRecord({
                   [{String(idx + 1).padStart(2, "0")}]
                 </span>
                 <div className="flex flex-1 flex-col">
-                  <span className="font-mono text-sm" style={{ color: "var(--mdt-content-text)" }}>{note.content}</span>
+                  <span className="font-mono text-sm break-words whitespace-pre-wrap" style={{ color: "var(--mdt-content-text)" }}>{note.content}</span>
                   <span className="font-mono text-[10px]" style={{ color: "var(--mdt-muted-text)" }}>— {note.officer}</span>
                 </div>
-                {isDeleteNoteMode && (
+                {isDeleteNoteMode ? (
                   <button
                     onClick={() => onDeleteNote(note.id)}
                     className="shrink-0 inline-flex items-center justify-center hover:opacity-80"
@@ -304,6 +358,17 @@ export function PlayerRecord({
                       <path d="M2.5 3h9v1h-9z" fill="#c41e1e" />
                       <path d="M5 2.5h4v1H5z" fill="#c41e1e" />
                       <path d="M5.5 5.5v5M7 5.5v5M8.5 5.5v5" stroke="#fff" strokeWidth="0.7" />
+                    </svg>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => onEditNote?.(note.id)}
+                    className="shrink-0 inline-flex items-center justify-center hover:opacity-80"
+                    title="Edytuj notatkę"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path d="M2 10.5V12h1.5l6-6L8 4.5l-6 6z" fill="#4ade80" />
+                      <path d="M9.5 3l1.5 1.5-1 1L8.5 4l1-1z" fill="#4ade80" />
                     </svg>
                   </button>
                 )}
@@ -332,7 +397,7 @@ export function PlayerRecord({
 function InfoRow({ label, value, valueColor }: { label: string; value: string; valueColor?: string }) {
   return (
     <div className="flex gap-2">
-      <span className="w-24 shrink-0 font-mono text-sm font-bold" style={{ color: "var(--mdt-muted-text)" }}>{label}:</span>
+      <span className="w-36 shrink-0 font-mono text-[11px] font-bold" style={{ color: "var(--mdt-muted-text)" }}>{label}:</span>
       <span className="font-mono text-sm" style={{ color: valueColor || "var(--mdt-content-text)" }}>{value}</span>
     </div>
   )

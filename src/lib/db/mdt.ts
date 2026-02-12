@@ -37,12 +37,29 @@ export async function getMdtRecordById(id: string) {
 
 export async function searchMdtRecords(query: string) {
   try {
-    const { data, error } = await supabase
-      .from('mdt_records')
-      .select('id, first_name, last_name, wanted_status, priors')
-      .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,license_no.ilike.%${query}%`)
-      .order('last_name', { ascending: true })
-      .limit(10);
+    const trimmed = query.trim();
+    const parts = trimmed.split(/\s+/);
+
+    let dbQuery;
+    if (parts.length >= 2) {
+      const [p1, ...rest] = parts;
+      const p2 = rest.join(' ');
+      dbQuery = supabase
+        .from('mdt_records')
+        .select('id, first_name, last_name, wanted_status, priors')
+        .or(
+          `and(first_name.ilike.%${p1}%,last_name.ilike.%${p2}%),` +
+          `and(first_name.ilike.%${p2}%,last_name.ilike.%${p1}%),` +
+          `license_no.ilike.%${trimmed}%`
+        );
+    } else {
+      dbQuery = supabase
+        .from('mdt_records')
+        .select('id, first_name, last_name, wanted_status, priors')
+        .or(`first_name.ilike.%${trimmed}%,last_name.ilike.%${trimmed}%,license_no.ilike.%${trimmed}%`);
+    }
+
+    const { data, error } = await dbQuery.order('last_name', { ascending: true }).limit(10);
 
     if (error) throw error;
     return { data, error: null };
@@ -64,10 +81,10 @@ export async function createMdtRecord(record: {
   hair?: string;
   eyes?: string;
   address?: string;
-  phone?: string;
   license_no?: string;
   license_status?: string;
   gang_affiliation?: string;
+  record_level?: number;
   created_by?: string;
 }) {
   try {
@@ -97,12 +114,12 @@ export async function updateMdtRecord(id: string, updates: Partial<{
   hair: string;
   eyes: string;
   address: string;
-  phone: string;
   license_no: string;
   license_status: string;
   wanted_status: string;
   gang_affiliation: string;
   priors: number;
+  record_level: number;
   mugshot_url: string | null;
 }>) {
   try {
@@ -202,6 +219,29 @@ export async function deleteCriminalRecord(id: string, recordId: string) {
   }
 }
 
+export async function updateCriminalRecord(id: string, updates: Partial<{
+  date: string;
+  offense: string;
+  code: string;
+  status: string;
+  officer: string;
+}>) {
+  try {
+    const { data, error } = await supabase
+      .from('mdt_criminal_records')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('updateCriminalRecord error:', error);
+    return { data: null, error };
+  }
+}
+
 // ============================================
 // NOTES
 // ============================================
@@ -222,6 +262,23 @@ export async function addMdtNote(data: {
     return { data: result, error: null };
   } catch (error) {
     console.error('addMdtNote error:', error);
+    return { data: null, error };
+  }
+}
+
+export async function updateMdtNote(id: string, updates: { content: string }) {
+  try {
+    const { data, error } = await supabase
+      .from('mdt_notes')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('updateMdtNote error:', error);
     return { data: null, error };
   }
 }
@@ -412,6 +469,43 @@ export async function deleteBoloVehicle(id: string) {
   } catch (error) {
     console.error('deleteBoloVehicle error:', error);
     return { error };
+  }
+}
+
+// ============================================
+// MUGSHOT UPLOAD (Supabase Storage)
+// ============================================
+
+export async function uploadMugshot(recordId: string, blob: Blob) {
+  try {
+    const filePath = `mugshots/${recordId}.webp`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('mdt-photos')
+      .upload(filePath, blob, {
+        contentType: 'image/webp',
+        upsert: true,
+      });
+
+    if (uploadError) throw uploadError;
+
+    const { data: urlData } = supabase.storage
+      .from('mdt-photos')
+      .getPublicUrl(filePath);
+
+    // Append cache-buster to force refresh
+    const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+
+    // Update the record with the new URL
+    await supabase
+      .from('mdt_records')
+      .update({ mugshot_url: publicUrl, updated_at: new Date().toISOString() })
+      .eq('id', recordId);
+
+    return { url: publicUrl, error: null };
+  } catch (error) {
+    console.error('uploadMugshot error:', error);
+    return { url: null, error };
   }
 }
 

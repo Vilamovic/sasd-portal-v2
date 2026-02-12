@@ -16,7 +16,7 @@ import LoadingState from '@/src/components/shared/LoadingState';
 
 const divisionColors: Record<string, string> = {
   DTU: '#60a5fa',
-  GU: '#10b981',
+  GU: '#059669',
   SWAT: '#c41e1e',
   SS: '#ff8c00',
 };

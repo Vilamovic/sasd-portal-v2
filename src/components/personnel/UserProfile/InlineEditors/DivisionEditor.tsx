@@ -150,7 +150,7 @@ export default function DivisionEditor({ user, currentUser, userId, isHCS, isCS,
             <button
               onClick={() => setTempDivision('GU')}
               className="btn-win95 text-xs py-0.5 px-2 font-bold"
-              style={tempDivision === 'GU' ? { backgroundColor: '#10b981', color: '#fff', borderColor: '#555 #fff #fff #555' } : {}}
+              style={tempDivision === 'GU' ? { backgroundColor: '#059669', color: '#fff', borderColor: '#555 #fff #fff #555' } : {}}
             >
               GU
             </button>

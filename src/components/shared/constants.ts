@@ -37,7 +37,7 @@ export function getDivisionColor(division: string | null): string {
     case 'DTU':
       return 'bg-[#60a5fa] text-[#020a06]';
     case 'GU':
-      return 'bg-[#10b981] text-white';
+      return 'bg-[#059669] text-white';
     case 'SWAT':
       return 'bg-[#2d5a2d] text-white';
     default:

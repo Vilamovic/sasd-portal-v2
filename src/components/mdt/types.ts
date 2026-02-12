@@ -4,6 +4,8 @@
 
 export interface MdtRecord {
   id: string
+  record_number?: number
+  record_level?: number
   first_name: string
   last_name: string
   dob: string
@@ -15,7 +17,6 @@ export interface MdtRecord {
   hair: string
   eyes: string
   address: string
-  phone: string
   license_no: string
   license_status: string
   wanted_status: string

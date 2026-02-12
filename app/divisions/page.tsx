@@ -58,7 +58,7 @@ export default function DivisionsPage() {
       id: 'GU',
       name: 'Gang Unit (GU)',
       description: 'Oddział do walki z przestępczością zorganizowaną i gangami.',
-      color: '#10b981',
+      color: '#059669',
       accessible: division === 'GU' || isAdmin || isDev,
     },
     {

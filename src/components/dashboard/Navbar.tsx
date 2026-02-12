@@ -110,7 +110,7 @@ export default function Navbar() {
   };
 
   const getDivisionColor = () => {
-    const colors = { FTO: '#c9a227', SS: '#ff8c00', DTU: '#60a5fa', GU: '#10b981' };
+    const colors = { FTO: '#c9a227', SS: '#ff8c00', DTU: '#60a5fa', GU: '#059669' };
     return colors[division as keyof typeof colors] || '#d4d4d4';
   };
 

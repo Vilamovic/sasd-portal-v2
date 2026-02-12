@@ -436,6 +436,11 @@ input[type="week"]:invalid {
   color: #d4d4d4;
 }
 
+[data-theme="dark"] .ql-toolbar {
+  background-color: var(--mdt-btn-face) !important;
+  border-color: var(--mdt-border-mid) !important;
+}
+
 /* Dark mode toolbar icons & labels */
 [data-theme="dark"] .ql-toolbar .ql-stroke {
   stroke: #d4d4d4 !important;

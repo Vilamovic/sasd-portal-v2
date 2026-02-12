@@ -18,6 +18,7 @@ interface RightPanelProps {
   onRemoveWarrant?: () => void
   hasWarrant?: boolean
   onPrintFile?: () => void
+  onDeleteKartoteka?: () => void
   // List actions
   onCreatePerson?: () => void
   // BOLO actions
@@ -39,6 +40,7 @@ export function RightPanel({
   onRemoveWarrant,
   hasWarrant,
   onPrintFile,
+  onDeleteKartoteka,
   onCreatePerson,
   onCreateBolo,
 }: RightPanelProps) {
@@ -77,21 +79,6 @@ export function RightPanel({
         <div className="font-mono text-sm text-green-400/60">{currentDate}</div>
       </div>
 
-      {/* Unit Info */}
-      <div className="px-3 py-1.5" style={{ backgroundColor: "var(--mdt-header)" }}>
-        <span className="font-[family-name:var(--font-vt323)] text-sm tracking-wider" style={{ color: "var(--mdt-header-text)" }}>
-          STATUS JEDNOSTKI
-        </span>
-      </div>
-      <div className="panel-inset p-3" style={{ backgroundColor: "#333" }}>
-        <div className="flex flex-col gap-1">
-          <StatusRow label="JEDNOSTKA" value="5K13" />
-          <StatusRow label="STATUS" value="10-8" color="#4ade80" />
-          <StatusRow label="STREFA" value="EAST LS" />
-          <StatusRow label="CZEST." value="CH-3" />
-        </div>
-      </div>
-
       {/* Quick Actions */}
       <div className="px-3 py-1.5" style={{ backgroundColor: "var(--mdt-header)" }}>
         <span className="font-[family-name:var(--font-vt323)] text-sm tracking-wider" style={{ color: "var(--mdt-header-text)" }}>
@@ -119,6 +106,14 @@ export function RightPanel({
               ŚCIĄGNIJ NAKAZ
             </button>
             <button className="btn-win95 w-full text-sm" onClick={onPrintFile}>DRUKUJ PLIK</button>
+            <div className="my-1 border-t border-[#555]" />
+            <button
+              className="btn-win95 w-full text-sm"
+              style={{ color: "#c41e1e" }}
+              onClick={onDeleteKartoteka}
+            >
+              USUŃ KARTOTEKĘ
+            </button>
           </>
         )}
 
@@ -168,11 +163,3 @@ export function RightPanel({
   )
 }
 
-function StatusRow({ label, value, color }: { label: string; value: string; color?: string }) {
-  return (
-    <div className="flex justify-between">
-      <span className="font-mono text-xs text-[#777]">{label}</span>
-      <span className="font-mono text-xs font-bold" style={{ color: color || "#ccc" }}>{value}</span>
-    </div>
-  )
-}

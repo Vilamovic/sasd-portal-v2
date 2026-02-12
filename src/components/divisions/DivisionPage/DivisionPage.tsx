@@ -69,8 +69,8 @@ export default function DivisionPage({ divisionId, onBack }: DivisionPageProps) 
     },
     GU: {
       name: 'Gang Unit',
-      color: '#10b981',
-      textColor: '#10b981',
+      color: '#059669',
+      textColor: '#059669',
     },
     FTO: {
       name: 'Training Staff',

@@ -15,7 +15,7 @@ export default function ExamDashboard({ onNavigate, onBack }: { onNavigate?: (vi
   const { role, isAdmin } = useAuth();
   const { t } = useTranslation();
 
-  // Navigation handler - uses Next.js router for stats/archive
+  // Navigation handler - uses Next.js router for all views
   const handleTileClick = (tileId: string) => {
     if (tileId === 'statistics') {
       router.push('/exams/stats');
@@ -23,6 +23,10 @@ export default function ExamDashboard({ onNavigate, onBack }: { onNavigate?: (vi
       router.push('/exams/archive');
     } else if (tileId === 'practical') {
       router.push('/exams/practical');
+    } else if (tileId === 'take-exam') {
+      router.push('/exams/take');
+    } else if (tileId === 'questions') {
+      router.push('/exams/questions');
     } else if (onNavigate) {
       onNavigate(tileId);
     }

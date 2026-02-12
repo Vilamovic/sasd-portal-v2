@@ -1,10 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { Edit3, Plus, Users } from 'lucide-react';
 import { useGangs } from './hooks/useGangs';
 import GangCard from './GangCard';
 import GangForm from './GangForm';
+import GangDetailModal from './GangDetailModal';
 import LoadingState from '@/src/components/shared/LoadingState';
 
 interface GangsPageProps {
@@ -15,6 +17,7 @@ export default function GangsPage({ onBack }: GangsPageProps) {
   const { user, isCS, isDev, division, isCommander } = useAuth();
 
   const canManage = isCS || isDev || (division === 'GU' && isCommander);
+  const [selectedGang, setSelectedGang] = useState<{ id: string; title: string; description: string | null } | null>(null);
 
   const {
     gangs,
@@ -43,7 +46,7 @@ export default function GangsPage({ onBack }: GangsPageProps) {
     <div>
       {/* Header */}
       <div className="panel-raised mb-4" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
-        <div className="px-3 py-1 flex items-center justify-between" style={{ backgroundColor: '#10b981' }}>
+        <div className="px-3 py-1 flex items-center justify-between" style={{ backgroundColor: '#059669' }}>
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-white" />
             <span className="font-[family-name:var(--font-vt323)] text-base tracking-widest uppercase text-white">
@@ -113,9 +116,17 @@ export default function GangsPage({ onBack }: GangsPageProps) {
               canManage={canManage}
               onEdit={openEditForm}
               onDelete={handleDeleteGang}
+              onClick={() => !editMode && setSelectedGang(gang)}
             />
           ))}
         </div>
+      )}
+      {/* Detail Modal */}
+      {selectedGang && (
+        <GangDetailModal
+          gang={selectedGang}
+          onClose={() => setSelectedGang(null)}
+        />
       )}
     </div>
   );
