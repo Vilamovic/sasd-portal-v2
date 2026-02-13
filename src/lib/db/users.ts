@@ -36,13 +36,22 @@ export function upsertUser(userData: any) {
 }
 
 /**
- * Usuwa użytkownika z bazy
+ * Usuwa użytkownika z bazy (z czyszczeniem FK dependencies)
  */
-export function deleteUser(userId: string) {
-  return dbMutate(
-    () => supabase.from('users').delete().eq('id', userId),
-    'deleteUser'
-  );
+export async function deleteUser(userId: string) {
+  try {
+    // Clean up FK references that block user deletion
+    await supabase.from('exam_access_tokens').delete().eq('created_by', userId);
+    await supabase.from('user_penalties').delete().eq('user_id', userId);
+    await supabase.from('user_notes').delete().eq('user_id', userId);
+
+    const { error } = await supabase.from('users').delete().eq('id', userId);
+    if (error) throw error;
+    return { data: null, error: null };
+  } catch (error) {
+    console.error('deleteUser:', error);
+    return { data: null, error };
+  }
 }
 
 /**

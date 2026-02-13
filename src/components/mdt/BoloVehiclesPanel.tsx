@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import type { MdtBoloVehicle } from "./types"
 import { MdtModal } from "./MdtModal"
 
@@ -15,6 +15,8 @@ interface BoloVehiclesPanelProps {
   onResolve: (id: string) => void
   officerName: string
   userId?: string
+  selectedBoloId?: string | null
+  onClearSelectedBolo?: () => void
 }
 
 const emptyForm = { plate: "", make: "", model: "", color: "", reason: "", reported_by: "" }
@@ -22,12 +24,29 @@ const emptyForm = { plate: "", make: "", model: "", color: "", reason: "", repor
 export function BoloVehiclesPanel({
   vehicles, loading, filterStatus, onChangeFilter,
   onCreate, onUpdate, onDelete, onResolve,
-  officerName, userId,
+  officerName, userId, selectedBoloId, onClearSelectedBolo,
 }: BoloVehiclesPanelProps) {
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState(emptyForm)
   const [detailVehicle, setDetailVehicle] = useState<MdtBoloVehicle | null>(null)
+
+  // Auto-open detail when vehicle selected from search
+  useEffect(() => {
+    if (selectedBoloId && vehicles.length > 0) {
+      const found = vehicles.find((v) => v.id === selectedBoloId)
+      if (found) {
+        setDetailVehicle(found)
+      } else {
+        // Vehicle not in current filter — switch to ALL and try again
+        if (filterStatus !== "ALL") {
+          onChangeFilter("ALL")
+          return // will re-run after vehicles reload
+        }
+      }
+      onClearSelectedBolo?.()
+    }
+  }, [selectedBoloId, vehicles, filterStatus, onChangeFilter, onClearSelectedBolo])
 
   function openAdd() {
     setForm({ ...emptyForm, reported_by: officerName })

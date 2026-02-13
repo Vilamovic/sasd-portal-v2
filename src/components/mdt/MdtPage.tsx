@@ -41,6 +41,7 @@ export default function MdtPage() {
   const [isEditing, setIsEditing] = useState(false)
   const [isDeleteRecordMode, setIsDeleteRecordMode] = useState(false)
   const [isDeleteNoteMode, setIsDeleteNoteMode] = useState(false)
+  const [selectedBoloId, setSelectedBoloId] = useState<string | null>(null)
 
   // Modal state (single state replaces 8 booleans)
   const [activeModal, setActiveModal] = useState<ModalType>("none")
@@ -245,7 +246,7 @@ export default function MdtPage() {
 
           <SearchPanel
             onSelectRecord={(id) => { handleTabChange("kartoteka"); selectRecord(id) }}
-            onSelectBolo={() => handleTabChange("bolo")}
+            onSelectBolo={(id) => { setSelectedBoloId(id); handleTabChange("bolo") }}
             onSwitchTab={handleTabChange}
             onSearch={(q) => { handleTabChange("kartoteka"); handleSearch(q) }}
           />
@@ -292,6 +293,8 @@ export default function MdtPage() {
                 onChangeFilter={changeFilter} onCreate={handleCreateBolo} onUpdate={handleUpdateBolo}
                 onDelete={handleDeleteBolo} onResolve={handleResolveBolo}
                 officerName={officerName} userId={user?.id}
+                selectedBoloId={selectedBoloId}
+                onClearSelectedBolo={() => setSelectedBoloId(null)}
               />
             )}
 

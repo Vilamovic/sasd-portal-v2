@@ -7,7 +7,7 @@ import type { SearchSuggestion } from "./types"
 
 interface SearchPanelProps {
   onSelectRecord: (id: string) => void
-  onSelectBolo: () => void
+  onSelectBolo: (id: string) => void
   onSwitchTab: (tab: string) => void
   onSearch: (query: string) => void
 }
@@ -103,7 +103,7 @@ export function SearchPanel({ onSelectRecord, onSelectBolo, onSwitchTab, onSearc
       onSelectRecord(s.id)
     } else {
       onSwitchTab("bolo")
-      onSelectBolo()
+      onSelectBolo(s.id)
     }
   }
 

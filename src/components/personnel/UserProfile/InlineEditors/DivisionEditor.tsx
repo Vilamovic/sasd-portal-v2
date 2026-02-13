@@ -21,7 +21,7 @@ interface DivisionEditorProps {
  */
 export default function DivisionEditor({ user, currentUser, userId, isHCS, isCS, onUpdate }: DivisionEditorProps) {
   const [editing, setEditing] = useState(false);
-  const [tempDivision, setTempDivision] = useState(user?.division || '');
+  const [tempDivision, setTempDivision] = useState(user?.is_swat_commander || user?.is_swat_operator ? 'SWAT' : (user?.division || ''));
   const [tempIsCommander, setTempIsCommander] = useState(user?.is_commander || false);
   const [tempIsSwatOperator, setTempIsSwatOperator] = useState(user?.is_swat_operator || false);
   const submittingRef = useRef(false);
@@ -37,8 +37,9 @@ export default function DivisionEditor({ user, currentUser, userId, isHCS, isCS,
       const oldDivision = user.division;
       const isSwat = tempDivision === 'SWAT';
 
-      // Update division
-      const { error: divError } = await updateUserDivision(userId, tempDivision || null);
+      // Update division (SWAT is not a real division_type ENUM value — use null)
+      const divisionValue = isSwat ? null : (tempDivision || null);
+      const { error: divError } = await updateUserDivision(userId, divisionValue);
       if (divError) throw divError;
 
       // Update commander status
@@ -94,7 +95,7 @@ export default function DivisionEditor({ user, currentUser, userId, isHCS, isCS,
 
   const handleCancel = () => {
     setEditing(false);
-    setTempDivision(user?.division || '');
+    setTempDivision(user?.is_swat_commander || user?.is_swat_operator ? 'SWAT' : (user?.division || ''));
     setTempIsCommander(user?.is_commander || false);
     setTempIsSwatOperator(user?.is_swat_operator || false);
   };
@@ -199,9 +200,9 @@ export default function DivisionEditor({ user, currentUser, userId, isHCS, isCS,
         </div>
       ) : (
         <div className="flex flex-wrap gap-1">
-          {user?.division ? (
-            <span className={`px-1 py-0.5 text-xs font-bold font-mono ${getDivisionColor(user.division)}`}>
-              {user.division}{user.is_swat_commander ? ' CMD' : user.is_swat_operator ? ' OP' : user.is_commander ? ' CMD' : ''}
+          {user?.division || user?.is_swat_commander || user?.is_swat_operator ? (
+            <span className={`px-1 py-0.5 text-xs font-bold font-mono ${getDivisionColor(user?.is_swat_commander || user?.is_swat_operator ? 'SWAT' : user.division)}`}>
+              {user?.is_swat_commander ? 'SWAT CMD' : user?.is_swat_operator ? 'SWAT OP' : user.division}{!user?.is_swat_commander && !user?.is_swat_operator && user?.is_commander ? ' CMD' : ''}
             </span>
           ) : (
             <span className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>Brak</span>
