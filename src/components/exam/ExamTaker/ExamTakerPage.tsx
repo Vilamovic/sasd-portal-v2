@@ -247,7 +247,7 @@ export default function ExamTakerPage({ onBack }: { onBack?: () => void }) {
             percentage: result.percentage,
             passed,
             passingThreshold,
-            examId: savedExam.exam_id,
+            examId: savedExam?.exam_id,
           });
         } catch (e) {
           console.warn('Exam submission webhook failed:', e);

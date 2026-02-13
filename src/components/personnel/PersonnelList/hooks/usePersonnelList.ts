@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { getAllUsersWithDetails } from '@/src/lib/db/users';
 
 interface UsePersonnelListProps {
@@ -22,7 +22,6 @@ export function usePersonnelList({
   badges,
 }: UsePersonnelListProps) {
   const [users, setUsers] = useState<any[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<any[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
 
   const loadUsers = async () => {
@@ -39,8 +38,8 @@ export function usePersonnelList({
     }
   };
 
-  // Apply filters & search & sort
-  useEffect(() => {
+  // Apply filters & search & sort via useMemo (no extra state, no useEffect)
+  const filteredUsers = useMemo(() => {
     let result = [...users];
 
     // Search
@@ -108,7 +107,7 @@ export function usePersonnelList({
       }
     });
 
-    setFilteredUsers(result);
+    return result;
   }, [users, searchQuery, divisionFilter, roleFilter, sortBy, sortOrder, badges]);
 
   return {

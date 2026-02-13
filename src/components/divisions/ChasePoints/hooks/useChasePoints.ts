@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   getAllChasePoints,
   getPointsForUser,
@@ -59,8 +59,8 @@ export function useChasePoints(currentUserId?: string) {
     setLoading(false);
   }, []);
 
-  // Group entries by target user
-  const userSummaries: UserSummary[] = (() => {
+  // Group entries by target user (memoized — only recalculates when entries change)
+  const userSummaries: UserSummary[] = useMemo(() => {
     const map = new Map<string, UserSummary>();
     for (const entry of entries) {
       const uid = entry.target_user_id;
@@ -78,9 +78,8 @@ export function useChasePoints(currentUserId?: string) {
       summary.totalPoints += entry.points;
       summary.entries.push(entry);
     }
-    // Sort by total points descending
     return Array.from(map.values()).sort((a, b) => b.totalPoints - a.totalPoints);
-  })();
+  }, [entries]);
 
   const handleAddPoints = useCallback(async (data: {
     target_user_id: string;

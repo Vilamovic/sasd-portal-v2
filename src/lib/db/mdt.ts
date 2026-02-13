@@ -1,76 +1,59 @@
 import { supabase } from '@/src/supabaseClient';
+import { dbQuery, dbMutate } from './queryWrapper';
 
 // ============================================
 // MDT RECORDS - CRUD
 // ============================================
 
-export async function getMdtRecords() {
-  try {
-    const { data, error } = await supabase
-      .from('mdt_records')
-      .select('*')
-      .order('last_name', { ascending: true });
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('getMdtRecords error:', error);
-    return { data: null, error };
-  }
+export function getMdtRecords() {
+  return dbQuery(
+    () => supabase.from('mdt_records').select('*').order('last_name', { ascending: true }),
+    'getMdtRecords'
+  );
 }
 
-export async function getMdtRecordById(id: string) {
-  try {
-    const { data, error } = await supabase
+export function getMdtRecordById(id: string) {
+  return dbQuery(
+    () => supabase
       .from('mdt_records')
       .select('*, criminal_records:mdt_criminal_records(*), mdt_notes(*), mdt_warrants(*)')
       .eq('id', id)
-      .single();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('getMdtRecordById error:', error);
-    return { data: null, error };
-  }
+      .single(),
+    'getMdtRecordById'
+  );
 }
 
 export async function searchMdtRecords(query: string) {
-  try {
-    const trimmed = query.trim();
-    const parts = trimmed.split(/\s+/);
+  const trimmed = query.trim();
+  const parts = trimmed.split(/\s+/);
 
-    let dbQuery;
-    if (parts.length >= 2) {
-      const [p1, ...rest] = parts;
-      const p2 = rest.join(' ');
-      dbQuery = supabase
-        .from('mdt_records')
-        .select('id, first_name, last_name, ssn, gang_affiliation, wanted_status, priors')
-        .or(
-          `and(first_name.ilike.%${p1}%,last_name.ilike.%${p2}%),` +
-          `and(first_name.ilike.%${p2}%,last_name.ilike.%${p1}%),` +
-          `ssn.ilike.%${trimmed}%,` +
-          `gang_affiliation.ilike.%${trimmed}%`
-        );
-    } else {
-      dbQuery = supabase
-        .from('mdt_records')
-        .select('id, first_name, last_name, ssn, gang_affiliation, wanted_status, priors')
-        .or(`first_name.ilike.%${trimmed}%,last_name.ilike.%${trimmed}%,ssn.ilike.%${trimmed}%,gang_affiliation.ilike.%${trimmed}%`);
-    }
-
-    const { data, error } = await dbQuery.order('last_name', { ascending: true }).limit(10);
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('searchMdtRecords error:', error);
-    return { data: null, error };
+  let q;
+  if (parts.length >= 2) {
+    const [p1, ...rest] = parts;
+    const p2 = rest.join(' ');
+    q = supabase
+      .from('mdt_records')
+      .select('id, first_name, last_name, ssn, gang_affiliation, wanted_status, priors')
+      .or(
+        `and(first_name.ilike.%${p1}%,last_name.ilike.%${p2}%),` +
+        `and(first_name.ilike.%${p2}%,last_name.ilike.%${p1}%),` +
+        `ssn.ilike.%${trimmed}%,` +
+        `gang_affiliation.ilike.%${trimmed}%`
+      );
+  } else {
+    q = supabase
+      .from('mdt_records')
+      .select('id, first_name, last_name, ssn, gang_affiliation, wanted_status, priors')
+      .or(`first_name.ilike.%${trimmed}%,last_name.ilike.%${trimmed}%,ssn.ilike.%${trimmed}%,gang_affiliation.ilike.%${trimmed}%`);
   }
+
+  return dbQuery(
+    () => q.order('last_name', { ascending: true }).limit(10),
+    'searchMdtRecords'
+  );
 }
 
-export async function createMdtRecord(record: {
+export function createMdtRecord(record: {
   first_name: string;
   last_name: string;
   dob?: string;
@@ -88,22 +71,13 @@ export async function createMdtRecord(record: {
   record_level?: number;
   created_by?: string;
 }) {
-  try {
-    const { data, error } = await supabase
-      .from('mdt_records')
-      .insert(record)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('createMdtRecord error:', error);
-    return { data: null, error };
-  }
+  return dbQuery(
+    () => supabase.from('mdt_records').insert(record).select().single(),
+    'createMdtRecord'
+  );
 }
 
-export async function updateMdtRecord(id: string, updates: Partial<{
+export function updateMdtRecord(id: string, updates: Partial<{
   first_name: string;
   last_name: string;
   dob: string;
@@ -123,41 +97,29 @@ export async function updateMdtRecord(id: string, updates: Partial<{
   record_level: number;
   mugshot_url: string | null;
 }>) {
-  try {
-    const { data, error } = await supabase
+  return dbQuery(
+    () => supabase
       .from('mdt_records')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
-      .single();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('updateMdtRecord error:', error);
-    return { data: null, error };
-  }
+      .single(),
+    'updateMdtRecord'
+  );
 }
 
-export async function deleteMdtRecord(id: string) {
-  try {
-    const { error } = await supabase
-      .from('mdt_records')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
-    return { error: null };
-  } catch (error) {
-    console.error('deleteMdtRecord error:', error);
-    return { error };
-  }
+export function deleteMdtRecord(id: string) {
+  return dbMutate(
+    () => supabase.from('mdt_records').delete().eq('id', id),
+    'deleteMdtRecord'
+  );
 }
 
 // ============================================
 // CRIMINAL RECORDS
 // ============================================
 
+// Complex multi-query function — kept with manual try-catch
 export async function addCriminalRecord(data: {
   record_id: string;
   date: string;
@@ -188,11 +150,12 @@ export async function addCriminalRecord(data: {
 
     return { data: result, error: null };
   } catch (error) {
-    console.error('addCriminalRecord error:', error);
+    console.error('addCriminalRecord:', error);
     return { data: null, error };
   }
 }
 
+// Complex multi-query function — kept with manual try-catch
 export async function deleteCriminalRecord(id: string, recordId: string) {
   try {
     const { error } = await supabase
@@ -215,94 +178,58 @@ export async function deleteCriminalRecord(id: string, recordId: string) {
 
     return { error: null };
   } catch (error) {
-    console.error('deleteCriminalRecord error:', error);
+    console.error('deleteCriminalRecord:', error);
     return { error };
   }
 }
 
-export async function updateCriminalRecord(id: string, updates: Partial<{
+export function updateCriminalRecord(id: string, updates: Partial<{
   date: string;
   offense: string;
   code: string;
   status: string;
   officer: string;
 }>) {
-  try {
-    const { data, error } = await supabase
-      .from('mdt_criminal_records')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('updateCriminalRecord error:', error);
-    return { data: null, error };
-  }
+  return dbQuery(
+    () => supabase.from('mdt_criminal_records').update(updates).eq('id', id).select().single(),
+    'updateCriminalRecord'
+  );
 }
 
 // ============================================
 // NOTES
 // ============================================
 
-export async function addMdtNote(data: {
+export function addMdtNote(data: {
   record_id: string;
   content: string;
   officer?: string;
 }) {
-  try {
-    const { data: result, error } = await supabase
-      .from('mdt_notes')
-      .insert(data)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return { data: result, error: null };
-  } catch (error) {
-    console.error('addMdtNote error:', error);
-    return { data: null, error };
-  }
+  return dbQuery(
+    () => supabase.from('mdt_notes').insert(data).select().single(),
+    'addMdtNote'
+  );
 }
 
-export async function updateMdtNote(id: string, updates: { content: string }) {
-  try {
-    const { data, error } = await supabase
-      .from('mdt_notes')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('updateMdtNote error:', error);
-    return { data: null, error };
-  }
+export function updateMdtNote(id: string, updates: { content: string }) {
+  return dbQuery(
+    () => supabase.from('mdt_notes').update(updates).eq('id', id).select().single(),
+    'updateMdtNote'
+  );
 }
 
-export async function deleteMdtNote(id: string) {
-  try {
-    const { error } = await supabase
-      .from('mdt_notes')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
-    return { error: null };
-  } catch (error) {
-    console.error('deleteMdtNote error:', error);
-    return { error };
-  }
+export function deleteMdtNote(id: string) {
+  return dbMutate(
+    () => supabase.from('mdt_notes').delete().eq('id', id),
+    'deleteMdtNote'
+  );
 }
 
 // ============================================
 // WARRANTS
 // ============================================
 
+// Complex multi-query function — kept with manual try-catch
 export async function issueWarrant(data: {
   record_id: string;
   type: string;
@@ -334,11 +261,12 @@ export async function issueWarrant(data: {
 
     return { data: result, error: null };
   } catch (error) {
-    console.error('issueWarrant error:', error);
+    console.error('issueWarrant:', error);
     return { data: null, error };
   }
 }
 
+// Complex multi-query function — kept with manual try-catch
 export async function removeWarrant(warrantId: string, recordId: string) {
   try {
     await supabase
@@ -362,7 +290,7 @@ export async function removeWarrant(warrantId: string, recordId: string) {
 
     return { error: null };
   } catch (error) {
-    console.error('removeWarrant error:', error);
+    console.error('removeWarrant:', error);
     return { error };
   }
 }
@@ -372,44 +300,32 @@ export async function removeWarrant(warrantId: string, recordId: string) {
 // ============================================
 
 export async function getBoloVehicles(statusFilter?: string) {
-  try {
-    let query = supabase
-      .from('mdt_bolo_vehicles')
-      .select('*')
-      .order('created_at', { ascending: false });
+  let query = supabase
+    .from('mdt_bolo_vehicles')
+    .select('*')
+    .order('created_at', { ascending: false });
 
-    if (statusFilter && statusFilter !== 'ALL') {
-      query = query.eq('status', statusFilter);
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('getBoloVehicles error:', error);
-    return { data: null, error };
+  if (statusFilter && statusFilter !== 'ALL') {
+    query = query.eq('status', statusFilter);
   }
+
+  return dbQuery(() => query, 'getBoloVehicles');
 }
 
-export async function searchBoloVehicles(query: string) {
-  try {
-    const { data, error } = await supabase
+export function searchBoloVehicles(query: string) {
+  return dbQuery(
+    () => supabase
       .from('mdt_bolo_vehicles')
       .select('id, plate, make, model, color, status')
       .or(`plate.ilike.%${query}%,make.ilike.%${query}%,model.ilike.%${query}%`)
       .eq('status', 'ACTIVE')
       .order('created_at', { ascending: false })
-      .limit(5);
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('searchBoloVehicles error:', error);
-    return { data: null, error };
-  }
+      .limit(5),
+    'searchBoloVehicles'
+  );
 }
 
-export async function createBoloVehicle(data: {
+export function createBoloVehicle(data: {
   plate: string;
   make?: string;
   model?: string;
@@ -418,22 +334,13 @@ export async function createBoloVehicle(data: {
   reported_by?: string;
   created_by?: string;
 }) {
-  try {
-    const { data: result, error } = await supabase
-      .from('mdt_bolo_vehicles')
-      .insert(data)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return { data: result, error: null };
-  } catch (error) {
-    console.error('createBoloVehicle error:', error);
-    return { data: null, error };
-  }
+  return dbQuery(
+    () => supabase.from('mdt_bolo_vehicles').insert(data).select().single(),
+    'createBoloVehicle'
+  );
 }
 
-export async function updateBoloVehicle(id: string, updates: Partial<{
+export function updateBoloVehicle(id: string, updates: Partial<{
   plate: string;
   make: string;
   model: string;
@@ -442,41 +349,29 @@ export async function updateBoloVehicle(id: string, updates: Partial<{
   status: string;
   reported_by: string;
 }>) {
-  try {
-    const { data, error } = await supabase
+  return dbQuery(
+    () => supabase
       .from('mdt_bolo_vehicles')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
-      .single();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('updateBoloVehicle error:', error);
-    return { data: null, error };
-  }
+      .single(),
+    'updateBoloVehicle'
+  );
 }
 
-export async function deleteBoloVehicle(id: string) {
-  try {
-    const { error } = await supabase
-      .from('mdt_bolo_vehicles')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
-    return { error: null };
-  } catch (error) {
-    console.error('deleteBoloVehicle error:', error);
-    return { error };
-  }
+export function deleteBoloVehicle(id: string) {
+  return dbMutate(
+    () => supabase.from('mdt_bolo_vehicles').delete().eq('id', id),
+    'deleteBoloVehicle'
+  );
 }
 
 // ============================================
 // MUGSHOT UPLOAD (Supabase Storage)
 // ============================================
 
+// Complex multi-step function (storage + DB update) — kept with manual try-catch
 export async function uploadMugshot(recordId: string, blob: Blob) {
   try {
     const filePath = `mugshots/${recordId}.webp`;
@@ -505,7 +400,7 @@ export async function uploadMugshot(recordId: string, blob: Blob) {
 
     return { url: publicUrl, error: null };
   } catch (error) {
-    console.error('uploadMugshot error:', error);
+    console.error('uploadMugshot:', error);
     return { url: null, error };
   }
 }
@@ -514,6 +409,7 @@ export async function uploadMugshot(recordId: string, blob: Blob) {
 // DASHBOARD STATS
 // ============================================
 
+// Complex multi-query function (Promise.all) — kept with manual try-catch
 export async function getMdtDashboardStats() {
   try {
     const [recordsRes, warrantsRes, boloRes] = await Promise.all([
@@ -531,56 +427,41 @@ export async function getMdtDashboardStats() {
       error: null,
     };
   } catch (error) {
-    console.error('getMdtDashboardStats error:', error);
+    console.error('getMdtDashboardStats:', error);
     return { data: null, error };
   }
 }
 
-export async function getMostWanted(limit = 5) {
-  try {
-    const { data, error } = await supabase
+export function getMostWanted(limit = 5) {
+  return dbQuery(
+    () => supabase
       .from('mdt_records')
       .select('id, first_name, last_name, priors, wanted_status')
       .order('priors', { ascending: false })
-      .limit(limit);
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('getMostWanted error:', error);
-    return { data: null, error };
-  }
+      .limit(limit),
+    'getMostWanted'
+  );
 }
 
-export async function getRecentActivity(limit = 10) {
-  try {
-    const { data, error } = await supabase
+export function getRecentActivity(limit = 10) {
+  return dbQuery(
+    () => supabase
       .from('mdt_criminal_records')
       .select('id, date, offense, officer, status, created_at, record_id, record:mdt_records!record_id(first_name, last_name)')
       .order('created_at', { ascending: false })
-      .limit(limit);
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('getRecentActivity error:', error);
-    return { data: null, error };
-  }
+      .limit(limit),
+    'getRecentActivity'
+  );
 }
 
-export async function getLatestBolos(limit = 5) {
-  try {
-    const { data, error } = await supabase
+export function getLatestBolos(limit = 5) {
+  return dbQuery(
+    () => supabase
       .from('mdt_bolo_vehicles')
       .select('*')
       .eq('status', 'ACTIVE')
       .order('created_at', { ascending: false })
-      .limit(limit);
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('getLatestBolos error:', error);
-    return { data: null, error };
-  }
+      .limit(limit),
+    'getLatestBolos'
+  );
 }

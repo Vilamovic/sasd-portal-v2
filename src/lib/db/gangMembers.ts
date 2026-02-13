@@ -1,35 +1,29 @@
 import { supabase } from '@/src/supabaseClient';
+import { dbQuery, dbMutate } from './queryWrapper';
 
 // ============================================
 // GANG MEMBERS
 // ============================================
 
 export async function getGangMembers(gangId?: string) {
-  try {
-    let query = supabase
-      .from('gang_members')
-      .select(`
-        *,
-        gang:gang_profiles!gang_members_gang_id_fkey(id, title)
-      `)
-      .order('last_name');
+  let query = supabase
+    .from('gang_members')
+    .select(`
+      *,
+      gang:gang_profiles!gang_members_gang_id_fkey(id, title)
+    `)
+    .order('last_name');
 
-    if (gangId) {
-      query = query.eq('gang_id', gangId);
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('getGangMembers error:', error);
-    return { data: null, error };
+  if (gangId) {
+    query = query.eq('gang_id', gangId);
   }
+
+  return dbQuery(() => query, 'getGangMembers');
 }
 
-export async function getGangMember(id: string) {
-  try {
-    const { data, error } = await supabase
+export function getGangMember(id: string) {
+  return dbQuery(
+    () => supabase
       .from('gang_members')
       .select(`
         *,
@@ -37,50 +31,38 @@ export async function getGangMember(id: string) {
         reports:gang_member_reports(*)
       `)
       .eq('id', id)
-      .single();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('getGangMember error:', error);
-    return { data: null, error };
-  }
+      .single(),
+    'getGangMember'
+  );
 }
 
 export async function searchGangMembers(query: string) {
-  try {
-    const terms = query.trim().split(/\s+/);
-    let dbQuery = supabase
-      .from('gang_members')
-      .select(`
-        *,
-        gang:gang_profiles!gang_members_gang_id_fkey(id, title)
-      `);
+  const terms = query.trim().split(/\s+/);
+  let q = supabase
+    .from('gang_members')
+    .select(`
+      *,
+      gang:gang_profiles!gang_members_gang_id_fkey(id, title)
+    `);
 
-    if (terms.length >= 2) {
-      // Search both name orders
-      const [a, b] = terms;
-      dbQuery = dbQuery.or(
-        `first_name.ilike.%${a}%,last_name.ilike.%${a}%,alias.ilike.%${a}%,` +
-        `first_name.ilike.%${b}%,last_name.ilike.%${b}%,alias.ilike.%${b}%`
-      );
-    } else {
-      const term = terms[0];
-      dbQuery = dbQuery.or(
-        `first_name.ilike.%${term}%,last_name.ilike.%${term}%,alias.ilike.%${term}%`
-      );
-    }
-
-    const { data, error } = await dbQuery.order('last_name').limit(50);
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('searchGangMembers error:', error);
-    return { data: null, error };
+  if (terms.length >= 2) {
+    // Search both name orders
+    const [a, b] = terms;
+    q = q.or(
+      `first_name.ilike.%${a}%,last_name.ilike.%${a}%,alias.ilike.%${a}%,` +
+      `first_name.ilike.%${b}%,last_name.ilike.%${b}%,alias.ilike.%${b}%`
+    );
+  } else {
+    const term = terms[0];
+    q = q.or(
+      `first_name.ilike.%${term}%,last_name.ilike.%${term}%,alias.ilike.%${term}%`
+    );
   }
+
+  return dbQuery(() => q.order('last_name').limit(50), 'searchGangMembers');
 }
 
-export async function createGangMember(data: {
+export function createGangMember(data: {
   gang_id: string;
   first_name: string;
   last_name: string;
@@ -96,25 +78,20 @@ export async function createGangMember(data: {
   status?: string;
   created_by?: string;
 }) {
-  try {
-    const { data: result, error } = await supabase
+  return dbQuery(
+    () => supabase
       .from('gang_members')
       .insert(data)
       .select(`
         *,
         gang:gang_profiles!gang_members_gang_id_fkey(id, title)
       `)
-      .single();
-
-    if (error) throw error;
-    return { data: result, error: null };
-  } catch (error) {
-    console.error('createGangMember error:', error);
-    return { data: null, error };
-  }
+      .single(),
+    'createGangMember'
+  );
 }
 
-export async function updateGangMember(id: string, updates: {
+export function updateGangMember(id: string, updates: {
   gang_id?: string;
   first_name?: string;
   last_name?: string;
@@ -129,8 +106,8 @@ export async function updateGangMember(id: string, updates: {
   mugshot_url?: string | null;
   status?: string;
 }) {
-  try {
-    const { data, error } = await supabase
+  return dbQuery(
+    () => supabase
       .from('gang_members')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
@@ -138,36 +115,23 @@ export async function updateGangMember(id: string, updates: {
         *,
         gang:gang_profiles!gang_members_gang_id_fkey(id, title)
       `)
-      .single();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('updateGangMember error:', error);
-    return { data: null, error };
-  }
+      .single(),
+    'updateGangMember'
+  );
 }
 
-export async function deleteGangMember(id: string) {
-  try {
-    const { error } = await supabase
-      .from('gang_members')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
-    return { error: null };
-  } catch (error) {
-    console.error('deleteGangMember error:', error);
-    return { error };
-  }
+export function deleteGangMember(id: string) {
+  return dbMutate(
+    () => supabase.from('gang_members').delete().eq('id', id),
+    'deleteGangMember'
+  );
 }
 
 // ============================================
 // GANG MEMBER REPORTS
 // ============================================
 
-export async function createMemberReport(data: {
+export function createMemberReport(data: {
   member_id: string;
   report_type: 'investigation' | 'autopsy';
   date?: string | null;
@@ -181,22 +145,13 @@ export async function createMemberReport(data: {
   signed_by: string;
   created_by?: string;
 }) {
-  try {
-    const { data: result, error } = await supabase
-      .from('gang_member_reports')
-      .insert(data)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return { data: result, error: null };
-  } catch (error) {
-    console.error('createMemberReport error:', error);
-    return { data: null, error };
-  }
+  return dbQuery(
+    () => supabase.from('gang_member_reports').insert(data).select().single(),
+    'createMemberReport'
+  );
 }
 
-export async function updateMemberReport(id: string, updates: Partial<{
+export function updateMemberReport(id: string, updates: Partial<{
   report_type: 'investigation' | 'autopsy';
   date: string | null;
   location: string | null;
@@ -208,33 +163,15 @@ export async function updateMemberReport(id: string, updates: Partial<{
   body_markers: Array<{ x: number; y: number; side: string }> | null;
   signed_by: string;
 }>) {
-  try {
-    const { data, error } = await supabase
-      .from('gang_member_reports')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('updateMemberReport error:', error);
-    return { data: null, error };
-  }
+  return dbQuery(
+    () => supabase.from('gang_member_reports').update(updates).eq('id', id).select().single(),
+    'updateMemberReport'
+  );
 }
 
-export async function deleteMemberReport(id: string) {
-  try {
-    const { error } = await supabase
-      .from('gang_member_reports')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
-    return { error: null };
-  } catch (error) {
-    console.error('deleteMemberReport error:', error);
-    return { error };
-  }
+export function deleteMemberReport(id: string) {
+  return dbMutate(
+    () => supabase.from('gang_member_reports').delete().eq('id', id),
+    'deleteMemberReport'
+  );
 }

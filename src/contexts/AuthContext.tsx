@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { supabase } from '@/src/supabaseClient';
 import { getUserById } from '@/src/lib/db/users';
 
@@ -30,14 +30,16 @@ const AuthContext = createContext<any>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   // ==================== STATE ====================
   const [role, setRole] = useState<string | null>(null);
-  const [division, setDivision] = useState<string | null>(null);
-  const [permissions, setPermissions] = useState<string[]>([]);
-  const [plusCount, setPlusCount] = useState(0);
-  const [minusCount, setMinusCount] = useState(0);
-  const [isCommander, setIsCommander] = useState(false);
-  const [isSwatCommander, setIsSwatCommander] = useState(false);
-  const [isSwatOperator, setIsSwatOperator] = useState(false);
-  const [badge, setBadge] = useState<string | null>(null);
+  const [userData, setUserData] = useState({
+    division: null as string | null,
+    permissions: [] as string[],
+    plusCount: 0,
+    minusCount: 0,
+    isCommander: false,
+    isSwatCommander: false,
+    isSwatOperator: false,
+    badge: null as string | null,
+  });
 
   // ==================== CALLBACKS (stable references) ====================
 
@@ -45,16 +47,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setRole(newRole);
   }, []);
 
-  const handleUserDataLoaded = useCallback((userData: any) => {
-    setDivision(userData.division || null);
-    setPermissions(userData.permissions || []);
-    setPlusCount(userData.plus_count || 0);
-    setMinusCount(userData.minus_count || 0);
-    setIsCommander(userData.is_commander || false);
-    setIsSwatCommander(userData.is_swat_commander || false);
-    setIsSwatOperator(userData.is_swat_operator || false);
-    setBadge(userData.badge || null);
+  const updateUserData = useCallback((data: any) => {
+    setUserData({
+      division: data.division || null,
+      permissions: data.permissions || [],
+      plusCount: data.plus_count || 0,
+      minusCount: data.minus_count || 0,
+      isCommander: data.is_commander || false,
+      isSwatCommander: data.is_swat_commander || false,
+      isSwatOperator: data.is_swat_operator || false,
+      badge: data.badge || null,
+    });
   }, []);
+
+  const handleUserDataLoaded = updateUserData;
 
   const handleStartRolePolling = useCallback((userId: string) => {
     // Will be handled by useForceLogout
@@ -113,14 +119,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Wyczyść state
       setRole(null);
-      setDivision(null);
-      setPermissions([]);
-      setPlusCount(0);
-      setMinusCount(0);
-      setIsCommander(false);
-      setIsSwatCommander(false);
-      setIsSwatOperator(false);
-      setBadge(null);
+      setUserData({
+        division: null, permissions: [], plusCount: 0, minusCount: 0,
+        isCommander: false, isSwatCommander: false, isSwatOperator: false, badge: null,
+      });
       userRef.current = null;
       loginTimestampRef.current = null;
     } catch (error) {
@@ -133,16 +135,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    */
   useForceLogout(user?.id, loginTimestampRef, role, {
     onRoleChange: (newRole) => setRole(newRole),
-    onUserDataUpdate: (userData) => {
-      setDivision(userData.division || null);
-      setPermissions(userData.permissions || []);
-      setPlusCount(userData.plus_count || 0);
-      setMinusCount(userData.minus_count || 0);
-      setIsCommander(userData.is_commander || false);
-      setIsSwatCommander(userData.is_swat_commander || false);
-      setIsSwatOperator(userData.is_swat_operator || false);
-      setBadge(userData.badge || null);
-    },
+    onUserDataUpdate: updateUserData,
     onForceLogout: signOut,
   });
 
@@ -180,17 +173,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!user?.id) return;
 
     try {
-      const { data: userData } = await getUserById(user.id);
+      const { data: freshData } = await getUserById(user.id);
 
-      if (userData) {
-        setPlusCount(userData.plus_count || 0);
-        setMinusCount(userData.minus_count || 0);
-        setDivision(userData.division || null);
-        setPermissions(userData.permissions || []);
-        setIsCommander(userData.is_commander || false);
-        setIsSwatCommander(userData.is_swat_commander || false);
-        setIsSwatOperator(userData.is_swat_operator || false);
-        setBadge(userData.badge || null);
+      if (freshData) {
+        updateUserData(freshData);
       }
 
       // Odśwież aktywne kary
@@ -198,13 +184,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('refreshUserData error:', error);
     }
-  }, [user?.id, fetchActivePenalties]);
+  }, [user?.id, fetchActivePenalties, updateUserData]);
 
   // ==================== ROLE HELPERS ====================
   const roleHelpers = getRoleHelpers(role);
 
   // ==================== CONTEXT VALUE ====================
-  const value = {
+  const value = useMemo(() => ({
     user,
     session,
     loading,
@@ -217,20 +203,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     forceRelogin,
     refreshUserData,
     // Kartoteka & Dywizje
-    division,
-    permissions,
-    plusCount,
-    minusCount,
+    division: userData.division,
+    permissions: userData.permissions,
+    plusCount: userData.plusCount,
+    minusCount: userData.minusCount,
     activePenalties,
-    isCommander,
-    isSwatCommander,
-    isSwatOperator,
-    badge,
+    isCommander: userData.isCommander,
+    isSwatCommander: userData.isSwatCommander,
+    isSwatOperator: userData.isSwatOperator,
+    badge: userData.badge,
     // Role helpers (spread)
     ...roleHelpers,
     // Dodatkowo dla kompatybilności
     isAuthenticated: !!user,
-  };
+  }), [user, session, loading, role, mtaNick, showMtaNickModal,
+    handleMtaNickComplete, signInWithDiscord, signOut, forceRelogin,
+    refreshUserData, userData, activePenalties, roleHelpers]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

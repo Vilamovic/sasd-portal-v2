@@ -17,9 +17,9 @@ import { MainDashboard } from "./MainDashboard"
 import { MonitoringPanel } from "./MonitoringPanel"
 import { UnitsPanel } from "./UnitsPanel"
 import { EmergencyPanel } from "./EmergencyPanel"
-import { MdtModal } from "./MdtModal"
-import { WantedPoster } from "./WantedPoster"
 import GangMembersPage from "@/src/components/divisions/GangsPage/GangMembers/GangMembersPage"
+import MdtModals from "./modals/MdtModals"
+import type { ModalType, ModalEditData } from "./modals/MdtModals"
 import { useMdtRecords } from "./hooks/useMdtRecords"
 import { useMdtBolo } from "./hooks/useMdtBolo"
 import { getGangProfiles } from "@/src/lib/db/gangs"
@@ -35,37 +35,16 @@ export default function MdtPage() {
     loading: boolean
   }
 
+  // Layout states
   const [activeTab, setActiveTab] = useState("main")
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
-
-  // Delete modes
   const [isDeleteRecordMode, setIsDeleteRecordMode] = useState(false)
   const [isDeleteNoteMode, setIsDeleteNoteMode] = useState(false)
 
-  // Modal states
-  const [showAddRecord, setShowAddRecord] = useState(false)
-  const [showAddNote, setShowAddNote] = useState(false)
-  const [showWarrantModal, setShowWarrantModal] = useState(false)
-  const [showPrintModal, setShowPrintModal] = useState(false)
-  const [showPoster, setShowPoster] = useState(false)
-  const [showCreatePerson, setShowCreatePerson] = useState(false)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [deleteConfirmText, setDeleteConfirmText] = useState("")
-  const [showEditCriminalRecord, setShowEditCriminalRecord] = useState(false)
-  const [editCrRecordId, setEditCrRecordId] = useState<string | null>(null)
-  const [editCrForm, setEditCrForm] = useState({ date: "", offense: "", code: "", status: "W TOKU", officer: "" })
-  const [showEditNote, setShowEditNote] = useState(false)
-  const [editNoteId, setEditNoteId] = useState<string | null>(null)
-  const [editNoteContent, setEditNoteContent] = useState("")
-
-  // Form states
-  const [newRecordForm, setNewRecordForm] = useState({ date: "", offense: "", code: "", status: "W TOKU", officer: "" })
-  const [newNote, setNewNote] = useState("")
-  const [warrantType, setWarrantType] = useState<"PRZESZUKANIA" | "ARESZTOWANIA" | "NO-KNOCK">("PRZESZUKANIA")
-  const [warrantReason, setWarrantReason] = useState("")
-  const [printReason, setPrintReason] = useState("")
-  const [newPersonForm, setNewPersonForm] = useState({ first_name: "", last_name: "" })
+  // Modal state (single state replaces 8 booleans)
+  const [activeModal, setActiveModal] = useState<ModalType>("none")
+  const [modalEditData, setModalEditData] = useState<ModalEditData>({})
 
   // Hooks
   const {
@@ -100,15 +79,6 @@ export default function MdtPage() {
     }
   }, [user, loadRecords, loadVehicles])
 
-  // Reset new record form date
-  useEffect(() => {
-    setNewRecordForm((p) => ({
-      ...p,
-      date: new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" }),
-      officer: mtaNick || "",
-    }))
-  }, [mtaNick])
-
   const officerName = mtaNick || "NIEZNANY"
 
   const sectionLabels: Record<string, string> = {
@@ -128,11 +98,74 @@ export default function MdtPage() {
     if (tab !== "kartoteka") clearSelection()
   }, [clearSelection])
 
-  const handleSelectRecordFromSearch = useCallback((id: string) => {
-    selectRecord(id)
-  }, [selectRecord])
+  const closeModal = useCallback(() => {
+    setActiveModal("none")
+    setModalEditData({})
+  }, [])
 
-  // Save edit
+  // ==================== Modal Callbacks ====================
+
+  const onAddCriminalRecord = useCallback(async (form: { date: string; offense: string; code: string; status: string; officer: string }) => {
+    if (!selectedRecord || !form.offense.trim()) return
+    await handleAddCriminalRecord({
+      record_id: selectedRecord.id,
+      date: form.date,
+      offense: form.offense,
+      code: form.code,
+      status: form.status,
+      officer: form.officer,
+    })
+  }, [selectedRecord, handleAddCriminalRecord])
+
+  const onSaveEditCriminalRecord = useCallback(async (id: string, form: { date: string; offense: string; code: string; status: string; officer: string }) => {
+    if (!selectedRecord) return
+    await handleUpdateCriminalRecord(id, form, selectedRecord.id)
+  }, [selectedRecord, handleUpdateCriminalRecord])
+
+  const onAddNote = useCallback(async (content: string, officer: string) => {
+    if (!selectedRecord || !content.trim()) return
+    await handleAddNote({ record_id: selectedRecord.id, content, officer })
+  }, [selectedRecord, handleAddNote])
+
+  const onSaveEditNote = useCallback(async (id: string, content: string) => {
+    if (!selectedRecord) return
+    await handleUpdateNote(id, content, selectedRecord.id)
+  }, [selectedRecord, handleUpdateNote])
+
+  const onIssueWarrant = useCallback(async (type: string, reason: string) => {
+    if (!selectedRecord || !reason.trim()) return
+    await handleIssueWarrant({
+      record_id: selectedRecord.id,
+      type,
+      reason,
+      officer: officerName,
+      issued_date: new Date().toLocaleDateString("pl-PL"),
+    })
+  }, [selectedRecord, handleIssueWarrant, officerName])
+
+  const onGeneratePoster = useCallback((reason: string) => {
+    if (!reason.trim()) return
+    setActiveModal("poster")
+    setModalEditData({ posterReason: reason })
+  }, [])
+
+  const onCreatePerson = useCallback(async (firstName: string, lastName: string) => {
+    if (!firstName.trim() || !lastName.trim()) return
+    const newRecord = await handleCreateRecord({
+      first_name: firstName,
+      last_name: lastName,
+      created_by: user?.id,
+    })
+    if (newRecord) selectRecord(newRecord.id)
+  }, [handleCreateRecord, user?.id, selectRecord])
+
+  const onDeleteKartoteka = useCallback(async (confirmText: string) => {
+    if (!selectedRecord || confirmText !== "potwierdzam") return
+    await handleDeleteRecord(selectedRecord.id)
+  }, [selectedRecord, handleDeleteRecord])
+
+  // ==================== Record Action Handlers ====================
+
   async function handleSaveEdit(updates: Partial<MdtRecord>, newMugshotUrl: string | null) {
     if (!selectedRecord) return
     const finalUpdates = { ...updates }
@@ -143,59 +176,26 @@ export default function MdtPage() {
     setIsEditing(false)
   }
 
-  // Add criminal record
-  async function onAddCriminalRecord() {
-    if (!selectedRecord || !newRecordForm.offense.trim()) return
-    await handleAddCriminalRecord({
-      record_id: selectedRecord.id,
-      date: newRecordForm.date,
-      offense: newRecordForm.offense,
-      code: newRecordForm.code,
-      status: newRecordForm.status,
-      officer: newRecordForm.officer,
-    })
-    setNewRecordForm({
-      date: new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" }),
-      offense: "", code: "", status: "W TOKU", officer: officerName,
-    })
-    setShowAddRecord(false)
-  }
-
-  // Delete criminal record
-  async function onDeleteCriminalRecord(id: string) {
+  function openEditCriminalRecord(crId: string) {
     if (!selectedRecord) return
-    await handleDeleteCriminalRecord(id, selectedRecord.id)
+    const cr = selectedRecord.criminal_records?.find((c) => c.id === crId)
+    if (!cr) return
+    setModalEditData({ editCrRecordId: crId, editCrForm: { date: cr.date, offense: cr.offense, code: cr.code, status: cr.status, officer: cr.officer } })
+    setActiveModal("editRecord")
   }
 
-  // Add note
-  async function onAddNote() {
-    if (!selectedRecord || !newNote.trim()) return
-    await handleAddNote({ record_id: selectedRecord.id, content: newNote, officer: officerName })
-    setNewNote("")
-    setShowAddNote(false)
-  }
-
-  // Delete note
-  async function onDeleteNote(id: string) {
+  function openEditNote(noteId: string) {
     if (!selectedRecord) return
-    await handleDeleteNote(id, selectedRecord.id)
+    const note = selectedRecord.mdt_notes?.find((n) => n.id === noteId)
+    if (!note) return
+    setModalEditData({ editNoteId: noteId, editNoteContent: note.content })
+    setActiveModal("editNote")
   }
 
-  // Issue warrant
-  async function onIssueWarrant() {
-    if (!selectedRecord || !warrantReason.trim()) return
-    await handleIssueWarrant({
-      record_id: selectedRecord.id,
-      type: warrantType,
-      reason: warrantReason,
-      officer: officerName,
-      issued_date: new Date().toLocaleDateString("pl-PL"),
-    })
-    setWarrantReason("")
-    setShowWarrantModal(false)
+  function handleMugshotChange(url: string) {
+    if (selectedRecord) handleUpdateRecord(selectedRecord.id, { mugshot_url: url })
   }
 
-  // Remove warrant
   async function onRemoveWarrant() {
     if (!selectedRecord) return
     const activeWarrant = selectedRecord.mdt_warrants?.find((w) => w.is_active)
@@ -203,84 +203,11 @@ export default function MdtPage() {
     await handleRemoveWarrant(activeWarrant.id, selectedRecord.id)
   }
 
-  // Create person
-  async function onCreatePerson() {
-    if (!newPersonForm.first_name.trim() || !newPersonForm.last_name.trim()) return
-    const newRecord = await handleCreateRecord({
-      first_name: newPersonForm.first_name,
-      last_name: newPersonForm.last_name,
-      created_by: user?.id,
-    })
-    setNewPersonForm({ first_name: "", last_name: "" })
-    setShowCreatePerson(false)
-    if (newRecord) {
-      selectRecord(newRecord.id)
-    }
-  }
-
-  // Generate poster
-  function onGeneratePoster() {
-    if (!printReason.trim()) return
-    setShowPrintModal(false)
-    setShowPoster(true)
-  }
-
-  // Delete kartoteka with confirmation
-  async function onDeleteKartoteka() {
-    if (!selectedRecord || deleteConfirmText !== "potwierdzam") return
-    await handleDeleteRecord(selectedRecord.id)
-    setShowDeleteConfirm(false)
-    setDeleteConfirmText("")
-  }
-
-  // Edit criminal record
-  function openEditCriminalRecord(crId: string) {
-    if (!selectedRecord) return
-    const cr = selectedRecord.criminal_records?.find((c) => c.id === crId)
-    if (!cr) return
-    setEditCrRecordId(crId)
-    setEditCrForm({ date: cr.date, offense: cr.offense, code: cr.code, status: cr.status, officer: cr.officer })
-    setShowEditCriminalRecord(true)
-  }
-
-  async function onSaveEditCriminalRecord() {
-    if (!selectedRecord || !editCrRecordId) return
-    await handleUpdateCriminalRecord(editCrRecordId, editCrForm, selectedRecord.id)
-    setShowEditCriminalRecord(false)
-    setEditCrRecordId(null)
-  }
-
-  // Edit note
-  function openEditNote(noteId: string) {
-    if (!selectedRecord) return
-    const note = selectedRecord.mdt_notes?.find((n) => n.id === noteId)
-    if (!note) return
-    setEditNoteId(noteId)
-    setEditNoteContent(note.content)
-    setShowEditNote(true)
-  }
-
-  async function onSaveEditNote() {
-    if (!selectedRecord || !editNoteId) return
-    await handleUpdateNote(editNoteId, editNoteContent, selectedRecord.id)
-    setShowEditNote(false)
-    setEditNoteId(null)
-  }
-
-  // Mugshot change handler
-  function handleMugshotChange(url: string) {
-    if (selectedRecord) {
-      handleUpdateRecord(selectedRecord.id, { mugshot_url: url })
-    }
-  }
-
-  const currentSection = isEditing
-    ? "Edycja danych"
-    : sectionLabels[activeTab] || "Kartoteki"
-
+  const currentSection = isEditing ? "Edycja danych" : sectionLabels[activeTab] || "Kartoteki"
   const activeWarrant = selectedRecord?.mdt_warrants?.find((w) => w.is_active)
 
-  // Access check
+  // ==================== Access Check ====================
+
   if (authLoading) {
     return (
       <div className="flex h-screen items-center justify-center" style={{ backgroundColor: "var(--mdt-content)" }}>
@@ -300,16 +227,14 @@ export default function MdtPage() {
     )
   }
 
+  // ==================== Render ====================
+
   return (
     <div className="flex flex-col h-screen overflow-hidden" style={{ backgroundColor: "var(--mdt-content)" }}>
       {!isFullscreen && <Navbar />}
 
-      {/* MDT Terminal Window */}
       <div className={`flex-1 overflow-hidden ${!isFullscreen ? "mt-0.5" : ""}`}>
-        <div
-          className="panel-raised flex flex-col overflow-hidden h-full"
-          style={{ backgroundColor: "var(--mdt-sidebar)" }}
-        >
+        <div className="panel-raised flex flex-col overflow-hidden h-full" style={{ backgroundColor: "var(--mdt-sidebar)" }}>
           <MdtHeader
             currentSection={currentSection}
             officerName={officerName}
@@ -319,22 +244,15 @@ export default function MdtPage() {
           />
 
           <SearchPanel
-            onSelectRecord={(id) => {
-              handleTabChange("kartoteka")
-              selectRecord(id)
-            }}
+            onSelectRecord={(id) => { handleTabChange("kartoteka"); selectRecord(id) }}
             onSelectBolo={() => handleTabChange("bolo")}
             onSwitchTab={handleTabChange}
-            onSearch={(q) => {
-              handleTabChange("kartoteka")
-              handleSearch(q)
-            }}
+            onSearch={(q) => { handleTabChange("kartoteka"); handleSearch(q) }}
           />
 
           <div className="flex flex-1 overflow-hidden">
             <MdtSidebar activeTab={activeTab} onTabChange={handleTabChange} />
 
-            {/* Center content */}
             {activeTab === "main" && (
               <MainDashboard
                 onSelectRecord={(id) => { handleTabChange("kartoteka"); selectRecord(id) }}
@@ -345,20 +263,15 @@ export default function MdtPage() {
             {activeTab === "kartoteka" && (
               selectedRecord ? (
                 isEditing ? (
-                  <EditPlayerRecord
-                    record={selectedRecord}
-                    onSave={handleSaveEdit}
-                    onCancel={() => setIsEditing(false)}
-                    gangs={gangs}
-                  />
+                  <EditPlayerRecord record={selectedRecord} onSave={handleSaveEdit} onCancel={() => setIsEditing(false)} gangs={gangs} />
                 ) : (
                   <PlayerRecord
                     record={selectedRecord}
                     onMugshotChange={handleMugshotChange}
                     isDeleteRecordMode={isDeleteRecordMode}
-                    onDeleteRecord={onDeleteCriminalRecord}
+                    onDeleteRecord={(id) => selectedRecord && handleDeleteCriminalRecord(id, selectedRecord.id)}
                     isDeleteNoteMode={isDeleteNoteMode}
-                    onDeleteNote={onDeleteNote}
+                    onDeleteNote={(id) => selectedRecord && handleDeleteNote(id, selectedRecord.id)}
                     onEditCriminalRecord={openEditCriminalRecord}
                     onEditNote={openEditNote}
                   />
@@ -368,23 +281,17 @@ export default function MdtPage() {
                   records={records}
                   loading={recordsLoading}
                   onSelectRecord={(id) => selectRecord(id)}
-                  onCreateNew={() => setShowCreatePerson(true)}
+                  onCreateNew={() => setActiveModal("createPerson")}
                 />
               )
             )}
 
             {activeTab === "bolo" && (
               <BoloVehiclesPanel
-                vehicles={vehicles}
-                loading={boloLoading}
-                filterStatus={filterStatus}
-                onChangeFilter={changeFilter}
-                onCreate={handleCreateBolo}
-                onUpdate={handleUpdateBolo}
-                onDelete={handleDeleteBolo}
-                onResolve={handleResolveBolo}
-                officerName={officerName}
-                userId={user?.id}
+                vehicles={vehicles} loading={boloLoading} filterStatus={filterStatus}
+                onChangeFilter={changeFilter} onCreate={handleCreateBolo} onUpdate={handleUpdateBolo}
+                onDelete={handleDeleteBolo} onResolve={handleResolveBolo}
+                officerName={officerName} userId={user?.id}
               />
             )}
 
@@ -398,7 +305,6 @@ export default function MdtPage() {
             {activeTab === "roster" && <UnitsPanel />}
             {activeTab === "emergency" && <EmergencyPanel />}
 
-            {/* Right panel */}
             <RightPanel
               activeTab={activeTab}
               hasSelectedRecord={!!selectedRecord}
@@ -410,383 +316,44 @@ export default function MdtPage() {
                 }
               }}
               isEditing={isEditing}
-              onAddRecord={() => selectedRecord && setShowAddRecord(true)}
+              onAddRecord={() => selectedRecord && setActiveModal("addRecord")}
               onDeleteRecordMode={() => {
-                if (selectedRecord) {
-                  setIsDeleteRecordMode((p) => !p)
-                  setIsDeleteNoteMode(false)
-                }
+                if (selectedRecord) { setIsDeleteRecordMode((p) => !p); setIsDeleteNoteMode(false) }
               }}
               isDeleteRecordMode={isDeleteRecordMode}
-              onAddNote={() => selectedRecord && setShowAddNote(true)}
+              onAddNote={() => selectedRecord && setActiveModal("addNote")}
               onDeleteNoteMode={() => {
-                if (selectedRecord) {
-                  setIsDeleteNoteMode((p) => !p)
-                  setIsDeleteRecordMode(false)
-                }
+                if (selectedRecord) { setIsDeleteNoteMode((p) => !p); setIsDeleteRecordMode(false) }
               }}
               isDeleteNoteMode={isDeleteNoteMode}
-              onIssueWarrant={() => selectedRecord && setShowWarrantModal(true)}
+              onIssueWarrant={() => selectedRecord && setActiveModal("warrant")}
               onRemoveWarrant={onRemoveWarrant}
               hasWarrant={!!activeWarrant}
-              onPrintFile={() => {
-                if (selectedRecord) {
-                  setPrintReason("")
-                  setShowPrintModal(true)
-                }
-              }}
-              onDeleteKartoteka={() => {
-                if (selectedRecord) {
-                  setDeleteConfirmText("")
-                  setShowDeleteConfirm(true)
-                }
-              }}
-              onCreatePerson={() => setShowCreatePerson(true)}
-              onCreateBolo={() => {/* BoloVehiclesPanel has its own modal */}}
+              onPrintFile={() => selectedRecord && setActiveModal("print")}
+              onDeleteKartoteka={() => selectedRecord && setActiveModal("deleteConfirm")}
+              onCreatePerson={() => setActiveModal("createPerson")}
+              onCreateBolo={() => {}}
             />
           </div>
         </div>
       </div>
 
-      {/* MODAL: Add Criminal Record */}
-      {showAddRecord && selectedRecord && (
-        <MdtModal title="Dodaj wpis do historii karnej" onClose={() => setShowAddRecord(false)}>
-          <div className="flex flex-col gap-3">
-            {[
-              { label: "DATA", key: "date", placeholder: "" },
-              { label: "PRZESTĘPSTWO", key: "offense", placeholder: "np. Kradzież pojazdu" },
-              { label: "KOD", key: "code", placeholder: "np. PC 487(d)(1)" },
-              { label: "FUNKCJONARIUSZ", key: "officer", placeholder: "np. Dep. Kowalski" },
-            ].map((f) => (
-              <div key={f.key} className="flex items-center gap-2">
-                <label className="w-32 shrink-0 font-mono text-xs font-bold" style={{ color: "var(--mdt-muted-text)" }}>
-                  {f.label}:
-                </label>
-                <input
-                  type="text"
-                  value={newRecordForm[f.key as keyof typeof newRecordForm]}
-                  onChange={(e) => setNewRecordForm((p) => ({ ...p, [f.key]: e.target.value }))}
-                  className="panel-inset flex-1 px-2 py-1 font-mono text-xs"
-                  style={{ backgroundColor: "var(--mdt-input-bg)", color: "var(--mdt-content-text)", outline: "none" }}
-                  placeholder={f.placeholder}
-                />
-              </div>
-            ))}
-            <div className="flex items-center gap-2">
-              <label className="w-32 shrink-0 font-mono text-xs font-bold" style={{ color: "var(--mdt-muted-text)" }}>STATUS:</label>
-              <select
-                value={newRecordForm.status}
-                onChange={(e) => setNewRecordForm((p) => ({ ...p, status: e.target.value }))}
-                className="panel-inset flex-1 px-2 py-1 font-mono text-xs"
-                style={{ backgroundColor: "var(--mdt-input-bg)", color: "var(--mdt-content-text)", outline: "none", cursor: "pointer" }}
-              >
-                <option value="W TOKU">W TOKU</option>
-                <option value="SKAZANY">SKAZANY</option>
-                <option value="ODDALONO">ODDALONO</option>
-                <option value="OCZEKUJE">OCZEKUJE</option>
-              </select>
-            </div>
-            <div className="flex justify-end gap-2 border-t border-[#999] pt-3">
-              <button
-                className="btn-win95 text-xs"
-                style={{ backgroundColor: "#3a6a3a", color: "#fff", borderColor: "#5a9a5a #1a3a1a #1a3a1a #5a9a5a" }}
-                onClick={onAddCriminalRecord}
-              >
-                DODAJ WPIS
-              </button>
-              <button className="btn-win95 text-xs" onClick={() => setShowAddRecord(false)}>ANULUJ</button>
-            </div>
-          </div>
-        </MdtModal>
-      )}
-
-      {/* MODAL: Add Note */}
-      {showAddNote && selectedRecord && (
-        <MdtModal title="Dodaj notatkę" onClose={() => setShowAddNote(false)}>
-          <div className="flex flex-col gap-3">
-            <label className="font-mono text-xs font-bold" style={{ color: "var(--mdt-muted-text)" }}>TREŚĆ NOTATKI:</label>
-            <textarea
-              value={newNote}
-              onChange={(e) => { if (e.target.value.length <= 500) setNewNote(e.target.value) }}
-              maxLength={500}
-              rows={4}
-              className="panel-inset w-full resize-none px-2 py-1 font-mono text-xs"
-              style={{ backgroundColor: "var(--mdt-input-bg)", color: "var(--mdt-content-text)", outline: "none" }}
-              placeholder="Wpisz treść notatki..."
-            />
-            <div className="flex items-center justify-between">
-              <span className="font-mono text-[10px]" style={{ color: newNote.length >= 450 ? "#c41e1e" : "var(--mdt-muted-text)" }}>
-                {newNote.length}/500
-              </span>
-            </div>
-            <div className="flex justify-end gap-2 border-t border-[#999] pt-3">
-              <button
-                className="btn-win95 text-xs"
-                style={{ backgroundColor: "#3a6a3a", color: "#fff", borderColor: "#5a9a5a #1a3a1a #1a3a1a #5a9a5a" }}
-                onClick={onAddNote}
-              >
-                DODAJ
-              </button>
-              <button className="btn-win95 text-xs" onClick={() => setShowAddNote(false)}>ANULUJ</button>
-            </div>
-          </div>
-        </MdtModal>
-      )}
-
-      {/* MODAL: Issue Warrant */}
-      {showWarrantModal && selectedRecord && (
-        <MdtModal title="Wystaw nakaz" onClose={() => setShowWarrantModal(false)}>
-          <div className="flex flex-col gap-3">
-            <span className="font-mono text-xs" style={{ color: "var(--mdt-muted-text)" }}>
-              Wybierz rodzaj nakazu dla: <strong>{selectedRecord.last_name}, {selectedRecord.first_name}</strong>
-            </span>
-            <div className="flex flex-col gap-2">
-              {([
-                { id: "PRZESZUKANIA" as const, label: "NAKAZ PRZESZUKANIA", color: "#ffc107" },
-                { id: "ARESZTOWANIA" as const, label: "NAKAZ ARESZTOWANIA", color: "#f97316" },
-                { id: "NO-KNOCK" as const, label: "NAKAZ NO-KNOCK", color: "#c41e1e" },
-              ]).map((opt) => (
-                <button
-                  key={opt.id}
-                  className={`btn-win95 w-full text-xs ${warrantType === opt.id ? "btn-win95-active" : ""}`}
-                  onClick={() => setWarrantType(opt.id)}
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="h-3 w-3 border-2" style={{ borderColor: "#555", backgroundColor: warrantType === opt.id ? opt.color : "transparent" }} />
-                    {opt.label}
-                  </div>
-                </button>
-              ))}
-            </div>
-            <label className="font-mono text-xs font-bold" style={{ color: "var(--mdt-muted-text)" }}>POWÓD WYSTAWIENIA:</label>
-            <textarea
-              value={warrantReason}
-              onChange={(e) => setWarrantReason(e.target.value)}
-              rows={3}
-              className="panel-inset w-full resize-none px-2 py-1 font-mono text-xs"
-              style={{ backgroundColor: "var(--mdt-input-bg)", color: "var(--mdt-content-text)", outline: "none" }}
-              placeholder="Wpisz powód wystawienia nakazu..."
-            />
-            <div className="flex justify-end gap-2 border-t border-[#999] pt-3">
-              <button
-                className="btn-win95 text-xs"
-                style={{ backgroundColor: "#3a6a3a", color: "#fff", borderColor: "#5a9a5a #1a3a1a #1a3a1a #5a9a5a" }}
-                onClick={onIssueWarrant}
-              >
-                WYSTAW NAKAZ
-              </button>
-              <button className="btn-win95 text-xs" onClick={() => setShowWarrantModal(false)}>ANULUJ</button>
-            </div>
-          </div>
-        </MdtModal>
-      )}
-
-      {/* MODAL: Print */}
-      {showPrintModal && selectedRecord && (
-        <MdtModal title="Drukuj list gończy" onClose={() => setShowPrintModal(false)}>
-          <div className="flex flex-col gap-3">
-            <span className="font-mono text-xs" style={{ color: "var(--mdt-muted-text)" }}>
-              Generowanie listu gończego dla: <strong>{selectedRecord.last_name}, {selectedRecord.first_name}</strong>
-            </span>
-            <label className="font-mono text-xs font-bold" style={{ color: "var(--mdt-muted-text)" }}>POWÓD POSZUKIWANIA:</label>
-            <textarea
-              value={printReason}
-              onChange={(e) => setPrintReason(e.target.value)}
-              rows={4}
-              className="panel-inset w-full resize-none px-2 py-1 font-mono text-xs"
-              style={{ backgroundColor: "var(--mdt-input-bg)", color: "var(--mdt-content-text)", outline: "none" }}
-              placeholder="Wpisz powód poszukiwania osoby..."
-            />
-            <div className="flex justify-end gap-2 border-t border-[#999] pt-3">
-              <button
-                className="btn-win95 text-xs"
-                style={{ backgroundColor: "#3a6a3a", color: "#fff", borderColor: "#5a9a5a #1a3a1a #1a3a1a #5a9a5a" }}
-                onClick={onGeneratePoster}
-              >
-                GENERUJ PLAKAT
-              </button>
-              <button className="btn-win95 text-xs" onClick={() => setShowPrintModal(false)}>ANULUJ</button>
-            </div>
-          </div>
-        </MdtModal>
-      )}
-
-      {/* MODAL: Create Person */}
-      {showCreatePerson && (
-        <MdtModal title="Dodaj nową kartotekę" onClose={() => setShowCreatePerson(false)}>
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <label className="w-24 shrink-0 font-mono text-xs font-bold" style={{ color: "var(--mdt-muted-text)" }}>IMIĘ:</label>
-              <input
-                type="text"
-                value={newPersonForm.first_name}
-                onChange={(e) => setNewPersonForm((p) => ({ ...p, first_name: e.target.value }))}
-                className="panel-inset flex-1 px-2 py-1 font-mono text-xs"
-                style={{ backgroundColor: "var(--mdt-input-bg)", color: "var(--mdt-content-text)", outline: "none" }}
-                placeholder="Imię osoby"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <label className="w-24 shrink-0 font-mono text-xs font-bold" style={{ color: "var(--mdt-muted-text)" }}>NAZWISKO:</label>
-              <input
-                type="text"
-                value={newPersonForm.last_name}
-                onChange={(e) => setNewPersonForm((p) => ({ ...p, last_name: e.target.value }))}
-                className="panel-inset flex-1 px-2 py-1 font-mono text-xs"
-                style={{ backgroundColor: "var(--mdt-input-bg)", color: "var(--mdt-content-text)", outline: "none" }}
-                placeholder="Nazwisko osoby"
-              />
-            </div>
-            <div className="flex justify-end gap-2 border-t border-[#999] pt-3">
-              <button
-                className="btn-win95 text-xs"
-                style={{ backgroundColor: "#3a6a3a", color: "#fff", borderColor: "#5a9a5a #1a3a1a #1a3a1a #5a9a5a" }}
-                onClick={onCreatePerson}
-              >
-                UTWÓRZ KARTOTEKĘ
-              </button>
-              <button className="btn-win95 text-xs" onClick={() => setShowCreatePerson(false)}>ANULUJ</button>
-            </div>
-          </div>
-        </MdtModal>
-      )}
-
-      {/* MODAL: Delete Confirmation */}
-      {showDeleteConfirm && selectedRecord && (
-        <MdtModal title="Usuwanie kartoteki" onClose={() => setShowDeleteConfirm(false)}>
-          <div className="flex flex-col gap-3">
-            <div className="panel-inset p-3" style={{ backgroundColor: "#4a1a1a" }}>
-              <span className="font-mono text-xs text-red-400">
-                UWAGA: Ta operacja jest nieodwracalna. Wszystkie dane kartoteki, wpisy karne, notatki i nakazy zostaną trwale usunięte.
-              </span>
-            </div>
-            <span className="font-mono text-xs" style={{ color: "var(--mdt-muted-text)" }}>
-              Kartoteka: <strong>{selectedRecord.last_name}, {selectedRecord.first_name}</strong>
-            </span>
-            <label className="font-mono text-xs font-bold" style={{ color: "var(--mdt-muted-text)" }}>
-              Wpisz &quot;potwierdzam&quot; aby usunąć:
-            </label>
-            <input
-              type="text"
-              value={deleteConfirmText}
-              onChange={(e) => setDeleteConfirmText(e.target.value)}
-              className="panel-inset px-2 py-1 font-mono text-xs"
-              style={{ backgroundColor: "var(--mdt-input-bg)", color: "var(--mdt-content-text)", outline: "none" }}
-              placeholder="potwierdzam"
-            />
-            <div className="flex justify-end gap-2 border-t border-[#999] pt-3">
-              <button
-                className="btn-win95 text-xs"
-                style={{
-                  backgroundColor: deleteConfirmText === "potwierdzam" ? "#c41e1e" : "#555",
-                  color: "#fff",
-                  borderColor: deleteConfirmText === "potwierdzam" ? "#ff6b6b #8a1a1a #8a1a1a #ff6b6b" : "#777 #333 #333 #777",
-                }}
-                onClick={onDeleteKartoteka}
-                disabled={deleteConfirmText !== "potwierdzam"}
-              >
-                USUŃ KARTOTEKĘ
-              </button>
-              <button className="btn-win95 text-xs" onClick={() => setShowDeleteConfirm(false)}>ANULUJ</button>
-            </div>
-          </div>
-        </MdtModal>
-      )}
-
-      {/* MODAL: Edit Criminal Record */}
-      {showEditCriminalRecord && selectedRecord && (
-        <MdtModal title="Edytuj wpis karny" onClose={() => setShowEditCriminalRecord(false)}>
-          <div className="flex flex-col gap-3">
-            {[
-              { label: "DATA", key: "date", placeholder: "" },
-              { label: "PRZESTĘPSTWO", key: "offense", placeholder: "np. Kradzież pojazdu" },
-              { label: "KOD", key: "code", placeholder: "np. PC 487(d)(1)" },
-              { label: "FUNKCJONARIUSZ", key: "officer", placeholder: "np. Dep. Kowalski" },
-            ].map((f) => (
-              <div key={f.key} className="flex items-center gap-2">
-                <label className="w-32 shrink-0 font-mono text-xs font-bold" style={{ color: "var(--mdt-muted-text)" }}>
-                  {f.label}:
-                </label>
-                <input
-                  type="text"
-                  value={editCrForm[f.key as keyof typeof editCrForm]}
-                  onChange={(e) => setEditCrForm((p) => ({ ...p, [f.key]: e.target.value }))}
-                  className="panel-inset flex-1 px-2 py-1 font-mono text-xs"
-                  style={{ backgroundColor: "var(--mdt-input-bg)", color: "var(--mdt-content-text)", outline: "none" }}
-                  placeholder={f.placeholder}
-                />
-              </div>
-            ))}
-            <div className="flex items-center gap-2">
-              <label className="w-32 shrink-0 font-mono text-xs font-bold" style={{ color: "var(--mdt-muted-text)" }}>STATUS:</label>
-              <select
-                value={editCrForm.status}
-                onChange={(e) => setEditCrForm((p) => ({ ...p, status: e.target.value }))}
-                className="panel-inset flex-1 px-2 py-1 font-mono text-xs"
-                style={{ backgroundColor: "var(--mdt-input-bg)", color: "var(--mdt-content-text)", outline: "none", cursor: "pointer" }}
-              >
-                <option value="W TOKU">W TOKU</option>
-                <option value="SKAZANY">SKAZANY</option>
-                <option value="ODDALONO">ODDALONO</option>
-                <option value="OCZEKUJE">OCZEKUJE</option>
-              </select>
-            </div>
-            <div className="flex justify-end gap-2 border-t border-[#999] pt-3">
-              <button
-                className="btn-win95 text-xs"
-                style={{ backgroundColor: "#3a6a3a", color: "#fff", borderColor: "#5a9a5a #1a3a1a #1a3a1a #5a9a5a" }}
-                onClick={onSaveEditCriminalRecord}
-              >
-                ZAPISZ ZMIANY
-              </button>
-              <button className="btn-win95 text-xs" onClick={() => setShowEditCriminalRecord(false)}>ANULUJ</button>
-            </div>
-          </div>
-        </MdtModal>
-      )}
-
-      {/* MODAL: Edit Note */}
-      {showEditNote && selectedRecord && (
-        <MdtModal title="Edytuj notatkę" onClose={() => setShowEditNote(false)}>
-          <div className="flex flex-col gap-3">
-            <label className="font-mono text-xs font-bold" style={{ color: "var(--mdt-muted-text)" }}>TREŚĆ NOTATKI:</label>
-            <textarea
-              value={editNoteContent}
-              onChange={(e) => { if (e.target.value.length <= 500) setEditNoteContent(e.target.value) }}
-              maxLength={500}
-              rows={4}
-              className="panel-inset w-full resize-none px-2 py-1 font-mono text-xs"
-              style={{ backgroundColor: "var(--mdt-input-bg)", color: "var(--mdt-content-text)", outline: "none" }}
-              placeholder="Wpisz treść notatki..."
-            />
-            <div className="flex items-center justify-between">
-              <span className="font-mono text-[10px]" style={{ color: editNoteContent.length >= 450 ? "#c41e1e" : "var(--mdt-muted-text)" }}>
-                {editNoteContent.length}/500
-              </span>
-            </div>
-            <div className="flex justify-end gap-2 border-t border-[#999] pt-3">
-              <button
-                className="btn-win95 text-xs"
-                style={{ backgroundColor: "#3a6a3a", color: "#fff", borderColor: "#5a9a5a #1a3a1a #1a3a1a #5a9a5a" }}
-                onClick={onSaveEditNote}
-              >
-                ZAPISZ ZMIANY
-              </button>
-              <button className="btn-win95 text-xs" onClick={() => setShowEditNote(false)}>ANULUJ</button>
-            </div>
-          </div>
-        </MdtModal>
-      )}
-
-      {/* Wanted Poster */}
-      {showPoster && selectedRecord && (
-        <WantedPoster
-          record={selectedRecord}
-          mugshotUrl={selectedRecord.mugshot_url}
-          reason={printReason}
-          onClose={() => setShowPoster(false)}
-        />
-      )}
+      {/* All Modals */}
+      <MdtModals
+        activeModal={activeModal}
+        editData={modalEditData}
+        selectedRecord={selectedRecord}
+        officerName={officerName}
+        onClose={closeModal}
+        onAddCriminalRecord={onAddCriminalRecord}
+        onSaveEditCriminalRecord={onSaveEditCriminalRecord}
+        onAddNote={onAddNote}
+        onSaveEditNote={onSaveEditNote}
+        onIssueWarrant={onIssueWarrant}
+        onGeneratePoster={onGeneratePoster}
+        onCreatePerson={onCreatePerson}
+        onDeleteKartoteka={onDeleteKartoteka}
+      />
     </div>
   )
 }

@@ -33,15 +33,20 @@ export function useUserProfile(username: string) {
       setUser(userData);
 
       if (userData) {
-        // Load penalties
-        const { data: penaltiesData, error: penaltiesError } = await getUserPenalties(userData.id);
-        if (penaltiesError) throw penaltiesError;
+        // Load penalties + notes in parallel
+        const [penaltiesRes, notesRes] = await Promise.all([
+          getUserPenalties(userData.id),
+          getUserNotes(userData.id),
+        ]);
 
-        // Map created_by_user to admin_username and fix column names for display
-        const mappedPenalties = (penaltiesData || []).map((p: any) => ({
+        if (penaltiesRes.error) throw penaltiesRes.error;
+        if (notesRes.error) throw notesRes.error;
+
+        // Map penalties
+        const mappedPenalties = (penaltiesRes.data || []).map((p: any) => ({
           ...p,
-          penalty_type: p.type,        // Map 'type' to 'penalty_type' for UI
-          reason: p.description,       // Map 'description' to 'reason' for UI
+          penalty_type: p.type,
+          reason: p.description,
           admin_username: p.created_by_user?.username || 'Unknown',
         }));
         setPenalties(mappedPenalties);
@@ -57,18 +62,14 @@ export function useUserProfile(username: string) {
           return false;
         });
         setActivePenalties(active);
+
+        // Map notes
+        const mappedNotes = (notesRes.data || []).map((n: any) => ({
+          ...n,
+          admin_username: n.created_by_user?.username || 'Unknown',
+        }));
+        setNotes(mappedNotes);
       }
-
-      // Load notes
-      const { data: notesData, error: notesError } = await getUserNotes(userData.id);
-      if (notesError) throw notesError;
-
-      // Map created_by_user to admin_username for display
-      const mappedNotes = (notesData || []).map((n: any) => ({
-        ...n,
-        admin_username: n.created_by_user?.username || 'Unknown',
-      }));
-      setNotes(mappedNotes);
     } catch (error) {
       console.error('Error loading user data:', error);
       alert('Błąd podczas ładowania danych użytkownika.');

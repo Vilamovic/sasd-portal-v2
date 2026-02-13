@@ -1,7 +1,8 @@
 import { supabase } from '@/src/supabaseClient';
+import { dbQuery } from './queryWrapper';
 import type { PracticalExamChecklist, LegacyChecklist } from '@/src/components/zgloszenia/types';
 
-export async function createPracticalExamResult(data: {
+export function createPracticalExamResult(data: {
   slot_id?: string | null;
   exam_type: string;
   examinee_id: string;
@@ -12,19 +13,14 @@ export async function createPracticalExamResult(data: {
   checklist: PracticalExamChecklist | LegacyChecklist;
   notes?: string;
 }) {
-  try {
-    const { data: result, error } = await supabase
+  return dbQuery(
+    () => supabase
       .from('practical_exam_results')
       .insert(data)
       .select()
-      .single();
-
-    if (error) throw error;
-    return { data: result, error: null };
-  } catch (error) {
-    console.error('createPracticalExamResult error:', error);
-    return { data: null, error };
-  }
+      .single(),
+    'createPracticalExamResult'
+  );
 }
 
 export async function getAllPracticalExamResults(filters?: {
@@ -32,42 +28,34 @@ export async function getAllPracticalExamResults(filters?: {
   examinee_id?: string;
   include_archived?: boolean;
 }) {
-  try {
-    let query = supabase
-      .from('practical_exam_results')
-      .select(`
-        *,
-        examinee:users!practical_exam_results_examinee_id_fkey(username, mta_nick),
-        examiner:users!practical_exam_results_examiner_id_fkey(username, mta_nick),
-        archived_by_user:users!practical_exam_results_archived_by_fkey(username, mta_nick)
-      `)
-      .order('created_at', { ascending: false });
+  let query = supabase
+    .from('practical_exam_results')
+    .select(`
+      *,
+      examinee:users!practical_exam_results_examinee_id_fkey(username, mta_nick),
+      examiner:users!practical_exam_results_examiner_id_fkey(username, mta_nick),
+      archived_by_user:users!practical_exam_results_archived_by_fkey(username, mta_nick)
+    `)
+    .order('created_at', { ascending: false });
 
-    // Exclude archived by default
-    if (!filters?.include_archived) {
-      query = query.eq('is_archived', false);
-    }
-
-    if (filters?.exam_type) {
-      query = query.eq('exam_type', filters.exam_type);
-    }
-    if (filters?.examinee_id) {
-      query = query.eq('examinee_id', filters.examinee_id);
-    }
-
-    const { data, error } = await query;
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('getAllPracticalExamResults error:', error);
-    return { data: null, error };
+  // Exclude archived by default
+  if (!filters?.include_archived) {
+    query = query.eq('is_archived', false);
   }
+
+  if (filters?.exam_type) {
+    query = query.eq('exam_type', filters.exam_type);
+  }
+  if (filters?.examinee_id) {
+    query = query.eq('examinee_id', filters.examinee_id);
+  }
+
+  return dbQuery(() => query, 'getAllPracticalExamResults');
 }
 
-export async function getPracticalExamResultById(id: string) {
-  try {
-    const { data, error } = await supabase
+export function getPracticalExamResultById(id: string) {
+  return dbQuery(
+    () => supabase
       .from('practical_exam_results')
       .select(`
         *,
@@ -76,22 +64,17 @@ export async function getPracticalExamResultById(id: string) {
         archived_by_user:users!practical_exam_results_archived_by_fkey(username, mta_nick)
       `)
       .eq('id', id)
-      .single();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('getPracticalExamResultById error:', error);
-    return { data: null, error };
-  }
+      .single(),
+    'getPracticalExamResultById'
+  );
 }
 
 /**
  * Archiwizuje wynik egzaminu praktycznego
  */
-export async function archiveExamResult(id: string, archivedBy: string) {
-  try {
-    const { data, error } = await supabase
+export function archiveExamResult(id: string, archivedBy: string) {
+  return dbQuery(
+    () => supabase
       .from('practical_exam_results')
       .update({
         is_archived: true,
@@ -100,14 +83,9 @@ export async function archiveExamResult(id: string, archivedBy: string) {
       })
       .eq('id', id)
       .select()
-      .single();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('archiveExamResult error:', error);
-    return { data: null, error };
-  }
+      .single(),
+    'archiveExamResult'
+  );
 }
 
 /**
@@ -117,31 +95,23 @@ export async function getArchivedExamResults(filters?: {
   exam_type?: string;
   examinee_id?: string;
 }) {
-  try {
-    let query = supabase
-      .from('practical_exam_results')
-      .select(`
-        *,
-        examinee:users!practical_exam_results_examinee_id_fkey(username, mta_nick),
-        examiner:users!practical_exam_results_examiner_id_fkey(username, mta_nick),
-        archived_by_user:users!practical_exam_results_archived_by_fkey(username, mta_nick)
-      `)
-      .eq('is_archived', true)
-      .order('archived_at', { ascending: false });
+  let query = supabase
+    .from('practical_exam_results')
+    .select(`
+      *,
+      examinee:users!practical_exam_results_examinee_id_fkey(username, mta_nick),
+      examiner:users!practical_exam_results_examiner_id_fkey(username, mta_nick),
+      archived_by_user:users!practical_exam_results_archived_by_fkey(username, mta_nick)
+    `)
+    .eq('is_archived', true)
+    .order('archived_at', { ascending: false });
 
-    if (filters?.exam_type) {
-      query = query.eq('exam_type', filters.exam_type);
-    }
-    if (filters?.examinee_id) {
-      query = query.eq('examinee_id', filters.examinee_id);
-    }
-
-    const { data, error } = await query;
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('getArchivedExamResults error:', error);
-    return { data: null, error };
+  if (filters?.exam_type) {
+    query = query.eq('exam_type', filters.exam_type);
   }
+  if (filters?.examinee_id) {
+    query = query.eq('examinee_id', filters.examinee_id);
+  }
+
+  return dbQuery(() => query, 'getArchivedExamResults');
 }

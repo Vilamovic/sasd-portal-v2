@@ -1,4 +1,5 @@
 import { supabase } from '@/src/supabaseClient';
+import { dbQuery, dbMutate } from './queryWrapper';
 
 // ============================================
 // EXAMS - Types, Questions, Results
@@ -7,103 +8,78 @@ import { supabase } from '@/src/supabaseClient';
 /**
  * Pobiera wszystkie typy egzaminów
  */
-export async function getAllExamTypes() {
-  try {
-    const { data, error } = await supabase
+export function getAllExamTypes() {
+  return dbQuery(
+    () => supabase
       .from('exam_types')
       .select('*')
-      .order('id', { ascending: true });
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('getAllExamTypes error:', error);
-    return { data: null, error };
-  }
+      .order('id', { ascending: true }),
+    'getAllExamTypes'
+  );
 }
 
 /**
  * Pobiera pytania dla danego typu egzaminu
  */
-export async function getQuestionsByExamType(examTypeId: number) {
-  try {
-    const { data, error } = await supabase
+export function getQuestionsByExamType(examTypeId: number) {
+  return dbQuery(
+    () => supabase
       .from('exam_questions')
       .select('*')
       .eq('exam_type_id', examTypeId)
-      .order('id', { ascending: true });
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('getQuestionsByExamType error:', error);
-    return { data: null, error };
-  }
+      .order('id', { ascending: true }),
+    'getQuestionsByExamType'
+  );
 }
 
 /**
  * Dodaje nowe pytanie egzaminacyjne
  */
-export async function addExamQuestion(questionData: any) {
-  try {
-    const { data, error } = await supabase
+export function addExamQuestion(questionData: any) {
+  return dbQuery(
+    () => supabase
       .from('exam_questions')
       .insert(questionData)
       .select()
-      .single();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('addExamQuestion error:', error);
-    return { data: null, error };
-  }
+      .single(),
+    'addExamQuestion'
+  );
 }
 
 /**
  * Aktualizuje pytanie egzaminacyjne
  */
-export async function updateExamQuestion(questionId: number, questionData: any) {
-  try {
-    const { data, error } = await supabase
+export function updateExamQuestion(questionId: number, questionData: any) {
+  return dbQuery(
+    () => supabase
       .from('exam_questions')
       .update(questionData)
       .eq('id', questionId)
       .select()
-      .single();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('updateExamQuestion error:', error);
-    return { data: null, error };
-  }
+      .single(),
+    'updateExamQuestion'
+  );
 }
 
 /**
  * Usuwa pytanie egzaminacyjne
  */
-export async function deleteExamQuestion(questionId: number) {
-  try {
-    const { error } = await supabase
+export function deleteExamQuestion(questionId: number) {
+  return dbMutate(
+    () => supabase
       .from('exam_questions')
       .delete()
-      .eq('id', questionId);
-
-    if (error) throw error;
-    return { error: null };
-  } catch (error) {
-    console.error('deleteExamQuestion error:', error);
-    return { error };
-  }
+      .eq('id', questionId),
+    'deleteExamQuestion'
+  );
 }
 
 /**
  * Pobiera niezarchiwizowane wyniki egzaminów
  */
-export async function getAllExamResultsNonArchived() {
-  try {
-    const { data, error } = await supabase
+export function getAllExamResultsNonArchived() {
+  return dbQuery(
+    () => supabase
       .from('exam_results')
       .select(`
         *,
@@ -111,22 +87,17 @@ export async function getAllExamResultsNonArchived() {
         users (username, mta_nick, badge)
       `)
       .eq('is_archived', false)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('getAllExamResultsNonArchived error:', error);
-    return { data: null, error };
-  }
+      .order('created_at', { ascending: false }),
+    'getAllExamResultsNonArchived'
+  );
 }
 
 /**
  * Pobiera zarchiwizowane wyniki egzaminów
  */
-export async function getAllExamResultsArchived() {
-  try {
-    const { data, error } = await supabase
+export function getAllExamResultsArchived() {
+  return dbQuery(
+    () => supabase
       .from('exam_results')
       .select(`
         *,
@@ -134,91 +105,66 @@ export async function getAllExamResultsArchived() {
         users (username, mta_nick, badge)
       `)
       .eq('is_archived', true)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('getAllExamResultsArchived error:', error);
-    return { data: null, error };
-  }
+      .order('created_at', { ascending: false }),
+    'getAllExamResultsArchived'
+  );
 }
 
 /**
  * Zapisuje wynik egzaminu
  */
-export async function saveExamResult(resultData: any) {
-  try {
-    const { data, error } = await supabase
+export function saveExamResult(resultData: any) {
+  return dbQuery(
+    () => supabase
       .from('exam_results')
       .insert({
         ...resultData,
         is_archived: false,
       })
       .select()
-      .single();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('saveExamResult error:', error);
-    return { data: null, error };
-  }
+      .single(),
+    'saveExamResult'
+  );
 }
 
 /**
  * Archiwizuje wynik egzaminu
  */
-export async function archiveExamResult(examId: string) {
-  try {
-    const { data, error } = await supabase
+export function archiveExamResult(examId: string) {
+  return dbQuery(
+    () => supabase
       .from('exam_results')
       .update({ is_archived: true })
       .eq('exam_id', examId)
       .select()
-      .single();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('archiveExamResult error:', error);
-    return { data: null, error };
-  }
+      .single(),
+    'archiveExamResult'
+  );
 }
 
 /**
  * Archiwizuje wiele wyników egzaminów naraz (batch)
  */
-export async function archiveBatchExamResults(examIds: string[]) {
-  try {
-    const { data, error } = await supabase
+export function archiveBatchExamResults(examIds: string[]) {
+  return dbQuery(
+    () => supabase
       .from('exam_results')
       .update({ is_archived: true })
       .in('exam_id', examIds)
-      .select();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('archiveBatchExamResults error:', error);
-    return { data: null, error };
-  }
+      .select(),
+    'archiveBatchExamResults'
+  );
 }
 
 /**
  * Usuwa wynik egzaminu (trwale)
  */
-export async function deleteExamResult(examId: string) {
-  try {
-    const { error } = await supabase
+export function deleteExamResult(examId: string) {
+  return dbMutate(
+    () => supabase
       .from('exam_results')
       .delete()
-      .eq('exam_id', examId);
-
-    if (error) throw error;
-    return { error: null };
-  } catch (error) {
-    console.error('deleteExamResult error:', error);
-    return { error };
-  }
+      .eq('exam_id', examId),
+    'deleteExamResult'
+  );
 }

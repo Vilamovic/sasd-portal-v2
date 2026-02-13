@@ -1,4 +1,5 @@
 import { supabase } from '@/src/supabaseClient';
+import { dbQuery, dbMutate } from './queryWrapper';
 
 // ============================================
 // USERS - Database Operations
@@ -7,95 +8,52 @@ import { supabase } from '@/src/supabaseClient';
 /**
  * Pobiera użytkownika z bazy po ID
  */
-export async function getUserById(userId: string) {
-  try {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('getUserById error:', error);
-    return { data: null, error };
-  }
+export function getUserById(userId: string) {
+  return dbQuery(
+    () => supabase.from('users').select('*').eq('id', userId).single(),
+    'getUserById'
+  );
 }
 
 /**
  * Pobiera użytkownika z bazy po username
  */
-export async function getUserByUsername(username: string) {
-  try {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('username', username)
-      .single();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('getUserByUsername error:', error);
-    return { data: null, error };
-  }
+export function getUserByUsername(username: string) {
+  return dbQuery(
+    () => supabase.from('users').select('*').eq('username', username).single(),
+    'getUserByUsername'
+  );
 }
 
 /**
  * Upsert użytkownika do bazy
  */
-export async function upsertUser(userData: any) {
-  try {
-    const { data, error } = await supabase
-      .from('users')
-      .upsert(userData, { onConflict: 'id' })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('upsertUser error:', error);
-    return { data: null, error };
-  }
+export function upsertUser(userData: any) {
+  return dbQuery(
+    () => supabase.from('users').upsert(userData, { onConflict: 'id' }).select().single(),
+    'upsertUser'
+  );
 }
 
 /**
  * Usuwa użytkownika z bazy
  */
-export async function deleteUser(userId: string) {
-  try {
-    const { error } = await supabase
-      .from('users')
-      .delete()
-      .eq('id', userId);
-
-    if (error) throw error;
-    return { error: null };
-  } catch (error) {
-    console.error('deleteUser error:', error);
-    return { error };
-  }
+export function deleteUser(userId: string) {
+  return dbMutate(
+    () => supabase.from('users').delete().eq('id', userId),
+    'deleteUser'
+  );
 }
 
 /**
  * Ustawia force logout timestamp dla pojedynczego użytkownika
  */
-export async function setForceLogoutForUser(userId: string) {
-  try {
-    const timestamp = new Date().toISOString();
-    const { error } = await supabase
-      .from('users')
-      .update({ force_logout_after: timestamp })
-      .eq('id', userId);
-
-    if (error) throw error;
-    return { error: null };
-  } catch (error) {
-    console.error('setForceLogoutForUser error:', error);
-    return { error };
-  }
+export function setForceLogoutForUser(userId: string) {
+  const timestamp = new Date().toISOString();
+  return dbMutate(
+    () => supabase.from('users').update({ force_logout_after: timestamp }).eq('id', userId),
+    'setForceLogoutForUser'
+  );
 }
 
 /**
@@ -103,42 +61,27 @@ export async function setForceLogoutForUser(userId: string) {
  * @param {string} scope - 'all' (dev only) | 'user' (admin can kick trainee/deputy)
  */
 export async function setForceLogoutTimestamp(scope: 'all' | 'user') {
-  try {
-    const timestamp = new Date().toISOString();
-    let query = supabase
-      .from('users')
-      .update({ force_logout_after: timestamp });
+  const timestamp = new Date().toISOString();
+  let query = supabase
+    .from('users')
+    .update({ force_logout_after: timestamp });
 
-    if (scope === 'user') {
-      query = query.in('role', ['trainee', 'deputy']);
-    }
-    // scope === 'all' → brak filtra (wszyscy oprócz dev - handled by RLS)
-
-    const { error } = await query;
-    if (error) throw error;
-    return { error: null };
-  } catch (error) {
-    console.error('setForceLogoutTimestamp error:', error);
-    return { error };
+  if (scope === 'user') {
+    query = query.in('role', ['trainee', 'deputy']);
   }
+  // scope === 'all' → brak filtra (wszyscy oprócz dev - handled by RLS)
+
+  return dbMutate(() => query, 'setForceLogoutTimestamp');
 }
 
 /**
  * Pobiera wszystkich użytkowników z pełnymi danymi (Kartoteka)
  */
-export async function getAllUsersWithDetails() {
-  try {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('getAllUsersWithDetails error:', error);
-    return { data: null, error };
-  }
+export function getAllUsersWithDetails() {
+  return dbQuery(
+    () => supabase.from('users').select('*').order('created_at', { ascending: false }),
+    'getAllUsersWithDetails'
+  );
 }
 
 /**
@@ -152,100 +95,51 @@ export async function getUserWithDetails(userId: string) {
 /**
  * Aktualizuje badge (stopień) użytkownika
  */
-export async function updateUserBadge(userId: string | null, badge: string | null) {
-  try {
-    const { data, error } = await supabase
-      .from('users')
-      .update({ badge })
-      .eq('id', userId)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('updateUserBadge error:', error);
-    return { data: null, error };
-  }
+export function updateUserBadge(userId: string | null, badge: string | null) {
+  return dbQuery(
+    () => supabase.from('users').update({ badge }).eq('id', userId).select().single(),
+    'updateUserBadge'
+  );
 }
 
 /**
  * Aktualizuje dywizję użytkownika
  */
-export async function updateUserDivision(userId: string | null, division: string | null) {
-  try {
-    const { data, error } = await supabase
-      .from('users')
-      .update({ division })
-      .eq('id', userId)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('updateUserDivision error:', error);
-    return { data: null, error };
-  }
+export function updateUserDivision(userId: string | null, division: string | null) {
+  return dbQuery(
+    () => supabase.from('users').update({ division }).eq('id', userId).select().single(),
+    'updateUserDivision'
+  );
 }
 
 /**
  * Aktualizuje uprawnienia użytkownika
  */
-export async function updateUserPermissions(userId: string | null, permissions: string[]) {
-  try {
-    const { data, error} = await supabase
-      .from('users')
-      .update({ permissions })
-      .eq('id', userId)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('updateUserPermissions error:', error);
-    return { data: null, error };
-  }
+export function updateUserPermissions(userId: string | null, permissions: string[]) {
+  return dbQuery(
+    () => supabase.from('users').update({ permissions }).eq('id', userId).select().single(),
+    'updateUserPermissions'
+  );
 }
 
 /**
  * Aktualizuje status Commander użytkownika
  */
-export async function updateIsCommander(userId: string | null, isCommander: boolean) {
-  try {
-    const { data, error } = await supabase
-      .from('users')
-      .update({ is_commander: isCommander })
-      .eq('id', userId)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('updateIsCommander error:', error);
-    return { data: null, error };
-  }
+export function updateIsCommander(userId: string | null, isCommander: boolean) {
+  return dbQuery(
+    () => supabase.from('users').update({ is_commander: isCommander }).eq('id', userId).select().single(),
+    'updateIsCommander'
+  );
 }
 
-export async function updateIsSwatOperator(userId: string, isSwatOperator: boolean) {
-  try {
-    const { data, error } = await supabase
-      .from('users')
-      .update({ is_swat_operator: isSwatOperator })
-      .eq('id', userId)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return { data, error: null };
-  } catch (error) {
-    console.error('updateIsSwatOperator error:', error);
-    return { data: null, error };
-  }
+export function updateIsSwatOperator(userId: string, isSwatOperator: boolean) {
+  return dbQuery(
+    () => supabase.from('users').update({ is_swat_operator: isSwatOperator }).eq('id', userId).select().single(),
+    'updateIsSwatOperator'
+  );
 }
 
+// Complex multi-query function (removes existing commander first) — kept with manual try-catch
 export async function updateIsSwatCommander(userId: string, isSwatCommander: boolean) {
   try {
     // If setting to true, first remove from any existing SWAT Commander (max 1)
@@ -266,7 +160,7 @@ export async function updateIsSwatCommander(userId: string, isSwatCommander: boo
     if (error) throw error;
     return { data, error: null };
   } catch (error) {
-    console.error('updateIsSwatCommander error:', error);
+    console.error('updateIsSwatCommander:', error);
     return { data: null, error };
   }
 }

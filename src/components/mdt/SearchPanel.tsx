@@ -36,7 +36,7 @@ export function SearchPanel({ onSelectRecord, onSelectBolo, onSwitchTab, onSearc
     const results: SearchSuggestion[] = []
 
     if (recordsRes.data) {
-      recordsRes.data.forEach((r) => {
+      recordsRes.data.forEach((r: any) => {
         results.push({
           type: "person",
           id: r.id,
@@ -47,7 +47,7 @@ export function SearchPanel({ onSelectRecord, onSelectBolo, onSwitchTab, onSearc
     }
 
     if (boloRes.data) {
-      boloRes.data.forEach((v) => {
+      boloRes.data.forEach((v: any) => {
         results.push({
           type: "vehicle",
           id: v.id,
