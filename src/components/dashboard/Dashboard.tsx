@@ -1,15 +1,38 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useTranslation } from '@/src/contexts/TranslationContext';
-import { BookOpen, FileText, Users, CheckCircle, Shield, Briefcase, UserCog, ClipboardList } from 'lucide-react';
+import { BookOpen, FileText, Users, CheckCircle, Shield, Briefcase, UserCog, ClipboardList, Tag } from 'lucide-react';
+import { supabase } from '@/src/supabaseClient';
 import Navbar from './Navbar';
 import MtaNickModal from './MtaNickModal';
 
 export default function Dashboard() {
   const { user, role, isDev, isAdmin, showMtaNickModal, handleMtaNickComplete } = useAuth();
   const { t } = useTranslation();
+  const [docCount, setDocCount] = useState<number | null>(null);
+  const [examTypeCount, setExamTypeCount] = useState<number | null>(null);
+  const [userCount, setUserCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    async function loadStats() {
+      const [mat, divMat, exams, users] = await Promise.all([
+        supabase.from('materials').select('id', { count: 'exact', head: true }),
+        supabase.from('division_materials').select('id', { count: 'exact', head: true }),
+        supabase.from('exam_questions').select('type'),
+        supabase.from('users').select('id', { count: 'exact', head: true }),
+      ]);
+      setDocCount((mat.count || 0) + (divMat.count || 0));
+      if (exams.data) {
+        const types = new Set(exams.data.map((e: { type: string }) => e.type));
+        setExamTypeCount(types.size);
+      }
+      setUserCount(users.count || 0);
+    }
+    loadStats();
+  }, []);
 
   const tiles = [
     {
@@ -201,10 +224,10 @@ export default function Dashboard() {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-1">
               {[
-                { label: 'DOKUMENTY', value: '50+', icon: FileText },
-                { label: 'TYPY EGZAMINÓW', value: '7', icon: CheckCircle },
-                { label: 'UŻYTKOWNICY', value: '120+', icon: Users },
-                { label: 'UPTIME', value: '99.9%', icon: Shield },
+                { label: 'DOKUMENTY', value: docCount !== null ? String(docCount) : '...', icon: FileText },
+                { label: 'TYPY EGZAMINÓW', value: examTypeCount !== null ? String(examTypeCount) : '...', icon: CheckCircle },
+                { label: 'UŻYTKOWNICY', value: userCount !== null ? String(userCount) : '...', icon: Users },
+                { label: 'WERSJA', value: 'v1.0', icon: Tag },
               ].map((stat, index) => {
                 const StatIcon = stat.icon;
                 return (
@@ -229,7 +252,7 @@ export default function Dashboard() {
         <div className="fixed bottom-0 left-0 right-0 flex items-center gap-2 px-4 py-1.5 z-50" style={{ backgroundColor: 'var(--mdt-header)' }}>
           <div className="pulse-dot h-2 w-2 rounded-full bg-green-500" />
           <span className="font-mono text-xs" style={{ color: '#aaa' }}>POŁĄCZONO Z BAZĄ SASD</span>
-          <span className="ml-auto font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>SASD PORTAL v2.0</span>
+          <span className="ml-auto font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>SASD PORTAL v1.0</span>
         </div>
       </div>
     </>

@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
 import Navbar from '@/src/components/dashboard/Navbar';
-import { ChevronLeft, BookOpen, Monitor, FileText, ArrowRight, Users, UserSearch, ClipboardList, Zap } from 'lucide-react';
+import { ChevronLeft, BookOpen, Monitor, FileText, ArrowRight, Users, ClipboardList, Zap } from 'lucide-react';
 
 /**
  * Division Categories Page - shows category tiles for a division
@@ -82,13 +82,6 @@ export default function DivisionCategoriesPage() {
             description: 'Baza danych gangów i organizacji przestępczych.',
             icon: Users,
             href: `/divisions/GU/gangs`,
-          },
-          {
-            id: 'gang-members',
-            name: 'Członkowie Gangów',
-            description: 'Kartoteki członków gangów — raporty śledcze i autopsje.',
-            icon: UserSearch,
-            href: `/divisions/GU/gang-members`,
           },
         ]
       : []),

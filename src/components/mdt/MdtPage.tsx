@@ -388,7 +388,11 @@ export default function MdtPage() {
               />
             )}
 
-            {activeTab === "gang-kartoteki" && <GangMembersPage embedded />}
+            {activeTab === "gang-kartoteki" && (
+              <div className="flex-1 min-w-0 overflow-hidden">
+                <GangMembersPage embedded />
+              </div>
+            )}
 
             {activeTab === "cctv" && <MonitoringPanel />}
             {activeTab === "roster" && <UnitsPanel />}

@@ -74,6 +74,15 @@ export function SearchPanel({ onSelectRecord, onSelectBolo, onSwitchTab, onSearc
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       setShowDropdown(false)
+      const query = searchQuery.trim()
+      if (!query) {
+        // Reset: wróć do kartoteki i pokaż wszystkie
+        lastPersonCount.current = 0
+        lastVehicleCount.current = 0
+        onSwitchTab("kartoteka")
+        onSearch("")
+        return
+      }
       if (lastPersonCount.current === 0 && lastVehicleCount.current > 0) {
         onSwitchTab("bolo")
       } else {

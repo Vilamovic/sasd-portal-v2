@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
-import { Shield, BookOpen, GraduationCap, Users, Bell } from 'lucide-react';
+import { supabase } from '@/src/supabaseClient';
+import { Shield, Calendar, Users } from 'lucide-react';
 
 export default function Login() {
   const { signInWithDiscord } = useAuth();
@@ -18,11 +19,17 @@ export default function Login() {
     }
   };
 
+  const [userCount, setUserCount] = useState<string>('...');
+
+  useEffect(() => {
+    supabase.from('users').select('id', { count: 'exact', head: true }).then(({ count }) => {
+      setUserCount(count ? String(count) : '0');
+    });
+  }, []);
+
   const features = [
-    { icon: BookOpen, label: 'MATERIAŁY SZKOLENIOWE', stat: '50+' },
-    { icon: GraduationCap, label: 'SYSTEM EGZAMINACYJNY', stat: '7 TYPÓW' },
-    { icon: Users, label: 'PANEL ADMINISTRACYJNY', stat: '100%' },
-    { icon: Bell, label: 'INTEGRACJA DISCORD', stat: '24/7' },
+    { icon: Calendar, label: 'OSTATNIA AKTUALIZACJA', stat: '13.02.2026' },
+    { icon: Users, label: 'LICZNIK ZASTĘPCÓW', stat: userCount },
   ];
 
   return (
@@ -60,19 +67,11 @@ export default function Login() {
             <div className="space-y-2">
               <div className="flex gap-2">
                 <span className="w-28 shrink-0 font-mono text-sm font-bold" style={{ color: 'var(--mdt-muted-text)' }}>SYSTEM:</span>
-                <span className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>SASD Training Portal v2.0</span>
-              </div>
-              <div className="flex gap-2">
-                <span className="w-28 shrink-0 font-mono text-sm font-bold" style={{ color: 'var(--mdt-muted-text)' }}>WYMAGANIA:</span>
-                <span className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>Konto Discord</span>
+                <span className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>SASD Training Portal v1.0</span>
               </div>
               <div className="flex gap-2">
                 <span className="w-28 shrink-0 font-mono text-sm font-bold" style={{ color: 'var(--mdt-muted-text)' }}>PROTOKÓŁ:</span>
                 <span className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>OAuth 2.0 / SSL</span>
-              </div>
-              <div className="flex gap-2">
-                <span className="w-28 shrink-0 font-mono text-sm font-bold" style={{ color: 'var(--mdt-muted-text)' }}>BAZA DANYCH:</span>
-                <span className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>Supabase (PostgreSQL)</span>
               </div>
             </div>
           </div>
@@ -80,7 +79,7 @@ export default function Login() {
           {/* Features list */}
           <div className="mb-6">
             <div className="px-3 py-1.5 mb-3" style={{ backgroundColor: 'var(--mdt-header)' }}>
-              <span className="font-[family-name:var(--font-vt323)] text-sm tracking-wider uppercase" style={{ color: 'var(--mdt-header-text)' }}>FUNKCJE SYSTEMU</span>
+              <span className="font-[family-name:var(--font-vt323)] text-sm tracking-wider uppercase" style={{ color: 'var(--mdt-header-text)' }}>INFORMACJE:</span>
             </div>
             <div className="space-y-1">
               {features.map((feature, index) => {
@@ -129,7 +128,7 @@ export default function Login() {
           <div className="pulse-dot h-2 w-2 rounded-full bg-green-500" />
           <span className="font-mono text-xs" style={{ color: '#aaa' }}>SERWER AUTORYZACJI: ONLINE</span>
           <span className="ml-auto font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>
-            SASD PORTAL v2.0
+            SASD PORTAL v1.0
           </span>
         </div>
       </div>

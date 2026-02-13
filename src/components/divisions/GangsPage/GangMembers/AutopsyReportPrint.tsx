@@ -201,9 +201,9 @@ export default function AutopsyReportPrint({ member, report, onClose }: AutopsyR
         <body>
           <div class="report">
             <div class="header">
-              <h1>OPERATION STREETS SAFE<br/>BUREAU AUTOPSY REPORT</h1>
+              <h1>OPERATION SAFE STREETS<br/>BUREAU AUTOPSY REPORT</h1>
               <div class="dept">
-                SAN ANDREAS<br/>SHERIFF'S DEPARTMENT<br/>OPERATION STREETS SAFE BUREAU
+                SAN ANDREAS<br/>SHERIFF'S DEPARTMENT<br/>OPERATION SAFE STREETS BUREAU
               </div>
             </div>
             <div class="meta">

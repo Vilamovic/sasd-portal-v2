@@ -163,10 +163,10 @@ export default function InvestigationReportPrint({ member, report, onClose }: In
             <div class="header">
               <div>
                 <h1>RAPORT ŚLEDCZY</h1>
-                <div style="font-size:11px;letter-spacing:2px;opacity:0.7;margin-top:2px">OPERATION STREETS SAFE BUREAU</div>
+                <div style="font-size:11px;letter-spacing:2px;opacity:0.7;margin-top:2px">OPERATION SAFE STREETS BUREAU</div>
               </div>
               <div class="dept">
-                SAN ANDREAS<br/>SHERIFF'S DEPARTMENT<br/>OPERATION STREETS SAFE BUREAU
+                SAN ANDREAS<br/>SHERIFF'S DEPARTMENT<br/>OPERATION SAFE STREETS BUREAU
               </div>
             </div>
             <div class="subheader">
