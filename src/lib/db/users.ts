@@ -40,8 +40,15 @@ export function upsertUser(userData: any) {
  */
 export async function deleteUser(userId: string) {
   try {
-    // Clean up FK references that block user deletion
+    // Clean up all FK references that block user deletion
+    await supabase.from('submissions').delete().eq('user_id', userId);
+    await supabase.from('submissions').update({ reviewed_by: null }).eq('reviewed_by', userId);
     await supabase.from('exam_access_tokens').delete().eq('created_by', userId);
+    await supabase.from('exam_slots').update({ booked_by: null }).eq('booked_by', userId);
+    await supabase.from('exam_slots').delete().eq('created_by', userId);
+    await supabase.from('practical_exam_results').delete().eq('examinee_id', userId);
+    await supabase.from('practical_exam_results').update({ examiner_id: null }).eq('examiner_id', userId);
+    await supabase.from('division_reports').delete().eq('author_id', userId);
     await supabase.from('user_penalties').delete().eq('user_id', userId);
     await supabase.from('user_notes').delete().eq('user_id', userId);
 
