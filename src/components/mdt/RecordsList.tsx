@@ -45,6 +45,7 @@ export function RecordsList({ records, loading, onSelectRecord, onCreateNew }: R
                 <th className="px-3 py-2 text-left font-[family-name:var(--font-vt323)] text-sm tracking-wider text-[#ccc]">NAZWISKO</th>
                 <th className="px-3 py-2 text-left font-[family-name:var(--font-vt323)] text-sm tracking-wider text-[#ccc]">IMIĘ</th>
                 <th className="px-3 py-2 text-left font-[family-name:var(--font-vt323)] text-sm tracking-wider text-[#ccc]">NICK</th>
+                <th className="px-3 py-2 text-left font-[family-name:var(--font-vt323)] text-sm tracking-wider text-[#ccc]">GANG</th>
                 <th className="px-3 py-2 text-left font-[family-name:var(--font-vt323)] text-sm tracking-wider text-[#ccc]">STATUS</th>
                 <th className="px-3 py-2 text-left font-[family-name:var(--font-vt323)] text-sm tracking-wider text-[#ccc]">WYROKI</th>
               </tr>
@@ -63,6 +64,7 @@ export function RecordsList({ records, loading, onSelectRecord, onCreateNew }: R
                   <td className="px-3 py-2 font-mono text-sm font-bold">{r.last_name}</td>
                   <td className="px-3 py-2 font-mono text-sm">{r.first_name}</td>
                   <td className="px-3 py-2 font-mono text-sm">{r.ssn || "—"}</td>
+                  <td className="px-3 py-2 font-mono text-sm">{r.gang_affiliation || "—"}</td>
                   <td className="px-3 py-2 font-mono text-sm">
                     <span style={{
                       color: r.wanted_status === "POSZUKIWANY" ? "#c41e1e" : r.wanted_status === "BRAK" ? "#1a6a1a" : "var(--mdt-content-text)",
@@ -76,7 +78,7 @@ export function RecordsList({ records, loading, onSelectRecord, onCreateNew }: R
               ))}
               {records.length === 0 && (
                 <tr style={{ backgroundColor: "var(--mdt-row-even)" }}>
-                  <td colSpan={5} className="px-3 py-8 text-center font-mono text-xs" style={{ color: "#888" }}>
+                  <td colSpan={6} className="px-3 py-8 text-center font-mono text-xs" style={{ color: "#888" }}>
                     BRAK REKORDÓW W BAZIE DANYCH
                   </td>
                 </tr>

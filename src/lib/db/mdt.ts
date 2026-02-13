@@ -46,17 +46,18 @@ export async function searchMdtRecords(query: string) {
       const p2 = rest.join(' ');
       dbQuery = supabase
         .from('mdt_records')
-        .select('id, first_name, last_name, wanted_status, priors')
+        .select('id, first_name, last_name, ssn, gang_affiliation, wanted_status, priors')
         .or(
           `and(first_name.ilike.%${p1}%,last_name.ilike.%${p2}%),` +
           `and(first_name.ilike.%${p2}%,last_name.ilike.%${p1}%),` +
-          `license_no.ilike.%${trimmed}%`
+          `ssn.ilike.%${trimmed}%,` +
+          `gang_affiliation.ilike.%${trimmed}%`
         );
     } else {
       dbQuery = supabase
         .from('mdt_records')
-        .select('id, first_name, last_name, wanted_status, priors')
-        .or(`first_name.ilike.%${trimmed}%,last_name.ilike.%${trimmed}%,license_no.ilike.%${trimmed}%`);
+        .select('id, first_name, last_name, ssn, gang_affiliation, wanted_status, priors')
+        .or(`first_name.ilike.%${trimmed}%,last_name.ilike.%${trimmed}%,ssn.ilike.%${trimmed}%,gang_affiliation.ilike.%${trimmed}%`);
     }
 
     const { data, error } = await dbQuery.order('last_name', { ascending: true }).limit(10);

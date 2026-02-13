@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { FileText } from 'lucide-react';
 import BodyMapSvg, { type BodyMarker } from './BodyMapSvg';
-import type { GangMember } from './hooks/useGangMembers';
+import type { GangMember, GangMemberReport } from './hooks/useGangMembers';
 
 interface ReportFormProps {
   member: GangMember;
   officerNick: string;
   saving: boolean;
+  editingReport?: GangMemberReport | null;
   onSubmit: (data: {
     member_id: string;
     report_type: 'investigation' | 'autopsy';
@@ -25,23 +26,26 @@ interface ReportFormProps {
   onCancel: () => void;
 }
 
-export default function ReportForm({ member, officerNick, saving, onSubmit, onCancel }: ReportFormProps) {
-  const [reportType, setReportType] = useState<'investigation' | 'autopsy'>('investigation');
-  const [date, setDate] = useState('');
-  const [location, setLocation] = useState('');
-  const [description, setDescription] = useState('');
-  const [resultStatus, setResultStatus] = useState('ARRESTED');
-  const [officers, setOfficers] = useState(officerNick);
-  const [evidenceUrl, setEvidenceUrl] = useState('');
+export default function ReportForm({ member, officerNick, saving, editingReport, onSubmit, onCancel }: ReportFormProps) {
+  const ad = (editingReport?.autopsy_data || {}) as Record<string, string>;
+  const [reportType, setReportType] = useState<'investigation' | 'autopsy'>(editingReport?.report_type || 'investigation');
+  const [date, setDate] = useState(editingReport?.date || '');
+  const [location, setLocation] = useState(editingReport?.location || '');
+  const [description, setDescription] = useState(editingReport?.description || '');
+  const [resultStatus, setResultStatus] = useState(editingReport?.result_status || 'ARRESTED');
+  const [officers, setOfficers] = useState(editingReport?.officers?.join(', ') || officerNick);
+  const [evidenceUrl, setEvidenceUrl] = useState(editingReport?.evidence_urls?.join(', ') || '');
 
   // Autopsy fields
-  const [causeOfDeath, setCauseOfDeath] = useState('');
-  const [bloodType, setBloodType] = useState('');
-  const [contentsInBlood, setContentsInBlood] = useState('');
-  const [rigorMortis, setRigorMortis] = useState('');
-  const [liverMortis, setLiverMortis] = useState('');
-  const [marksDescription, setMarksDescription] = useState('');
-  const [bodyMarkers, setBodyMarkers] = useState<BodyMarker[]>([]);
+  const [causeOfDeath, setCauseOfDeath] = useState(ad.cause_of_death || '');
+  const [bloodType, setBloodType] = useState(ad.blood_type || '');
+  const [contentsInBlood, setContentsInBlood] = useState(ad.contents_in_blood || '');
+  const [rigorMortis, setRigorMortis] = useState(ad.rigor_mortis || '');
+  const [liverMortis, setLiverMortis] = useState(ad.liver_mortis || '');
+  const [marksDescription, setMarksDescription] = useState(ad.marks_description || '');
+  const [bodyMarkers, setBodyMarkers] = useState<BodyMarker[]>(
+    (editingReport?.body_markers as BodyMarker[] | null) || []
+  );
 
   const handleSubmit = () => {
     const officerList = officers.split(',').map((o) => o.trim()).filter(Boolean);
@@ -80,7 +84,7 @@ export default function ReportForm({ member, officerNick, saving, onSubmit, onCa
       <div className="flex items-center gap-2 px-4 py-2" style={{ backgroundColor: '#059669' }}>
         <FileText className="w-4 h-4 text-white" />
         <span className="font-[family-name:var(--font-vt323)] text-base tracking-widest text-white uppercase">
-          Nowy raport — {member.last_name}, {member.first_name}
+          {editingReport ? 'Edycja raportu' : 'Nowy raport'} — {member.last_name}, {member.first_name}
         </span>
       </div>
 
@@ -208,7 +212,7 @@ export default function ReportForm({ member, officerNick, saving, onSubmit, onCa
         {/* Signature preview */}
         <div className="panel-inset p-3" style={{ backgroundColor: 'var(--mdt-input-bg)' }}>
           <span className="font-mono text-[10px] block mb-1" style={{ color: 'var(--mdt-muted-text)' }}>PODPIS:</span>
-          <span className="font-[family-name:var(--font-caveat)] text-2xl" style={{ color: 'var(--mdt-content-text)' }}>
+          <span className="font-[family-name:var(--font-retro-signature)] text-2xl" style={{ color: 'var(--mdt-content-text)' }}>
             {officerNick}
           </span>
         </div>
@@ -222,7 +226,7 @@ export default function ReportForm({ member, officerNick, saving, onSubmit, onCa
           className="btn-win95 text-xs"
           style={{ backgroundColor: '#3a6a3a', color: '#fff', borderColor: '#5a9a5a #1a3a1a #1a3a1a #5a9a5a' }}
         >
-          {saving ? 'ZAPISYWANIE...' : 'ZAPISZ RAPORT'}
+          {saving ? 'ZAPISYWANIE...' : editingReport ? 'ZAPISZ ZMIANY' : 'ZAPISZ RAPORT'}
         </button>
         <button onClick={onCancel} className="btn-win95 text-xs">ANULUJ</button>
       </div>

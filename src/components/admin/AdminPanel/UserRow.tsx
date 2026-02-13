@@ -16,6 +16,7 @@ interface UserRowProps {
   user: User;
   currentUserId: string;
   isCS: boolean;
+  isDev: boolean;
   onToggleDropdown: (userId: string) => void;
   buttonRef: (el: HTMLButtonElement | null) => void;
   index: number;
@@ -31,6 +32,7 @@ export default function UserRow({
   user,
   currentUserId,
   isCS,
+  isDev,
   onToggleDropdown,
   buttonRef,
   index,
@@ -97,8 +99,8 @@ export default function UserRow({
         {user.badge || 'N/A'}
       </td>
 
-      {/* Email (CS+ only) */}
-      {isCS && (
+      {/* Email (Dev only) */}
+      {isDev && (
         <td className="px-4 py-2 font-mono text-sm" style={{ color: 'var(--mdt-muted-text)' }}>
           {user.email || 'N/A'}
         </td>

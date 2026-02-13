@@ -9,6 +9,7 @@ const navItems = [
   { id: "main", label: "EKRAN GŁÓWNY" },
   { id: "kartoteka", label: "KARTOTEKI" },
   { id: "bolo", label: "POJAZDY BOLO" },
+  { id: "gang-kartoteki", label: "KARTOTEKI GANGÓW" },
   { id: "separator1", label: "" },
   { id: "cctv", label: "MONITORING" },
   { id: "roster", label: "JEDNOSTKI" },

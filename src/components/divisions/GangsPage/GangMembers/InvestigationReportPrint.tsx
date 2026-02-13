@@ -24,14 +24,16 @@ export default function InvestigationReportPrint({ member, report, onClose }: In
         <head>
           <title>Raport Śledczy - ${member.last_name}, ${member.first_name}</title>
           <style>
-            @import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&family=Caveat:wght@400;700&display=swap');
+            @font-face { font-family: 'Type Machine'; src: url('/fonts/TypeMachine.ttf'); }
+            @font-face { font-family: 'RetroSignature'; src: url('/fonts/RetroSignature.otf'); }
+            @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { display: flex; justify-content: center; padding: 20px; background: #fff; }
             .report {
               width: 650px;
               border: 3px solid #1a1a1a;
               padding: 0;
-              font-family: 'Share Tech Mono', 'Courier New', monospace;
+              font-family: 'Type Machine', 'Courier New', monospace;
               background: #fff;
             }
             .header {
@@ -132,7 +134,7 @@ export default function InvestigationReportPrint({ member, report, onClose }: In
               align-items: flex-end;
             }
             .signature {
-              font-family: 'Caveat', cursive;
+              font-family: 'RetroSignature', cursive;
               font-size: 32px;
               color: #1a1a1a;
               border-bottom: 1px solid #1a1a1a;
@@ -161,10 +163,10 @@ export default function InvestigationReportPrint({ member, report, onClose }: In
             <div class="header">
               <div>
                 <h1>RAPORT ŚLEDCZY</h1>
-                <div style="font-size:11px;letter-spacing:2px;opacity:0.7;margin-top:2px">GANG UNIT INVESTIGATION REPORT</div>
+                <div style="font-size:11px;letter-spacing:2px;opacity:0.7;margin-top:2px">OPERATION STREETS SAFE BUREAU</div>
               </div>
               <div class="dept">
-                SAN ANDREAS<br/>SHERIFF'S DEPARTMENT<br/>GANG UNIT
+                SAN ANDREAS<br/>SHERIFF'S DEPARTMENT<br/>OPERATION STREETS SAFE BUREAU
               </div>
             </div>
             <div class="subheader">
@@ -233,7 +235,7 @@ export default function InvestigationReportPrint({ member, report, onClose }: In
               </div>
 
               <div class="confidential">
-                POUFNE — WYŁĄCZNIE DO UŻYTKU WEWNĘTRZNEGO GU SASD
+                POUFNE — WYŁĄCZNIE DO UŻYTKU WEWNĘTRZNEGO OSS BUREAU SASD
               </div>
             </div>
           </div>
@@ -277,7 +279,7 @@ export default function InvestigationReportPrint({ member, report, onClose }: In
               {report.description && <p style={{ marginTop: '6px', whiteSpace: 'pre-wrap' }}>{report.description.substring(0, 200)}{report.description.length > 200 ? '...' : ''}</p>}
             </div>
             <div style={{ marginTop: '12px', borderTop: '1px solid #ccc', paddingTop: '8px' }}>
-              <span style={{ fontFamily: 'var(--font-caveat)', fontSize: '22px', color: '#1a1a1a' }}>{report.signed_by}</span>
+              <span style={{ fontFamily: 'var(--font-retro-signature)', fontSize: '22px', color: '#1a1a1a' }}>{report.signed_by}</span>
             </div>
           </div>
         </div>

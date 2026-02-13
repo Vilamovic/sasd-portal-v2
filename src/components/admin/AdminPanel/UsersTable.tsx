@@ -17,6 +17,7 @@ interface UsersTableProps {
   users: User[];
   currentUserId: string;
   isCS: boolean;
+  isDev: boolean;
   sortBy: string;
   sortOrder: 'asc' | 'desc';
   onSort: (column: string) => void;
@@ -34,6 +35,7 @@ export default function UsersTable({
   users,
   currentUserId,
   isCS,
+  isDev,
   sortBy,
   sortOrder,
   onSort,
@@ -70,8 +72,8 @@ export default function UsersTable({
                 </div>
               </th>
 
-              {/* Email Column (CS+ only) */}
-              {isCS && (
+              {/* Email Column (Dev only) */}
+              {isDev && (
                 <th
                   className="px-4 py-2 text-left font-[family-name:var(--font-vt323)] text-base"
                   style={{ color: '#ccc' }}
@@ -130,7 +132,7 @@ export default function UsersTable({
             {users.length === 0 ? (
               <tr>
                 <td
-                  colSpan={isCS ? 7 : 6}
+                  colSpan={isDev ? 7 : 6}
                   className="px-4 py-6 text-center font-mono text-sm"
                   style={{ color: 'var(--mdt-muted-text)' }}
                 >
@@ -144,6 +146,7 @@ export default function UsersTable({
                   user={user}
                   currentUserId={currentUserId}
                   isCS={isCS}
+                  isDev={isDev}
                   onToggleDropdown={onToggleDropdown}
                   buttonRef={(el) => (buttonRefs.current[user.id] = el)}
                   index={index}

@@ -81,6 +81,7 @@ export default function AdminPanelPage({ onBack }: AdminPanelPageProps) {
           users={filteredUsers}
           currentUserId={user.id}
           isCS={isCS}
+          isDev={isDev}
           sortBy={sortBy}
           sortOrder={sortOrder}
           onSort={handleSort}

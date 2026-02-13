@@ -19,8 +19,10 @@ import { UnitsPanel } from "./UnitsPanel"
 import { EmergencyPanel } from "./EmergencyPanel"
 import { MdtModal } from "./MdtModal"
 import { WantedPoster } from "./WantedPoster"
+import GangMembersPage from "@/src/components/divisions/GangsPage/GangMembers/GangMembersPage"
 import { useMdtRecords } from "./hooks/useMdtRecords"
 import { useMdtBolo } from "./hooks/useMdtBolo"
+import { getGangProfiles } from "@/src/lib/db/gangs"
 import type { MdtRecord } from "./types"
 
 export default function MdtPage() {
@@ -84,11 +86,17 @@ export default function MdtPage() {
     handleResolve: handleResolveBolo,
   } = useMdtBolo()
 
+  // Gangs for dropdown
+  const [gangs, setGangs] = useState<{ id: string; title: string }[]>([])
+
   // Load data on mount
   useEffect(() => {
     if (user) {
       loadRecords()
       loadVehicles()
+      getGangProfiles().then(({ data }) => {
+        if (data) setGangs(data.map((g: { id: string; title: string }) => ({ id: g.id, title: g.title })))
+      })
     }
   }, [user, loadRecords, loadVehicles])
 
@@ -341,6 +349,7 @@ export default function MdtPage() {
                     record={selectedRecord}
                     onSave={handleSaveEdit}
                     onCancel={() => setIsEditing(false)}
+                    gangs={gangs}
                   />
                 ) : (
                   <PlayerRecord
@@ -378,6 +387,8 @@ export default function MdtPage() {
                 userId={user?.id}
               />
             )}
+
+            {activeTab === "gang-kartoteki" && <GangMembersPage embedded />}
 
             {activeTab === "cctv" && <MonitoringPanel />}
             {activeTab === "roster" && <UnitsPanel />}

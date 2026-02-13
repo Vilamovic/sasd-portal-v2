@@ -60,7 +60,7 @@ export default function GenerateTokenForm({
             <option value="">Wybierz użytkownika...</option>
             {users.map((u) => (
               <option key={u.id} value={u.id}>
-                {u.mta_nick || u.username || u.email}
+                {u.mta_nick || u.username || 'Brak nicku'}
               </option>
             ))}
           </select>

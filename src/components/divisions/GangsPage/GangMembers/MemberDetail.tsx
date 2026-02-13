@@ -1,6 +1,6 @@
 'use client';
 
-import { Edit3, Trash2, FileText, FilePlus, Printer } from 'lucide-react';
+import { Edit3, Trash2, FileText, FilePlus, Printer, Pencil } from 'lucide-react';
 import { getSkinUrl } from './skinData';
 import type { GangMember, GangMemberReport } from './hooks/useGangMembers';
 
@@ -11,6 +11,7 @@ interface MemberDetailProps {
   onDelete: () => void;
   onNewReport: () => void;
   onViewReport: (report: GangMemberReport) => void;
+  onEditReport: (report: GangMemberReport) => void;
   onDeleteReport: (reportId: string) => void;
 }
 
@@ -21,6 +22,7 @@ export default function MemberDetail({
   onDelete,
   onNewReport,
   onViewReport,
+  onEditReport,
   onDeleteReport,
 }: MemberDetailProps) {
   const reports = member.reports || [];
@@ -56,11 +58,11 @@ export default function MemberDetail({
             {/* Mugshot */}
             <div className="flex justify-center mb-4">
               <div
-                className="relative w-40 h-52 flex items-center justify-center"
+                className="relative w-40 h-52 flex items-center justify-center overflow-hidden"
                 style={{ backgroundColor: '#2a2a2a', border: '3px solid #1a1a1a' }}
               >
                 {member.skin_id != null ? (
-                  <img src={getSkinUrl(member.skin_id)} alt="Mugshot" className="w-full h-auto object-cover object-top" />
+                  <img src={getSkinUrl(member.skin_id)} alt="Mugshot" className="w-full h-full object-cover object-top" />
                 ) : (
                   <span className="font-mono text-[10px]" style={{ color: '#888' }}>BRAK ZDJĘCIA</span>
                 )}
@@ -177,6 +179,13 @@ export default function MemberDetail({
                             title="Podgląd / Drukuj"
                           >
                             <Printer className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onEditReport(report); }}
+                            className="text-yellow-400 hover:text-yellow-300"
+                            title="Edytuj raport"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
                           </button>
                           {isCS && (
                             <button

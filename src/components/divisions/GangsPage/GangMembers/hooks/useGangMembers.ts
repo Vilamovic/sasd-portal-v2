@@ -9,6 +9,7 @@ import {
   updateGangMember,
   deleteGangMember,
   createMemberReport,
+  updateMemberReport,
   deleteMemberReport,
 } from '@/src/lib/db/gangMembers';
 import { getGangProfiles } from '@/src/lib/db/gangs';
@@ -149,6 +150,16 @@ export function useGangMembers(userId?: string) {
     return { error };
   }, [userId, selectedMember, selectMember]);
 
+  const handleUpdateReport = useCallback(async (reportId: string, updates: Parameters<typeof updateMemberReport>[1]) => {
+    setSaving(true);
+    const { error } = await updateMemberReport(reportId, updates);
+    if (!error && selectedMember) {
+      await selectMember(selectedMember.id);
+    }
+    setSaving(false);
+    return { error };
+  }, [selectedMember, selectMember]);
+
   const handleDeleteReport = useCallback(async (reportId: string) => {
     const { error } = await deleteMemberReport(reportId);
     if (!error && selectedMember) {
@@ -174,6 +185,7 @@ export function useGangMembers(userId?: string) {
     handleUpdateMember,
     handleDeleteMember,
     handleCreateReport,
+    handleUpdateReport,
     handleDeleteReport,
     refreshMembers: () => loadMembers(gangFilter || undefined),
   };

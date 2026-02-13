@@ -16,6 +16,8 @@ export function SearchPanel({ onSelectRecord, onSelectBolo, onSwitchTab, onSearc
   const [searchQuery, setSearchQuery] = useState("")
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([])
   const [showDropdown, setShowDropdown] = useState(false)
+  const lastPersonCount = useRef(0)
+  const lastVehicleCount = useRef(0)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -55,6 +57,10 @@ export function SearchPanel({ onSelectRecord, onSelectBolo, onSwitchTab, onSearc
       })
     }
 
+    const persons = results.filter((r) => r.type === "person")
+    const vehicles = results.filter((r) => r.type === "vehicle")
+    lastPersonCount.current = persons.length
+    lastVehicleCount.current = vehicles.length
     setSuggestions(results)
     setShowDropdown(results.length > 0)
   }, [])
@@ -68,8 +74,12 @@ export function SearchPanel({ onSelectRecord, onSelectBolo, onSwitchTab, onSearc
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       setShowDropdown(false)
-      onSwitchTab("kartoteka")
-      onSearch(searchQuery)
+      if (lastPersonCount.current === 0 && lastVehicleCount.current > 0) {
+        onSwitchTab("bolo")
+      } else {
+        onSwitchTab("kartoteka")
+        onSearch(searchQuery)
+      }
     }
     if (e.key === "Escape") {
       setShowDropdown(false)
@@ -117,7 +127,7 @@ export function SearchPanel({ onSelectRecord, onSelectBolo, onSwitchTab, onSearc
         onChange={(e) => handleInputChange(e.target.value)}
         onKeyDown={handleKeyDown}
         onFocus={() => suggestions.length > 0 && setShowDropdown(true)}
-        placeholder="Wpisz imię, nazwisko, tablicę rejestracyjną..."
+        placeholder="Wpisz imię, nazwisko, nick, gang, tablicę rej..."
         className="panel-inset flex-1 px-3 py-1.5 font-mono text-sm"
         style={{
           backgroundColor: "var(--mdt-input-bg)",

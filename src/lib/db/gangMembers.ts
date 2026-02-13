@@ -196,6 +196,34 @@ export async function createMemberReport(data: {
   }
 }
 
+export async function updateMemberReport(id: string, updates: Partial<{
+  report_type: 'investigation' | 'autopsy';
+  date: string | null;
+  location: string | null;
+  description: string | null;
+  result_status: string | null;
+  officers: string[] | null;
+  evidence_urls: string[] | null;
+  autopsy_data: Record<string, unknown> | null;
+  body_markers: Array<{ x: number; y: number; side: string }> | null;
+  signed_by: string;
+}>) {
+  try {
+    const { data, error } = await supabase
+      .from('gang_member_reports')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('updateMemberReport error:', error);
+    return { data: null, error };
+  }
+}
+
 export async function deleteMemberReport(id: string) {
   try {
     const { error } = await supabase

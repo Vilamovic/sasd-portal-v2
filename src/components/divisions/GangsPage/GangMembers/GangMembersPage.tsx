@@ -14,11 +14,12 @@ import AutopsyReportPrint from './AutopsyReportPrint';
 
 type View = 'list' | 'detail' | 'create' | 'edit' | 'report';
 
-export default function GangMembersPage() {
+export default function GangMembersPage({ embedded }: { embedded?: boolean } = {}) {
   const { user, isCS, mtaNick } = useAuth();
   const hook = useGangMembers(user?.id);
   const [view, setView] = useState<View>('list');
   const [viewingReport, setViewingReport] = useState<GangMemberReport | null>(null);
+  const [editingReport, setEditingReport] = useState<GangMemberReport | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null); // member id
 
   const handleSelectMember = async (id: string) => {
@@ -54,8 +55,17 @@ export default function GangMembersPage() {
   };
 
   const handleReportSubmit = async (data: Parameters<typeof hook.handleCreateReport>[0]) => {
-    const { error } = await hook.handleCreateReport(data);
-    if (!error) setView('detail');
+    if (editingReport) {
+      // Update existing report
+      const { error } = await hook.handleUpdateReport(editingReport.id, data);
+      if (!error) {
+        setEditingReport(null);
+        setView('detail');
+      }
+    } else {
+      const { error } = await hook.handleCreateReport(data);
+      if (!error) setView('detail');
+    }
   };
 
   const handleDeleteReport = async (reportId: string) => {
@@ -63,22 +73,24 @@ export default function GangMembersPage() {
   };
 
   return (
-    <div className="flex flex-col" style={{ height: 'calc(100vh - 48px)' }}>
+    <div className="flex flex-col" style={{ height: embedded ? '100%' : 'calc(100vh - 48px)' }}>
       {/* Top bar */}
-      <div className="flex items-center gap-3 px-4 py-2" style={{ backgroundColor: 'var(--mdt-header)', borderBottom: '2px solid #555' }}>
-        {view !== 'list' && (
-          <button
-            onClick={handleBack}
-            className="btn-win95 py-0 px-1.5"
-            title="Wróć"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-          </button>
-        )}
-        <span className="font-[family-name:var(--font-vt323)] text-base tracking-widest" style={{ color: '#4ade80' }}>
-          GANG UNIT — BAZA CZŁONKÓW
-        </span>
-      </div>
+      {!embedded && (
+        <div className="flex items-center gap-3 px-4 py-2" style={{ backgroundColor: 'var(--mdt-header)', borderBottom: '2px solid #555' }}>
+          {view !== 'list' && (
+            <button
+              onClick={handleBack}
+              className="btn-win95 py-0 px-1.5"
+              title="Wróć"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+            </button>
+          )}
+          <span className="font-[family-name:var(--font-vt323)] text-base tracking-widest" style={{ color: '#4ade80' }}>
+            GANG UNIT — BAZA CZŁONKÓW
+          </span>
+        </div>
+      )}
 
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
@@ -103,8 +115,9 @@ export default function GangMembersPage() {
             isCS={isCS}
             onEdit={() => setView('edit')}
             onDelete={() => setConfirmDelete(hook.selectedMember!.id)}
-            onNewReport={() => setView('report')}
+            onNewReport={() => { setEditingReport(null); setView('report'); }}
             onViewReport={(r) => setViewingReport(r)}
+            onEditReport={(r) => { setEditingReport(r); setView('report'); }}
             onDeleteReport={handleDeleteReport}
           />
         )}
@@ -133,8 +146,9 @@ export default function GangMembersPage() {
             member={hook.selectedMember}
             officerNick={mtaNick || user?.username || 'Unknown'}
             saving={hook.saving}
+            editingReport={editingReport}
             onSubmit={handleReportSubmit}
-            onCancel={handleBack}
+            onCancel={() => { setEditingReport(null); handleBack(); }}
           />
         )}
       </div>

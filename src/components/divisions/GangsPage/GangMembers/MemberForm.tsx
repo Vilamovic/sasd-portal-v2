@@ -80,11 +80,11 @@ export default function MemberForm({ gangs, editingMember, saving, onSubmit, onC
           {/* Left: Mugshot */}
           <div className="w-40 flex-shrink-0 flex flex-col items-center">
             <div
-              className="w-32 h-40 flex items-center justify-center mb-2"
+              className="w-32 h-40 flex items-center justify-center mb-2 overflow-hidden"
               style={{ backgroundColor: '#2a2a2a', border: '3px solid #1a1a1a' }}
             >
               {skinId != null ? (
-                <img src={getSkinUrl(skinId)} alt="Skin" className="w-full h-auto object-cover object-top" />
+                <img src={getSkinUrl(skinId)} alt="Skin" className="w-full h-full object-cover object-top" />
               ) : (
                 <span className="font-mono text-[10px] text-center" style={{ color: '#888' }}>
                   BRAK<br />ZDJĘCIA

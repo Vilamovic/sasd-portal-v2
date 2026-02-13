@@ -1,7 +1,5 @@
 'use client';
 
-import { X } from 'lucide-react';
-
 export interface BodyMarker {
   x: number;
   y: number;
@@ -19,43 +17,39 @@ const BODY_WIDTH = 200;
 const BODY_HEIGHT = 400;
 
 /**
- * SVG body outline for front and back views.
- * Simplified human silhouette paths.
+ * Improved filled human silhouette for body map.
  */
 function BodyOutline() {
   return (
     <g>
       {/* Head */}
-      <ellipse cx="100" cy="40" rx="25" ry="30" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <ellipse cx="100" cy="35" rx="22" ry="26" fill="var(--body-fill, #f0f0f0)" stroke="currentColor" strokeWidth="1.5" />
       {/* Neck */}
-      <line x1="90" y1="70" x2="90" y2="85" stroke="currentColor" strokeWidth="1.5" />
-      <line x1="110" y1="70" x2="110" y2="85" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="91" y="60" width="18" height="14" rx="3" fill="var(--body-fill, #f0f0f0)" stroke="currentColor" strokeWidth="1" />
       {/* Torso */}
-      <path d="M 60 85 Q 55 90, 50 130 L 50 220 Q 55 240, 70 250 L 70 250" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M 140 85 Q 145 90, 150 130 L 150 220 Q 145 240, 130 250 L 130 250" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      {/* Shoulders */}
-      <path d="M 60 85 Q 70 80, 90 85" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M 140 85 Q 130 80, 110 85" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      {/* Arms left */}
-      <path d="M 60 85 Q 30 100, 25 160 Q 22 180, 20 200" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M 20 200 Q 18 210, 15 215" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      {/* Arms right */}
-      <path d="M 140 85 Q 170 100, 175 160 Q 178 180, 180 200" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M 180 200 Q 182 210, 185 215" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      {/* Hips */}
-      <path d="M 70 250 Q 80 260, 85 260 L 85 270" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M 130 250 Q 120 260, 115 260 L 115 270" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      {/* Waist line */}
-      <line x1="50" y1="220" x2="150" y2="220" stroke="currentColor" strokeWidth="0.5" strokeDasharray="4,2" />
-      {/* Legs left */}
-      <path d="M 85 270 Q 80 310, 75 350 Q 73 370, 70 390" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M 70 390 L 60 395" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      {/* Legs right */}
-      <path d="M 115 270 Q 120 310, 125 350 Q 127 370, 130 390" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M 130 390 L 140 395" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M 65 74 L 60 80 Q 55 85, 52 110 L 50 180 Q 52 200, 60 210 L 70 220 L 85 225 L 100 228 L 115 225 L 130 220 L 140 210 Q 148 200, 150 180 L 148 110 Q 145 85, 140 80 L 135 74"
+        fill="var(--body-fill, #f0f0f0)" stroke="currentColor" strokeWidth="1.5"
+      />
+      {/* Shoulders connection */}
+      <path d="M 65 74 Q 80 68, 100 67 Q 120 68, 135 74" fill="var(--body-fill, #f0f0f0)" stroke="currentColor" strokeWidth="1.5" />
+      {/* Left arm */}
+      <path d="M 55 85 Q 40 95, 32 130 Q 28 155, 25 180 Q 22 195, 20 205" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <ellipse cx="18" cy="210" rx="6" ry="8" fill="var(--body-fill, #f0f0f0)" stroke="currentColor" strokeWidth="1" />
+      {/* Right arm */}
+      <path d="M 145 85 Q 160 95, 168 130 Q 172 155, 175 180 Q 178 195, 180 205" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <ellipse cx="182" cy="210" rx="6" ry="8" fill="var(--body-fill, #f0f0f0)" stroke="currentColor" strokeWidth="1" />
+      {/* Left leg */}
+      <path d="M 78 225 Q 75 260, 72 300 Q 70 330, 68 360 L 66 380" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <ellipse cx="64" cy="386" rx="10" ry="6" fill="var(--body-fill, #f0f0f0)" stroke="currentColor" strokeWidth="1" />
+      {/* Right leg */}
+      <path d="M 122 225 Q 125 260, 128 300 Q 130 330, 132 360 L 134 380" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <ellipse cx="136" cy="386" rx="10" ry="6" fill="var(--body-fill, #f0f0f0)" stroke="currentColor" strokeWidth="1" />
       {/* Inner legs */}
-      <path d="M 85 270 Q 90 290, 90 310 Q 88 340, 85 370 Q 83 385, 80 395" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M 115 270 Q 110 290, 110 310 Q 112 340, 115 370 Q 117 385, 120 395" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M 90 228 Q 88 260, 85 300 Q 83 330, 80 360 L 78 380" fill="none" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M 110 228 Q 112 260, 115 300 Q 117 330, 120 360 L 122 380" fill="none" stroke="currentColor" strokeWidth="1.2" />
+      {/* Waist line */}
+      <line x1="50" y1="180" x2="150" y2="180" stroke="currentColor" strokeWidth="0.5" strokeDasharray="4,3" opacity="0.5" />
     </g>
   );
 }

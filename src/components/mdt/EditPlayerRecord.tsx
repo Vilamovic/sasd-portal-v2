@@ -10,9 +10,10 @@ interface EditPlayerRecordProps {
   record: MdtRecord
   onSave: (updates: Partial<MdtRecord>, newMugshotUrl: string | null) => void
   onCancel: () => void
+  gangs?: { id: string; title: string }[]
 }
 
-export function EditPlayerRecord({ record, onSave, onCancel }: EditPlayerRecordProps) {
+export function EditPlayerRecord({ record, onSave, onCancel, gangs }: EditPlayerRecordProps) {
   const [form, setForm] = useState({
     first_name: record.first_name,
     last_name: record.last_name,
@@ -79,7 +80,7 @@ export function EditPlayerRecord({ record, onSave, onCancel }: EditPlayerRecordP
     { label: "ADRES", key: "address" },
     { label: "STATUS PRAWA JAZDY", key: "license_status", type: "select", options: ["BRAK", "AKTYWNE", "COFNIĘTE"] },
     { label: "POSZUKIWANY", key: "wanted_status", type: "select", options: ["NIE", "POSZUKIWANY"] },
-    { label: "GANG", key: "gang_affiliation" },
+    { label: "GANG", key: "gang_affiliation", type: "select", options: ["NIEZNANE", ...(gangs || []).map((g) => g.title)] },
     { label: "POZIOM KARTOTEKI", key: "record_level", type: "select", options: ["1", "2"] },
   ]
 
