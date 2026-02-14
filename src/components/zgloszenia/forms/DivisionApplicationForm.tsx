@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Shield, Send } from 'lucide-react';
-import QuillEditor from '@/src/components/shared/QuillEditor';
+
 import { createSubmission } from '@/src/lib/db/submissions';
 import { getRecruitmentStatus } from '@/src/lib/db/recruitment';
 import { notifyNewSubmission } from '@/src/lib/webhooks/submissions';
@@ -55,7 +55,7 @@ export default function DivisionApplicationForm({ userId, onSuccess, onCancel }:
       setError('Wybierz dywizję');
       return;
     }
-    if (!motivation.trim() || motivation === '<p><br></p>') {
+    if (!motivation.trim()) {
       setError('Motywacja jest wymagana');
       return;
     }
@@ -155,11 +155,13 @@ export default function DivisionApplicationForm({ userId, onSuccess, onCancel }:
           <label className="font-mono text-xs block mb-1" style={{ color: 'var(--mdt-muted-text)' }}>
             Motywacja * (dlaczego chcesz dołączyć do tej dywizji?)
           </label>
-          <QuillEditor
+          <textarea
             value={motivation}
-            onChange={setMotivation}
+            onChange={(e) => setMotivation(e.target.value)}
             placeholder="Opisz swoją motywację i doświadczenie..."
-            minHeight="200px"
+            rows={6}
+            className="panel-inset w-full px-3 py-2 font-mono text-sm"
+            style={{ backgroundColor: 'var(--mdt-input-bg)', color: 'var(--mdt-content-text)', outline: 'none', resize: 'vertical' }}
           />
         </div>
 

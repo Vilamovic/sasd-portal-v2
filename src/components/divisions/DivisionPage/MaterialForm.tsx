@@ -1,6 +1,6 @@
 import { Plus, Save } from 'lucide-react';
 import QuillEditor from '@/src/components/shared/QuillEditor';
-import TemplatePresets from '@/src/components/shared/TemplatePresets';
+
 
 interface MaterialFormProps {
   isEditing: boolean;
@@ -73,12 +73,9 @@ export default function MaterialForm({
 
         {/* Rich Text Description */}
         <div className="mb-4">
-          <div className="flex items-center justify-between mb-1">
-            <label className="font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>
-              Opis
-            </label>
-            <TemplatePresets onInsert={onDescriptionChange} />
-          </div>
+          <label className="font-mono text-xs block mb-1" style={{ color: 'var(--mdt-muted-text)' }}>
+            Opis
+          </label>
           <QuillEditor
             value={formDescription}
             onChange={onDescriptionChange}

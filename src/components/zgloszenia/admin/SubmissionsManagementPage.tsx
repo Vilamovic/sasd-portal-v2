@@ -167,7 +167,7 @@ export default function SubmissionsManagementPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--mdt-content)' }}>
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <BackButton onClick={() => router.push('/zgloszenia')} destination="Zgłoszenia" />
+        <BackButton onClick={() => router.push('/reports')} destination="Zgłoszenia" />
 
         {/* Page Header */}
         <div className="px-4 py-2 mb-6" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
@@ -186,7 +186,7 @@ export default function SubmissionsManagementPage() {
             REKRUTACJA DYWIZJI
           </button>
           <button
-            onClick={() => router.push('/zgloszenia/management/archived')}
+            onClick={() => router.push('/reports/management/archived')}
             className="btn-win95 font-mono text-xs flex items-center gap-1"
           >
             <Archive className="w-3 h-3" />

@@ -74,7 +74,7 @@ export default function ArchivedSubmissionsPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--mdt-content)' }}>
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <BackButton onClick={() => router.push('/zgloszenia/management')} destination="Zarządzanie" />
+        <BackButton onClick={() => router.push('/reports/management')} destination="Zarządzanie" />
 
         <div className="px-4 py-2 mb-6" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
           <span className="font-[family-name:var(--font-vt323)] text-xl tracking-widest uppercase text-white">

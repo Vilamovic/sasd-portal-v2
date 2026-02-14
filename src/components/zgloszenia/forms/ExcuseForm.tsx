@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { FileText, Send } from 'lucide-react';
-import QuillEditor from '@/src/components/shared/QuillEditor';
+
 import { createSubmission } from '@/src/lib/db/submissions';
 import { notifyNewSubmission } from '@/src/lib/webhooks/submissions';
 import { useAuth } from '@/src/contexts/AuthContext';
@@ -35,7 +35,7 @@ export default function ExcuseForm({ userId, onSuccess, onCancel }: ExcuseFormPr
   const [error, setError] = useState('');
 
   const handleSubmit = async () => {
-    if (!reason.trim() || reason === '<p><br></p>') {
+    if (!reason.trim()) {
       setError('Powód usprawiedliwienia jest wymagany');
       return;
     }
@@ -107,11 +107,13 @@ export default function ExcuseForm({ userId, onSuccess, onCancel }: ExcuseFormPr
           <label className="font-mono text-xs block mb-1" style={{ color: 'var(--mdt-muted-text)' }}>
             Powód * (dlaczego nie zrealizowano normy tygodniowej?)
           </label>
-          <QuillEditor
+          <textarea
             value={reason}
-            onChange={setReason}
+            onChange={(e) => setReason(e.target.value)}
             placeholder="Opisz powód braku realizacji normy..."
-            minHeight="150px"
+            rows={5}
+            className="panel-inset w-full px-3 py-2 font-mono text-sm"
+            style={{ backgroundColor: 'var(--mdt-input-bg)', color: 'var(--mdt-content-text)', outline: 'none', resize: 'vertical' }}
           />
         </div>
 

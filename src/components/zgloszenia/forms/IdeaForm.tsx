@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Lightbulb, Send } from 'lucide-react';
-import QuillEditor from '@/src/components/shared/QuillEditor';
+
 import { createSubmission } from '@/src/lib/db/submissions';
 import { notifyNewSubmission } from '@/src/lib/webhooks/submissions';
 import { useAuth } from '@/src/contexts/AuthContext';
@@ -26,7 +26,7 @@ export default function IdeaForm({ userId, onSuccess, onCancel }: IdeaFormProps)
       setError('Tytuł jest wymagany');
       return;
     }
-    if (!description.trim() || description === '<p><br></p>') {
+    if (!description.trim()) {
       setError('Opis propozycji jest wymagany');
       return;
     }
@@ -118,11 +118,13 @@ export default function IdeaForm({ userId, onSuccess, onCancel }: IdeaFormProps)
           <label className="font-mono text-xs block mb-1" style={{ color: 'var(--mdt-muted-text)' }}>
             Opis propozycji * (co chcesz zaproponować i dlaczego?)
           </label>
-          <QuillEditor
+          <textarea
             value={description}
-            onChange={setDescription}
+            onChange={(e) => setDescription(e.target.value)}
             placeholder="Opisz szczegółowo swój pomysł..."
-            minHeight="200px"
+            rows={6}
+            className="panel-inset w-full px-3 py-2 font-mono text-sm"
+            style={{ backgroundColor: 'var(--mdt-input-bg)', color: 'var(--mdt-content-text)', outline: 'none', resize: 'vertical' }}
           />
         </div>
 

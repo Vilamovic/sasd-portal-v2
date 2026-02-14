@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Bug, Send } from 'lucide-react';
-import QuillEditor from '@/src/components/shared/QuillEditor';
+
 import { createSubmission } from '@/src/lib/db/submissions';
 import { notifyNewSubmission } from '@/src/lib/webhooks/submissions';
 import { useAuth } from '@/src/contexts/AuthContext';
@@ -25,7 +25,7 @@ export default function BugReportForm({ userId, onSuccess, onCancel }: BugReport
       setError('Tytuł jest wymagany');
       return;
     }
-    if (!description.trim() || description === '<p><br></p>') {
+    if (!description.trim()) {
       setError('Opis błędu jest wymagany');
       return;
     }
@@ -95,11 +95,13 @@ export default function BugReportForm({ userId, onSuccess, onCancel }: BugReport
           <label className="font-mono text-xs block mb-1" style={{ color: 'var(--mdt-muted-text)' }}>
             Opis problemu * (kroki reprodukcji, co się dzieje, co powinno się dziać)
           </label>
-          <QuillEditor
+          <textarea
             value={description}
-            onChange={setDescription}
+            onChange={(e) => setDescription(e.target.value)}
             placeholder="Opisz szczegółowo napotkany problem..."
-            minHeight="200px"
+            rows={6}
+            className="panel-inset w-full px-3 py-2 font-mono text-sm"
+            style={{ backgroundColor: 'var(--mdt-input-bg)', color: 'var(--mdt-content-text)', outline: 'none', resize: 'vertical' }}
           />
         </div>
 

@@ -23,7 +23,7 @@ import type { ModalType, ModalEditData } from "./modals/MdtModals"
 import { useMdtRecords } from "./hooks/useMdtRecords"
 import { useMdtBolo } from "./hooks/useMdtBolo"
 import { getGangProfiles } from "@/src/lib/db/gangs"
-import type { MdtRecord } from "./types"
+import type { MdtRecord, MdtBoloVehicle } from "./types"
 
 export default function MdtPage() {
   const router = useRouter()
@@ -42,6 +42,10 @@ export default function MdtPage() {
   const [isDeleteRecordMode, setIsDeleteRecordMode] = useState(false)
   const [isDeleteNoteMode, setIsDeleteNoteMode] = useState(false)
   const [selectedBoloId, setSelectedBoloId] = useState<string | null>(null)
+  const [boloSearchQuery, setBoloSearchQuery] = useState("")
+  const [selectedBoloVehicle, setSelectedBoloVehicle] = useState<MdtBoloVehicle | null>(null)
+  const [boloAction, setBoloAction] = useState<"none" | "add" | "edit">("none")
+  const [gangCreateTrigger, setGangCreateTrigger] = useState(0)
 
   // Modal state (single state replaces 8 booleans)
   const [activeModal, setActiveModal] = useState<ModalType>("none")
@@ -97,6 +101,10 @@ export default function MdtPage() {
     setIsDeleteRecordMode(false)
     setIsDeleteNoteMode(false)
     if (tab !== "kartoteka") clearSelection()
+    if (tab !== "bolo") {
+      setSelectedBoloVehicle(null)
+      setBoloSearchQuery("")
+    }
   }, [clearSelection])
 
   const closeModal = useCallback(() => {
@@ -249,6 +257,7 @@ export default function MdtPage() {
             onSelectBolo={(id) => { setSelectedBoloId(id); handleTabChange("bolo") }}
             onSwitchTab={handleTabChange}
             onSearch={(q) => { handleTabChange("kartoteka"); handleSearch(q) }}
+            onSearchBolo={(q) => { setActiveTab("bolo"); setBoloSearchQuery(q); if (q.trim()) changeFilter("ALL") }}
           />
 
           <div className="flex flex-1 overflow-hidden">
@@ -290,17 +299,21 @@ export default function MdtPage() {
             {activeTab === "bolo" && (
               <BoloVehiclesPanel
                 vehicles={vehicles} loading={boloLoading} filterStatus={filterStatus}
+                searchQuery={boloSearchQuery}
                 onChangeFilter={changeFilter} onCreate={handleCreateBolo} onUpdate={handleUpdateBolo}
-                onDelete={handleDeleteBolo} onResolve={handleResolveBolo}
                 officerName={officerName} userId={user?.id}
                 selectedBoloId={selectedBoloId}
                 onClearSelectedBolo={() => setSelectedBoloId(null)}
+                selectedVehicle={selectedBoloVehicle}
+                onSelectVehicle={setSelectedBoloVehicle}
+                pendingAction={boloAction}
+                onActionHandled={() => setBoloAction("none")}
               />
             )}
 
             {activeTab === "gang-kartoteki" && (
               <div className="flex-1 min-w-0 overflow-hidden">
-                <GangMembersPage embedded />
+                <GangMembersPage embedded createTrigger={gangCreateTrigger} />
               </div>
             )}
 
@@ -335,7 +348,23 @@ export default function MdtPage() {
               onPrintFile={() => selectedRecord && setActiveModal("print")}
               onDeleteKartoteka={() => selectedRecord && setActiveModal("deleteConfirm")}
               onCreatePerson={() => setActiveModal("createPerson")}
-              onCreateBolo={() => {}}
+              onCreateBolo={() => setBoloAction("add")}
+              onEditBolo={() => setBoloAction("edit")}
+              onResolveBolo={() => {
+                if (selectedBoloVehicle) {
+                  handleResolveBolo(selectedBoloVehicle.id)
+                  setSelectedBoloVehicle(null)
+                }
+              }}
+              onDeleteBolo={() => {
+                if (selectedBoloVehicle) {
+                  handleDeleteBolo(selectedBoloVehicle.id)
+                  setSelectedBoloVehicle(null)
+                }
+              }}
+              hasSelectedBolo={!!selectedBoloVehicle}
+              selectedBoloStatus={selectedBoloVehicle?.status}
+              onCreateGangMember={() => setGangCreateTrigger((n) => n + 1)}
             />
           </div>
         </div>

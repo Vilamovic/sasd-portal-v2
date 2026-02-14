@@ -34,13 +34,13 @@ export default function SubmissionFormPage() {
     return (
       <div className="min-h-screen" style={{ backgroundColor: 'var(--mdt-content)' }}>
         <div className="max-w-7xl mx-auto px-6 py-8">
-          <BackButton onClick={() => router.push('/zgloszenia')} destination="Zgłoszenia" />
+          <BackButton onClick={() => router.push('/reports')} destination="Zgłoszenia" />
           <div className="panel-raised p-6 text-center" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
             <p className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>
               Nieznany typ zgłoszenia lub formularz niedostępny.
             </p>
             <button
-              onClick={() => router.push('/zgloszenia')}
+              onClick={() => router.push('/reports')}
               className="btn-win95 font-mono text-xs mt-4"
             >
               POWRÓT DO ZGŁOSZEŃ
@@ -55,7 +55,7 @@ export default function SubmissionFormPage() {
     return (
       <div className="min-h-screen" style={{ backgroundColor: 'var(--mdt-content)' }}>
         <div className="max-w-7xl mx-auto px-6 py-8">
-          <BackButton onClick={() => router.push('/zgloszenia')} destination="Zgłoszenia" />
+          <BackButton onClick={() => router.push('/reports')} destination="Zgłoszenia" />
           <div className="panel-raised p-6 text-center" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
             <p className="font-mono text-sm" style={{ color: 'var(--mdt-content-text)' }}>
               Ten typ zgłoszenia będzie dostępny wkrótce.
@@ -69,11 +69,11 @@ export default function SubmissionFormPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--mdt-content)' }}>
       <div className="max-w-4xl mx-auto px-6 py-8">
-        <BackButton onClick={() => router.push('/zgloszenia')} destination="Zgłoszenia" />
+        <BackButton onClick={() => router.push('/reports')} destination="Zgłoszenia" />
         <FormComponent
           userId={user?.id}
-          onSuccess={() => router.push('/zgloszenia/moje')}
-          onCancel={() => router.push('/zgloszenia')}
+          onSuccess={() => router.push('/reports/mine')}
+          onCancel={() => router.push('/reports')}
         />
       </div>
     </div>

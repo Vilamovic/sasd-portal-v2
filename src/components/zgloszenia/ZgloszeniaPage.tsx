@@ -38,14 +38,14 @@ export default function ZgloszeniaPage() {
         {/* Quick links */}
         <div className="flex gap-2 mb-6">
           <button
-            onClick={() => router.push('/zgloszenia/moje')}
+            onClick={() => router.push('/reports/mine')}
             className="btn-win95 font-mono text-xs"
           >
             MOJE ZGŁOSZENIA
           </button>
           {isAdmin && (
             <button
-              onClick={() => router.push('/zgloszenia/management')}
+              onClick={() => router.push('/reports/management')}
               className="btn-win95 font-mono text-xs"
             >
               ZARZĄDZANIE
@@ -60,7 +60,7 @@ export default function ZgloszeniaPage() {
               key={typeConfig.type}
               config={typeConfig}
               onClick={() => {
-                router.push(`/zgloszenia/${typeConfig.type}`);
+                router.push(`/reports/${typeConfig.type}`);
               }}
             />
           ))}

@@ -3,7 +3,7 @@ import { Edit3, Save, X, Maximize2, Minimize2 } from 'lucide-react';
 import QuillEditor from '@/src/components/shared/QuillEditor';
 import ProtectedContent from '@/src/components/shared/ProtectedContent';
 import MandatoryBadge from '@/src/components/shared/MandatoryBadge';
-import TemplatePresets from '@/src/components/shared/TemplatePresets';
+
 
 interface MaterialModalProps {
   selectedMaterial: any | null;
@@ -77,7 +77,6 @@ export default function MaterialModal({
           />
           <span className="font-mono text-xs text-white">Obowiązkowy</span>
         </label>
-        <TemplatePresets onInsert={setEditContent} />
         <button
           onClick={() => setFullscreen(!isFullscreen)}
           className="btn-win95 p-1"

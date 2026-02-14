@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import type { MdtBoloVehicle } from "./types"
 import { MdtModal } from "./MdtModal"
 
@@ -8,23 +8,27 @@ interface BoloVehiclesPanelProps {
   vehicles: MdtBoloVehicle[]
   loading: boolean
   filterStatus: string
+  searchQuery: string
   onChangeFilter: (status: string) => void
   onCreate: (data: { plate: string; make: string; model: string; color: string; reason: string; reported_by: string; created_by?: string }) => void
   onUpdate: (id: string, data: Partial<MdtBoloVehicle>) => void
-  onDelete: (id: string) => void
-  onResolve: (id: string) => void
   officerName: string
   userId?: string
   selectedBoloId?: string | null
   onClearSelectedBolo?: () => void
+  selectedVehicle: MdtBoloVehicle | null
+  onSelectVehicle: (vehicle: MdtBoloVehicle | null) => void
+  pendingAction: "none" | "add" | "edit"
+  onActionHandled: () => void
 }
 
-const emptyForm = { plate: "", make: "", model: "", color: "", reason: "", reported_by: "" }
+const emptyForm = { plate: "", make: "", model: "", color: "", reason: "" }
 
 export function BoloVehiclesPanel({
-  vehicles, loading, filterStatus, onChangeFilter,
-  onCreate, onUpdate, onDelete, onResolve,
+  vehicles, loading, filterStatus, searchQuery, onChangeFilter,
+  onCreate, onUpdate,
   officerName, userId, selectedBoloId, onClearSelectedBolo,
+  selectedVehicle, onSelectVehicle, pendingAction, onActionHandled,
 }: BoloVehiclesPanelProps) {
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -37,35 +41,58 @@ export function BoloVehiclesPanel({
       const found = vehicles.find((v) => v.id === selectedBoloId)
       if (found) {
         setDetailVehicle(found)
+        onSelectVehicle(found)
       } else {
-        // Vehicle not in current filter — switch to ALL and try again
         if (filterStatus !== "ALL") {
           onChangeFilter("ALL")
-          return // will re-run after vehicles reload
+          return
         }
       }
       onClearSelectedBolo?.()
     }
-  }, [selectedBoloId, vehicles, filterStatus, onChangeFilter, onClearSelectedBolo])
+  }, [selectedBoloId, vehicles, filterStatus, onChangeFilter, onClearSelectedBolo, onSelectVehicle])
 
-  function openAdd() {
-    setForm({ ...emptyForm, reported_by: officerName })
-    setEditingId(null)
-    setShowAddModal(true)
-  }
+  // Handle external actions from RightPanel (add/edit)
+  useEffect(() => {
+    if (pendingAction === "add") {
+      setForm({ ...emptyForm })
+      setEditingId(null)
+      setShowAddModal(true)
+      onActionHandled()
+    } else if (pendingAction === "edit" && selectedVehicle) {
+      setForm({
+        plate: selectedVehicle.plate,
+        make: selectedVehicle.make || "",
+        model: selectedVehicle.model || "",
+        color: selectedVehicle.color || "",
+        reason: selectedVehicle.reason || "",
+      })
+      setEditingId(selectedVehicle.id)
+      setShowAddModal(true)
+      onActionHandled()
+    }
+  }, [pendingAction, selectedVehicle, onActionHandled])
 
-  function openEdit(v: MdtBoloVehicle) {
-    setForm({ plate: v.plate, make: v.make || "", model: v.model || "", color: v.color || "", reason: v.reason || "", reported_by: v.reported_by || "" })
-    setEditingId(v.id)
-    setShowAddModal(true)
-  }
+  // Client-side filtering by search query
+  const filteredVehicles = useMemo(() => {
+    if (!searchQuery.trim()) return vehicles
+    const q = searchQuery.toLowerCase()
+    return vehicles.filter((v) =>
+      v.plate.toLowerCase().includes(q) ||
+      (v.make && v.make.toLowerCase().includes(q)) ||
+      (v.model && v.model.toLowerCase().includes(q)) ||
+      (v.color && v.color.toLowerCase().includes(q)) ||
+      (v.reason && v.reason.toLowerCase().includes(q)) ||
+      (v.reported_by && v.reported_by.toLowerCase().includes(q))
+    )
+  }, [vehicles, searchQuery])
 
   function handleSubmit() {
     if (!form.plate.trim()) return
     if (editingId) {
       onUpdate(editingId, form)
     } else {
-      onCreate({ ...form, created_by: userId })
+      onCreate({ ...form, reported_by: officerName, created_by: userId })
     }
     setShowAddModal(false)
     setForm(emptyForm)
@@ -95,13 +122,6 @@ export function BoloVehiclesPanel({
               {f.label}
             </button>
           ))}
-          <button
-            onClick={openAdd}
-            className="btn-win95 text-xs"
-            style={{ backgroundColor: "#3a6a3a", color: "#fff", borderColor: "#5a9a5a #1a3a1a #1a3a1a #5a9a5a" }}
-          >
-            + DODAJ BOLO
-          </button>
         </div>
       </div>
 
@@ -123,18 +143,22 @@ export function BoloVehiclesPanel({
                 <th className="px-3 py-2 text-left font-[family-name:var(--font-vt323)] text-sm tracking-wider text-[#ccc]">POWÓD</th>
                 <th className="px-3 py-2 text-left font-[family-name:var(--font-vt323)] text-sm tracking-wider text-[#ccc]">STATUS</th>
                 <th className="px-3 py-2 text-left font-[family-name:var(--font-vt323)] text-sm tracking-wider text-[#ccc]">ZGŁOSIŁ</th>
-                <th className="px-3 py-2 text-center font-[family-name:var(--font-vt323)] text-sm tracking-wider text-[#ccc]">AKCJE</th>
               </tr>
             </thead>
             <tbody>
-              {vehicles.map((v, idx) => (
+              {filteredVehicles.map((v, idx) => (
                 <tr
                   key={v.id}
                   className="cursor-pointer hover:brightness-110"
-                  onClick={() => setDetailVehicle(v)}
+                  onClick={() => {
+                    onSelectVehicle(v)
+                    setDetailVehicle(v)
+                  }}
                   style={{
-                    backgroundColor: idx % 2 === 0 ? "var(--mdt-row-even)" : "var(--mdt-row-odd)",
-                    color: "var(--mdt-content-text)",
+                    backgroundColor: selectedVehicle?.id === v.id
+                      ? "var(--mdt-blue-bar)"
+                      : idx % 2 === 0 ? "var(--mdt-row-even)" : "var(--mdt-row-odd)",
+                    color: selectedVehicle?.id === v.id ? "#fff" : "var(--mdt-content-text)",
                   }}
                 >
                   <td className="px-3 py-2 font-mono text-sm font-bold">{v.plate}</td>
@@ -143,35 +167,18 @@ export function BoloVehiclesPanel({
                   <td className="px-3 py-2 font-mono text-sm max-w-48 truncate">{v.reason || "—"}</td>
                   <td className="px-3 py-2 font-mono text-sm">
                     <span style={{
-                      color: v.status === "ACTIVE" ? "#4ade80" : "#888",
+                      color: selectedVehicle?.id === v.id ? "#fff" : v.status === "ACTIVE" ? "#4ade80" : "#888",
                       fontWeight: v.status === "ACTIVE" ? 700 : 400,
                     }}>
                       {v.status === "ACTIVE" ? "AKTYWNY" : "ZAKOŃCZONY"}
                     </span>
                   </td>
                   <td className="px-3 py-2 font-mono text-sm">{v.reported_by || "—"}</td>
-                  <td className="px-3 py-2 text-center" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex items-center justify-center gap-1">
-                      <button onClick={() => openEdit(v)} className="btn-win95 text-[10px] px-2 py-0.5">EDYTUJ</button>
-                      {v.status === "ACTIVE" && (
-                        <button onClick={() => onResolve(v.id)} className="btn-win95 text-[10px] px-2 py-0.5" style={{ color: "#4ade80" }}>
-                          ROZWIĄŻ
-                        </button>
-                      )}
-                      <button
-                        onClick={() => onDelete(v.id)}
-                        className="btn-win95 text-[10px] px-2 py-0.5"
-                        style={{ color: "#c41e1e" }}
-                      >
-                        USUŃ
-                      </button>
-                    </div>
-                  </td>
                 </tr>
               ))}
-              {vehicles.length === 0 && (
+              {filteredVehicles.length === 0 && (
                 <tr style={{ backgroundColor: "var(--mdt-row-even)" }}>
-                  <td colSpan={7} className="px-3 py-8 text-center font-mono text-xs" style={{ color: "#888" }}>
+                  <td colSpan={6} className="px-3 py-8 text-center font-mono text-xs" style={{ color: "#888" }}>
                     BRAK POJAZDÓW BOLO
                   </td>
                 </tr>
@@ -187,7 +194,7 @@ export function BoloVehiclesPanel({
           <div className="pulse-dot h-2 w-2 rounded-full bg-green-500" />
           <span className="font-mono text-sm" style={{ color: "#aaa" }}>POŁĄCZONO Z BAZĄ SASD</span>
         </div>
-        <span className="font-mono text-sm" style={{ color: "#888" }}>POJAZDY: {vehicles.length}</span>
+        <span className="font-mono text-sm" style={{ color: "#888" }}>POJAZDY: {filteredVehicles.length}</span>
       </div>
 
       {/* Detail Modal */}
@@ -215,7 +222,6 @@ export function BoloVehiclesPanel({
               </p>
             </div>
             <div className="flex justify-end gap-2 border-t border-[#999] pt-3">
-              <button className="btn-win95 text-xs" onClick={() => { setDetailVehicle(null); openEdit(detailVehicle) }}>EDYTUJ</button>
               <button className="btn-win95 text-xs" onClick={() => setDetailVehicle(null)}>ZAMKNIJ</button>
             </div>
           </div>
@@ -231,7 +237,6 @@ export function BoloVehiclesPanel({
               { label: "MARKA", key: "make", placeholder: "np. Vapid" },
               { label: "MODEL", key: "model", placeholder: "np. Crown Victoria" },
               { label: "KOLOR", key: "color", placeholder: "np. Czarny" },
-              { label: "ZGŁOSIŁ", key: "reported_by", placeholder: "np. Dep. Morrison" },
             ].map((f) => (
               <div key={f.key} className="flex items-center gap-2">
                 <label className="w-24 shrink-0 font-mono text-xs font-bold" style={{ color: "var(--mdt-muted-text)" }}>

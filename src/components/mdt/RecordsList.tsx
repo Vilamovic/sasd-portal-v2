@@ -20,13 +20,6 @@ export function RecordsList({ records, loading, onSelectRecord, onCreateNew }: R
         <span className="font-[family-name:var(--font-vt323)] text-base tracking-widest uppercase text-white">
           Kartoteki — Lista osób
         </span>
-        <button
-          onClick={onCreateNew}
-          className="btn-win95 text-xs"
-          style={{ backgroundColor: "#3a6a3a", color: "#fff", borderColor: "#5a9a5a #1a3a1a #1a3a1a #5a9a5a" }}
-        >
-          + DODAJ OSOBĘ
-        </button>
       </div>
 
       {/* Table */}

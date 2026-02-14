@@ -23,6 +23,13 @@ interface RightPanelProps {
   onCreatePerson?: () => void
   // BOLO actions
   onCreateBolo?: () => void
+  onEditBolo?: () => void
+  onResolveBolo?: () => void
+  onDeleteBolo?: () => void
+  hasSelectedBolo?: boolean
+  selectedBoloStatus?: string
+  // Gang kartoteki actions
+  onCreateGangMember?: () => void
 }
 
 export function RightPanel({
@@ -43,6 +50,12 @@ export function RightPanel({
   onDeleteKartoteka,
   onCreatePerson,
   onCreateBolo,
+  onEditBolo,
+  onResolveBolo,
+  onDeleteBolo,
+  hasSelectedBolo,
+  selectedBoloStatus,
+  onCreateGangMember,
 }: RightPanelProps) {
   const [currentTime, setCurrentTime] = useState("")
   const [currentDate, setCurrentDate] = useState("")
@@ -67,6 +80,7 @@ export function RightPanel({
   const showKartotekaActions = activeTab === "kartoteka" && hasSelectedRecord
   const showKartotekaListActions = activeTab === "kartoteka" && !hasSelectedRecord
   const showBoloActions = activeTab === "bolo"
+  const showGangKartotekiActions = activeTab === "gang-kartoteki"
 
   return (
     <aside
@@ -128,7 +142,25 @@ export function RightPanel({
           </button>
         )}
 
-        {/* BOLO */}
+        {/* BOLO - vehicle selected */}
+        {showBoloActions && hasSelectedBolo && (
+          <>
+            <button className="btn-win95 w-full text-sm" onClick={onEditBolo}>
+              EDYTUJ BOLO
+            </button>
+            {selectedBoloStatus === "ACTIVE" && (
+              <button className="btn-win95 w-full text-sm" style={{ color: "#4ade80" }} onClick={onResolveBolo}>
+                ROZWIĄŻ
+              </button>
+            )}
+            <button className="btn-win95 w-full text-sm" style={{ color: "#c41e1e" }} onClick={onDeleteBolo}>
+              USUŃ BOLO
+            </button>
+            <div className="my-1 border-t border-[#555]" />
+          </>
+        )}
+
+        {/* BOLO - always show add */}
         {showBoloActions && (
           <button
             className="btn-win95 w-full text-sm"
@@ -139,8 +171,19 @@ export function RightPanel({
           </button>
         )}
 
+        {/* Gang kartoteki */}
+        {showGangKartotekiActions && (
+          <button
+            className="btn-win95 w-full text-sm"
+            style={{ backgroundColor: "#3a6a3a", color: "#fff", borderColor: "#5a9a5a #1a3a1a #1a3a1a #5a9a5a" }}
+            onClick={onCreateGangMember}
+          >
+            + DODAJ OSOBĘ
+          </button>
+        )}
+
         {/* Other tabs - no specific actions */}
-        {!showKartotekaActions && !showKartotekaListActions && !showBoloActions && (
+        {!showKartotekaActions && !showKartotekaListActions && !showBoloActions && !showGangKartotekiActions && (
           <div className="panel-inset p-3 text-center" style={{ backgroundColor: "#1a1a1a" }}>
             <span className="font-mono text-xs" style={{ color: "#555" }}>
               BRAK DOSTĘPNYCH AKCJI
@@ -162,4 +205,3 @@ export function RightPanel({
     </aside>
   )
 }
-

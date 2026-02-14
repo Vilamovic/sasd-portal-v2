@@ -10,9 +10,10 @@ interface SearchPanelProps {
   onSelectBolo: (id: string) => void
   onSwitchTab: (tab: string) => void
   onSearch: (query: string) => void
+  onSearchBolo: (query: string) => void
 }
 
-export function SearchPanel({ onSelectRecord, onSelectBolo, onSwitchTab, onSearch }: SearchPanelProps) {
+export function SearchPanel({ onSelectRecord, onSelectBolo, onSwitchTab, onSearch, onSearchBolo }: SearchPanelProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([])
   const [showDropdown, setShowDropdown] = useState(false)
@@ -85,6 +86,7 @@ export function SearchPanel({ onSelectRecord, onSelectBolo, onSwitchTab, onSearc
       }
       if (lastPersonCount.current === 0 && lastVehicleCount.current > 0) {
         onSwitchTab("bolo")
+        onSearchBolo(searchQuery)
       } else {
         onSwitchTab("kartoteka")
         onSearch(searchQuery)

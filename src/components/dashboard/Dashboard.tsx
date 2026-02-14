@@ -66,7 +66,7 @@ export default function Dashboard() {
       roles: ['trainee', 'deputy', 'cs', 'hcs', 'dev'],
     },
     {
-      id: 'zgloszenia',
+      id: 'reports',
       title: 'Zgłoszenia',
       description: 'Składaj wnioski, zgłaszaj błędy i propozycje. System wniosków SASD.',
       icon: ClipboardList,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useGangMembers } from './hooks/useGangMembers';
@@ -14,10 +14,19 @@ import AutopsyReportPrint from './AutopsyReportPrint';
 
 type View = 'list' | 'detail' | 'create' | 'edit' | 'report';
 
-export default function GangMembersPage({ embedded }: { embedded?: boolean } = {}) {
+export default function GangMembersPage({ embedded, createTrigger }: { embedded?: boolean; createTrigger?: number } = {}) {
   const { user, isCS, mtaNick } = useAuth();
   const hook = useGangMembers(user?.id);
   const [view, setView] = useState<View>('list');
+
+  // External trigger from RightPanel (DODAJ OSOBĘ)
+  useEffect(() => {
+    if (createTrigger && createTrigger > 0) {
+      hook.setSelectedMember(null);
+      setView('create');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [createTrigger]);
   const [viewingReport, setViewingReport] = useState<GangMemberReport | null>(null);
   const [editingReport, setEditingReport] = useState<GangMemberReport | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null); // member id

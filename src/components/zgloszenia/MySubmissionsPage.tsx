@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ClipboardList, Eye } from 'lucide-react';
+import { ClipboardList, Eye, X } from 'lucide-react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import BackButton from '@/src/components/shared/BackButton';
 import { getUserSubmissions } from '@/src/lib/db/submissions';
@@ -17,6 +17,7 @@ export default function MySubmissionsPage() {
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
+  const [detailSubmission, setDetailSubmission] = useState<Submission | null>(null);
 
   useEffect(() => {
     if (user?.id) loadSubmissions();
@@ -47,7 +48,7 @@ export default function MySubmissionsPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--mdt-content)' }}>
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <BackButton onClick={() => router.push('/zgloszenia')} destination="Zgłoszenia" />
+        <BackButton onClick={() => router.push('/reports')} destination="Zgłoszenia" />
 
         {/* Page Header */}
         <div className="px-4 py-2 mb-6" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
@@ -109,7 +110,7 @@ export default function MySubmissionsPage() {
                 Brak zgłoszeń do wyświetlenia.
               </p>
               <button
-                onClick={() => router.push('/zgloszenia')}
+                onClick={() => router.push('/reports')}
                 className="btn-win95 font-mono text-xs mt-3"
               >
                 ZŁÓŻ NOWE ZGŁOSZENIE
@@ -149,47 +150,100 @@ export default function MySubmissionsPage() {
                     <SubmissionStatusBadge status={submission.status} />
                   </div>
 
-                  {/* Admin Response indicator */}
-                  {submission.admin_response && (
-                    <div className="w-6 shrink-0" title={submission.admin_response}>
-                      <Eye className="w-3 h-3" style={{ color: 'var(--mdt-muted-text)' }} />
-                    </div>
-                  )}
+                  {/* Eye button — opens detail modal */}
+                  <div className="w-6 shrink-0">
+                    <button
+                      onClick={() => setDetailSubmission(submission)}
+                      title="Podgląd szczegółów"
+                    >
+                      <Eye className="w-3.5 h-3.5" style={{ color: submission.admin_response ? 'var(--mdt-content-text)' : 'var(--mdt-muted-text)' }} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
         </div>
-
-        {/* Admin Response Details */}
-        {filtered.some((s) => s.admin_response) && (
-          <div className="mt-4">
-            <div className="px-3 py-1.5 mb-2" style={{ backgroundColor: 'var(--mdt-header)' }}>
-              <span className="font-[family-name:var(--font-vt323)] text-sm tracking-wider uppercase" style={{ color: 'var(--mdt-header-text)' }}>
-                ODPOWIEDZI ADMINISTRACJI
-              </span>
-            </div>
-            {filtered.filter((s) => s.admin_response).map((s) => (
-              <div key={s.id} className="panel-inset p-3 mb-2" style={{ backgroundColor: 'var(--mdt-input-bg)' }}>
-                <div className="flex items-center gap-2 mb-1">
-                  <SubmissionStatusBadge status={s.status} />
-                  <span className="font-mono text-xs" style={{ color: 'var(--mdt-content-text)' }}>
-                    {s.title || TYPE_LABELS[s.type]}
-                  </span>
-                  {s.reviewed_by_user && (
-                    <span className="font-mono text-[10px]" style={{ color: 'var(--mdt-muted-text)' }}>
-                      — {s.reviewed_by_user.mta_nick || s.reviewed_by_user.username}
-                    </span>
-                  )}
-                </div>
-                <p className="font-mono text-xs" style={{ color: 'var(--mdt-content-text)' }}>
-                  {s.admin_response}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
+
+      {/* Detail Modal */}
+      {detailSubmission && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
+          <div className="panel-raised w-full max-w-lg mx-4" style={{ backgroundColor: 'var(--mdt-btn-face)' }}>
+            {/* Title bar */}
+            <div className="px-4 py-2 flex items-center justify-between" style={{ backgroundColor: 'var(--mdt-blue-bar)' }}>
+              <span className="font-[family-name:var(--font-vt323)] text-base tracking-widest uppercase text-white">
+                SZCZEGÓŁY ZGŁOSZENIA
+              </span>
+              <button onClick={() => setDetailSubmission(null)} className="text-white hover:opacity-80">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-3">
+              {/* Type + Status */}
+              <div className="flex items-center gap-2">
+                <SubmissionStatusBadge status={detailSubmission.status} />
+                <span className="font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>
+                  {TYPE_LABELS[detailSubmission.type] || detailSubmission.type}
+                </span>
+                <span className="font-mono text-[10px] ml-auto" style={{ color: 'var(--mdt-muted-text)' }}>
+                  {formatDate(detailSubmission.created_at)}
+                </span>
+              </div>
+
+              {/* Title */}
+              <div className="panel-inset p-2" style={{ backgroundColor: 'var(--mdt-input-bg)' }}>
+                <span className="font-mono text-xs font-bold block mb-0.5" style={{ color: 'var(--mdt-muted-text)' }}>TYTUŁ</span>
+                <span className="font-mono text-xs" style={{ color: 'var(--mdt-content-text)' }}>
+                  {detailSubmission.title || '—'}
+                </span>
+              </div>
+
+              {/* Description */}
+              {detailSubmission.description && (
+                <div className="panel-inset p-2" style={{ backgroundColor: 'var(--mdt-input-bg)' }}>
+                  <span className="font-mono text-xs font-bold block mb-0.5" style={{ color: 'var(--mdt-muted-text)' }}>TREŚĆ</span>
+                  <p className="font-mono text-xs whitespace-pre-wrap" style={{ color: 'var(--mdt-content-text)' }}>
+                    {detailSubmission.description}
+                  </p>
+                </div>
+              )}
+
+              {/* Admin Response */}
+              {detailSubmission.admin_response ? (
+                <div className="panel-inset p-2" style={{ backgroundColor: 'var(--mdt-input-bg)' }}>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="font-mono text-xs font-bold" style={{ color: 'var(--mdt-muted-text)' }}>ODPOWIEDŹ ADMINISTRACJI</span>
+                    {detailSubmission.reviewed_by_user && (
+                      <span className="font-mono text-[10px]" style={{ color: 'var(--mdt-muted-text)' }}>
+                        — {(detailSubmission.reviewed_by_user as any).mta_nick || (detailSubmission.reviewed_by_user as any).username}
+                      </span>
+                    )}
+                  </div>
+                  <p className="font-mono text-xs whitespace-pre-wrap" style={{ color: 'var(--mdt-content-text)' }}>
+                    {detailSubmission.admin_response}
+                  </p>
+                </div>
+              ) : (
+                <div className="panel-inset p-2" style={{ backgroundColor: 'var(--mdt-input-bg)' }}>
+                  <span className="font-mono text-xs" style={{ color: 'var(--mdt-muted-text)' }}>
+                    Brak odpowiedzi administracji.
+                  </span>
+                </div>
+              )}
+
+              {/* Close button */}
+              <button
+                onClick={() => setDetailSubmission(null)}
+                className="btn-win95 font-mono text-xs w-full py-1"
+              >
+                ZAMKNIJ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
